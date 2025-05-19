@@ -7,7 +7,7 @@
         <script src="https://cdn.tailwindcss.com"></script>         
         <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet"> 
         <script src="https://accounts.google.com/gsi/client" async defer></script>         
-        <style>@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap'); body { font-family: 'Vazirmatn', sans-serif; background-color: #f3f0e1; overflow-x: hidden; } .bg-glass { background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); } .modal { transition: all 0.3s ease; opacity: 0; visibility: hidden; } .modal.active { opacity: 1; visibility: visible; } .card-hover { transition: all 0.3s ease; } .card-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); } .fade-in { animation: fadeIn 0.8s ease-in; } .slide-in-right { animation: slideInRight 0.8s ease-out; } .slide-in-left { animation: slideInLeft 0.8s ease-out; } @keyframes fadeIn { from {  opacity: 0; }  to {  opacity: 1; } } @keyframes slideInRight { from {  transform: translateX(50px);  opacity: 0; }  to {  transform: translateX(0);  opacity: 1; } } @keyframes slideInLeft { from {  transform: translateX(-50px);  opacity: 0; }  to {  transform: translateX(0);  opacity: 1; } } .scroll-down { animation: bounce 2s infinite; } @keyframes bounce { 0%, 20%, 50%, 80%, 100% {  transform: translateY(0); }  40% {  transform: translateY(-10px); }  60% {  transform: translateY(-5px); } } .g_id_signin div[role="button"] { background-color: #FFE9CF !important; color: black !important; border-radius: 9999px; font-family: 'Vazir', sans-serif !important; } .g_id_signin div[role="button"] > div { font-size: 16px !important; }</style>         
+        <style>@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap'); body { font-family: 'Vazirmatn', sans-serif; background-color: #f3f0e1; overflow-x: hidden; } .bg-glass { background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); } .modal { transition: all 0.3s ease; opacity: 0; visibility: hidden; } .modal.active { opacity: 1; visibility: visible; } .card-hover { transition: all 0.3s ease; } .card-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); } .fade-in { animation: fadeIn 0.8s ease-in; } .slide-in-right { animation: slideInRight 0.8s ease-out; } .slide-in-left { animation: slideInLeft 0.8s ease-out; } @keyframes fadeIn { from {  opacity: 0; }  to {  opacity: 1; } } @keyframes slideInRight { from {  transform: translateX(50px);  opacity: 0; }  to {  transform: translateX(0);  opacity: 1; } } @keyframes slideInLeft { from {  transform: translateX(-50px);  opacity: 0; }  to {  transform: translateX(0);  opacity: 1; } } .scroll-down { animation: bounce 2s infinite; } @keyframes bounce { 0%, 20%, 50%, 80%, 100% {  transform: translateY(0); }  40% {  transform: translateY(-10px); }  60% {  transform: translateY(-5px); } } .g_id_signin div[role="button"] { background-color: #FFE9CF !important; color: black !important; border-radius: 9999px; font-family: 'Vazir', sans-serif !important; } .g_id_signin div[role="button"] > div { font-size: 16px !important; } .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }</style>         
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     </head>     
     <body class="min-h-screen flex"> 
@@ -87,21 +87,24 @@
                         <form class="mx-8"> 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="mb-4"> 
-                                    <label for="login-email" class="dark:text-gray-300 font-medium hidden mb-2 text-gray-700 text-sm">آدرس ایمیل</label>                                     
+                                    <label for="login-email" class="sr-only">آدرس ایمیل</label>                                     
                                     <div class="relative"> 
                                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"> <i class="fas fa-envelope text-gray-400"></i> 
                                         </div>                                         
-                                        <input type="email" id="login-email" class="w-full pr-10 pl-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white" placeholder="آدرس ایمیل" required> 
-                                    </div>                                     
+                                        <input type="email" id="login-email" name="email" aria-label="آدرس ایمیل" class="w-full pr-10 pl-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white" placeholder="آدرس ایمیل" required> 
+                                                                                <div id="email-error" class="text-red-500 text-sm hidden">لطفاً یه ایمیل درست وارد کن</div>
+                                                                      </div>                                     
                                 </div>                                 
                                 <div class="mb-4"> 
-                                    <label for="login-password" class="dark:text-gray-300 font-medium hidden mb-2 text-gray-700 text-sm">رمز عبور</label>                                     
+                                    <label for="login-password" class="sr-only">رمز عبور</label>                                     
                                     <div class="relative"> 
                                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"> <i class="fas fa-lock text-gray-400"></i> 
                                         </div>                                         
-                                        <input type="password" id="login-password" class="w-full pr-10 pl-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white" placeholder="رمز عبور" required> 
-                                        <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3"> <i class="fas fa-eye-slash text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"></i> 
-                                        </button>                                         
+                                        <input type="password" id="login-password" name="password" aria-label="رمز عبور" class="w-full pr-10 pl-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white" placeholder="رمز عبور" required>
+                                                                                <div id="password-error" class="text-red-500 text-sm hidden">رمز عبور باید حداقل 8 کاراکتر باشد</div> 
+                                       <button type="button" class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3">
+    <i class="fas fa-eye-slash text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"></i>
+</button>                                         
                                     </div>                                     
                                 </div>
                             </div>                             
@@ -434,53 +437,41 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // ورود
-// وقتی فرم ارسال می‌شه، این کد اجرا می‌شه
-    document.getElementById('login-form').addEventListener('submit', function(event) {
-        event.preventDefault(); // جلوی ارسال پیش‌فرض فرم رو می‌گیره تا ما خودمون چک کنیم
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    const emailError = document.getElementById('email-error');
+    const passwordError = document.getElementById('password-error');
 
-        // گرفتن ایمیل و رمز عبور از فیلدها
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
+    emailError.classList.add('hidden');
+    passwordError.classList.add('hidden');
 
-        // چک کردن فرمت ایمیل
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailPattern.test(email)) {
-            alert('لطفاً یه ایمیل درست وارد کن، مثل ali@gmail.com');
-            return; // اگه ایمیل اشتباه بود، کار رو متوقف می‌کنه
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+        emailError.classList.remove('hidden');
+        return;
+    }
+
+    if (password.length < 8) {
+        passwordError.classList.remove('hidden');
+        return;
+    }
+
+    // اگر همه چیز درست بود، اطلاعات را به سرور ارسال کنید
+    fetch('https://script.google.com/macros/s/AKfycbzna0f7dQOtokAJkoj2lPBxiL2jMX_evcI9mQmB1ePuP___K4tdmz2UxQHvv2F-MPb1/exec', {
+        method: 'POST',
+        body: JSON.stringify({ email, password })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('ورود موفقیت‌آمیز بود!');
+        } else {
+            alert('خطا: ' + data.error);
         }
-
-        // چک کردن طول رمز عبور
-        if (password.length < 8) {
-            alert('رمز عبور باید حداقل 8 کاراکتر باشه!');
-            return; // اگه رمز کوتاه بود، کار رو متوقف می‌کنه
-        }
-
-        // اگه همه‌چیز درست بود، اطلاعات رو به گوگل اسکریپت می‌فرستیم
-        const userData = {
-            email: email,
-            password: password
-        };
-
-        fetch('https://script.google.com/macros/s/AKfycbzna0f7dQOtokAJkoj2lPBxiL2jMX_evcI9mQmB1ePuP___K4tdmz2UxQHvv2F-MPb1/exec', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(userData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('ورود موفقیت‌آمیز بود! خوش اومدی!');
-            } else {
-                alert('یه مشکلی پیش اومد: ' + data.error);
-            }
-        })
-        .catch(error => {
-            alert('خطا در ارتباط با سرور: ' + error.message);
-        });
     });
-
+});
         // فراموشی رمز عبور
         document.getElementById('forgotPasswordForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -504,6 +495,18 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => alert('خطا: ' + error.message));
         });
+
+document.querySelector('.fa-eye-slash').addEventListener('click', function() {
+    const passwordInput = document.getElementById('login-password');
+    const icon = this;
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+    } else {
+        passwordInput.type = 'password';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+    }
+});
 
     </script>         
     </body>     
