@@ -437,7 +437,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // ورود
-        document.getElementById('login-form').addEventListener('submit', function(event) {
+document.getElementById('loginForm').addEventListener('submit', function(event) {
     event.preventDefault();
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
@@ -458,18 +458,23 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    // اگر همه چیز درست بود، اطلاعات را به سرور ارسال کنید
-    fetch('https://script.google.com/macros/s/AKfycbzna0f7dQOtokAJkoj2lPBxiL2jMX_evcI9mQmB1ePuP___K4tdmz2UxQHvv2F-MPb1/exec', {
-        method: 'POST',
-        body: JSON.stringify({ email, password })
+    const webAppUrl = 'https://script.google.com/macros/s/AKfycbzna0f7dQOtokAJkoj2lPBxiL2jMX_evcI9mQmB1ePuP___K4tdmz2UxQHvv2F-MPb1/exec';
+    const queryString = `?func=Login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+    const fullUrl = webAppUrl + queryString;
+
+    fetch(fullUrl, {
+        method: 'GET'
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('ورود موفقیت‌آمیز بود!');
+            alert('ورود موفقیت‌آمیز بود! خوش اومدی!');
         } else {
             alert('خطا: ' + data.error);
         }
+    })
+    .catch(error => {
+        alert('خطا در ارتباط با سرور: ' + error.message);
     });
 });
         // فراموشی رمز عبور
@@ -496,9 +501,9 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => alert('خطا: ' + error.message));
         });
 
-document.querySelector('.fa-eye-slash').addEventListener('click', function() {
+document.querySelector('.toggle-password').addEventListener('click', function() {
     const passwordInput = document.getElementById('login-password');
-    const icon = this;
+    const icon = this.querySelector('i');
     if (passwordInput.type === 'password') {
         passwordInput.type = 'text';
         icon.classList.replace('fa-eye-slash', 'fa-eye');
