@@ -29,7 +29,8 @@
                     </div>                     
                 </div>
                 <div class="bg-glass card-hover delay-300 mx-auto p-6 rounded-xl shadow-lg slide-in-left w-full"> 
-                    <h2 class="font-semibold mb-0 text-black text-center text-xl">اهداف و رسالت نظام تندیس</h2><span class="flex flex-auto justify-center mb-2 pb-0 text-base text-center">پلتفرم تخصصی ارتباط مهندسان و کارفرمایان ساختمانی</span>
+                    <h2 class="font-semibold mb-0 text-black text-center text-xl">اهداف و رسالت نظام تندیس</h2>
+                    <span class="flex flex-auto justify-center mb-2 pb-0 text-base text-center">پلتفرم تخصصی ارتباط مهندسان و کارفرمایان ساختمانی</span>
                     <p class="text-gray-900 text-justify text-sm"> 
                         نظام تندیس با هدف ایجاد پل ارتباطی بین مهندسان متخصص و کارفرمایان محترم در صنعت ساختمان ایجاد شده است. ما بستری امن و تخصصی فراهم کرده‌ایم تا مهندسان بتوانند توانمندی‌های خود را به نمایش بگذارند و کارفرمایان بتوانند به راحتی نیروی متخصص مورد نیاز خود را پیدا کنند. </p> 
                 </div>
@@ -72,7 +73,7 @@
                 <div class="flex items-center justify-center">
                     <div>
                         <h1 class="font-extrabold text-3xl text-center text-gray-800"><b class="text-4xl text-blue-800">نظام تندیس</b></h1>
-                        <p class="font-bold pt-2.5 text-base text-blue-600">تدارک نیازمندی دقیق و یکپارچه ساختمان</p>
+                        <p class="font-bold pt-2.5 text-base text-yellow-600">تدارک نیازمندی دقیق و یکپارچه ساختمان</p>
                     </div>
                 </div>                 
                 <div data-pg-collapsed class="px-8"> 
@@ -81,47 +82,42 @@
                         <button id="login-tab" class="flex-1 py-3 font-medium border-b-2 border-blue-500 text-blue-600 dark:text-blue-400">ورود</button>                         
                         <button id="signup-tab" class="flex-1 py-3 font-medium border-b-2 text-gray-500 dark:text-gray-400">ثبت‌نام</button>                         
                     </div>                     
-                    <!-- Login Form -->                     
-                    <div id="login-form" class="space-y-6"> 
-                        <!-- Email Login -->                         
-                        <form class="mx-8"> 
+                    <!-- Login Form -->
+                    <div id="login-form" class="space-y-6">
+                        <form id="loginForm" class="mx-8">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="mb-4"> 
-                                    <label for="login-email" class="sr-only">آدرس ایمیل</label>                                     
-                                    <div class="relative"> 
-                                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"> <i class="fas fa-envelope text-gray-400"></i> 
-                                        </div>                                         
-                                        <input type="email" id="login-email" name="email" aria-label="آدرس ایمیل" class="w-full pr-10 pl-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white" placeholder="آدرس ایمیل" required> 
-                                                                                <div id="email-error" class="text-red-500 text-sm hidden">لطفاً یه ایمیل درست وارد کن</div>
-                                                                      </div>                                     
-                                </div>                                 
-                                <div class="mb-4"> 
-                                    <label for="login-password" class="sr-only">رمز عبور</label>                                     
-                                    <div class="relative"> 
-                                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"> <i class="fas fa-lock text-gray-400"></i> 
-                                        </div>                                         
-                                        <input type="password" id="login-password" name="password" aria-label="رمز عبور" class="w-full pr-10 pl-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white" placeholder="رمز عبور" required>
-                                                                                <div id="password-error" class="text-red-500 text-sm hidden">رمز عبور باید حداقل 8 کاراکتر باشد</div> 
-                                       <button type="button" class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3">
-    <i class="fas fa-eye-slash text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"></i>
-</button>                                         
-                                    </div>                                     
+                                <div class="mb-4">
+                                    <label for="login-email" class="dark:text-gray-300 font-medium mb-2 text-gray-700 text-sm">آدرس ایمیل</label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"><i class="fas fa-envelope text-gray-400"></i>
+                                        </div>
+                                        <input type="email" id="login-email" name="email" class="w-full pr-10 pl-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white" placeholder="آدرس ایمیل" required>
+                                        <div id="email-error" class="text-red-500 text-sm mt-1 hidden">لطفاً یه ایمیل درست وارد کن</div>
+                                    </div>
                                 </div>
-                            </div>                             
-                            <div class="flex items-center justify-end mb-6"> 
-                                <div class="hidden items-center"> 
-                                    <input id="remember-me" name="remember-me" type="checkbox" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 border-gray-300 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500"> 
-                                    <label for="remember-me" class="mr-2 block text-sm text-gray-700 dark:text-gray-300">مرا بخاطر بسپار</label>                                     
-                                </div>                                 
-                                <button id="forgotPassword-tab" class="border-b-2 border-blue-500 dark:text-blue-400 font-medium text-blue-600">فراموشی رمز عبور؟</button>                                 
-                            </div>                             
-                            <button type="submit" class="bg-blue-600 dark:bg-blue-700 dark:hover:bg-blue-600 duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium hover:-translate-y-0.5 hover:bg-blue-700 leading-10 px-4 py-2.5 rounded-lg text-white transform transition-all w-full">
-                                <i class="fa-sign-in-alt fas mx-2"></i> 
-                                ورود به حساب کاربری 
-                            
-                            </button>                             
-                        </form>                         
-                    </div>                     
+                                <div class="mb-4">
+                                    <label for="login-password" class="dark:text-gray-300 font-medium mb-2 text-gray-700 text-sm">رمز عبور</label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"><i class="fas fa-lock text-gray-400"></i>
+                                        </div>
+                                        <input type="password" id="login-password" name="password" class="w-full pr-10 pl-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white" placeholder="رمز عبور" required>
+                                        <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 toggle-password"><i class="fas fa-eye-slash text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"></i>
+                                        </button>
+                                        <div id="password-error" class="text-red-500 text-sm mt-1 hidden">رمز عبور باید حداقل 8 کاراکتر باشه</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-end mb-6">
+                                <div class="flex items-center">
+                                    <input id="remember-me" name="remember-me" type="checkbox" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 border-gray-300 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500">
+                                    <label for="remember-me" class="mr-2 block text-sm text-gray-700 dark:text-gray-300">مرا بخاطر بسپار</label>
+                                </div><a href="#forgotPassword" class="border-b-2 border-blue-500 dark:text-blue-400 font-medium text-blue-600 mr-4">فراموشی رمز عبور؟</a>
+                            </div>
+                            <button type="submit" class="bg-blue-600 dark:bg-blue-700 dark:hover:bg-blue-600 duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium hover:-translate-y-0.5 hover:bg-blue-700 leading-10 px-4 py-2.5 rounded-lg text-white transform transition-all w-full"><i class="fa-sign-in-alt fas mx-2"></i>
+                                ورود به حساب کاربری
+                            </button>
+                        </form>
+                    </div>
                     <!-- Forgot password Form (Hidden by default) -->                     
                     <div id="forgotPassword-form" class="tab-content hidden">
                         <form class="px-8">
@@ -143,7 +139,8 @@
                                 <div class="border border-gray-300 dark:border-gray-700 inline-flex items-center overflow-hidden rounded-lg w-full"> 
                                     <label class="flex-1"> 
                                         <input type="radio" name="account-type" value="engineer" class="sr-only peer" checked> 
-                                        <div class="cursor-pointer dark:peer-checked:bg-orange-500 flex flex-row items-end justify-evenly p-4 peer-checked:bg-orange-500 peer-checked:font-medium peer-checked:text-white text-center text-lg"><i class="fa-hard-hat fas pb-1"></i> 
+                                        <div class="cursor-pointer dark:peer-checked:bg-orange-500 flex flex-row items-end justify-evenly p-4 peer-checked:bg-orange-500 peer-checked:font-medium peer-checked:text-white text-center text-lg">
+                                            <i class="fa-hard-hat fas pb-1"></i> 
                                             مهندس
                                         </div>
                                     </label>                                     
@@ -187,8 +184,7 @@
                                     </div>                                     
                                 </div>
                             </div>                             
-                            <button type="submit" class="bg-blue-600 dark:bg-blue-700 dark:hover:bg-blue-600 duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium hover:-translate-y-0.5 hover:bg-blue-700 mt-5 px-4 py-2.5 rounded-lg text-white transform transition-all w-full">
-                                <i class="fa-user-plus fas leading-10 mx-2"></i> 
+                            <button type="submit" class="bg-blue-600 dark:bg-blue-700 dark:hover:bg-blue-600 duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium hover:-translate-y-0.5 hover:bg-blue-700 mt-5 px-4 py-2.5 rounded-lg text-white transform transition-all w-full"><i class="fa-user-plus fas leading-10 mx-2"></i> 
                                 شروع ثبت‌نام                                 
                             </button>                             
                         </form>                         
