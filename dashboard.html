@@ -69,30 +69,47 @@
 
     // بررسی اینکه URL یک تصویر معتبر است
     function isValidImageUrl(url) {
-      return url && (url.startsWith('http') || url.startsWith('/')) && /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(url);
+      // بررسی اینکه url یک رشته است و خالی نیست
+      if (typeof url !== 'string' || !url.trim()) {
+        return false;
+      }
+      // بررسی فرمت URL و پسوند تصویر
+      return (url.startsWith('http') || url.startsWith('/')) && /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(url);
     }
 
     // نمایش اطلاعات کاربر در داشبورد
     function displayUserDashboard() {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      let userInfo;
+      try {
+        userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      } catch (e) {
+        showMessage('خطا در بارگذاری اطلاعات کاربر', 'error');
+        setTimeout(() => window.location.href = 'index.html', 3000);
+        return;
+      }
+
       const dashboard = document.getElementById('userInfo');
-      if (userInfo && dashboard) {
+      if (userInfo && Array.isArray(userInfo) && userInfo.length >= 7 && dashboard) {
         // تصویر پیش‌فرض
         const defaultImage = 'https://via.placeholder.com/200x200.png?text=بدون+تصویر';
         // بررسی و اصلاح URL تصویر
         let imageUrl = userInfo[5] || defaultImage;
-        if (imageUrl.includes('drive.google.com') && !imageUrl.includes('uc?export=view')) {
+        if (typeof imageUrl !== 'string') {
+          imageUrl = defaultImage;
+          showMessage('لینک تصویر پروفایل نامعتبر است', 'error');
+        } else if (imageUrl.includes('drive.google.com') && !imageUrl.includes('uc?export=view')) {
           const fileIdMatch = imageUrl.match(/[-\w]{25,}/);
           if (fileIdMatch) {
             imageUrl = `https://drive.google.com/uc?export=view&id=${fileIdMatch[0]}`;
           } else {
             imageUrl = defaultImage;
+            showMessage('لینک تصویر Google Drive نامعتبر است', 'error');
           }
         }
         // بررسی معتبر بودن URL تصویر
         if (!isValidImageUrl(imageUrl)) {
           imageUrl = defaultImage;
-          showMessage('لینک تصویر پروفایل معتبر نیست', 'error');
+          showMessage('فرمت لینک تصویر پروفایل معتبر نیست', 'error');
         }
 
         dashboard.innerHTML = `
@@ -105,7 +122,7 @@
           <p><strong>تأیید شده:</strong> ${userInfo[6] === 'بله' ? 'بله' : 'خیر'}</p>
         `;
       } else {
-        showMessage('اطلاعات کاربر یافت نشد', 'error');
+        showMessage('اطلاعات کاربر یافت نشد یا ناقص است', 'error');
         setTimeout(() => window.location.href = 'index.html', 3000);
       }
     }
