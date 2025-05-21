@@ -20,6 +20,7 @@
         <meta name="twitter:image" content="https://tandis.shahraavand.ir/images/TLogo_B.png">
         <!-- Favicon -->
         <link rel="icon" href="/images/Tfavicon.ico" type="image/x-icon">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
         <script src="https://cdn.tailwindcss.com"></script>         
         <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet"> 
         <script src="https://accounts.google.com/gsi/client" async defer></script>         
@@ -480,32 +481,27 @@ document.getElementById('loginFormInner').addEventListener('submit', function(ev
     fetch(fullUrl, {
         method: 'GET'
     })
-.then(response => response.text()) // پاسخ به صورت متن ساده است
-.then(data => {
-  if (data === 'ERPWD') {
-    alert('رمز عبور اشتباه است');
-  } else if (data === 'NoUser') {
-    alert('کاربر یافت نشد');
-  } else {
-    // فرض می‌کنیم پاسخ یک آرایه اطلاعات کاربر است
-    try {
-      const userInfo = eval('(' + data + ')'); // تبدیل متن به آرایه
-      console.log('نام کامل:', userInfo[0]);
-      console.log('نام کاربری:', userInfo[1]);
-      console.log('بیو:', userInfo[2]);
-      console.log('رنگ:', userInfo[3]);
-      console.log('نام فایل:', userInfo[4]);
-      console.log('URL:', userInfo[5]);
-      console.log('تأیید شده:', userInfo[6]);
-      // اینجا می‌توانید اطلاعات را در داشبورد نمایش دهید
-    } catch (e) {
-      alert('خطا در پردازش اطلاعات کاربر: ' + e.message);
+  .then(response => response.json()) // پاسخ JSON است
+  .then(data => {
+    if (!data.success) {
+      if (data.error === 'ERPWD') {
+        showMessage('رمز عبور اشتباه است', 'error');
+      } else if (data.error === 'NoUser') {
+        showMessage('کاربر یافت نشد', 'error');
+      } else {
+        showMessage(`خطا: ${data.error}`, 'error');
+      }
+    } else {
+      showMessage('ورود موفقیت‌آمیز بود!', 'success');
+      // ذخیره اطلاعات برای داشبورد
+      localStorage.setItem('userInfo', JSON.stringify(data.data));
+      // هدایت به صفحه داشبورد
+      window.location.href = 'dashboard.html';
     }
-  }
-})
-.catch(error => {
-  alert('خطا در ارتباط با سرور: ' + error.message);
-});
+  })
+  .catch(error => {
+    showMessage(`خطا در ارتباط با سرور: ${error.message}`, 'error');
+  });
 });
         // فراموشی رمز عبور
         document.getElementById('forgotPasswordInner').addEventListener('submit', function(e) {
@@ -543,6 +539,22 @@ document.querySelector('.password-toggle').addEventListener('click', function() 
     }
 });
 
+// تابع نمایش پیام با Toastify
+function showMessage(message, type) {
+  Toastify({
+    text: message,
+    duration: 3000,
+    close: true,
+    gravity: "top",
+    position: "center",
+    backgroundColor: type === 'success' ? "#4CAF50" : "#F44336",
+    style: {
+      fontFamily: "Vazir, Arial, sans-serif"
+    }
+  }).showToast();
+}            
     </script>         
+
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     </body>     
 </html>
