@@ -473,14 +473,15 @@ document.getElementById('loginFormInner').addEventListener('submit', function(ev
         return;
     }
 
-    const webAppUrl = 'https://script.google.com/macros/s/AKfycbzna0f7dQOtokAJkoj2lPBxiL2jMX_evcI9mQmB1ePuP___K4tdmz2UxQHvv2F-MPb1/exec';
-fetch(webAppUrl, {
-  method: 'POST',
-  body: JSON.stringify({ func: 'Login', email: email, password: password }),
-  headers: { 'Content-Type': 'application/json' }
-})
-  .then(response => response.json())
-  .then(data => console.log(data));
+    const webAppUrl = 'https://script.google.com/macros/s/AKfycbxky_b2JDyszPX_XTMkXvOoZUkIM_8y-wVikhyJIf_ZS3G7Jgar0aSohwv0w5ktPnso/exec';
+    const queryString = `?func=Login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+    const fullUrl = webAppUrl + queryString;
+
+    fetch(fullUrl, {
+        method: 'GET'
+    })
+    .then(response => response.json())
+    .then(data => {
         if (data.success) {
             alert('ورود موفقیت‌آمیز بود! خوش اومدی!');
         } else {
