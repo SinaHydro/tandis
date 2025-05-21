@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>داشبورد کاربر</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <style>
+    @font-face {
+      font-family: 'Vazir';
+      src: url('https://cdn.fontcdn.ir/Font/Persian/Vazir/Vazir.woff2') format('woff2');
+    }
+    body {
+      font-family: 'Vazir', Arial, sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+    }
+    .dashboard-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      text-align: right;
+    }
+    .dashboard-container h1 {
+      color: #333;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .user-info p {
+      margin: 10px 0;
+      font-size: 16px;
+    }
+    .user-info strong {
+      color: #555;
+    }
+    .profile-image {
+      max-width: 200px;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <h1>داشبورد کاربر</h1>
+    <div class="user-info" id="userInfo"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script>
+    // تابع نمایش پیام با Toastify
+    function showMessage(message, type) {
+      Toastify({
+        text: message,
+        duration: 3000,
+        close: true,
+        gravity: "top",
+        position: "center",
+        backgroundColor: type === 'success' ? "#4CAF50" : "#F44336",
+        style: {
+          fontFamily: "Vazir, Arial, sans-serif"
+        }
+      }).showToast();
+    }
+
+    // نمایش اطلاعات کاربر در داشبورد
+    function displayUserDashboard() {
+      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      const dashboard = document.getElementById('userInfo');
+      if (userInfo && dashboard) {
+        dashboard.innerHTML = `
+          <p><strong>نام کامل:</strong> ${userInfo[0] || 'نامشخص'}</p>
+          <p><strong>نام کاربری:</strong> ${userInfo[1] || 'نامشخص'}</p>
+          <p><strong>بیو:</strong> ${userInfo[2] || 'نامشخص'}</p>
+          <p><strong>رنگ:</strong> ${userInfo[3] || 'نامشخص'}</p>
+          <p><strong>نام فایل:</strong> ${userInfo[4] || 'نامشخص'}</p>
+          <img src="${userInfo[5] || ''}" alt="تصویر پروفایل" class="profile-image" onerror="this.style.display='none'">
+          <p><strong>تأیید شده:</strong> ${userInfo[6] === 'بله' ? 'بله' : 'خیر'}</p>
+        `;
+      } else {
+        showMessage('اطلاعات کاربر یافت نشد', 'error');
+        setTimeout(() => window.location.href = 'index.html', 3000);
+      }
+    }
+
+    // اجرای تابع هنگام لود صفحه
+    displayUserDashboard();
+  </script>
+</body>
+</html>
