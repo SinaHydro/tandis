@@ -46,8 +46,7 @@
                     </div>                     
                 </div>
                 <div class="bg-glass card-hover delay-300 mx-auto p-6 rounded-xl shadow-lg slide-in-left w-full"> 
-                    <h2 class="font-semibold mb-0 text-black text-center text-xl">اهداف و رسالت نظام تندیس</h2>
-                    <span class="flex flex-auto justify-center mb-2 pb-0 text-base text-center">پلتفرم تخصصی ارتباط مهندسان و کارفرمایان ساختمانی</span>
+                    <h2 class="font-semibold mb-0 text-black text-center text-xl">اهداف و رسالت نظام تندیس</h2><span class="flex flex-auto justify-center mb-2 pb-0 text-base text-center">پلتفرم تخصصی ارتباط مهندسان و کارفرمایان ساختمانی</span>
                     <p class="text-gray-900 text-justify text-sm"> 
                         نظام تندیس با هدف ایجاد پل ارتباطی بین مهندسان متخصص و کارفرمایان محترم در صنعت ساختمان ایجاد شده است. ما بستری امن و تخصصی فراهم کرده‌ایم تا مهندسان بتوانند توانمندی‌های خود را به نمایش بگذارند و کارفرمایان بتوانند به راحتی نیروی متخصص مورد نیاز خود را پیدا کنند. </p> 
                 </div>
@@ -104,8 +103,8 @@
                     <div id="login-form" class="space-y-6"> 
                         <!-- Email Login -->                         
                         <form id="loginFormInner" class="mx-8"> 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="mb-4"> 
+                            <div class="gap-4 grid grid-cols-1 md:grid-cols-2">
+                                <div> 
                                     <label for="login-email" class="sr-only">آدرس ایمیل</label>                                     
                                     <div class="relative"> 
                                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"> <i class="fas fa-envelope text-gray-400"></i> 
@@ -114,26 +113,28 @@
                                         <div id="email-error" class="text-red-500 text-sm hidden">لطفاً یه ایمیل درست وارد کن</div>
                                     </div>                                     
                                 </div>                                 
-                                <div class="mb-4"> 
+                                <div> 
                                     <label for="login-password" class="sr-only">رمز عبور</label>                                     
                                     <div class="relative"> 
                                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"> <i class="fas fa-lock text-gray-400"></i> 
                                         </div>                                         
                                         <input type="password" id="login-password" name="password" aria-label="رمز عبور" class="w-full pr-10 pl-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white" placeholder="رمز عبور" required>
                                         <div id="password-error" class="text-red-500 text-sm hidden">رمز عبور باید حداقل 8 کاراکتر باشد</div>                                         
-                                        <button type="button" class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3"><i class="fas fa-eye-slash text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"></i>
+                                        <button type="button" class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3">
+                                            <i class="fas fa-eye-slash text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"></i>
                                         </button>                                         
                                     </div>                                     
                                 </div>
                             </div>                             
-                            <div class="flex items-center justify-end mb-6"> 
+                            <div class="flex items-center justify-end my-3"> 
                                 <div class="hidden items-center"> 
                                     <input id="remember-me" name="remember-me" type="checkbox" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 border-gray-300 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500"> 
                                     <label for="remember-me" class="mr-2 block text-sm text-gray-700 dark:text-gray-300">مرا بخاطر بسپار</label>                                     
                                 </div>                                 
                                 <button id="forgotPassword-tab" class="border-b-2 border-blue-500 dark:text-blue-400 font-medium text-blue-600">فراموشی رمز عبور؟</button>                                 
                             </div>                             
-                            <button type="submit" class="bg-blue-600 dark:bg-blue-700 dark:hover:bg-blue-600 duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium hover:-translate-y-0.5 hover:bg-blue-700 leading-10 px-4 py-2.5 rounded-lg text-white transform transition-all w-full"><i class="fa-sign-in-alt fas mx-2"></i> 
+                            <button type="submit" class="bg-blue-600 dark:bg-blue-700 dark:hover:bg-blue-600 duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium hover:-translate-y-0.5 hover:bg-blue-700 leading-10 px-4 py-2.5 rounded-lg text-white transform transition-all w-full">
+                                <i class="fa-sign-in-alt fas mx-2"></i> 
                                 ورود به حساب کاربری 
                             </button>                             
                         </form>                         
@@ -155,12 +156,11 @@
                     <div id="signup-form" class="space-y-6 hidden" data-pg-collapsed> 
                         <form id="signupFormInner" class="mx-8"> 
                             <div class="flex-col inline-flex mb-4 w-full"> 
-                                <label class="block dark:text-gray-300 font-medium mb-2 text-gray-400 text-sm">نوع کاربر</label>                                 
+                                <label class="block dark:text-gray-300 font-medium mb-2 pr-4 text-gray-400 text-sm">نوع کاربر</label>                                 
                                 <div class="border border-gray-300 dark:border-gray-700 inline-flex items-center overflow-hidden rounded-lg w-full"> 
                                     <label class="flex-1"> 
                                         <input type="radio" name="account-type" value="engineer" class="sr-only peer" checked> 
-                                        <div class="cursor-pointer dark:peer-checked:bg-orange-500 flex flex-row items-end justify-evenly p-4 peer-checked:bg-orange-500 peer-checked:font-medium peer-checked:text-white text-center text-lg">
-                                            <i class="fa-hard-hat fas pb-1"></i> 
+                                        <div class="cursor-pointer dark:peer-checked:bg-orange-500 flex flex-row items-end justify-evenly p-4 peer-checked:bg-orange-500 peer-checked:font-medium peer-checked:text-white text-center text-lg"><i class="fa-hard-hat fas pb-1"></i> 
                                             مهندس
                                         </div>
                                     </label>                                     
@@ -172,29 +172,23 @@
                                     </label>                                     
                                 </div>                                 
                             </div>                             
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4"> 
-                                <div> 
-                                    <label for="first-name" class="dark:text-gray-300 font-medium hidden mb-2 text-gray-700 text-sm">نام</label>                                     
+                            <div class="gap-4 grid grid-cols-1 grid-rows-2 md:grid-cols-2"> 
+                                <div>                                      
                                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"> 
 </div>                                     
                                     <input type="text" id="first-name" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white" placeholder="نام"> 
                                 </div>                                 
-                                <div> 
-                                    <label for="last-name" class="dark:text-gray-300 font-medium hidden mb-2 text-gray-700 text-sm">نام خانوادگی</label>                                     
+                                <div>                                      
                                     <input type="text" id="last-name" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white" placeholder="نام خانوادگی"> 
                                 </div>                                 
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4"> 
-                                <div class="mt-4"> 
-                                    <label for="signup-email" class="dark:text-gray-300 font-medium hidden mb-2 text-gray-700 text-sm">آدرس ایمیل</label>                                     
+                                <div>                                      
                                     <div class="relative"> 
                                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"> <i class="fas fa-envelope text-gray-400"></i> 
                                         </div>                                         
                                         <input type="email" id="signup-email" class="border dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500 px-4 py-2 rounded-lg w-full" placeholder="ایمیل"> 
                                     </div>                                     
                                 </div>
-                                <div class="mt-4"> 
-                                    <label for="signup-password" class="dark:text-gray-300 font-medium hidden mb-2 text-gray-700 text-sm">رمز عبور</label>                                     
+                                <div>                                      
                                     <div class="relative"> 
                                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"> <i class="fas fa-lock text-gray-400"></i> 
                                         </div>                                         
@@ -204,7 +198,8 @@
                                     </div>                                     
                                 </div>
                             </div>                             
-                            <button type="submit" class="bg-blue-600 dark:bg-blue-700 dark:hover:bg-blue-600 duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium hover:-translate-y-0.5 hover:bg-blue-700 mt-5 px-4 py-2.5 rounded-lg text-white transform transition-all w-full"><i class="fa-user-plus fas leading-10 mx-2"></i> 
+                            <button type="submit" class="bg-blue-600 dark:bg-blue-700 dark:hover:bg-blue-600 duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium hover:-translate-y-0.5 hover:bg-blue-700 mt-5 px-4 py-2.5 rounded-lg text-white transform transition-all w-full">
+                                <i class="fa-user-plus fas leading-10 mx-2"></i> 
                                 شروع ثبت‌نام                                 
                             </button>                             
                         </form>                         
@@ -217,18 +212,18 @@
                     <p>و</p> <a href="#" class="hover:text-[#8cffc8] text-[#c39170] text-blue-600 underline" onclick="showPrivacyModal()">قوانین حریم خصوصی</a> 
                 </div>                 
             </div>
-            <div class="glass-card my-2 p-8" style="animation-delay: 0.4s;"> 
+            <div class="glass-card p-8" style="animation-delay: 0.4s;"> 
                 <h2 class="border-t font-extrabold mb-3 pt-5 text-center text-gray-500 text-xl">خدمات <b class="font-extrabold text-gray-500 text-xl">نظام تندیس</b></h2> 
-                <div class="gap-4 grid grid-cols-3"> 
-                    <div class="bg-blue-50 p-6 rounded-lg text-center"> <i class="fas fa-dollar text-blue-600 text-xl mb-2"></i> 
+                <div class="gap-3 grid grid-cols-1 md:grid-cols-3"> 
+                    <div class="bg-blue-50 p-6 rounded-lg text-center w-full"> <i class="fas fa-dollar text-blue-600 text-xl mb-2"></i> 
                         <h3 class="font-bold pb-2 text-center text-gray-600">کاهش هزینه ها</h3> 
                         <p class="mt-1 text-center text-gray-600 text-sm">صرفه حویی در زمان و هزینه های اضافی در فرایند جذب نیروی متخصص</p> 
                     </div>                     
-                    <div class="bg-blue-50 p-6 rounded-lg text-center"> <i class="fas fa-building text-green-600 text-xl mb-2"></i> 
+                    <div class="bg-blue-50 p-6 rounded-lg text-center w-full"> <i class="fas fa-building text-green-600 text-xl mb-2"></i> 
                         <h3 class="font-bold pb-2 text-center text-gray-600">پروژه‌های ساختمانی</h3> 
                         <p class="mt-1 text-center text-gray-600 text-sm">ثبت و درخواست انواع محتلف متخصص برای پروژه‌های ساختمانی</p> 
                     </div>                     
-                    <div class="bg-blue-50 p-6 rounded-lg text-center"> <i class="fas fa-search text-purple-600 text-xl mb-2"></i> 
+                    <div class="bg-blue-50 p-6 rounded-lg text-center w-full">                          <i class="fas fa-search text-purple-600 text-xl mb-2"></i>
                         <h3 class="font-bold pb-2 text-center text-gray-600">جستجوی هوشمند</h3> 
                         <p class="mt-1 text-center text-gray-600 text-sm">یافتن مهندس یا کارفرمای مناسب در پروژه های ساختمانی</p> 
                     </div>                     
@@ -554,7 +549,6 @@ function showMessage(message, type) {
   }).showToast();
 }            
     </script>         
-
-<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     </body>     
 </html>
