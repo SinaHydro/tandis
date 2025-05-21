@@ -5,17 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>داشبورد کاربر</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">      
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap'); 
-    body { font-family: 'Vazirmatn', sans-serif; background-color: #f3f0e1; overflow-x: hidden; }      
-    @font-face { font-family: 'Vazir'; src: url('https://cdn.fontcdn.ir/Font/Persian/Vazir/Vazir.woff2') format('woff2'); }
-    body { font-family: 'Vazir', Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
-    .dashboard-container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); text-align: right; }
-    .dashboard-container h1 { color: #333; font-size: 24px; margin-bottom: 20px; }
-    .user-info p { margin: 10px 0; font-size: 16px; }
-    .user-info strong { color: #555; }
-    .profile-image { max-width: 200px; border-radius: 8px; margin: 10px 0; }
+    @font-face {
+      font-family: 'Vazir';
+      src: url('https://cdn.fontcdn.ir/Font/Persian/Vazir/Vazir.woff2') format('woff2');
+    }
+    body {
+      font-family: 'Vazir', Arial, sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+    }
+    .dashboard-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      text-align: right;
+    }
+    .dashboard-container h1 {
+      color: #333;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .user-info p {
+      margin: 10px 0;
+      font-size: 16px;
+    }
+    .user-info strong {
+      color: #555;
+    }
+    .profile-image {
+      max-width: 200px;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
   </style>
 </head>
 <body>
@@ -23,6 +49,7 @@
     <h1>داشبورد کاربر</h1>
     <div class="user-info" id="userInfo"></div>
   </div>
+
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <script>
     // تابع نمایش پیام با Toastify
@@ -35,19 +62,9 @@
         position: "center",
         backgroundColor: type === 'success' ? "#4CAF50" : "#F44336",
         style: {
-          fontFamily: "Vazirmatn, Arial, sans-serif"
+          fontFamily: "Vazir, Arial, sans-serif"
         }
       }).showToast();
-    }
-
-    // بررسی اینکه URL یک تصویر معتبر است
-    function isValidImageUrl(url) {
-      // بررسی اینکه url یک رشته است و خالی نیست
-      if (typeof url !== 'string' || !url.trim()) {
-        return false;
-      }
-      // بررسی فرمت URL و پسوند تصویر
-      return (url.startsWith('http') || url.startsWith('/')) && /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(url);
     }
 
     // نمایش اطلاعات کاربر در داشبورد
@@ -64,25 +81,13 @@
       const dashboard = document.getElementById('userInfo');
       if (userInfo && Array.isArray(userInfo) && userInfo.length >= 7 && dashboard) {
         // تصویر پیش‌فرض
-        const defaultImage = 'https://thumbs.dreamstime.com/b/default-profile-picture-avatar-photo-placeholder-vector-illustration-default-profile-picture-avatar-photo-placeholder-vector-189495158.jpg';
-        // بررسی و اصلاح URL تصویر
-        let imageUrl = userInfo[5] || defaultImage;
-        if (typeof imageUrl !== 'string') {
-          imageUrl = defaultImage;
-          showMessage('لینک تصویر پروفایل نامعتبر است', 'error');
-        } else if (imageUrl.includes('drive.google.com') && !imageUrl.includes('uc?export=view')) {
-          const fileIdMatch = imageUrl.match(/[-\w]{25,}/);
-          if (fileIdMatch) {
-            imageUrl = `https://drive.google.com/uc?export=view&id=${fileIdMatch[0]}`;
-          } else {
-            imageUrl = defaultImage;
-            showMessage('لینک تصویر Google Drive نامعتبر است', 'error');
-          }
-        }
-        // بررسی معتبر بودن URL تصویر
-        if (!isValidImageUrl(imageUrl)) {
-          imageUrl = defaultImage;
-          showMessage('فرمت لینک تصویر پروفایل معتبر نیست', 'error');
+        const defaultImage = 'https://via.placeholder.com/200x200.png?text=بدون+تصویر';
+        // استفاده مستقیم از لینک تصویر بدون اصلاح
+        const imageUrl = typeof userInfo[5] === 'string' && userInfo[5].trim() ? userInfo[5] : defaultImage;
+
+        // اگر تصویر پیش‌فرض استفاده شد، پیام خطا نمایش داده شود
+        if (imageUrl === defaultImage) {
+          showMessage('لینک تصویر پروفایل نامعتبر یا خالی است', 'error');
         }
 
         dashboard.innerHTML = `
