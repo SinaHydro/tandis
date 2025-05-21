@@ -480,19 +480,33 @@ document.getElementById('loginFormInner').addEventListener('submit', function(ev
     fetch(fullUrl, {
         method: 'GET'
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('ورود موفقیت‌آمیز بود! خوش اومدی!');
-        } else {
-            alert('خطا: ' + data.error);
-        }
-    })
-    .catch(error => {
-        alert('خطا در ارتباط با سرور: ' + error.message);
-    });
+.then(response => response.text()) // پاسخ به صورت متن ساده است
+.then(data => {
+  if (data === 'ERPWD') {
+    alert('رمز عبور اشتباه است');
+  } else if (data === 'NoUser') {
+    alert('کاربر یافت نشد');
+  } else {
+    // فرض می‌کنیم پاسخ یک آرایه اطلاعات کاربر است
+    try {
+      const userInfo = eval('(' + data + ')'); // تبدیل متن به آرایه
+      console.log('نام کامل:', userInfo[0]);
+      console.log('نام کاربری:', userInfo[1]);
+      console.log('بیو:', userInfo[2]);
+      console.log('رنگ:', userInfo[3]);
+      console.log('نام فایل:', userInfo[4]);
+      console.log('URL:', userInfo[5]);
+      console.log('تأیید شده:', userInfo[6]);
+      // اینجا می‌توانید اطلاعات را در داشبورد نمایش دهید
+    } catch (e) {
+      alert('خطا در پردازش اطلاعات کاربر: ' + e.message);
+    }
+  }
+})
+.catch(error => {
+  alert('خطا در ارتباط با سرور: ' + error.message);
 });
-
+    
         // فراموشی رمز عبور
         document.getElementById('forgotPasswordInner').addEventListener('submit', function(e) {
             e.preventDefault();
