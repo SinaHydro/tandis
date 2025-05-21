@@ -473,12 +473,18 @@ document.getElementById('loginFormInner').addEventListener('submit', function(ev
         return;
     }
 
-    const webAppUrl = 'https://script.google.com/macros/s/AKfycbwTvnqH1yx0QCRrV4kjD-ShT-Q2bZDlCT1rXcySM4kY3LIlMbr11MjU599sYa7rnwdZ/exec';
-    const queryString = `?func=Login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
-    const fullUrl = webAppUrl + queryString;
+    const webAppUrl = 'https://script.google.com/macros/s/AKfycbzna0f7dQOtokAJkoj2lPBxiL2jMX_evcI9mQmB1ePuP___K4tdmz2UxQHvv2F-MPb1/exec';
 
-    fetch(fullUrl, {
-        method: 'GET'
+    fetch(webAppUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            func: 'Login',
+            email: email,
+            password: password
+        })
     })
     .then(response => response.json())
     .then(data => {
@@ -492,6 +498,7 @@ document.getElementById('loginFormInner').addEventListener('submit', function(ev
         alert('خطا در ارتباط با سرور: ' + error.message);
     });
 });
+
         // فراموشی رمز عبور
         document.getElementById('forgotPasswordInner').addEventListener('submit', function(e) {
             e.preventDefault();
