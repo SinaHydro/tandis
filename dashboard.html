@@ -72,13 +72,27 @@
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const dashboard = document.getElementById('userInfo');
       if (userInfo && dashboard) {
+        // تصویر پیش‌فرض در صورت خطا
+        const defaultImage = 'https://via.placeholder.com/200x200.png?text=بدون+تصویر';
+        // اصلاح URL تصویر (برای Google Drive یا محلی)
+        let imageUrl = userInfo[5] || defaultImage;
+        // اگر URL از Google Drive است، مطمئن شویم فرمت درست است
+        if (imageUrl.includes('drive.google.com') && !imageUrl.includes('uc?export=view')) {
+          const fileIdMatch = imageUrl.match(/[-\w]{25,}/);
+          if (fileIdMatch) {
+            imageUrl = `https://drive.google.com/uc?export=view&id=${fileIdMatch[0]}`;
+          } else {
+            imageUrl = defaultImage;
+          }
+        }
+
         dashboard.innerHTML = `
           <p><strong>نام کامل:</strong> ${userInfo[0] || 'نامشخص'}</p>
           <p><strong>نام کاربری:</strong> ${userInfo[1] || 'نامشخص'}</p>
           <p><strong>بیو:</strong> ${userInfo[2] || 'نامشخص'}</p>
           <p><strong>رنگ:</strong> ${userInfo[3] || 'نامشخص'}</p>
           <p><strong>نام فایل:</strong> ${userInfo[4] || 'نامشخص'}</p>
-          <img src="${userInfo[5] || ''}" alt="تصویر پروفایل" class="profile-image" onerror="this.style.display='none'">
+          <img src="${imageUrl}" alt="تصویر پروفایل" class="profile-image" onerror="this.src='${defaultImage}'; showMessage('نمایش تصویر پروفایل ممکن نشد', 'error');">
           <p><strong>تأیید شده:</strong> ${userInfo[6] === 'بله' ? 'بله' : 'خیر'}</p>
         `;
       } else {
