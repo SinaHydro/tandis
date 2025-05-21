@@ -67,16 +67,20 @@
       }).showToast();
     }
 
+    // بررسی اینکه URL یک تصویر معتبر است
+    function isValidImageUrl(url) {
+      return url && (url.startsWith('http') || url.startsWith('/')) && /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(url);
+    }
+
     // نمایش اطلاعات کاربر در داشبورد
     function displayUserDashboard() {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const dashboard = document.getElementById('userInfo');
       if (userInfo && dashboard) {
-        // تصویر پیش‌فرض در صورت خطا
+        // تصویر پیش‌فرض
         const defaultImage = 'https://via.placeholder.com/200x200.png?text=بدون+تصویر';
-        // اصلاح URL تصویر (برای Google Drive یا محلی)
+        // بررسی و اصلاح URL تصویر
         let imageUrl = userInfo[5] || defaultImage;
-        // اگر URL از Google Drive است، مطمئن شویم فرمت درست است
         if (imageUrl.includes('drive.google.com') && !imageUrl.includes('uc?export=view')) {
           const fileIdMatch = imageUrl.match(/[-\w]{25,}/);
           if (fileIdMatch) {
@@ -85,6 +89,11 @@
             imageUrl = defaultImage;
           }
         }
+        // بررسی معتبر بودن URL تصویر
+        if (!isValidImageUrl(imageUrl)) {
+          imageUrl = defaultImage;
+          showMessage('لینک تصویر پروفایل معتبر نیست', 'error');
+        }
 
         dashboard.innerHTML = `
           <p><strong>نام کامل:</strong> ${userInfo[0] || 'نامشخص'}</p>
@@ -92,7 +101,7 @@
           <p><strong>بیو:</strong> ${userInfo[2] || 'نامشخص'}</p>
           <p><strong>رنگ:</strong> ${userInfo[3] || 'نامشخص'}</p>
           <p><strong>نام فایل:</strong> ${userInfo[4] || 'نامشخص'}</p>
-          <img src="${imageUrl}" alt="تصویر پروفایل" class="profile-image" onerror="this.src='${defaultImage}'; showMessage('نمایش تصویر پروفایل ممکن نشد', 'error');">
+          <img src="${imageUrl}" alt="تصویر پروفایل" class="profile-image" onerror="this.src='${defaultImage}'; showMessage('بارگذاری تصویر پروفایل ناموفق بود', 'error');">
           <p><strong>تأیید شده:</strong> ${userInfo[6] === 'بله' ? 'بله' : 'خیر'}</p>
         `;
       } else {
