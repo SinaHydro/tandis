@@ -419,33 +419,87 @@ document.addEventListener('DOMContentLoaded', function() {
         const scriptURL = 'https://script.google.com/macros/s/AKfycbxEjsCU3mPGrCqDMPnqXBJgb_wVsCK9neHfQP3rLcd0MQJ3jVBdPFxsLeRjIQZLWPk0/exec'; // YOUR_SCRIPT_ID را جایگزین کنید
 
         // ثبت‌نام
-        document.getElementById('signupFormInner').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            const data = {
-                func: 'Create',
-                email: formData.get('regEmail'),
-                password: formData.get('regPassword'),
-                fullname: formData.get('regFullname'),
-                phone: formData.get('regPhone'),
-                client: formData.get('client') || '',
-            };
-            fetch(scriptURL, {
-                method: 'POST',
-                body: JSON.stringify(data),
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then(response => response.text())
-            .then(data => {
-                if (data === '') {
-                    alert('ثبت‌نام با موفقیت انجام شد!');
-                    window.location.href = '/dashboard.html';
+document.getElementById('signupFormInner').addEventListener('submit', function(e) {
+    e.preventDefault(); // جلوگیری از ارسال پیش‌فرض فرم
+
+    // دریافت مقادیر ایمیل و پسورد از فیلدهای فرم ثبت نام
+    const email = document.getElementById('regEmail').value;
+    const password = document.getElementById('regPassword').value;
+
+    // انتخاب المنت‌های نمایش خطا
+    const emailError = document.getElementById('regEmail-error'); // فرض می‌کنیم ID اینها وجود دارد
+    const passwordError = document.getElementById('regPassword-error'); // فرض می‌کنیم ID اینها وجود دارد
+
+    // پنهان کردن خطاهای قبلی
+    if (emailError) emailError.classList.add('hidden');
+    if (passwordError) passwordError.classList.add('hidden');
+
+
+    // اعتبارسنجی ایمیل (مانند فرم ورود)
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+        if (emailError) {
+            emailError.textContent = 'لطفا یک آدرس ایمیل معتبر وارد کنید.';
+            emailError.classList.remove('hidden');
+        }
+        return;
+    }
+
+    // اعتبارسنجی رمز عبور (حداقل 8 کاراکتر)
+    if (password.length < 8) {
+        if (passwordError) {
+            passwordError.textContent = 'رمز عبور باید حداقل 8 کاراکتر باشد.';
+            passwordError.classList.remove('hidden');
+        }
+        return;
+    }
+
+    // URL مربوط به Google Apps Script شما (همانند فرم ورود)
+    // مطمئن شوید که این URL معتبر است و اسکریپت شما تابع 'Create' را پشتیبانی می کند
+    const webAppUrl = 'https://script.google.com/macros/s/AKfycbxEjsCU3mPGrCqDMPnqXBJgb_wVsCK9neHfQP3rLcd0MQJ3jVBdPFxsLeRjIQZLWPk0/exec';
+
+    // ساخت queryString برای ارسال داده‌ها با متد GET (همانند فرم ورود شما)
+    const queryString = `?func=Create&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+    const fullUrl = webAppUrl + queryString;
+
+    // ارسال درخواست به Google Apps Script با متد GET
+    fetch(fullUrl, {
+            method: 'GET' // برای ارسال داده‌ها با Query String از GET استفاده می‌کنیم
+        })
+        .then(response => response.json()) // فرض بر این است که پاسخ JSON است
+        .then(data => {
+            if (data.success) {
+                showMessage('ثبت‌نام با موفقیت انجام شد!', 'success');
+                // اگر نیاز دارید اطلاعات کاربری را پس از ثبت نام ذخیره کنید
+                // localStorage.setItem('userInfo', JSON.stringify(data.data)); // اگر اطلاعاتی برگشت داده می‌شود
+                // هدایت به صفحه داشبورد یا صفحه ورود
+                window.location.href = 'dashboard.html'; // یا 'login.html'
+            } else {
+                if (data.error === 'EmailExists') { // فرض بر این است که خطای "ایمیل موجود است" را به این شکل برمی‌گرداند
+                    showMessage('این ایمیل قبلاً ثبت شده است.', 'error');
                 } else {
-                    alert('این ایمیل قبلاً ثبت شده است.');
+                    showMessage(`خطا در ثبت‌نام: ${data.error}`, 'error');
                 }
-            })
-            .catch(error => alert('خطا: ' + error.message));
+            }
+        })
+        .catch(error => {
+            // نمایش پیام خطا در صورت بروز مشکل در ارتباط یا پاسخ سرور
+            showMessage(`خطا در ارتباط با سرور: ${error.message}`, 'error');
         });
+});
+
+// این تابع showMessage را باید در جایی دیگر در کد خود داشته باشید، همانند آنچه در کد ورود استفاده کرده‌اید.
+// مثال:
+// function showMessage(message, type) {
+//     const messageDiv = document.getElementById('message-container'); // یا هر المان دیگری
+//     messageDiv.textContent = message;
+//     messageDiv.className = type === 'success' ? 'alert success' : 'alert error';
+//     messageDiv.classList.remove('hidden');
+//     // می توانید بعد از چند ثانیه آن را پنهان کنید
+//     setTimeout(() => {
+//         messageDiv.classList.add('hidden');
+//     }, 5000);
+// }
 
         // ورود
 document.getElementById('loginFormInner').addEventListener('submit', function(event) {
@@ -498,6 +552,7 @@ document.getElementById('loginFormInner').addEventListener('submit', function(ev
     showMessage(`خطا در ارتباط با سرور: ${error.message}`, 'error');
   });
 });
+            
         // فراموشی رمز عبور
         document.getElementById('forgotPasswordInner').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -538,7 +593,7 @@ document.querySelector('.password-toggle').addEventListener('click', function() 
 function showMessage(message, type) {
   Toastify({
     text: message,
-    duration: 3000,
+    duration: 5000,
     close: true,
     gravity: "top",
     position: "center",
