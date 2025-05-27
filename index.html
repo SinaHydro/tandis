@@ -650,12 +650,13 @@ function showMessage(message, type) {
     close: true,
     gravity: "top",
     position: "center",
-    backgroundColor: type === 'success' ? "#4CAF50" : "#F44336",
+    // خط زیر اصلاح شده است:
     style: {
-      fontFamily: "Vazirmatn, sans-serif"
+      fontFamily: "Vazirmatn, sans-serif",
+      background: type === 'success' ? "#4CAF50" : "#F44336" // استفاده از 'background' در داخل 'style'
     }
   }).showToast();
-}            
+}        
     </script>         
         <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     </body>     
