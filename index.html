@@ -79,8 +79,7 @@
                 </div>                 
                 <!-- Company Info Card -->                 
                 <!-- Scroll Indicator -->                 
-                <div class="absolute bottom-4 left-0 right-0 flex justify-center scroll-down"> 
-</div>                 
+                <div class="absolute bottom-4 left-0 right-0 flex justify-center scroll-down"> </div>                 
             </div>             
         </div>         
         <!-- Right Column - Login Form -->         
@@ -419,7 +418,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
         // URL وب اپ Google Apps Script
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbxEjsCU3mPGrCqDMPnqXBJgb_wVsCK9neHfQP3rLcd0MQJ3jVBdPFxsLeRjIQZLWPk0/exec'; // YOUR_SCRIPT_ID را جایگزین کنید
+        const webAppUrl = 'https://script.google.com/macros/s/AKfycbzdTAoE4HCc6R0dNa7SVoUC0UoY6hGSodcHMXirmj5Z4wpc_5bhKcZZjLirsykySwQr/exec';
 
         // ثبت‌نام
 document.getElementById('signupFormInner').addEventListener('submit', function(e) {
@@ -504,7 +503,7 @@ document.getElementById('signupFormInner').addEventListener('submit', function(e
 
 
     // URL مربوط به Google Apps Script شما
-    const webAppUrl = 'https://script.google.com/macros/s/AKfycbyva7-NyCtshj4z4-D04nAY5o3bqwkXsBxi-2rGRESkrALbp-W1o4VYFRRCddzfqkg0/exec';
+    // const webAppUrl = 'https://script.google.com/macros/s/AKfycbzdTAoE4HCc6R0dNa7SVoUC0UoY6hGSodcHMXirmj5Z4wpc_5bhKcZZjLirsykySwQr/exec';
 
     // ساخت queryString برای ارسال تمام داده‌ها با متد GET
     const queryString = `?func=Create` +
@@ -576,7 +575,7 @@ document.getElementById('loginFormInner').addEventListener('submit', function(ev
         return;
     }
 
-    const webAppUrl = 'https://script.google.com/macros/s/AKfycbyva7-NyCtshj4z4-D04nAY5o3bqwkXsBxi-2rGRESkrALbp-W1o4VYFRRCddzfqkg0/exec';
+    // const webAppUrl = 'https://script.google.com/macros/s/AKfycbzdTAoE4HCc6R0dNa7SVoUC0UoY6hGSodcHMXirmj5Z4wpc_5bhKcZZjLirsykySwQr/exec';
     const queryString = `?func=Login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
     const fullUrl = webAppUrl + queryString;
 
