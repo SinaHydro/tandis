@@ -422,27 +422,66 @@ document.addEventListener('DOMContentLoaded', function() {
 document.getElementById('signupFormInner').addEventListener('submit', function(e) {
     e.preventDefault(); // جلوگیری از ارسال پیش‌فرض فرم
 
-    // دریافت مقادیر ایمیل و پسورد از فیلدهای فرم ثبت نام
-    const email = document.getElementById('regEmail').value;
-    const password = document.getElementById('regPassword').value;
+    // دریافت مقادیر از فیلدهای فرم ثبت نام
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+    const firstName = document.getElementById('first-name').value;
+    const lastName = document.getElementById('last-name').value;
+    // برای رادیو باتن، مقدار radio button انتخاب شده را دریافت می‌کنیم
+    const accountType = document.querySelector('input[name="account-type"]:checked').value;
+
 
     // انتخاب المنت‌های نمایش خطا
-    const emailError = document.getElementById('regEmail-error'); // فرض می‌کنیم ID اینها وجود دارد
-    const passwordError = document.getElementById('regPassword-error'); // فرض می‌کنیم ID اینها وجود دارد
+    // فرض بر این است که این IDها در HTML شما وجود دارند.
+    // اگر وجود ندارند، باید آنها را در HTML اضافه کنید (مثلاً یک <p> زیر هر input با id مربوطه و کلاس hidden)
+    const emailError = document.getElementById('signup-email-error');
+    const passwordError = document.getElementById('signup-password-error');
+    const firstNameError = document.getElementById('first-name-error');
+    const lastNameError = document.getElementById('last-name-error');
+
 
     // پنهان کردن خطاهای قبلی
     if (emailError) emailError.classList.add('hidden');
     if (passwordError) passwordError.classList.add('hidden');
+    if (firstNameError) firstNameError.classList.add('hidden');
+    if (lastNameError) lastNameError.classList.add('hidden');
 
 
-    // اعتبارسنجی ایمیل (مانند فرم ورود)
+    // اعتبارسنجی (Validation)
+    let hasError = false;
+
+    // اعتبارسنجی نام
+    if (!firstName.trim()) { // بررسی خالی نبودن و فضای خالی
+        if (firstNameError) {
+            firstNameError.textContent = 'نام الزامی است.';
+            firstNameError.classList.remove('hidden');
+        } else {
+            showMessage('نام الزامی است.', 'error');
+        }
+        hasError = true;
+    }
+
+    // اعتبارسنجی نام خانوادگی
+    if (!lastName.trim()) { // بررسی خالی نبودن و فضای خالی
+        if (lastNameError) {
+            lastNameError.textContent = 'نام خانوادگی الزامی است.';
+            lastNameError.classList.remove('hidden');
+        } else {
+            showMessage('نام خانوادگی الزامی است.', 'error');
+        }
+        hasError = true;
+    }
+
+    // اعتبارسنجی ایمیل
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(email)) {
         if (emailError) {
-            emailError.textContent = 'لطفا یک آدرس ایمیل معتبر وارد کنید.';
+            emailError.textContent = 'لطفاً یک آدرس ایمیل معتبر وارد کنید.';
             emailError.classList.remove('hidden');
+        } else {
+            showMessage('لطفاً یک آدرس ایمیل معتبر وارد کنید.', 'error');
         }
-        return;
+        hasError = true;
     }
 
     // اعتبارسنجی رمز عبور (حداقل 8 کاراکتر)
@@ -450,28 +489,39 @@ document.getElementById('signupFormInner').addEventListener('submit', function(e
         if (passwordError) {
             passwordError.textContent = 'رمز عبور باید حداقل 8 کاراکتر باشد.';
             passwordError.classList.remove('hidden');
+        } else {
+            showMessage('رمز عبور باید حداقل 8 کاراکتر باشد.', 'error');
         }
-        return;
+        hasError = true;
     }
 
-    // URL مربوط به Google Apps Script شما (همانند فرم ورود)
-    // مطمئن شوید که این URL معتبر است و اسکریپت شما تابع 'Create' را پشتیبانی می کند
+    if (hasError) {
+        return; // اگر هر خطایی وجود دارد، ارسال فرم را متوقف کن
+    }
+
+
+    // URL مربوط به Google Apps Script شما
     const webAppUrl = 'https://script.google.com/macros/s/AKfycbxEjsCU3mPGrCqDMPnqXBJgb_wVsCK9neHfQP3rLcd0MQJ3jVBdPFxsLeRjIQZLWPk0/exec';
 
-    // ساخت queryString برای ارسال داده‌ها با متد GET (همانند فرم ورود شما)
-    const queryString = `?func=Create&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+    // ساخت queryString برای ارسال تمام داده‌ها با متد GET
+    const queryString = `?func=Create` +
+                        `&email=${encodeURIComponent(email)}` +
+                        `&password=${encodeURIComponent(password)}` +
+                        `&firstName=${encodeURIComponent(firstName)}` +
+                        `&lastName=${encodeURIComponent(lastName)}` +
+                        `&accountType=${encodeURIComponent(accountType)}`; // اضافه کردن نقش کاربری
     const fullUrl = webAppUrl + queryString;
 
     // ارسال درخواست به Google Apps Script با متد GET
     fetch(fullUrl, {
-            method: 'GET' // برای ارسال داده‌ها با Query String از GET استفاده می‌کنیم
+            method: 'GET'
         })
         .then(response => response.json()) // فرض بر این است که پاسخ JSON است
         .then(data => {
             if (data.success) {
                 showMessage('ثبت‌نام با موفقیت انجام شد!', 'success');
                 // اگر نیاز دارید اطلاعات کاربری را پس از ثبت نام ذخیره کنید
-                // localStorage.setItem('userInfo', JSON.stringify(data.data)); // اگر اطلاعاتی برگشت داده می‌شود
+                // localStorage.setItem('userInfo', JSON.stringify(data.data)); // اگر Google Apps Script اطلاعات برگشت می‌دهد
                 // هدایت به صفحه داشبورد یا صفحه ورود
                 window.location.href = 'dashboard.html'; // یا 'login.html'
             } else {
