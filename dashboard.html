@@ -1,84 +1,2127 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>داشبورد کاربر</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap'); body { font-family: 'Vazirmatn', sans-serif; background-color: #f3f0e1; overflow-x: hidden; }
-    @font-face { font-family: 'Vazir'; src: url('https://cdn.fontcdn.ir/Font/Persian/Vazir/Vazir.woff2') format('woff2'); }
-    body { font-family: 'Vazirmatn', Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
-    .dashboard-container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); text-align: right; }
-    .dashboard-container h1 { color: #333; font-size: 24px; margin-bottom: 20px; }
-    .user-info p { margin: 10px 0; font-size: 16px; }
-    .user-info strong { color: #555; }
-    .profile-image { max-width: 200px; border-radius: 8px; margin: 10px 0; }
-  </style>
-</head>
-<body>
-  <div class="dashboard-container">
-    <h1>داشبورد کاربر</h1>
-    <div class="user-info" id="userInfo"></div>
-  </div>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>تکمیل پروفایل - نظام تندیس</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css"/>
+        <style>
+            body { font-family: 'Vazirmatn', 'Tahoma', sans-serif; background-color: #f8fafc; }
+            .form-step { display: none; }
+            .form-step.active { display: block; }
+            .form-container-wrapper { display: flex; flex-direction: column; height: 100vh; max-height: 100vh; margin: 0 auto; background-color: white; overflow: hidden; }
+            #stepsSidebar { background-color: #f1f5f9; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; }
+            #advertisementSidebar { background-color: #f1f5f9; border-right: 1px solid #e2e8f0; }
+            .mobile-steps-header { background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 0.75rem 1rem; }
+            .step-indicator { display: flex; align-items: center; text-align: right; color: #64748b; font-size: 0.875rem; position: relative; transition: all 0.3s ease; cursor: default; }
+            .step-indicator .step-icon-container { width: 32px; height: 32px; border-radius: 50%; background-color: #cbd5e1; color: #475569; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; border: 2px solid transparent; flex-shrink: 0; }
+            .step-indicator .step-icon { font-size: 0.9rem; }
+            .step-indicator .step-label { font-weight: 500; white-space: nowrap; }
+            .step-indicator.active .step-icon-container { background-color: #0ea5e9; color: white; border-color: #38bdf8; }
+            .step-indicator.active .step-label { color: #0ea5e9; font-weight: 700; }
+            .step-indicator.completed .step-icon-container { background-color: #10b981; color: white; }
+            .step-indicator.completed:hover .step-icon-container { background-color: #059669; }
+            .step-indicator.completed .step-label { color: #059669; font-weight: 600; }
+            .step-indicator.completed { cursor: pointer; }
+            .steps-navigation-horizontal { display: flex; justify-content: space-around; align-items: flex-start; }
+            .steps-navigation-horizontal .step-indicator { flex-direction: column; align-items: center; flex: 1; padding: 0.5rem 0.25rem; }
+            .steps-navigation-horizontal .step-icon-container { margin-bottom: 0.25rem; }
+            .steps-navigation-vertical { display: flex; flex-direction: column; position: relative; padding-right: 10px; }
+            .steps-navigation-vertical .step-indicator { flex-direction: row; align-items: center; margin-bottom: 1.75rem; z-index: 2; }
+            .steps-navigation-vertical .step-indicator:last-child { margin-bottom: 0; }
+            .steps-navigation-vertical .step-icon-container { margin-left: 0.75rem; background-color: #f1f5f9; }
+            .steps-navigation-vertical .step-indicator.active .step-icon-container { box-shadow: 0 0 0 3px #f1f5f9, 0 0 0 5px #0ea5e9; }
+            .steps-navigation-vertical .step-indicator.completed .step-icon-container { background-color: #10b981; border-color: #059669; }
+            .sidebar-profile-section { border-bottom: 1px solid #cbd5e1; padding-bottom: 1rem; margin-bottom: 1rem; }
+            #sidebarUserEmail { font-size: 0.75rem; color: #64748b; margin-top: 0.5rem; margin-bottom: 0.25rem; word-break: break-all; }
+            #sidebarEngineerDiscipline { font-size: 0.8rem; color: #0ea5e9; font-weight: 500; margin-bottom: 0.5rem; }
+            .steps-header-info { padding: 0.5rem 0; }
+            .form-content-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+            .form-content { padding: 1.5rem 2rem; overflow-y: auto; flex-grow: 1; }
+            .form-navigation { padding: 1rem 2rem; border-top: 1px solid #e2e8f0; background-color: #f8fafc; flex-shrink: 0; }
+            .app-footer { background-color: #f1f5f9; color: #475569; padding: 0.75rem; text-align: center; font-size: 0.75rem; border-top: 1px solid #e2e8f0; flex-shrink: 0; }
+            .map-container { height: 220px; border-radius: 0.5rem; border: 1px solid #cbd5e1; }
+            .map-info-display { 
+                background-color: #e0f2fe; 
+                border: 1px solid #bae6fd; 
+                color: #0c4a6e; 
+            }
+            .map-info-display p { margin: 0; line-height: 1.6; }
+            .map-info-display strong { color: #0369a1; } 
 
-  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-  <script>
-    // تابع نمایش پیام با Toastify
-    function showMessage(message, type) {
-      Toastify({
-        text: message,
-        duration: 3000,
-        close: true,
-        gravity: "top",
-        position: "center",
-        backgroundColor: type === 'success' ? "#4CAF50" : "#F44336",
-        style: {
-          fontFamily: "Vazirmatn, Arial, sans-serif"
+            label.required::after { content: " *"; color: #ef4444; }
+            .form-content::-webkit-scrollbar { width: 8px; }
+            .form-content::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 8px; margin: 4px; }
+            .form-content::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 8px; border: 2px solid #f1f5f9; }
+            .form-content::-webkit-scrollbar-thumb:hover { background: #64748b; }
+            .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(15, 23, 42, 0.6); }
+            .modal-content { background-color: #ffffff; margin: 12% auto; padding: 2rem 2.5rem; border: none; width: 90%; max-width: 480px; border-radius: 0.75rem; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+            input[type="text"], input[type="date"], input[type="tel"], input[type="number"], textarea, select { background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.625rem 0.875rem; transition: border-color 0.2s ease, box-shadow 0.2s ease; line-height: 1.5; height: calc(1.5em + 0.75rem + 2px + 0.5rem); }
+            select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E"); background-position: left 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-left: 2.5rem; padding-right: 0.875rem; /* Ensure right padding for text */ }
+            input[type="text"]:focus, input[type="date"]:focus, input[type="tel"]:focus, input[type="number"]:focus, textarea:focus, select:focus { border-color: #0ea5e9; background-color: white; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2); outline: none; }
+            input[type="file"] { background-color: #f8fafc; border: 2px dashed #cbd5e1; padding: 0.75rem; border-radius: 0.5rem; transition: border-color 0.2s ease; }
+            input[type="file"]:hover { border-color: #94a3b8; }
+            input[type="file"]::file-selector-button { margin-right: 0.75rem; border: none; background: #0ea5e9; padding: 0.625rem 1rem; border-radius: 0.375rem; color: white; cursor: pointer; transition: background-color 0.2s ease-in-out; font-weight: 500; }
+            input[type="file"]::file-selector-button:hover { background: #0284c7; }
+            .btn { padding: 0.625rem 1.25rem; border-radius: 0.375rem; font-weight: 600; transition: all 0.2s ease-in-out; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;}
+            .btn-primary { background-color: #0ea5e9; color: white; }
+            .btn-primary:hover { background-color: #0284c7; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); }
+            .btn-secondary { background-color: #e2e8f0; color: #1e293b; }
+            .btn-secondary:hover { background-color: #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); }
+            .btn-success { background-color: #10b981; color: white; }
+            .btn-success:hover { background-color: #059669; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); }
+            .btn:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: none; }
+            .step-description-box { background-color: #e0f2fe; border-right-width: 4px; border-color: #0ea5e9; padding: 1rem; border-radius: 0.375rem; margin-bottom: 1.5rem; }
+            .step-description-box p { margin:0; }
+            .file-preview-container { width: 100%; height: 12rem; overflow: hidden; border: 1px solid #cbd5e1; border-radius: 0.375rem; display: flex; align-items: center; justify-content: center; background-color: #f8fafc; }
+            .file-preview-container img { width: 100%; height: 100%; object-fit: cover; } 
+            .file-preview-container iframe { max-width: 100%; max-height: 100%; object-fit: contain; width: 100%; height: 100%;}
+            .file-preview-container .pdf-icon-text { text-align: center; color: #475569; }
+            .file-preview-container .pdf-icon-text i.fa-file-pdf { font-size: 2.5rem; margin-bottom: 0.5rem; color: #ef4444; }
+            .file-preview-container .pdf-icon-text i.fa-image { font-size: 2.5rem; margin-bottom: 0.5rem; color: #64748b; }
+            #adBrandingContainer { text-align: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #cbd5e1;}
+            #adLogoImage { width: 80px; height: 80px; margin: 0 auto 0.5rem; border-radius: 0.375rem; object-fit: contain; }
+            #adMainTitle { font-size: 1.25rem; font-weight: 700; color: #1e293b; margin-bottom: 0.25rem; }
+            .ad-subtitle { font-size: 0.875rem; color: #475569; margin-bottom: 0.125rem; }
+            
+            #welcomeScreen { 
+                display: flex; 
+                flex-direction: row; 
+                align-items: stretch; 
+                justify-content: center; 
+                height: 100%; 
+                padding: 0; 
+                text-align: center; 
+                background: linear-gradient(135deg, #FDFEFF 0%, #FCFDFF 50%, #EFF9FF 100%); 
+            }
+            .welcome-banner { width: 20vw; max-width: 220px; min-width:150px; background-color: rgba(255,255,255,0.5); display: none; align-items: center; justify-content: center; overflow: hidden; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.03); margin: 2rem; height: calc(100vh - 8rem); } 
+            .welcome-banner img { width: 100%; height: 100%; object-fit: cover; }
+            .left-banner-img { object-position: left center; }
+            .right-banner-img { object-position: right center; }
+            .welcome-content { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
+            #welcomeTopTitle { font-size: 2.5rem; line-height: 3rem; font-weight: 800; color: #1D4ED8; margin-bottom: 0.75rem; } 
+            .welcome-sub-title { font-size: 1.5rem; line-height: 1.5rem; color: #CB9214; margin-bottom: 0.3rem; } 
+            #welcomeImage { width: 100%; max-width: 450px; height: auto; border-radius: 0.75rem; margin-top: 1.5rem; margin-bottom: 2rem; object-fit: cover; aspect-ratio: 16/9; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); }
+            #welcomeMessageLine1 { font-size: 1.75rem; line-height:2.25rem; font-weight: 700; color: #212121; margin-top:1.5rem;} 
+            #welcomeMessageLine2 { font-size: 1.25rem; line-height:1.75rem; font-weight: 600; color: #1D4ED8; margin-bottom: 2rem; } 
+            #mainFormView { display: none; flex:1; }
+             @media (min-width: 1024px) { 
+                .welcome-banner { display: flex; }
+            }
+            .role-selection-button-group { 
+                display: flex; 
+                border-radius: 0.75rem; 
+                overflow: hidden; 
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+                border: 1px solid #BDBDBD; 
+                width: auto; 
+                max-width: 550px; 
+                margin-left: auto;
+                margin-right: auto;
+            }
+            .role-button {
+                flex: 1; 
+                padding: 1.25rem 1.5rem; 
+                font-size: 1.5rem;  
+                font-weight: 600; 
+                transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+                cursor: pointer;
+                border: none; 
+                background-color: white; 
+                color: #1D4ED8; 
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                gap: 0.75rem; 
+            }
+            .role-button:not(:last-child) {
+                 border-right: 1px solid #BDBDBD; 
+            }
+            .role-button.active {
+                background-color: #1D4ED8; 
+                color: white; 
+                border-color: #176BBF; 
+            }
+             .role-button.active i {
+                color: #FFB300; 
+            }
+            .role-button:not(.active):hover {
+                background-color: #E3F2FD; 
+                color: #1D4ED8; 
+            }
+             .role-button:not(.active):hover i {
+                color: #1D4ED8; 
+            }
+            .role-button i { 
+                font-size: 1.5em; 
+                color: #1D4ED8; 
+                transition: color 0.3s ease, text-shadow 0.3s ease;
+            }
+        </style>
+    </head>
+    <body class="bg-slate-50">
+        <div id="app" class="form-container-wrapper"> 
+            
+            <div id="welcomeScreen">
+                <div class="welcome-banner" id="leftWelcomeBanner">
+                     <img src="https://images.unsplash.com/photo-1657450717464-b2989dd69a66?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Ymx1ZSUyMGZsb3dlcnxlbnwwfDF8MHx8fDI%3D" 
+                          class="left-banner-img"
+                          alt="گل‌های آبی" 
+                          onerror="this.onerror=null;this.src='https://placehold.co/220x500/EBF4FF/2196F3?text=Flowers';" >
+                </div>
+                <div class="welcome-content">
+                    <div class="border-b-2 flex items-center justify-center pb-11 w-full">
+                        <img src="https://tandis.shahraavand.ir/images/new-TLogo_B.avif" alt="لوگوی تندیس شهرآوند" class="h-30 w-30 ml-5" width="100" height="100" loading="lazy">
+                        <div>
+                            <h1 id="welcomeTopTitle" class="font-black text-4xl text-center">نظام تندیس</h1>
+                            <p class="welcome-sub-title font-extrabold pt-2 text-lg leading-5 text-center">تدارک نیازمندی دقیق و یکپارچه ساختمان</p>
+                            <p class="welcome-sub-title font-extrabold pt-2 text-lg leading-5 text-center">پلتفرم ارتباطی مهندسان و کارفرمایان</p>
+                        </div>
+                    </div>
+                    <h2 id="welcomeMessageLine1" class="font-bold text-2xl">خوش آمدید!</h2>
+                    <p id="welcomeMessageLine2" class="font-semibold mt-3 text-xl"> </p>
+                    <div id="roleSelectionButtonGroup" class="my-6 role-selection-button-group w-5/6">
+                        <button id="selectEngineerRoleBtn" class="role-button">
+                            <i class="fas fa-hard-hat"></i> 
+                            <span>مهـندس</span>
+                        </button>
+                        <button id="selectEmployerRoleBtn" class="role-button">
+                             <span>کـارفـرما</span>
+                             <i class="fas fa-building"></i>
+                        </button>
+                    </div>
+                    <p class="text-slate-500 text-sm">لطفاً در ورود اطلاعات نهایت دقت را داشته باشید تا پروفایل شما سریعتر تایید شود.</p>
+                </div>
+                 <div class="welcome-banner" id="rightWelcomeBanner">
+                     <img src="https://images.unsplash.com/photo-1657450717464-b2989dd69a66?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Ymx1ZSUyMGZsb3dlcnxlbnwwfDF8MHx8fDI%3D" 
+                          class="right-banner-img"
+                          alt="گل‌های نارنجی"
+                          onerror="this.onerror=null;this.src='https://placehold.co/220x500/FFF3E0/FFB300?text=Flowers';">
+                </div>
+            </div>
+
+            <div id="mainFormView" class="flex flex-col md:flex-row flex-1 overflow-hidden"> 
+                <div id="stepsSidebar" class="flex-shrink-0 hidden overflow-y-auto p-5 w-64 md:flex md:flex-col lg:w-72"> 
+                    <div id="sidebarProfileSection" class="mb-5 text-center">
+                        <div class="relative w-36 h-36 mx-auto mb-3 rounded-full overflow-hidden border-2 border-sky-400 shadow-lg"> 
+                            <img id="sidebarProfileImagePreview" src="https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740" alt="عکس پروفایل" class="w-full h-full object-cover">
+                            <label for="applicantImage" class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center text-white text-xs opacity-0 hover:opacity-100 transition-opacity duration-300 cursor-pointer"><i class="fas fa-camera fa-md"></i> <span class="mr-1 text-xs">تغییر</span>
+                            </label>
+                        </div>
+                        <input type="file" id="applicantImage" name="applicantImage" accept="image/*" class="hidden">
+                        <h3 id="sidebarProfileName" class="text-md font-semibold text-slate-700">نام و نام خانوادگی</h3>
+                        <p id="sidebarUserEmail" class="text-xs text-slate-500 mt-1"></p>
+                        <div id="sidebarEngineerDiscipline" class="text-sm text-sky-600 mt-1"></div>
+                    </div>
+                    <div class="bg-sky-300 h-px my-4"></div>                     
+                    <div id="stepsNavigationDesktop" class="steps-navigation-vertical mt-2 flex-1"> 
+                        </div>
+                    <button id="changeRoleButton" class="btn btn-secondary w-full mt-4">تغییر نقش</button>
+                    <span id="verifiedBadgeDesktop" class="mt-auto pt-4 text-center hidden text-xs font-semibold py-1 px-2 uppercase rounded-full text-green-700 bg-green-100 self-center"> 
+                        <i class="fas fa-check-circle mr-1 ml-1"></i> کاربر معتبر 
+                    </span>
+                </div>
+                <div class="form-content-area flex-1"> 
+                    <div class="mobile-steps-header md:hidden">
+                        <div id="stepsNavigationMobile" class="steps-navigation-horizontal mb-2">
+                            </div>
+                        <span id="verifiedBadgeMobile" class="mt-1.5 ml-2 hidden text-xs font-semibold py-1 px-2 uppercase rounded-full text-green-700 bg-green-100"> 
+                            <i class="fas fa-check-circle mr-1 ml-1"></i> کاربر معتبر 
+                        </span>
+                    </div>
+                    <div class="form-content">
+                        <div id="engineerFormContainer">
+                            <form id="engineerForm">
+                                <div id="engineer-step-1" class="form-step">
+                                    <div id="stepDescriptionContainer-engineer-1" class="step-description-box"></div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 pt-4">
+                                        <div>
+                                            <label for="engineerFirstName" class="block text-sm font-medium text-slate-700 mb-1 required">نام</label>
+                                            <input type="text" id="engineerFirstName" name="engineerFirstName" required class="mt-1 block w-full sm:text-sm">
+                                        </div>
+                                        <div>
+                                            <label for="engineerLastName" class="block text-sm font-medium text-slate-700 mb-1 required">نام خانوادگی</label>
+                                            <input type="text" id="engineerLastName" name="engineerLastName" required class="mt-1 block w-full sm:text-sm">
+                                        </div>
+                                        <div>
+                                            <label for="engineerNationalId" class="block text-sm font-medium text-slate-700 mb-1 required">کدملی</label>
+                                            <input type="text" id="engineerNationalId" name="engineerNationalId" required pattern="\d{10}" title="کدملی باید ۱۰ رقم و معتبر باشد" class="mt-1 block w-full sm:text-sm">
+                                        </div>
+                                        <div>
+                                            <label for="engineerDob" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ تولد</label>
+                                            <input type="date" id="engineerDob" name="engineerDob" required class="mt-1 block w-full sm:text-sm">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-slate-700 mb-1 required">جنسیت</label>
+                                            <div class="mt-1">
+                                                <button type="button" id="engineerGenderToggle" data-value="مرد" class="w-full text-right p-2 border border-slate-300 rounded-md bg-slate-50 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-sm">
+                                                    مرد
+</button>
+                                                <input type="hidden" id="engineerGender" name="engineerGender" value="مرد">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="engineerMobile" class="block text-sm font-medium text-slate-700 mb-1 required">تلفن موبایل</label>
+                                            <input type="tel" id="engineerMobile" name="engineerMobile" required pattern="09\d{9}" title="شماره موبایل باید با 09 شروع شود و ۱۱ رقم باشد" class="mt-1 block w-full sm:text-sm">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="engineer-step-2" class="form-step">
+                                    <div id="stepDescriptionContainer-engineer-2" class="step-description-box"></div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 pt-4">
+                                        <div>
+                                            <label for="engineerPhone" class="block text-sm font-medium text-slate-700 mb-1 required">شماره تلفن ثابت</label>
+                                            <input type="tel" id="engineerPhone" name="engineerPhone" required pattern="0\d{10}" title="شماره تلفن ثابت باید ۱۱ رقم با کد شهرستان (شروع با ۰) باشد" class="mt-1 block w-full sm:text-sm">
+                                        </div>
+                                        <div>
+                                            <label for="engineerPostalCode" class="block text-sm font-medium text-slate-700 mb-1 required">کدپستی</label>
+                                            <input type="text" id="engineerPostalCode" name="engineerPostalCode" required pattern="\d{10}" title="کدپستی باید ۱۰ رقم باشد" class="mt-1 block w-full sm:text-sm">
+                                        </div>
+                                        <div>
+                                            <label for="engineerProvince" class="block text-sm font-medium text-slate-700 mb-1 required">استان سکونت</label>
+                                            <select id="engineerProvince" name="engineerProvince" required class="mt-1 block w-full sm:text-sm">
+                                                <option value="">انتخاب استان</option>
+                                                <option value="آذربایجان شرقی">آذربایجان شرقی</option>
+                                                <option value="آذربایجان غربی">آذربایجان غربی</option>
+                                                <option value="اردبیل">اردبیل</option>
+                                                <option value="اصفهان">اصفهان</option>
+                                                <option value="البرز">البرز</option>
+                                                <option value="ایلام">ایلام</option>
+                                                <option value="بوشهر">بوشهر</option>
+                                                <option value="تهران">تهران</option>
+                                                <option value="چهارمحال و بختیاری">چهارمحال و بختیاری</option>
+                                                <option value="خراسان جنوبی">خراسان جنوبی</option>
+                                                <option value="خراسان رضوی">خراسان رضوی</option>
+                                                <option value="خراسان شمالی">خراسان شمالی</option>
+                                                <option value="خوزستان">خوزستان</option>
+                                                <option value="زنجان">زنجان</option>
+                                                <option value="سمنان">سمنان</option>
+                                                <option value="سیستان و بلوچستان">سیستان و بلوچستان</option>
+                                                <option value="فارس">فارس</option>
+                                                <option value="قزوین">قزوین</option>
+                                                <option value="قم">قم</option>
+                                                <option value="کردستان">کردستان</option>
+                                                <option value="کرمان">کرمان</option>
+                                                <option value="کرمانشاه">کرمانشاه</option>
+                                                <option value="کهگیلویه و بویراحمد">کهگیلویه و بویراحمد</option>
+                                                <option value="گلستان">گلستان</option>
+                                                <option value="گیلان">گیلان</option>
+                                                <option value="لرستان">لرستان</option>
+                                                <option value="مازندران">مازندران</option>
+                                                <option value="مرکزی">مرکزی</option>
+                                                <option value="هرمزگان">هرمزگان</option>
+                                                <option value="همدان">همدان</option>
+                                                <option value="یزد">یزد</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="engineerCity" class="block text-sm font-medium text-slate-700 mb-1">شهر سکونت</label>
+                                            <input type="text" id="engineerCity" name="engineerCity" class="mt-1 block w-full sm:text-sm">
+                                        </div>
+                                    </div>
+                                    <div class="mt-8">
+                                        <label class="block text-sm font-medium text-slate-700 mb-1">آدرس محل سکونت</label>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                                            <textarea id="engineerResidentialAddress" name="engineerResidentialAddress" rows="4" class="mt-1 block w-full sm:text-sm min-h-[220px]"></textarea>
+                                            <div id="engineerResidentialMap" class="map-container min-h-[220px]"></div>
+                                        </div>
+                                        <div id="engineerResidentialMapInfo" class="mt-2 p-3 text-xs map-info-display rounded-md leading-relaxed shadow-sm">
+                                            <span class="text-slate-500 italic">موقعیت مکانی انتخاب شده روی نقشه در اینجا نمایش داده می‌شود.</span>
+                                        </div>
+                                        <input type="hidden" id="engineerResidentialLat" name="engineerResidentialLat">
+                                        <input type="hidden" id="engineerResidentialLng" name="engineerResidentialLng">
+                                        <input type="hidden" id="engineerResidentialNeighborhood" name="engineerResidentialNeighborhood">
+                                    </div>
+                                </div>
+                                <div id="engineer-step-3" class="form-step">
+                                    <div id="stepDescriptionContainer-engineer-3" class="step-description-box"></div>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6 pt-4">
+                                        <div>
+                                            <label for="licenseFirstIssueDate" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ اولین صدور پروانه</label>
+                                            <input type="date" id="licenseFirstIssueDate" name="licenseFirstIssueDate" required class="mt-1 block w-full sm:text-sm">
+                                        </div>
+                                        <div>
+                                            <label for="licenseStartDate" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ شروع اعتبار پروانه</label>
+                                            <input type="date" id="licenseStartDate" name="licenseStartDate" required class="mt-1 block w-full sm:text-sm">
+                                        </div>
+                                        <div>
+                                            <label for="licenseValidity" class="block text-sm font-medium text-slate-700 mb-1 required">مدت اعتبار پروانه (سال)</label>
+                                            <input type="number" id="licenseValidity" name="licenseValidity" min="1" required class="mt-1 block w-full sm:text-sm">
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6 pt-6">
+                                        <div>
+                                            <label for="licenseNumber" class="block text-sm font-medium text-slate-700 mb-1 required">شماره پروانه</label>
+                                            <input type="text" id="licenseNumber" name="licenseNumber" required class="mt-1 block w-full sm:text-sm" placeholder="0-13-30-012345" maxlength="14">
+                                        </div>
+                                        <div>
+                                            <label for="membershipNumber" class="block text-sm font-medium text-slate-700 mb-1 required">شماره عضویت</label>
+                                            <input type="text" id="membershipNumber" name="membershipNumber" required class="mt-1 block w-full sm:text-sm">
+                                        </div>
+                                        <div>
+                                            <label for="licenseActivityProvince" class="block text-sm font-medium text-slate-700 mb-1 required">استان فعالیت پروانه</label>
+                                            <select id="licenseActivityProvince" name="licenseActivityProvince" required class="mt-1 block w-full sm:text-sm">
+                                                <option value="">انتخاب استان</option>
+                                                <option value="سراسری">سراسری (کشوری)</option>
+                                                <option value="آذربایجان شرقی">آذربایجان شرقی</option>
+                                                <option value="آذربایجان غربی">آذربایجان غربی</option>
+                                                <option value="اردبیل">اردبیل</option>
+                                                <option value="اصفهان">اصفهان</option>
+                                                <option value="البرز">البرز</option>
+                                                <option value="ایلام">ایلام</option>
+                                                <option value="بوشهر">بوشهر</option>
+                                                <option value="تهران">تهران</option>
+                                                <option value="چهارمحال و بختیاری">چهارمحال و بختیاری</option>
+                                                <option value="خراسان جنوبی">خراسان جنوبی</option>
+                                                <option value="خراسان رضوی">خراسان رضوی</option>
+                                                <option value="خراسان شمالی">خراسان شمالی</option>
+                                                <option value="خوزستان">خوزستان</option>
+                                                <option value="زنجان">زنجان</option>
+                                                <option value="سمنان">سمنان</option>
+                                                <option value="سیستان و بلوچستان">سیستان و بلوچستان</option>
+                                                <option value="فارس">فارس</option>
+                                                <option value="قزوین">قزوین</option>
+                                                <option value="قم">قم</option>
+                                                <option value="کردستان">کردستان</option>
+                                                <option value="کرمان">کرمان</option>
+                                                <option value="کرمانشاه">کرمانشاه</option>
+                                                <option value="کهگیلویه و بویراحمد">کهگیلویه و بویراحمد</option>
+                                                <option value="گلستان">گلستان</option>
+                                                <option value="گیلان">گیلان</option>
+                                                <option value="لرستان">لرستان</option>
+                                                <option value="مازندران">مازندران</option>
+                                                <option value="مرکزی">مرکزی</option>
+                                                <option value="هرمزگان">هرمزگان</option>
+                                                <option value="همدان">همدان</option>
+                                                <option value="یزد">یزد</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-5">
+                                        <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
+                                            <div class="flex items-center space-x-2 space-x-reverse mb-1">
+                                                <input type="checkbox" id="hasDesignLicense" name="hasDesignLicense" class="h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500">
+                                                <label for="hasDesignLicense" id="designLicenseLabel" class="text-sm font-medium text-slate-700">پروانه طراحی ندارم</label>
+                                            </div>
+                                            <div>
+                                                <select id="designLicenseGrade" name="designLicenseGrade" disabled class="block w-full sm:text-sm bg-slate-100 mb-2">
+                                                    <option value="">انتخاب پایه طراحی</option>
+                                                    <option value="3">پایه ۳</option>
+                                                    <option value="2">پایه ۲</option>
+                                                    <option value="1">پایه ۱</option>
+                                                    <option value="arshad">پایه ارشد</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-medium text-slate-600 mb-1 mt-2">نوع صلاحیت طراحی:</label>
+                                                <div class="flex flex-col space-y-1 text-xs">
+                                                    <label class="inline-flex items-center"><input type="radio" name="designExecutorType" value="individual" class="form-radio h-3 w-3 text-sky-600"><span class="mr-1 ml-1">حقیقی</span></label>
+                                                    <label class="inline-flex items-center"><input type="radio" name="designExecutorType" value="legal" class="form-radio h-3 w-3 text-sky-600"><span class="mr-1 ml-1">حقوقی</span></label>
+                                                    <label class="inline-flex items-center"><input type="radio" name="designExecutorType" value="none" checked class="form-radio h-3 w-3 text-sky-600"><span class="mr-1 ml-1">فعالیت ندارم</span></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
+                                            <div class="flex items-center space-x-2 space-x-reverse mb-1">
+                                                <input type="checkbox" id="hasSupervisionLicense" name="hasSupervisionLicense" class="h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500">
+                                                <label for="hasSupervisionLicense" id="supervisionLicenseLabel" class="text-sm font-medium text-slate-700">پروانه نظارت ندارم</label>
+                                            </div>
+                                            <div>
+                                                <select id="supervisionLicenseGrade" name="supervisionLicenseGrade" disabled class="block w-full sm:text-sm bg-slate-100 mb-2">
+                                                    <option value="">انتخاب پایه نظارت</option>
+                                                    <option value="3">پایه ۳</option>
+                                                    <option value="2">پایه ۲</option>
+                                                    <option value="1">پایه ۱</option>
+                                                    <option value="arshad">پایه ارشد</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-medium text-slate-600 mb-1 mt-2">نوع صلاحیت نظارت:</label>
+                                                 <div class="flex flex-col space-y-1 text-xs">
+                                                    <label class="inline-flex items-center"><input type="radio" name="supervisionExecutorType" value="individual" class="form-radio h-3 w-3 text-sky-600"><span class="mr-1 ml-1">حقیقی</span></label>
+                                                    <label class="inline-flex items-center"><input type="radio" name="supervisionExecutorType" value="legal" class="form-radio h-3 w-3 text-sky-600"><span class="mr-1 ml-1">حقوقی</span></label>
+                                                    <label class="inline-flex items-center"><input type="radio" name="supervisionExecutorType" value="none" checked class="form-radio h-3 w-3 text-sky-600"><span class="mr-1 ml-1">فعالیت ندارم</span></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
+                                            <div class="flex items-center space-x-2 space-x-reverse mb-1">
+                                                <input type="checkbox" id="hasExecutionLicense" name="hasExecutionLicense" class="h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500">
+                                                <label for="hasExecutionLicense" id="executionLicenseLabel" class="text-sm font-medium text-slate-700">پروانه اجرا ندارم</label>
+                                            </div>
+                                            <div>
+                                                <select id="executionLicenseGrade" name="executionLicenseGrade" disabled class="block w-full sm:text-sm bg-slate-100 mb-2">
+                                                    <option value="">انتخاب پایه اجرا</option>
+                                                    <option value="3">پایه ۳</option>
+                                                    <option value="2">پایه ۲</option>
+                                                    <option value="1">پایه ۱</option>
+                                                    <option value="arshad">پایه ارشد</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-medium text-slate-600 mb-1 mt-2">نوع صلاحیت اجرا:</label>
+                                                 <div class="flex flex-col space-y-1 text-xs">
+                                                    <label class="inline-flex items-center"><input type="radio" name="executionExecutorType" value="individual" class="form-radio h-3 w-3 text-sky-600"><span class="mr-1 ml-1">حقیقی</span></label>
+                                                    <label class="inline-flex items-center"><input type="radio" name="executionExecutorType" value="legal" class="form-radio h-3 w-3 text-sky-600"><span class="mr-1 ml-1">حقوقی</span></label>
+                                                    <label class="inline-flex items-center"><input type="radio" name="executionExecutorType" value="none" checked class="form-radio h-3 w-3 text-sky-600"><span class="mr-1 ml-1">فعالیت ندارم</span></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="legalExecutorFields" class="mt-8 space-y-6 hidden bg-slate-100 p-5 rounded-lg border border-slate-200">
+                                        <h3 class="text-md font-semibold">اطلاعات شرکت حقوقی</h3>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                                            <div>
+                                                <label for="companyName" class="block text-sm font-medium text-slate-700 mb-1 required">نام شرکت حقوقی</label>
+                                                <input type="text" id="companyName" name="companyName" class="mt-1 block w-full sm:text-sm">
+                                            </div>
+                                            <div>
+                                                <label for="companyRegNumber" class="block text-sm font-medium text-slate-700 mb-1">شماره ثبت شرکت</label>
+                                                <input type="text" id="companyRegNumber" name="companyRegNumber" class="mt-1 block w-full sm:text-sm">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-slate-700 mb-1">آدرس دفتر شرکت</label>
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                                                <textarea id="companyOfficeAddress" name="companyOfficeAddress" rows="4" class="mt-1 block w-full sm:text-sm min-h-[220px]"></textarea>
+                                                <div id="companyOfficeMap" class="map-container min-h-[220px]"></div>
+                                            </div>
+                                            <div id="companyOfficeMapInfo" class="mt-2 p-3 text-xs map-info-display rounded-md leading-relaxed shadow-sm">
+                                                <span class="text-slate-500 italic">موقعیت مکانی انتخاب شده روی نقشه در اینجا نمایش داده می‌شود.</span>
+                                            </div>
+                                            <input type="hidden" id="companyOfficeMapLat" name="companyOfficeMapLat">
+                                            <input type="hidden" id="companyOfficeMapLng" name="companyOfficeMapLng">
+                                            <input type="hidden" id="companyOfficeMapNeighborhood" name="companyOfficeMapNeighborhood">
+                                        </div>
+                                    </div>
+                                    <div id="individualExecutorFieldsContainer" class="hidden">
+                                        <div id="individualExecutorFields" class="hidden mt-8 bg-slate-100 p-5 rounded-lg border border-slate-200">
+                                            <h3 class="text-md font-semibold mb-2">اطلاعات مهندس حقیقی (اجرا)</h3>
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="isAssistantExecutor" name="isAssistantExecutor" class="h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500">
+                                                <label for="isAssistantExecutor" class="ml-2 mr-2 block text-sm text-slate-700">فقط کمک مجری هستم</label>
+                                            </div>
+                                        </div>
+                                        <div class="mt-8"> 
+                                            <div class="flex items-center mb-4">
+                                                <input type="checkbox" id="engineerHasOfficeInfo" name="engineerHasOfficeInfo" class="h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500">
+                                                <label for="engineerHasOfficeInfo" id="engineerHasOfficeInfoLabel" class="ml-2 mr-2 block text-sm text-slate-700">دفتر کار ندارم</label>
+                                            </div>
+                                            <div id="engineerOfficeInfoFields" class="hidden space-y-6 bg-slate-100 p-5 rounded-lg border border-slate-200">
+                                                <h3 class="text-lg font-semibold">اطلاعات دفتر کار</h3>
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 mb-4">
+                                                    <div>
+                                                        <label for="officeName" class="block text-sm font-medium text-slate-700 mb-1 required">نام دفتر کار مهندسی</label>
+                                                        <input type="text" id="officeName" name="officeName" class="mt-1 block w-full sm:text-sm">
+                                                    </div>
+                                                    <div>
+                                                        <label for="officePhone" class="block text-sm font-medium text-slate-700 mb-1 required">تلفن دفتر کار</label>
+                                                        <input type="tel" id="officePhone" name="officePhone" class="mt-1 block w-full sm:text-sm" pattern="0\d{10}" title="تلفن دفتر باید ۱۱ رقم با کد شهرستان (شروع با ۰) باشد">
+                                                    </div>
+                                                </div>
+                                                <label class="block text-sm font-medium text-slate-700 mb-1">آدرس دفتر کار</label>
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                                                    <textarea id="officeAddress" name="officeAddress" rows="4" class="mt-1 block w-full sm:text-sm min-h-[220px]"></textarea>
+                                                    <div id="officeMap" class="map-container min-h-[220px]"></div>
+                                                </div>
+                                                <div id="officeMapInfo" class="mt-2 p-3 text-xs map-info-display rounded-md leading-relaxed shadow-sm">
+                                                    <span class="text-slate-500 italic">موقعیت مکانی انتخاب شده روی نقشه در اینجا نمایش داده می‌شود.</span>
+                                                </div>
+                                                <input type="hidden" id="officeMapLat" name="officeMapLat">
+                                                <input type="hidden" id="officeMapLng" name="officeMapLng">
+                                                <input type="hidden" id="officeMapNeighborhood" name="officeMapNeighborhood">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="engineer-step-4" class="form-step">
+                                    <div id="stepDescriptionContainer-engineer-4" class="step-description-box"></div>
+                                    <div class="pt-4">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6"> 
+                                            <div>
+                                                <label for="workPermitPdf" class="block text-sm font-medium text-slate-700 mb-1 required">پی دی اف پروانه اشتغال بکار</label>
+                                                <input type="file" id="workPermitPdf" name="workPermitPdf" accept="application/pdf" required class="mt-1 block w-full text-sm">
+                                                <div id="workPermitPdfPreviewContainer" class="mt-2 file-preview-container">
+                                                    <span class="pdf-icon-text"><i class="fas fa-file-pdf"></i><br>انتخاب نشده</span> 
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label for="nationalIdCardImageEngineer" class="block text-sm font-medium text-slate-700 mb-1 required">تصویر کارت ملی</label>
+                                                <input type="file" id="nationalIdCardImageEngineer" name="nationalIdCardImageEngineer" accept="image/*" required class="mt-1 block w-full text-sm">
+                                                <div id="nationalIdCardImageEngineerPreviewContainer" class="mt-2 file-preview-container">
+                                                    <span class="pdf-icon-text nationalIdCardImageEngineerPreviewPlaceholder"> <i class="fas fa-image text-slate-400"></i><br>انتخاب نشده</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="engineer-step-5" class="form-step">
+                                    <div id="stepDescriptionContainer-engineer-5" class="step-description-box"></div>
+                                    <div class="pt-4">
+                                        <div id="summaryContainerEngineer" class="bg-slate-100 p-5 sm:p-6 rounded-lg shadow border border-slate-200">
+</div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div id="employerFormContainer" class="hidden">
+                            <form id="employerForm">
+                                <div id="employer-step-1" class="form-step">
+                                    <div id="stepDescriptionContainer-employer-1" class="step-description-box"></div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 pt-4">
+                                        <div>
+                                            <label for="employerFirstName" class="block text-sm font-medium text-slate-700 mb-1 required">نام</label>
+                                            <input type="text" id="employerFirstName" name="employerFirstName" required class="mt-1 block w-full sm:text-sm">
+                                        </div>
+                                        <div>
+                                            <label for="employerLastName" class="block text-sm font-medium text-slate-700 mb-1 required">نام خانوادگی</label>
+                                            <input type="text" id="employerLastName" name="employerLastName" required class="mt-1 block w-full sm:text-sm">
+                                        </div>
+                                        <div>
+                                            <label for="employerNationalId" class="block text-sm font-medium text-slate-700 mb-1 required">کدملی</label>
+                                            <input type="text" id="employerNationalId" name="employerNationalId" required pattern="\d{10}" title="کدملی باید ۱۰ رقم و معتبر باشد" class="mt-1 block w-full sm:text-sm">
+                                        </div>
+                                        <div>
+                                            <label for="employerDob" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ تولد</label>
+                                            <input type="date" id="employerDob" name="employerDob" required class="mt-1 block w-full sm:text-sm">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-slate-700 mb-1 required">جنسیت</label>
+                                            <div class="mt-1">
+                                                <button type="button" id="employerGenderToggle" data-value="مرد" class="w-full text-right p-2 border border-slate-300 rounded-md bg-slate-50 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-sm">
+                                                    مرد
+</button>
+                                                <input type="hidden" id="employerGender" name="employerGender" value="مرد">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="employerMobile" class="block text-sm font-medium text-slate-700 mb-1 required">تلفن موبایل</label>
+                                            <input type="tel" id="employerMobile" name="employerMobile" required pattern="09\d{9}" title="شماره موبایل باید با 09 شروع شود و ۱۱ رقم باشد" class="mt-1 block w-full sm:text-sm">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="employer-step-2" class="form-step">
+                                    <div id="stepDescriptionContainer-employer-2" class="step-description-box"></div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 pt-4">
+                                        <div>
+                                            <label for="employerPhone" class="block text-sm font-medium text-slate-700 mb-1 required">شماره تماس</label>
+                                            <input type="tel" id="employerPhone" name="employerPhone" required pattern="0\d{9}|0\d{10}" title="شماره تماس معتبر وارد کنید (مثال: 02112345678 یا 09123456789)" class="mt-1 block w-full sm:text-sm">
+                                        </div>
+                                        <div>
+                                            <label for="employerPostalCode" class="block text-sm font-medium text-slate-700 mb-1 required">کدپستی</label>
+                                            <input type="text" id="employerPostalCode" name="employerPostalCode" required pattern="\d{10}" title="کدپستی باید ۱۰ رقم باشد" class="mt-1 block w-full sm:text-sm">
+                                        </div>
+                                        <div>
+                                            <label for="employerProvince" class="block text-sm font-medium text-slate-700 mb-1 required">استان سکونت</label>
+                                            <select id="employerProvince" name="employerProvince" required class="mt-1 block w-full sm:text-sm">
+                                                <option value="">انتخاب استان</option>
+                                                <option value="آذربایجان شرقی">آذربایجان شرقی</option>
+                                                <option value="آذربایجان غربی">آذربایجان غربی</option>
+                                                <option value="اردبیل">اردبیل</option>
+                                                <option value="اصفهان">اصفهان</option>
+                                                <option value="البرز">البرز</option>
+                                                <option value="ایلام">ایلام</option>
+                                                <option value="بوشهر">بوشهر</option>
+                                                <option value="تهران">تهران</option>
+                                                <option value="چهارمحال و بختیاری">چهارمحال و بختیاری</option>
+                                                <option value="خراسان جنوبی">خراسان جنوبی</option>
+                                                <option value="خراسان رضوی">خراسان رضوی</option>
+                                                <option value="خراسان شمالی">خراسان شمالی</option>
+                                                <option value="خوزستان">خوزستان</option>
+                                                <option value="زنجان">زنجان</option>
+                                                <option value="سمنان">سمنان</option>
+                                                <option value="سیستان و بلوچستان">سیستان و بلوچستان</option>
+                                                <option value="فارس">فارس</option>
+                                                <option value="قزوین">قزوین</option>
+                                                <option value="قم">قم</option>
+                                                <option value="کردستان">کردستان</option>
+                                                <option value="کرمان">کرمان</option>
+                                                <option value="کرمانشاه">کرمانشاه</option>
+                                                <option value="کهگیلویه و بویراحمد">کهگیلویه و بویراحمد</option>
+                                                <option value="گلستان">گلستان</option>
+                                                <option value="گیلان">گیلان</option>
+                                                <option value="لرستان">لرستان</option>
+                                                <option value="مازندران">مازندران</option>
+                                                <option value="مرکزی">مرکزی</option>
+                                                <option value="هرمزگان">هرمزگان</option>
+                                                <option value="همدان">همدان</option>
+                                                <option value="یزد">یزد</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="employerCity" class="block text-sm font-medium text-slate-700 mb-1">شهر سکونت</label>
+                                            <input type="text" id="employerCity" name="employerCity" class="mt-1 block w-full sm:text-sm">
+                                        </div>
+                                    </div>
+                                    <div class="mt-8">
+                                        <label class="block text-sm font-medium text-slate-700 mb-1">آدرس</label>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                                            <textarea id="employerAddress" name="employerAddress" rows="4" class="mt-1 block w-full sm:text-sm min-h-[220px]"></textarea>
+                                            <div id="employerAddressMap" class="map-container min-h-[220px]"></div>
+                                        </div>
+                                        <div id="employerAddressMapInfo" class="mt-2 p-3 text-xs map-info-display rounded-md leading-relaxed shadow-sm">
+                                            <span class="text-slate-500 italic">موقعیت مکانی انتخاب شده روی نقشه در اینجا نمایش داده می‌شود.</span>
+                                        </div>
+                                        <input type="hidden" id="employerAddressLat" name="employerAddressLat">
+                                        <input type="hidden" id="employerAddressLng" name="employerAddressLng">
+                                        <input type="hidden" id="employerAddressNeighborhood" name="employerAddressNeighborhood">
+                                    </div>
+                                </div>
+                                <div id="employer-step-3" class="form-step">
+                                    <div id="stepDescriptionContainer-employer-3" class="step-description-box"></div>
+                                    <div class="pt-4">
+                                        <div class="flex items-center mb-4">
+                                            <input type="checkbox" id="employerHasCompany" name="employerHasCompany" class="h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500">
+                                            <label for="employerHasCompany" id="employerHasCompanyLabel" class="ml-2 mr-2 block text-sm text-slate-700">شرکت ندارم (شخص حقیقی هستم)</label>
+                                        </div>
+                                        <div id="employerCompanyFields" class="hidden space-y-6">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                                                <div>
+                                                    <label for="employerCompanyName" class="block text-sm font-medium text-slate-700 mb-1 required">نام شرکت</label>
+                                                    <input type="text" id="employerCompanyName" name="employerCompanyName" class="mt-1 block w-full sm:text-sm">
+                                                </div>
+                                                <div>
+                                                    <label for="employerCompanyRegNumber" class="block text-sm font-medium text-slate-700 mb-1 required">شماره ثبت شرکت</label>
+                                                    <input type="text" id="employerCompanyRegNumber" name="employerCompanyRegNumber" class="mt-1 block w-full sm:text-sm">
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-slate-700 mb-1">آدرس شرکت</label>
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                                                    <textarea id="employerCompanyAddress" name="employerCompanyAddress" rows="4" class="mt-1 block w-full sm:text-sm min-h-[220px]"></textarea>
+                                                    <div id="employerCompanyMap" class="map-container min-h-[220px]"></div>
+                                                </div>
+                                                <div id="employerCompanyMapInfo" class="mt-2 p-3 text-xs map-info-display rounded-md leading-relaxed shadow-sm">
+                                                    <span class="text-slate-500 italic">موقعیت مکانی انتخاب شده روی نقشه در اینجا نمایش داده می‌شود.</span>
+                                                </div>
+                                                <input type="hidden" id="employerCompanyAddressLat" name="employerCompanyAddressLat">
+                                                <input type="hidden" id="employerCompanyAddressLng" name="employerCompanyAddressLng">
+                                                <input type="hidden" id="employerCompanyAddressNeighborhood" name="employerCompanyAddressNeighborhood">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="employer-step-4" class="form-step">
+                                    <div id="stepDescriptionContainer-employer-4" class="step-description-box"></div>
+                                    <div class="pt-4">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6"> 
+                                            <div>
+                                                <label for="employerNationalIdCardImage" class="block text-sm font-medium text-slate-700 mb-1 required">تصویر کارت ملی</label>
+                                                <input type="file" id="employerNationalIdCardImage" name="employerNationalIdCardImage" accept="image/*" required class="mt-1 block w-full text-sm">
+                                                <div id="employerNationalIdCardImagePreviewContainer" class="mt-2 file-preview-container">
+                                                    <span class="pdf-icon-text employerNationalIdCardImagePreviewPlaceholder"> <i class="fas fa-image text-slate-400"></i><br>انتخاب نشده</span>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label for="employerOtherDocs" class="block text-sm font-medium text-slate-700 mb-1">رزومه کاری (اختیاری)</label>
+                                                <input type="file" id="employerOtherDocs" name="employerOtherDocs" accept="image/*,application/pdf" class="mt-1 block w-full text-sm">
+                                                <div id="employerOtherDocsPreviewContainer" class="mt-2 file-preview-container">
+                                                    <span class="pdf-icon-text employerOtherDocsPreviewPlaceholder"> <i class="fas fa-file-alt text-slate-400"></i><br>انتخاب نشده</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="employer-step-5" class="form-step">
+                                    <div id="stepDescriptionContainer-employer-5" class="step-description-box"></div>
+                                    <div class="pt-4">
+                                        <div id="summaryContainerEmployer" class="bg-slate-100 p-5 sm:p-6 rounded-lg shadow border border-slate-200">
+</div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="form-navigation">
+                        <div class="flex justify-between items-center">
+                            <button type="button" id="prevButton" class="btn btn-secondary">گام قبلی</button>
+                            <button type="button" id="nextButton" class="btn btn-primary">گام بعدی</button>
+                            <button type="button" id="submitButton" class="btn btn-success hidden">ثبت نهایی اطلاعات</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="advertisementSidebar" class="hidden md:flex flex-col flex-shrink-0 w-64 lg:w-72 bg-slate-100 border-r border-slate-200 p-5 space-y-4 overflow-y-auto">
+                    <div id="adBrandingContainer">
+                        <img id="adLogoImage" src="https://tandis.shahraavand.ir/images/new-TLogo_B.avif" alt="لوگوی نظام تندیس">
+                        <h2 id="adMainTitle">نظام تندیس</h2>
+                        <p class="ad-subtitle">تدارک نیازمندی دقیق و یکپارچه ساختمان</p>
+                        <p class="ad-subtitle">پلتفرم تخصصی ارتباط مهندسان و کارفرمایان</p>
+                    </div>
+                    <img id="adBannerImage" src="https://images.unsplash.com/photo-1434873740857-1bc5653afda8?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bGVhZGVyc2hpcHxlbnwwfDF8MHx8fDA%3D" alt="بنر تبلیغاتی" class="w-full h-auto rounded-md shadow">
+                    <div id="adBannerText" class="text-sm text-slate-600 text-center">
+</div>
+                </div>
+            </div>
+            <div class="app-footer">
+                <p>&copy; تمامی حقوق سایت نظام تندیس متعلق به شرکت شهرآوند است. - ۱۴۰۳</p>
+            </div>
+        </div>
+        <div id="messageModal" class="modal">
+            <div class="modal-content">
+                <div id="modalIconContainer" class="mb-4 text-5xl">
+</div>
+                <p id="modalMessageText" class="text-slate-700 text-base"></p>
+                <button id="modalCloseButton" class="mt-6 btn btn-primary w-full sm:w-auto">متوجه شدم</button>
+            </div>
+        </div>
+        <script type="module">
+        // --- CONFIGURATION ---
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzPhnmZTDlcGYJYoCS4rHCNG_4sySwTmx_oQbDou-Ls8hHx6zyFXjaIQPU63BPG7ihg/exec'; // <-- آدرس وب اپ خود را اینجا قرار دهید
+        
+        // --- STATE VARIABLES ---
+        let currentStep = 1;
+        let totalSteps = 5; 
+        let currentUserRole = null; 
+        let initialUserData = { 
+            firstName: "محمد", 
+            lastName: "رضایی",  
+            userType: "مهندس", 
+            email: "mohammad.rezaei@example.com", 
+            gender: "مرد" 
+        };
+        let firstClickRole = null; 
+
+        // --- DOM ELEMENTS ---
+        const welcomeScreen = document.getElementById('welcomeScreen');
+        const mainFormView = document.getElementById('mainFormView');
+        const welcomeMessageElLine1 = document.getElementById('welcomeMessageLine1');
+        const welcomeMessageElLine2 = document.getElementById('welcomeMessageLine2');
+        const selectEngineerRoleButton = document.getElementById('selectEngineerRoleBtn'); 
+        const selectEmployerRoleButton = document.getElementById('selectEmployerRoleBtn'); 
+        const changeRoleButton = document.getElementById('changeRoleButton');
+
+        const engineerFormContainer = document.getElementById('engineerFormContainer');
+        const employerFormContainer = document.getElementById('employerFormContainer');
+        const engineerForm = document.getElementById('engineerForm');
+        const employerForm = document.getElementById('employerForm');
+        
+        let activeForm = null; 
+        let activeSteps = []; 
+
+        const stepsNavigationMobile = document.getElementById('stepsNavigationMobile');
+        const stepsNavigationDesktop = document.getElementById('stepsNavigationDesktop');
+        const sidebarProfileImagePreview = document.getElementById('sidebarProfileImagePreview');
+        const applicantImageInput = document.getElementById('applicantImage'); 
+        const sidebarProfileName = document.getElementById('sidebarProfileName');
+        const sidebarUserEmail = document.getElementById('sidebarUserEmail');
+        const sidebarEngineerDiscipline = document.getElementById('sidebarEngineerDiscipline');
+
+        const prevButton = document.getElementById('prevButton');
+        const nextButton = document.getElementById('nextButton');
+        const submitButton = document.getElementById('submitButton');
+
+        const adBannerImage = document.getElementById('adBannerImage');
+        const adBannerText = document.getElementById('adBannerText');
+        
+        const maps = {}; 
+
+        const stepIndicatorDataEngineer = [
+            { id: 1, icon: "fa-user", label: "۱. مشخصات فردی", recommendation: "تکمیل دقیق اطلاعات هویتی، اولین گام برای ساخت یک پروفایل حرفه‌ای است.", detailedExplanation: "در این بخش، نام، نام خانوادگی، کدملی (۱۰ رقمی و معتبر)، تاریخ تولد (حداقل ۱۸ سال) و جنسیت خود را وارد نمایید. شماره موبایل صحیح برای اطلاع‌رسانی‌ها ضروری است." }, 
+            { id: 2, icon: "fa-map-marker-alt", label: "۲. اطلاعات تماس", recommendation: "اطلاعات تماس کامل و دقیق، دسترسی کارفرمایان به شما را تسهیل می‌کند.", detailedExplanation: "شماره تلفن ثابت (۱۱ رقمی با کد شهرستان)، کدپستی (۱۰ رقمی)، استان، شهر و آدرس محل سکونت خود را وارد کنید. سپس موقعیت دقیق محل سکونت خود را روی نقشه انتخاب نمایید." }, 
+            { id: 3, icon: "fa-id-card", label: "۳. اطلاعات حرفه‌ای", recommendation: "ارائه اطلاعات دقیق حرفه‌ای و پروانه، اعتبار شما را به عنوان یک متخصص افزایش می‌دهد.", detailedExplanation: "تاریخ اولین صدور پروانه، تاریخ شروع و مدت اعتبار پروانه، شماره پروانه (با فرمت صحیح مانند 0-13-30-012345)، شماره عضویت و استان فعالیت پروانه را وارد کنید. سپس برای هر یک از صلاحیت‌های طراحی، نظارت و اجرا، پایه و نوع فعالیت (حقیقی، حقوقی یا عدم فعالیت در آن صلاحیت) را مشخص نمایید. انتخاب حداقل یکی از صلاحیت‌ها به همراه پایه آن الزامی است. بر اساس انتخاب شما، فیلدهای مربوط به اطلاعات شرکت (برای فعالیت حقوقی) یا دفتر کار (برای فعالیت حقیقی) نمایش داده خواهد شد." }, 
+            { id: 4, icon: "fa-cloud-upload-alt", label: "۴. آپلود مدارک", recommendation: "آپلود مدارک واضح و صحیح، گامی مهم در جهت تکمیل و تایید نهایی پروفایل شماست.", detailedExplanation: "تصویر پروفایل خود را (اختیاری، از طریق پنل کناری)، فایل PDF پروانه اشتغال و تصویر کارت ملی را بارگذاری کنید. دقت کنید که هر فایل باید کمتر از ۲۵۰ کیلوبایت حجم داشته باشد." }, 
+            { id: 5, icon: "fa-check-circle", label: "۵. تأیید نهایی", recommendation: "این آخرین مرحله است! اطلاعات خود را به دقت بررسی کنید.", detailedExplanation: "یک بار دیگر تمامی اطلاعات وارد شده در مراحل قبل را مرور کنید. در صورت اطمینان از صحت کامل اطلاعات، دکمه «ثبت نهایی اطلاعات» را برای ارسال پروفایل خود کلیک کنید." }
+        ];
+        const advertisementDataEngineer = [
+            { step: 1, imageUrl: 'https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Y29tcGFueXxlbnwwfHwwfHx8MA%3D%3D', text: 'با تکمیل دقیق اطلاعات، به جامعه‌ای متحد از مهندسان برای ارتقاء صنعت ساختمان بپیوندید.' },
+            { step: 2, imageUrl: 'https://images.unsplash.com/photo-1596524430615-b46475ddff6e?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Y29udGFjdCUyMHVzfGVufDB8fDB8fHww', text: 'اطلاعات تماس شما، پلی برای همکاری‌های سازنده و دستیابی به فرصت‌های بهتر در بازار کار است.'},
+            { step: 3, imageUrl: 'https://images.unsplash.com/photo-1490351267196-b7a67e26e41b?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fGNvbXBhbnl8ZW58MHwxfDB8fHww', text: 'تخصص و صلاحیت شما، در کنار هم‌افزایی مهندسان، به تنظیم عادلانه حق‌الزحمه‌ها و تعادل در عرضه و تقاضا کمک می‌کند.' },
+            { step: 4, imageUrl: 'https://images.unsplash.com/photo-1622260872090-5c558010a67e?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGNvbGxhYm9yYXRpb258ZW58MHwxfDB8fHww', text: 'مدارک شما، سندی بر تعهد و حرفه‌ای‌گری شماست؛ با هم، جایگاه مهندسی را اعتلا می‌بخشیم.' },
+            { step: 5, imageUrl: 'https://images.unsplash.com/photo-1578357078586-491adf1aa5ba?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGNvbGxhYm9yYXRpb258ZW58MHwxfDB8fHww', text: 'با نهایی کردن پروفایل خود، به حرکتی جمعی برای بهبود صنعت ساختمان و احقاق حقوق مهندسین می‌پیوندید.' }
+        ];
+
+        const stepIndicatorDataEmployer = [
+            { id: 1, icon: "fa-user-tie", label: "۱. مشخصات فردی", recommendation: "تکمیل دقیق اطلاعات شناسایی، به ایجاد اعتماد و شفافیت در همکاری‌ها کمک می‌کند.", detailedExplanation: "نام، نام خانوادگی، کدملی (۱۰ رقمی و معتبر)، تاریخ تولد (حداقل ۱۸ سال) و جنسیت خود را به عنوان کارفرما وارد نمایید. شماره موبایل صحیح برای ارتباطات بعدی ضروری است." },
+            { id: 2, icon: "fa-address-book", label: "۲. اطلاعات تماس", recommendation: "ارائه اطلاعات تماس دقیق، ارتباط موثر مهندسین با شما را تضمین می‌کند.", detailedExplanation: "شماره تماس ثابت (۱۰ رقمی با کد شهرستان یا ۱۱ رقمی موبایل)، کدپستی (۱۰ رقمی)، استان، شهر و آدرس خود را وارد کنید. سپس موقعیت دقیق خود را روی نقشه انتخاب نمایید." }, 
+            { id: 3, icon: "fa-building", label: "۳. اطلاعات شرکت", recommendation: "معرفی کسب‌وکار یا شرکت شما (در صورت وجود) به شناخت بهتر مهندسین کمک خواهد کرد.", detailedExplanation: "اگر به عنوان شخص حقوقی (شرکت) فعالیت می‌کنید، گزینه «شرکت دارم» را انتخاب کرده و نام شرکت، شماره ثبت و آدرس آن را به همراه موقعیت مکانی دفتر شرکت روی نقشه مشخص کنید. در غیر این صورت، گزینه «شرکت ندارم» را انتخاب شده باقی بگذارید." },
+            { id: 4, icon: "fa-id-badge", label: "۴. آپلود مدارک", recommendation: "بارگذاری مدارک شناسایی، به اعتبارسنجی هویت شما به عنوان کارفرما کمک می‌کند.", detailedExplanation: "تصویر کارت ملی خود را بارگذاری کنید. ارائه رزومه کاری اختیاری است اما می‌تواند به شناخت بهتر شما کمک کند. دقت کنید که هر فایل باید کمتر از ۲۵۰ کیلوبایت حجم داشته باشد." }, 
+            { id: 5, icon: "fa-clipboard-check", label: "۵. تأیید نهایی", recommendation: "مرحله نهایی! لطفاً اطلاعات خود را برای آخرین بار بررسی کنید.", detailedExplanation: "پیش از ثبت نهایی، تمامی اطلاعات وارد شده در مراحل قبل را به دقت مرور کنید. در صورت اطمینان از صحت کامل اطلاعات، دکمه «ثبت نهایی اطلاعات» را برای ارسال پروفایل خود کلیک کنید." }
+        ];
+         const advertisementDataEmployer = [
+            { step: 1, imageUrl: 'https://plus.unsplash.com/premium_photo-1672759360872-791a5ba6e2cc?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8ZGlmZmVyZW50fGVufDB8fDB8fHww', text: 'اطلاعات دقیق شما، شروع یک همکاری شفاف و منصفانه با جامعه مهندسی برای پروژه‌های موفق است.' },
+            { step: 2, imageUrl: 'https://plus.unsplash.com/premium_photo-1687362298502-1881385c786f?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8dGVsZXBob25lfGVufDB8fDB8fHww', text: 'ارتباط موثر با شما، به مهندسان امکان می‌دهد تا بهترین خدمات را با در نظر گرفتن شرایط عادلانه ارائه دهند.' },
+            { step: 3, imageUrl: 'https://images.unsplash.com/photo-1713299429500-aaee4444fe56?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGJ1c3NpbmVzc3xlbnwwfDF8MHx8fDA%3D', text: 'همکاری با مهندسان متخصص، به تنظیم منطقی هزینه‌ها و ایجاد تعادل در بازار خدمات مهندسی کمک می‌کند.' },
+            { step: 4, imageUrl: 'https://images.unsplash.com/photo-1715865171871-e02c0b656825?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGlkJTIwY2FyZHxlbnwwfDF8MHx8fDA%3D', text: 'تعهد شما به شفافیت، در کنار تخصص مهندسان، زمینه‌ساز پروژه‌هایی با کیفیت و با رعایت حقوق طرفین خواهد بود.' },
+            { step: 5, imageUrl: 'https://images.unsplash.com/photo-1564846824194-346b7871b855?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8ZG9jdW1lbnR8ZW58MHwxfDB8fHww', text: 'با تکمیل اطلاعات، شما نیز در ایجاد بازاری سالم و مبتنی بر همکاری و احترام متقابل در صنعت ساختمان سهیم می‌شوید.' }
+        ];
+
+        // --- INITIALIZATION FUNCTIONS ---
+        function showWelcomeScreen() {
+            welcomeScreen.style.display = 'flex';
+            mainFormView.style.display = 'none';
+            
+            let rolePrefix = "";
+            if (firstClickRole === "مهندس") {
+                rolePrefix = "مهندس ";
+            } else if (!firstClickRole && initialUserData.userType === "مهندس") { 
+                rolePrefix = "مهندس ";
+            }
+
+            welcomeMessageElLine1.textContent = `${rolePrefix}${initialUserData.firstName || ''} ${initialUserData.lastName || ''} عزیز،`;
+
+            if(firstClickRole) {
+                 welcomeMessageElLine2.textContent = `برای تأیید نقش ${firstClickRole === 'engineer' ? 'مهندس' : 'کارفرما'}، دوباره کلیک کنید.`;
+            } else {
+                welcomeMessageElLine2.textContent = `لطفا با انتخاب نقش، ثبت نام را به پایان برسانید.`;
+            }
+
+            if (firstClickRole === 'engineer') {
+                selectEngineerRoleButton.classList.add('active');
+                selectEmployerRoleButton.classList.remove('active');
+            } else if (firstClickRole === 'employer') {
+                selectEmployerRoleButton.classList.add('active');
+                selectEngineerRoleButton.classList.remove('active');
+            } else { 
+                selectEngineerRoleButton.classList.remove('active');
+                selectEmployerRoleButton.classList.remove('active');
+            }
+            updateSidebarName(); 
         }
-      }).showToast();
-    }
 
-    // نمایش اطلاعات کاربر در داشبورد
-    function displayUserDashboard() {
-      let userInfo;
-      try {
-        userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      } catch (e) {
-        showMessage('خطا در بارگذاری اطلاعات کاربر', 'error');
-        setTimeout(() => window.location.href = 'index.html', 3000);
-        return;
-      }
+        function initializeFormForRole(role) {
+            currentUserRole = role; 
+            initialUserData.userType = role; 
+            currentStep = 1; 
 
-      const dashboard = document.getElementById('userInfo');
-      if (userInfo && Array.isArray(userInfo) && userInfo.length >= 7 && dashboard) {
-        // تصویر پیش‌فرض
-        const defaultImage = 'https://via.placeholder.com/200x200.png?text=بدون+تصویر';
-        // استفاده مستقیم از لینک تصویر بدون اصلاح
-        const imageUrl = typeof userInfo[5] === 'string' && userInfo[5].trim() ? userInfo[5] : defaultImage;
+            welcomeScreen.style.display = 'none';
+            mainFormView.style.display = 'flex';
 
-        // اگر تصویر پیش‌فرض استفاده شد، پیام خطا نمایش داده شود
-        if (imageUrl === defaultImage) {
-          showMessage('لینک تصویر پروفایل نامعتبر یا خالی است', 'error');
+            if (engineerForm) {
+                engineerForm.removeEventListener('input', calculateProfileCompleteness);
+                engineerForm.removeEventListener('change', calculateProfileCompleteness);
+            }
+            if (employerForm) {
+                employerForm.removeEventListener('input', calculateProfileCompleteness);
+                employerForm.removeEventListener('change', calculateProfileCompleteness);
+            }
+
+            if (role === 'engineer') {
+                activeForm = engineerForm;
+                activeSteps = Array.from(engineerFormContainer.querySelectorAll('.form-step'));
+                totalSteps = stepIndicatorDataEngineer.length;
+                engineerFormContainer.classList.remove('hidden');
+                employerFormContainer.classList.add('hidden');
+                document.getElementById('engineerFirstName').value = initialUserData.firstName || '';
+                document.getElementById('engineerLastName').value = initialUserData.lastName || '';
+                const engineerGenderInput = document.getElementById('engineerGender');
+                const engineerGenderToggle = document.getElementById('engineerGenderToggle');
+                engineerGenderInput.value = initialUserData.gender || 'مرد'; 
+                engineerGenderToggle.textContent = engineerGenderInput.value;
+                const engineerPostalCodeInput = document.getElementById('engineerPostalCode');
+                if (engineerPostalCodeInput) engineerPostalCodeInput.value = ''; 
+                const engineerPhoneInput = document.getElementById('engineerPhone');
+                if (engineerPhoneInput) engineerPhoneInput.value = ''; 
+                // Initialize professional info visibility
+                updateProfessionalInfoVisibility();
+            } else if (role === 'employer') {
+                activeForm = employerForm;
+                activeSteps = Array.from(employerFormContainer.querySelectorAll('.form-step'));
+                totalSteps = stepIndicatorDataEmployer.length;
+                employerFormContainer.classList.remove('hidden');
+                engineerFormContainer.classList.add('hidden');
+                document.getElementById('employerFirstName').value = initialUserData.firstName || '';
+                document.getElementById('employerLastName').value = initialUserData.lastName || '';
+                const employerPostalCodeInput = document.getElementById('employerPostalCode');
+                 if (employerPostalCodeInput) employerPostalCodeInput.value = ''; 
+                const employerGenderInput = document.getElementById('employerGender');
+                const employerGenderToggle = document.getElementById('employerGenderToggle');
+                employerGenderInput.value = initialUserData.gender || 'مرد'; 
+                employerGenderToggle.textContent = employerGenderInput.value;
+            }
+            
+            if (activeForm) {
+                activeForm.addEventListener('input', calculateProfileCompleteness);
+                activeForm.addEventListener('change', calculateProfileCompleteness);
+            }
+            if(sidebarUserEmail) sidebarUserEmail.textContent = initialUserData.email || 'ایمیل ثبت نشده';
+
+            updateSidebarName(); 
+            populateStepIndicators();
+            updateStepDescriptions(); 
+            updateStepView();
+            firstClickRole = null; 
+        }
+        
+        selectEngineerRoleButton.addEventListener('click', () => {
+            if (firstClickRole === 'engineer') {
+                initializeFormForRole('engineer');
+            } else {
+                firstClickRole = 'engineer';
+                showWelcomeScreen(); 
+            }
+        });
+        selectEmployerRoleButton.addEventListener('click', () => {
+             if (firstClickRole === 'employer') {
+                initializeFormForRole('employer');
+            } else {
+                firstClickRole = 'employer';
+                showWelcomeScreen(); 
+            }
+        });
+
+        changeRoleButton.addEventListener('click', showWelcomeScreen);
+
+        function createStepIndicatorDOM(stepData, isMobile) {
+            const indicator = document.createElement('div');
+            indicator.id = `step-indicator-${currentUserRole}-${isMobile ? 'm' : 'd'}-${stepData.id}`;
+            indicator.className = 'step-indicator';
+            indicator.innerHTML = `
+                <div class="step-icon-container"><i class="fas ${stepData.icon} step-icon"></i></div>
+                <span class="step-label">${stepData.label}</span>
+            `;
+            return indicator;
         }
 
-        dashboard.innerHTML = `
-          <p><strong>نام کامل:</strong> ${userInfo[0] || 'نامشخص'}</p>
-          <p><strong>نام کاربری:</strong> ${userInfo[1] || 'نامشخص'}</p>
-          <p><strong>بیو:</strong> ${userInfo[2] || 'نامشخص'}</p>
-          <p><strong>رنگ:</strong> ${userInfo[3] || 'نامشخص'}</p>
-          <p><strong>نام فایل:</strong> ${userInfo[4] || 'نامشخص'}</p>
-          <img src="${imageUrl}" alt="تصویر پروفایل" class="profile-image" onerror="this.src='${defaultImage}'; showMessage('بارگذاری تصویر پروفایل ناموفق بود', 'error');">
-          <p><strong>تأیید شده:</strong> ${userInfo[6] === 'بله' ? 'بله' : 'خیر'}</p>
-        `;
-      } else {
-        showMessage('اطلاعات کاربر یافت نشد یا ناقص است', 'error');
-        setTimeout(() => window.location.href = 'index.html', 3000);
-      }
-    }
+        function populateStepIndicators() {
+            stepsNavigationMobile.innerHTML = '';
+            stepsNavigationDesktop.innerHTML = '';
+            const currentStepData = currentUserRole === 'engineer' ? stepIndicatorDataEngineer : stepIndicatorDataEmployer;
+            
+            currentStepData.forEach(data => {
+                stepsNavigationMobile.appendChild(createStepIndicatorDOM(data, true));
+                stepsNavigationDesktop.appendChild(createStepIndicatorDOM(data, false)); 
+            });
+        }
 
-    // اجرای تابع هنگام لود صفحه
-    displayUserDashboard();
-  </script>
-</body>
+        function updateStepDescriptions() {
+            const currentStepDescData = currentUserRole === 'engineer' ? stepIndicatorDataEngineer : stepIndicatorDataEmployer;
+            currentStepDescData.forEach(stepInfo => {
+                const containerId = `stepDescriptionContainer-${currentUserRole}-${stepInfo.id}`;
+                const container = document.getElementById(containerId);
+                if (container) {
+                    container.innerHTML = `
+                        <p class="text-sm text-slate-800 font-semibold mb-2">${stepInfo.recommendation}</p>
+                        <hr class="my-2 border-sky-300">
+                        <p class="text-xs text-slate-600 leading-relaxed"><i class="fas fa-info-circle mr-1 ml-2 text-sky-600"></i>${stepInfo.detailedExplanation}</p>
+                    `;
+                }
+            });
+        }
+
+
+        function updateStepView() {
+            if (!currentUserRole || !activeSteps.length) return;
+
+            activeSteps.forEach((step, index) => {
+                step.classList.toggle('active', (index + 1) === currentStep);
+            });
+
+            const allIndicators = document.querySelectorAll(`.step-indicator[id*="step-indicator-${currentUserRole}-"]`);
+            allIndicators.forEach(indicator => {
+                const idParts = indicator.id.split('-');
+                const stepNum = parseInt(idParts[idParts.length -1]);
+
+                indicator.classList.toggle('active', stepNum === currentStep);
+                indicator.classList.toggle('completed', stepNum < currentStep);
+
+                if (stepNum < currentStep) {
+                    indicator.style.cursor = 'pointer';
+                    indicator.onclick = () => goToStep(stepNum);
+                } else {
+                    indicator.style.cursor = 'default';
+                    indicator.onclick = null; 
+                }
+            });
+            
+            prevButton.disabled = currentStep === 1;
+            nextButton.classList.toggle('hidden', currentStep === totalSteps);
+            submitButton.classList.toggle('hidden', currentStep !== totalSteps);
+
+            if (currentUserRole === 'engineer') {
+                if (currentStep === 2) { 
+                    initMap('engineerResidentialMap', 'engineerResidentialLat', 'engineerResidentialLng', 'engineerResidentialNeighborhood', 'engineerResidentialMapInfo');
+                }
+                if (currentStep === 3) {
+                    // Re-check visibility and init maps if needed, as this can be called when navigating back/forth
+                    updateProfessionalInfoVisibility(); 
+                }
+            } else if (currentUserRole === 'employer') {
+                if (currentStep === 2) { 
+                    initMap('employerAddressMap', 'employerAddressLat', 'employerAddressLng', 'employerAddressNeighborhood', 'employerAddressMapInfo');
+                }
+                if (currentStep === 3 && document.getElementById('employerHasCompany')?.checked) { 
+                    initMap('employerCompanyMap', 'employerCompanyAddressLat', 'employerCompanyAddressLng', 'employerCompanyAddressNeighborhood', 'employerCompanyMapInfo');
+                }
+            }
+
+            if (currentStep === totalSteps) {
+                generateSummary();
+            }
+
+            const currentAdDataArray = currentUserRole === 'engineer' ? advertisementDataEngineer : advertisementDataEmployer;
+            const currentAd = currentAdDataArray.find(ad => ad.step === currentStep);
+            if (currentAd && adBannerImage && adBannerText) {
+                adBannerImage.src = currentAd.imageUrl;
+                adBannerImage.alt = `تبلیغ مرحله ${currentStep} - ${currentUserRole === 'engineer' ? 'مهندس' : 'کارفرما'}`;
+                adBannerText.textContent = currentAd.text; 
+            } else if (adBannerImage && adBannerText) { 
+                adBannerImage.src = 'https://images.unsplash.com/photo-1434873740857-1bc5653afda8?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bGVhZGVyc2hpcHxlbnwwfDF8MHx8fDA%3D';
+                adBannerImage.alt = 'بنر تبلیغاتی عمومی';
+                adBannerText.textContent = 'با همکاری و اتحاد، آینده‌ای روشن‌تر برای صنعت ساختمان رقم بزنیم.';
+            }
+
+            calculateProfileCompleteness();
+            if (activeForm) { 
+                const formContentContainer = activeForm.closest('.form-content');
+                if(formContentContainer) formContentContainer.scrollTop = 0;
+            }
+        }
+        
+        function goToStep(stepNumber) {
+            if (stepNumber >= 1 && stepNumber <= totalSteps) {
+                if (stepNumber < currentStep) {
+                     currentStep = stepNumber;
+                     updateStepView();
+                } 
+                else if (stepNumber > currentStep && validateStep(currentStep)) { 
+                    currentStep = stepNumber;
+                    updateStepView();
+                }
+            }
+        }
+
+        nextButton.addEventListener('click', () => {
+            if (validateStep(currentStep)) {
+                if (currentStep < totalSteps) {
+                    currentStep++;
+                    updateStepView();
+                }
+            }
+        });
+
+        prevButton.addEventListener('click', () => {
+            if (currentStep > 1) {
+                currentStep--;
+                updateStepView();
+            }
+        });
+
+        const messageModal = document.getElementById('messageModal');
+        const modalMessageText = document.getElementById('modalMessageText');
+        const modalCloseButton = document.getElementById('modalCloseButton');
+        const modalIconContainer = document.getElementById('modalIconContainer');
+
+        function showMessageModal(message, type = 'info') { 
+            modalMessageText.textContent = message;
+            modalMessageText.className = 'text-slate-700 text-base'; 
+            let iconHtml = '';
+            switch(type) {
+                case 'error':
+                    modalMessageText.classList.add('text-red-600', 'font-semibold');
+                    iconHtml = '<i class="fas fa-times-circle text-red-500"></i>';
+                    break;
+                case 'success':
+                    modalMessageText.classList.add('text-green-600', 'font-semibold');
+                    iconHtml = '<i class="fas fa-check-circle text-green-500"></i>';
+                    break;
+                case 'warning':
+                    modalMessageText.classList.add('text-amber-600', 'font-semibold');
+                    iconHtml = '<i class="fas fa-exclamation-triangle text-amber-500"></i>';
+                    break;
+                default: 
+                    iconHtml = '<i class="fas fa-info-circle text-sky-500"></i>';
+                    break;
+            }
+            modalIconContainer.innerHTML = iconHtml;
+            messageModal.style.display = 'block';
+        }
+        modalCloseButton.onclick = () => { messageModal.style.display = 'none'; };
+        window.onclick = (event) => { if (event.target == messageModal) messageModal.style.display = 'none'; };
+
+        function convertPersianToEnglishDigits(s) {
+            if (!s) return "";
+            const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            const englishDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            let result = "";
+            for (let i = 0; i < s.length; i++) {
+                const char = s[i];
+                const persianIndex = persianDigits.indexOf(char);
+                if (persianIndex !== -1) {
+                    result += englishDigits[persianIndex];
+                } else {
+                    result += char; 
+                }
+            }
+            return result;
+        }
+
+        function isValidKodemelli(kodemelli) {
+            const code = convertPersianToEnglishDigits(kodemelli.toString()); 
+            if (!/^\d{10}$/.test(code)) return false; 
+
+            const check = parseInt(code[9], 10);
+            let sum = 0;
+            for (let i = 0; i < 9; i++) {
+                sum += parseInt(code[i], 10) * (10 - i);
+            }
+            const remainder = sum % 11;
+            
+            if (remainder < 2) {
+                return check === remainder;
+            } else {
+                return check === (11 - remainder);
+            }
+        }
+
+        function validateStep(step) {
+            if (!activeForm || !activeSteps.length) return true; 
+            let isValid = true;
+            const currentStepElement = activeSteps[step - 1];
+            if (!currentStepElement) return true;
+            const currentStepFields = currentStepElement.querySelectorAll('[required]');
+            
+            for (const field of currentStepFields) {
+                let fieldIsValid = true;
+                let errorMessage = `لطفاً فیلد "${getLabelForField(field)}" را به درستی تکمیل کنید.`;
+                
+                // Skip validation for fields in hidden containers
+                if (field.closest('.hidden')) {
+                    continue;
+                }
+
+                 if (currentUserRole === 'employer' && field.closest('#employerCompanyFields')) {
+                    if (!document.getElementById('employerHasCompany').checked) {
+                        continue; 
+                    }
+                }
+
+                if (field.id === 'engineerNationalId' || field.id === 'employerNationalId') {
+                    const nationalIdValue = convertPersianToEnglishDigits(field.value);
+                    if (!nationalIdValue || !/^\d{10}$/.test(nationalIdValue)) { 
+                         errorMessage = "کد ملی باید ۱۰ رقم باشد.";
+                         fieldIsValid = false;
+                    } else if (!isValidKodemelli(nationalIdValue)) { 
+                        errorMessage = "کد ملی وارد شده معتبر نیست.";
+                        fieldIsValid = false;
+                    }
+                } else if (field.id === 'engineerPostalCode' || field.id === 'employerPostalCode') {
+                    const postalCodeValue = convertPersianToEnglishDigits(field.value);
+                    if (!postalCodeValue || !/^\d{10}$/.test(postalCodeValue)) {
+                        errorMessage = "کدپستی باید ۱۰ رقم باشد.";
+                        fieldIsValid = false;
+                    }
+                } else if (field.id === 'engineerPhone' || field.id === 'officePhone') { 
+                    const phoneValue = convertPersianToEnglishDigits(field.value);
+                    if (!phoneValue || !/^0\d{10}$/.test(phoneValue)) {
+                        errorMessage = `فیلد "${getLabelForField(field)}" باید ۱۱ رقم با کد شهرستان (شروع با ۰) باشد.`;
+                        fieldIsValid = false;
+                    }
+                } else if (field.id === 'engineerDob' || field.id === 'employerDob') {
+                    const dobValue = field.value;
+                    if (dobValue) {
+                        const birthDate = new Date(dobValue);
+                        const today = new Date();
+                        let age = today.getFullYear() - birthDate.getFullYear();
+                        const m = today.getMonth() - birthDate.getMonth();
+                        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                            age--;
+                        }
+                        if (age < 18) {
+                            errorMessage = "سن شما باید حداقل ۱۸ سال باشد.";
+                            fieldIsValid = false;
+                        }
+                    } else if (field.required) { 
+                         fieldIsValid = false; 
+                    }
+                } else if (field.type === 'file' && field.required && field.files.length === 0) {
+                     errorMessage = `لطفاً فایل "${getLabelForField(field)}" را بارگذاری کنید.`;
+                     fieldIsValid = false;
+                } else if (!field.checkValidity()) { 
+                    if (field.title && field.id !== 'engineerNationalId' && field.id !== 'employerNationalId') errorMessage += ` (${field.title})`; 
+                    fieldIsValid = false;
+                }
+
+                if (!fieldIsValid) {
+                    showMessageModal(errorMessage, 'error');
+                    field.focus();
+                    field.classList.add('border-red-500', 'ring-1', 'ring-red-500'); 
+                    setTimeout(() => field.classList.remove('border-red-500', 'ring-1', 'ring-red-500'), 3000);
+                    isValid = false;
+                    break; 
+                }
+            }
+            
+            if (currentUserRole === 'engineer' && step === 3 && isValid) {
+                const hasDesignCb = document.getElementById('hasDesignLicense');
+                const designGradeSelect = document.getElementById('designLicenseGrade');
+                const hasSupervisionCb = document.getElementById('hasSupervisionLicense');
+                const supervisionGradeSelect = document.getElementById('supervisionLicenseGrade');
+                const hasExecutionCb = document.getElementById('hasExecutionLicense');
+                const executionGradeSelect = document.getElementById('executionLicenseGrade');
+
+                const designSelected = hasDesignCb.checked && designGradeSelect.value;
+                const supervisionSelected = hasSupervisionCb.checked && supervisionGradeSelect.value;
+                const executionSelected = hasExecutionCb.checked && executionGradeSelect.value;
+
+                if (!(designSelected || supervisionSelected || executionSelected)) {
+                     showMessageModal("لطفاً حداقل یکی از صلاحیت‌های پروانه (طراحی، نظارت یا اجرا) را به همراه پایه آن به طور کامل انتخاب کنید.", 'error');
+                     if (hasDesignCb.checked && !designGradeSelect.value) designGradeSelect.focus();
+                     else if (hasSupervisionCb.checked && !supervisionGradeSelect.value) supervisionGradeSelect.focus();
+                     else if (hasExecutionCb.checked && !executionGradeSelect.value) executionGradeSelect.focus();
+                     else hasDesignCb.focus(); 
+                     isValid = false;
+                }
+                
+                if (isValid) { 
+                    const licenseStartDateInput = document.getElementById('licenseStartDate');
+                    const licenseValidityInput = document.getElementById('licenseValidity'); 
+                    if (licenseStartDateInput.value && licenseValidityInput.value) {
+                        const startDate = new Date(licenseStartDateInput.value);
+                        const validityYears = parseInt(licenseValidityInput.value, 10);
+                        if (!isNaN(validityYears)) {
+                            const expiryDate = new Date(startDate);
+                            expiryDate.setFullYear(startDate.getFullYear() + validityYears);
+                            const today = new Date();
+                            const oneMonthFromToday = new Date(); 
+                            oneMonthFromToday.setMonth(today.getMonth() + 1);
+                            expiryDate.setHours(0,0,0,0);
+                            oneMonthFromToday.setHours(0,0,0,0);
+
+                            if (expiryDate < oneMonthFromToday) {
+                                showMessageModal("اعتبار پروانه باید حداقل برای یک ماه از تاریخ امروز معتبر باشد.", 'error');
+                                licenseValidityInput.focus();
+                                isValid = false;
+                            }
+                        }
+                    }
+                }
+            }
+            return isValid;
+        }
+
+        function getLabelForField(field) {
+            const labelElement = document.querySelector(`label[for="${field.id}"]`) || field.closest('div').querySelector('label');
+            let labelText = field.name || field.id; 
+            if (labelElement) {
+                labelText = labelElement.textContent.replace('*', '').trim();
+            }
+            return labelText;
+        }
+        
+        const engineerGenderToggle = document.getElementById('engineerGenderToggle');
+        const engineerGenderInput = document.getElementById('engineerGender');
+        engineerGenderToggle.addEventListener('click', () => {
+            engineerGenderInput.value = (engineerGenderInput.value === 'مرد') ? 'زن' : 'مرد';
+            engineerGenderToggle.textContent = engineerGenderInput.value;
+            updateSidebarName(); 
+            calculateProfileCompleteness();
+        });
+
+        const employerGenderToggle = document.getElementById('employerGenderToggle');
+        const employerGenderInput = document.getElementById('employerGender');
+        employerGenderToggle.addEventListener('click', () => {
+            employerGenderInput.value = (employerGenderInput.value === 'مرد') ? 'زن' : 'مرد';
+            employerGenderToggle.textContent = employerGenderInput.value;
+            updateSidebarName(); 
+            calculateProfileCompleteness();
+        });
+
+        function setupLicenseField(checkboxId, labelId, selectId, hasText, نداردText) {
+            const checkbox = document.getElementById(checkboxId);
+            const label = document.getElementById(labelId);
+            const select = document.getElementById(selectId);
+            
+            if (!checkbox || !select) return; 
+
+            checkbox.addEventListener('change', () => {
+                if (label) label.textContent = checkbox.checked ? hasText : نداردText;
+                select.disabled = !checkbox.checked;
+                select.classList.toggle('bg-slate-100', !checkbox.checked); 
+                select.classList.toggle('bg-slate-50', checkbox.checked); 
+                if (!checkbox.checked) select.value = '';
+                select.required = checkbox.checked; 
+                calculateProfileCompleteness();
+            });
+            if (label) label.textContent = checkbox.checked ? hasText : نداردText;
+            select.disabled = !checkbox.checked;
+            select.classList.toggle('bg-slate-100', !checkbox.checked);
+            select.classList.toggle('bg-slate-50', checkbox.checked);
+            select.required = checkbox.checked;
+        }
+        setupLicenseField('hasDesignLicense', 'designLicenseLabel', 'designLicenseGrade', 'پروانه طراحی دارم', 'پروانه طراحی ندارم');
+        setupLicenseField('hasSupervisionLicense', 'supervisionLicenseLabel', 'supervisionLicenseGrade', 'پروانه نظارت دارم', 'پروانه نظارت ندارم');
+        setupLicenseField('hasExecutionLicense', 'executionLicenseLabel', 'executionLicenseGrade', 'پروانه اجرا دارم', 'پروانه اجرا ندارم');
+        
+        function updateProfessionalInfoVisibility() {
+            if (currentUserRole !== 'engineer') return;
+
+            const designType = document.querySelector('input[name="designExecutorType"]:checked')?.value;
+            const supervisionType = document.querySelector('input[name="supervisionExecutorType"]:checked')?.value;
+            const executionType = document.querySelector('input[name="executionExecutorType"]:checked')?.value;
+        
+            const isAnyLegal = designType === 'legal' || supervisionType === 'legal' || executionType === 'legal';
+            const isAnyIndividual = designType === 'individual' || supervisionType === 'individual' || executionType === 'individual';
+            const isExecutionIndividual = executionType === 'individual';
+        
+            const legalExecutorFields = document.getElementById('legalExecutorFields');
+            const individualExecutorFieldsContainer = document.getElementById('individualExecutorFieldsContainer');
+            const individualExecutorFields = document.getElementById('individualExecutorFields'); // "کمک مجری" section
+
+            // --- Legal Fields Visibility ---
+            const wasLegalHidden = legalExecutorFields.classList.contains('hidden');
+            legalExecutorFields.classList.toggle('hidden', !isAnyLegal);
+            if (wasLegalHidden && isAnyLegal) {
+                initMap('companyOfficeMap', 'companyOfficeMapLat', 'companyOfficeMapLng', 'companyOfficeMapNeighborhood', 'companyOfficeMapInfo');
+            }
+           
+            // --- Individual Fields Visibility ---
+            individualExecutorFieldsContainer.classList.toggle('hidden', !isAnyIndividual);
+
+            // "Assistant Executor" section visibility
+            individualExecutorFields.classList.toggle('hidden', !isExecutionIndividual);
+
+            // Office Info Map Initialization
+            const hasOfficeCheckbox = document.getElementById('engineerHasOfficeInfo');
+            const officeInfoFields = document.getElementById('engineerOfficeInfoFields');
+            if (isAnyIndividual && hasOfficeCheckbox.checked && !officeInfoFields.classList.contains('hidden')) {
+                initMap('officeMap', 'officeMapLat', 'officeMapLng', 'officeMapNeighborhood', 'officeMapInfo');
+            }
+
+            // Update required attributes
+            document.getElementById('companyName').required = isAnyLegal;
+            document.getElementById('companyRegNumber').required = isAnyLegal;
+            const companyOfficeAddress = document.getElementById('companyOfficeAddress');
+            if (companyOfficeAddress) {
+                 companyOfficeAddress.required = isAnyLegal;
+            }
+
+            const hasOffice = hasOfficeCheckbox ? hasOfficeCheckbox.checked : false;
+            document.getElementById('officeName').required = isAnyIndividual && hasOffice;
+            document.getElementById('officePhone').required = isAnyIndividual && hasOffice;
+            document.getElementById('officeAddress').required = isAnyIndividual && hasOffice;
+        }
+        
+        const qualificationRadios = document.querySelectorAll('input[name="designExecutorType"], input[name="supervisionExecutorType"], input[name="executionExecutorType"]');
+        qualificationRadios.forEach(radio => radio.addEventListener('change', updateProfessionalInfoVisibility));
+
+        const employerHasCompanyCheckbox = document.getElementById('employerHasCompany');
+        const employerCompanyFieldsDiv = document.getElementById('employerCompanyFields');
+        const employerCompanyNameInput = document.getElementById('employerCompanyName');
+        const employerCompanyRegNumberInput = document.getElementById('employerCompanyRegNumber');
+        const employerCompanyAddressTextarea = document.getElementById('employerCompanyAddress');
+        const employerHasCompanyLabel = document.querySelector('label[for="employerHasCompany"]');
+
+        if(employerHasCompanyCheckbox && employerCompanyFieldsDiv && employerHasCompanyLabel){
+            function updateEmployerCompanyLabelAndFields() {
+                const hasCompany = employerHasCompanyCheckbox.checked;
+                employerHasCompanyLabel.textContent = hasCompany ? "شرکت دارم" : "شرکت ندارم (شخص حقیقی هستم)";
+                employerCompanyFieldsDiv.classList.toggle('hidden', !hasCompany);
+                employerCompanyNameInput.required = hasCompany;
+                employerCompanyRegNumberInput.required = hasCompany;
+                employerCompanyAddressTextarea.required = hasCompany;
+                if (hasCompany && currentStep === 3 && currentUserRole === 'employer') {
+                     initMap('employerCompanyMap', 'employerCompanyAddressLat', 'employerCompanyAddressLng', 'employerCompanyAddressNeighborhood', 'employerCompanyMapInfo');
+                }
+                calculateProfileCompleteness();
+            }
+            employerHasCompanyCheckbox.addEventListener('change', updateEmployerCompanyLabelAndFields);
+            updateEmployerCompanyLabelAndFields(); 
+        }
+
+        const engineerHasOfficeInfoCheckbox = document.getElementById('engineerHasOfficeInfo');
+        const engineerOfficeInfoFieldsDiv = document.getElementById('engineerOfficeInfoFields');
+        
+        if (engineerHasOfficeInfoCheckbox && engineerOfficeInfoFieldsDiv) {
+            engineerHasOfficeInfoCheckbox.addEventListener('change', () => {
+                const hasOffice = engineerHasOfficeInfoCheckbox.checked;
+                const label = document.getElementById('engineerHasOfficeInfoLabel');
+                if (label) label.textContent = hasOffice ? "دفتر کار دارم" : "دفتر کار ندارم";
+                engineerOfficeInfoFieldsDiv.classList.toggle('hidden', !hasOffice);
+                // After toggling visibility, re-run the main visibility function to handle map initialization
+                updateProfessionalInfoVisibility(); 
+                calculateProfileCompleteness();
+            });
+            // Initial setup
+            const label = document.getElementById('engineerHasOfficeInfoLabel');
+            if (label) label.textContent = engineerHasOfficeInfoCheckbox.checked ? "دفتر کار دارم" : "دفتر کار ندارم";
+             engineerOfficeInfoFieldsDiv.classList.toggle('hidden', !engineerHasOfficeInfoCheckbox.checked);
+
+        }
+
+        const defaultCoords = [38.0800, 46.2900]; 
+        const defaultZoom = 13;
+
+        async function getAddressFromLatLng(lat, lng) {
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&accept-language=fa`);
+                if (!response.ok) throw new Error(`Nominatim request failed: ${response.status}`);
+                const data = await response.json();
+                return data.display_name || 'محله یافت نشد';
+            } catch (error) {
+                console.error("Error fetching address: ", error);
+                return 'خطا در دریافت نام محله';
+            }
+        }
+        
+        function initMap(mapId, latInputId, lngInputId, neighborhoodInputId, mapInfoDisplayId) {
+            const updateLocationUI = async (lat, lng, currentLatInputId, currentLngInputId, currentNeighborhoodInputId, currentMapInfoDisplayId) => {
+                const fLat = lat.toFixed(6), fLng = lng.toFixed(6);
+                if (currentLatInputId && document.getElementById(currentLatInputId)) document.getElementById(currentLatInputId).value = fLat;
+                if (currentLngInputId && document.getElementById(currentLngInputId)) document.getElementById(currentLngInputId).value = fLng;
+                
+                const fullAddress = await getAddressFromLatLng(lat, lng);
+
+                if (currentNeighborhoodInputId && document.getElementById(currentNeighborhoodInputId) ) {
+                    document.getElementById(currentNeighborhoodInputId).value = fullAddress; 
+                }
+
+                const currentMapInfoDiv = document.getElementById(mapInfoDisplayId);
+                if (currentMapInfoDiv) {
+                     currentMapInfoDiv.innerHTML = `<p><strong class="font-semibold text-slate-800">موقعیت انتخاب شده:</strong> <span class="font-mono text-slate-600">${fLat}, ${fLng}</span>. ${fullAddress}</p>`;
+                }
+                calculateProfileCompleteness();
+            };
+
+            const mapDiv = document.getElementById(mapId);
+            if (!mapDiv) {
+                console.error(`Map container ${mapId} not found.`);
+                return;
+            }
+        
+            if (maps[mapId + 'Instance']) {
+                maps[mapId + 'Instance'].invalidateSize();
+                const currentLatLng = maps[mapId + 'Instance'].getCenter();
+                updateLocationUI(currentLatLng.lat, currentLatLng.lng, latInputId, lngInputId, neighborhoodInputId, mapInfoDisplayId);
+                return;
+            }
+        
+            if (mapDiv._leaflet_id) {
+                const existingMapInstance = L.DomUtil.get(mapDiv)._leaflet_id;
+                 if (existingMapInstance && typeof existingMapInstance.invalidateSize === 'function') {
+                    maps[mapId + 'Instance'] = existingMapInstance;
+                    existingMapInstance.invalidateSize();
+                    const currentLatLng = existingMapInstance.getCenter();
+                    updateLocationUI(currentLatLng.lat, currentLatLng.lng, latInputId, lngInputId, neighborhoodInputId, mapInfoDisplayId);
+                    return;
+                }
+                return;
+            }
+        
+            const map = L.map(mapId).setView(defaultCoords, defaultZoom);
+            maps[mapId + 'Instance'] = map; 
+        
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+        
+            let marker = L.marker(defaultCoords, {
+                draggable: true,
+                icon: L.icon({
+                    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41]
+                })
+            }).addTo(map);
+        
+            map.on('click', (e) => { marker.setLatLng(e.latlng); updateLocationUI(e.latlng.lat, e.latlng.lng, latInputId, lngInputId, neighborhoodInputId, mapInfoDisplayId); });
+            marker.on('dragend', () => { const ll = marker.getLatLng(); updateLocationUI(ll.lat, ll.lng, latInputId, lngInputId, neighborhoodInputId, mapInfoDisplayId); });
+        
+            updateLocationUI(defaultCoords[0], defaultCoords[1], latInputId, lngInputId, neighborhoodInputId, mapInfoDisplayId); 
+            setTimeout(() => {
+                if (maps[mapId + 'Instance']) {
+                     maps[mapId + 'Instance'].invalidateSize();
+                }
+            }, 150);
+        }
+
+        const licenseNumberInputEl = document.getElementById('licenseNumber');
+        if (licenseNumberInputEl) {
+            licenseNumberInputEl.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, ''); 
+                let formattedValue = '';
+                if (value.length > 0) {
+                    formattedValue += value.substring(0, 1);
+                }
+                if (value.length > 1) {
+                    formattedValue += '-' + value.substring(1, 3);
+                }
+                if (value.length > 3) {
+                    formattedValue += '-' + value.substring(3, 5);
+                }
+                if (value.length > 5) {
+                    formattedValue += '-' + value.substring(5, Math.min(value.length, 11)); 
+                }
+                e.target.value = formattedValue;
+            });
+        }
+
+
+        function calculateProfileCompleteness() {
+            if(!activeForm) return;
+            let filledFields = 0;
+            let totalConsideredFields = 0;
+            const allInputsAndSelects = activeForm.querySelectorAll('input:not([type="hidden"]), select, textarea');
+
+            allInputsAndSelects.forEach(input => {
+                if (input.closest('.hidden')) return; 
+                if (input.disabled && input.id.includes('LicenseGrade')) return; 
+
+                if (currentUserRole === 'engineer'){
+                    if (input.id === 'designLicenseGrade' && !document.getElementById('hasDesignLicense').checked) return;
+                    if (input.id === 'supervisionLicenseGrade' && !document.getElementById('hasSupervisionLicense').checked) return;
+                    if (input.id === 'executionLicenseGrade' && !document.getElementById('hasExecutionLicense').checked) return;
+                }
+                if (currentUserRole === 'employer' && input.closest('#employerCompanyFields') && !document.getElementById('employerHasCompany').checked && !input.required) return;
+                
+                totalConsideredFields++;
+
+                if (input.type === 'checkbox' || input.type === 'radio') {
+                    if (input.checked) filledFields++;
+                } else if (input.type === 'file') {
+                    if (input.files && input.files.length > 0) {
+                        filledFields++;
+                    }
+                } else if (input.value !== undefined && input.value.trim() !== '') {
+                    filledFields++; 
+                }
+            });
+            
+            const completion = totalConsideredFields > 0 ? Math.round((filledFields / totalConsideredFields) * 100) : 0;
+        }
+        
+        const engineerFirstNameInput = document.getElementById('engineerFirstName');
+        const engineerLastNameInput = document.getElementById('engineerLastName');
+        const employerFirstNameInput = document.getElementById('employerFirstName');
+        const employerLastNameInput = document.getElementById('employerLastName');
+
+        function updateSidebarName() {
+            let titlePrefix = "";
+            let fName = "";
+            let lName = "";
+            let currentGender = initialUserData.gender || 'مرد'; 
+            let currentDiscipline = "";
+
+            if (currentUserRole === 'engineer') {
+                currentGender = document.getElementById('engineerGender').value;
+                titlePrefix = currentGender === "مرد" ? "آقای مهندس " : "خانم مهندس ";
+                fName = engineerFirstNameInput.value.trim();
+                lName = engineerLastNameInput.value.trim();
+                currentDiscipline = getDisciplineFromLicenseNumber(document.getElementById('licenseNumber')?.value || "");
+            } else if (currentUserRole === 'employer') {
+                 currentGender = document.getElementById('employerGender').value;
+                titlePrefix = currentGender === "مرد" ? "آقای " : "خانم ";
+                fName = employerFirstNameInput.value.trim();
+                lName = employerLastNameInput.value.trim();
+            } else { 
+                 let tempRoleForTitle = firstClickRole || initialUserData.userType;
+                 if (tempRoleForTitle === "مهندس") {
+                    titlePrefix = (initialUserData.gender === "مرد" ? "مهندس " : "مهندس ");
+                 } else {
+                     titlePrefix = (initialUserData.gender === "مرد" ? "آقای " : "خانم ");
+                 }
+                fName = initialUserData.firstName || "";
+                lName = initialUserData.lastName || "";
+            }
+            
+            let nameToDisplay;
+            if (fName || lName) { 
+                nameToDisplay = (fName + " " + lName).trim();
+            } else {
+                nameToDisplay = "نام و نام خانوادگی"; 
+            }
+            
+            let sidebarTitlePrefixCalculated = "";
+             if(currentUserRole === 'engineer'){
+                 sidebarTitlePrefixCalculated = (document.getElementById('engineerGender')?.value || initialUserData.gender) === "مرد" ? "آقای مهندس " : "خانم مهندس ";
+            } else if (currentUserRole === 'employer'){
+                 sidebarTitlePrefixCalculated = (document.getElementById('employerGender')?.value || initialUserData.gender) === "مرد" ? "آقای " : "خانم ";
+            } else { 
+                 sidebarTitlePrefixCalculated = initialUserData.userType === "مهندس" 
+                    ? (initialUserData.gender === "مرد" ? "آقای مهندس " : "خانم مهندس ")
+                    : (initialUserData.gender === "مرد" ? "آقای " : "خانم ");
+            }
+            sidebarProfileName.textContent = sidebarTitlePrefixCalculated + nameToDisplay;
+
+
+            if(sidebarUserEmail) sidebarUserEmail.textContent = initialUserData.email || 'ایمیل ثبت نشده';
+            if(sidebarEngineerDiscipline) sidebarEngineerDiscipline.textContent = currentUserRole === 'engineer' ? currentDiscipline : '';
+        }
+        if(engineerFirstNameInput) engineerFirstNameInput.addEventListener('input', updateSidebarName);
+        if(engineerLastNameInput) engineerLastNameInput.addEventListener('input', updateSidebarName);
+        if(employerFirstNameInput) employerFirstNameInput.addEventListener('input', updateSidebarName);
+        if(employerLastNameInput) employerLastNameInput.addEventListener('input', updateSidebarName);
+        const licenseNumberInputForSidebar = document.getElementById('licenseNumber');
+        if(licenseNumberInputForSidebar) licenseNumberInputForSidebar.addEventListener('input', updateSidebarName);
+
+        if (applicantImageInput && sidebarProfileImagePreview) {
+            applicantImageInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        sidebarProfileImagePreview.src = e.target.result;
+                    }
+                    reader.readAsDataURL(file);
+                } else { 
+                     sidebarProfileImagePreview.src = "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740"; 
+                }
+                calculateProfileCompleteness(); 
+            });
+        }
+
+        function handleFileUpload(inputId, previewContainerId) {
+            const input = document.getElementById(inputId);
+            const previewContainer = document.getElementById(previewContainerId);
+            if (!input || !previewContainer) return;
+
+            const originalPlaceholder = previewContainer.innerHTML;
+            const MAX_FILE_SIZE = 250 * 1024; // 250 KB
+
+            input.addEventListener('change', function(event) {
+                // Always reset to the placeholder first
+                previewContainer.innerHTML = originalPlaceholder;
+                const file = event.target.files[0];
+
+                if (!file) {
+                    calculateProfileCompleteness();
+                    return;
+                }
+
+                if (file.size > MAX_FILE_SIZE) {
+                    showMessageModal(`فایل انتخاب شده (${file.name}) بزرگتر از ۲۵۰ کیلوبایت است.`, 'error');
+                    input.value = '';
+                    calculateProfileCompleteness();
+                    return;
+                }
+                
+                const acceptedTypes = input.accept.split(',');
+
+                if (acceptedTypes.some(type => file.type.match(type.replace(/,\s*/g, '|').replace(/\./g, '\\.').replace(/\*/g, '.*')))) {
+                     if (file.type === 'application/pdf') {
+                        previewContainer.innerHTML = ''; // Clear placeholder
+                        const iframe = document.createElement('iframe');
+                        iframe.src = URL.createObjectURL(file);
+                        iframe.className = "w-full h-full border-0";
+                        previewContainer.appendChild(iframe);
+                    } else if (file.type.startsWith('image/')) {
+                        previewContainer.innerHTML = ''; // Clear placeholder
+                        const img = document.createElement('img');
+                        img.src = URL.createObjectURL(file);
+                        img.className = "w-full h-full object-cover";
+                        img.onload = () => URL.revokeObjectURL(img.src); // Free memory
+                        previewContainer.appendChild(img);
+                    }
+                } else {
+                     showMessageModal(`نوع فایل معتبر نیست. لطفاً یک فایل با فرمت ${input.accept} انتخاب کنید.`, 'error');
+                     input.value = '';
+                }
+                calculateProfileCompleteness();
+            });
+        }
+
+        function getDisciplineFromLicenseNumber(licenseNumber) {
+            if (!licenseNumber || typeof licenseNumber !== 'string') return "";
+            const parts = licenseNumber.split('-');
+            if (parts.length >= 3) {
+                const code = parts[2]; 
+                switch (code) {
+                    case '30': return "مهندسی عمران";
+                    case '10': return "مهندسی معماری";
+                    case '11': return "مرتبط با مهندسی معماری";
+                    case '20': return "مهندسی شهرسازی";
+                    case '31': return "مرتبط با مهندسی عمران";
+                    case '40': return "مهندسی تاسیسات مکانیکی";
+                    case '41': return "مرتبط با مهندسی تاسیسات مکانیکی";
+                    case '50': return "مهندسی تاسیسات برقی";
+                    case '51': return "مرتبط با مهندسی تاسیسات برقی";
+                    case '60': return "مهندسی نقشه برداری";
+                    case '61': return "مرتبط با مهندسی نقشه برداری";
+                    case '70': return "مهندسی ترافیک";
+                    case '71': return "مرتبط با مهندسی ترافیک";
+                    default: return "";
+                }
+            }
+            return "";
+        }
+
+        function generateSummary() {
+            const summaryContainerId = currentUserRole === 'engineer' ? 'summaryContainerEngineer' : 'summaryContainerEmployer';
+            const summaryContainer = document.getElementById(summaryContainerId);
+            if(!summaryContainer) return;
+
+            summaryContainer.className = 'bg-slate-100 p-5 sm:p-6 rounded-lg shadow border border-slate-200 grid grid-cols-1 md:grid-cols-2 md:gap-x-8 gap-y-1';
+            summaryContainer.innerHTML = ''; 
+
+            const mainTitle = document.createElement('h3');
+            mainTitle.className = "text-xl font-bold mb-6 border-b pb-3 text-slate-800 text-center md:col-span-2";
+            mainTitle.textContent = "خلاصه اطلاعات وارد شده";
+            summaryContainer.appendChild(mainTitle);
+            
+            const formData = new FormData(activeForm); 
+            const data = {}; 
+            
+            const baseFieldLabels = { 
+                firstName: "نام", lastName: "نام خانوادگی", nationalId: "کدملی", dob: "تاریخ تولد", gender: "جنسیت", mobile: "تلفن موبایل",
+                postalCode: "کدپستی", 
+                applicantImage: "عکس پروفایل" 
+            };
+            const engineerFieldLabels = {
+                ...baseFieldLabels,
+                engineerPhone: "شماره تلفن ثابت", 
+                engineerProvince: "استان سکونت", 
+                engineerCity: "شهر سکونت", 
+                engineerPostalCode: "کدپستی", 
+                residentialAddress: "آدرس محل سکونت", 
+                licenseFirstIssueDate: "تاریخ اولین صدور پروانه",
+                licenseNumber: "شماره پروانه", discipline: "رشته", membershipNumber: "شماره عضویت", licenseStartDate: "تاریخ شروع اعتبار پروانه", licenseValidity: "مدت اعتبار پروانه (سال)", 
+                licenseActivityProvince: "استان فعالیت پروانه",
+                hasDesignLicense: "پروانه طراحی", designLicenseGrade: "پایه طراحی", designExecutorType: "نوع صلاحیت طراحی",
+                hasSupervisionLicense: "پروانه نظارت", supervisionLicenseGrade: "پایه نظارت", supervisionExecutorType: "نوع صلاحیت نظارت",
+                hasExecutionLicense: "پروانه اجرا", executionLicenseGrade: "پایه اجرا", executionExecutorType: "نوع صلاحیت اجرا",
+                companyName: "نام شرکت (حقوقی)", companyRegNumber: "شماره ثبت (حقوقی)", companyOfficeAddress: "آدرس دفتر شرکت (حقوقی)", 
+                isAssistantExecutor: "کمک مجری (حقیقی)",
+                engineerHasOfficeInfo: "دفتر کار دارم",
+                officeName: "نام دفتر کار مهندسی",
+                officePhone: "تلفن دفتر کار",
+                officeAddress: "آدرس دفتر کار"
+            };
+            const employerFieldLabels = {
+                 firstName: "نام", lastName: "نام خانوادگی", nationalId: "کدملی", dob: "تاریخ تولد", gender: "جنسیت", 
+                 mobile: "تلفن موبایل",
+                 employerPhone: "شماره تماس", 
+                 postalCode: "کدپستی",
+                 employerProvince: "استان سکونت", 
+                 employerCity: "شهر سکونت", 
+                 employerAddress: "آدرس", 
+                employerHasCompany: "شرکت دارم", employerCompanyName: "نام شرکت", employerCompanyRegNumber: "شماره ثبت شرکت", employerCompanyAddress: "آدرس شرکت", 
+                applicantImage: "عکس پروفایل" 
+            };
+            const fieldLabels = currentUserRole === 'engineer' ? engineerFieldLabels : employerFieldLabels;
+
+            function addSummaryItem(label, value, isFullWidth = false, isHtml = false) {
+                if (value === undefined || value === null || (typeof value === 'string' && value.trim() === '' && !isHtml)) return; 
+                if (isHtml && typeof value === 'string' && value.includes('موقعیت مکانی انتخاب شده روی نقشه در اینجا نمایش داده می‌شود')) return;
+
+                let displayValue = value;
+                if (!isHtml) {
+                    if (typeof value === 'boolean') {
+                        displayValue = value ? 'دارد <i class="fas fa-check text-green-500"></i>' : 'ندارد <i class="fas fa-times text-red-500"></i>';
+                    } else if (value === 'individual') {
+                        displayValue = 'حقیقی';
+                    } else if (value === 'legal') {
+                        displayValue = 'حقوقی';
+                    } else if (value === 'none' && label.includes('نوع صلاحیت')) {
+                        displayValue = 'فعالیت ندارم';
+                    } else if (label.includes('پایه') && value) { 
+                        const grades = { '3': 'پایه ۳', '2': 'پایه ۲', '1': 'پایه ۱', 'arshad': 'پایه ارشد'};
+                        let stars = '';
+                        if (value === '3') stars = '★<span class="text-slate-300">☆☆☆</span>'; 
+                        else if (value === '2') stars = '★★<span class="text-slate-300">☆☆</span>';
+                        else if (value === '1') stars = '★★★<span class="text-slate-300">☆</span>'; 
+                        else if (value === 'arshad') stars = '★★★★';
+                        displayValue = (grades[value] || value) + ` <span class="text-amber-500 text-lg">${stars}</span>`;
+                    } else if (label === fieldLabels.applicantImage && value instanceof File) { 
+                        displayValue = `${value.name} (${(value.size / 1024).toFixed(1)} KB)`;
+                    }
+                }
+
+                const p = document.createElement('p');
+                let pClasses = "text-sm py-1 flex justify-between items-start";
+                if (isFullWidth) {
+                    pClasses += " md:col-span-2"; 
+                } else {
+                     pClasses += " md:col-span-1"; 
+                }
+                p.className = pClasses;
+                if (isHtml) {
+                    p.innerHTML = `<strong class="text-slate-700 font-semibold whitespace-nowrap">${label}:</strong> <span class="text-slate-600 mr-2 text-right break-words ml-auto w-full">${displayValue}</span>`;
+                } else {
+                    p.innerHTML = `<strong class="text-slate-700 font-semibold whitespace-nowrap">${label}:</strong> <span class="text-slate-600 mr-2 text-right break-words ml-auto">${displayValue}</span>`;
+                }
+                summaryContainer.appendChild(p);
+            }
+            
+            function addSectionTitle(titleText) {
+                const titleEl = document.createElement('h4');
+                titleEl.className = "text-md font-semibold mt-4 mb-1 text-slate-800 pt-2 border-t border-slate-300 md:col-span-2";
+                titleEl.textContent = titleText;
+                summaryContainer.appendChild(titleEl);
+            }
+
+            for (const [key, value] of formData.entries()) {
+                let adjustedKey = key;
+                 if (currentUserRole === 'engineer') {
+                    if (key === 'engineerFirstName') adjustedKey = 'firstName';
+                    if (key === 'engineerLastName') adjustedKey = 'lastName';
+                    if (key === 'engineerNationalId') adjustedKey = 'nationalId';
+                    if (key === 'engineerDob') adjustedKey = 'dob';
+                    if (key === 'engineerGender') adjustedKey = 'gender';
+                    if (key === 'engineerMobile') adjustedKey = 'mobile';
+                    if (key === 'engineerPostalCode') adjustedKey = 'postalCode'; 
+                    if (key === 'engineerProvince') adjustedKey = 'engineerProvince'; 
+                    if (key === 'engineerCity') adjustedKey = 'engineerCity'; 
+                    if (key === 'engineerResidentialAddress') adjustedKey = 'residentialAddress';
+                    if (key === 'engineerPhone') adjustedKey = 'engineerPhone'; 
+                } else if (currentUserRole === 'employer') {
+                    if (key === 'employerFirstName') adjustedKey = 'firstName';
+                    if (key === 'employerLastName') adjustedKey = 'lastName';
+                    if (key === 'employerNationalId') adjustedKey = 'nationalId';
+                    if (key === 'employerDob') adjustedKey = 'dob';
+                    if (key === 'employerGender') adjustedKey = 'gender';
+                    if (key === 'employerMobile') adjustedKey = 'mobile'; 
+                    if (key === 'employerPostalCode') adjustedKey = 'postalCode'; 
+                    if (key === 'employerProvince') adjustedKey = 'employerProvince'; 
+                    if (key === 'employerCity') adjustedKey = 'employerCity'; 
+                }
+
+                if (key.startsWith('fee-')) continue; 
+                if (key.endsWith('[]')) { 
+                    if (!data[adjustedKey]) data[adjustedKey] = [];
+                    data[adjustedKey].push(value);
+                } else {
+                    data[adjustedKey] = value;
+                }
+            }
+            
+            for (const key in data) {
+                const displayLabel = fieldLabels[key] || key; 
+                let val = data[key];
+
+                const fieldsToSkipForEngineerSummary = [
+                    'engineerResidentialLat', 'engineerResidentialLng', 'engineerResidentialNeighborhood',
+                    'companyOfficeMapLat', 'companyOfficeMapLng', 'companyOfficeMapNeighborhood',
+                    'officeMapLat', 'officeMapLng', 'officeMapNeighborhood',
+                    'workPermitPdf', 'nationalIdCardImageEngineer', 'councilCardImage',
+                ];
+                const fieldsToSkipForEmployerSummary = [
+                    'employerAddressLat', 'employerAddressLng', 'employerAddressNeighborhood',
+                    'employerCompanyAddressLat', 'employerCompanyAddressLng', 'employerCompanyAddressNeighborhood',
+                    'employerNationalIdCardImage', 'employerBirthCertificateImage', 'employerOtherDocs' 
+                ];
+
+                if (currentUserRole === 'engineer' && fieldsToSkipForEngineerSummary.includes(key)) {
+                    continue;
+                }
+                if (currentUserRole === 'employer' && fieldsToSkipForEmployerSummary.includes(key)) {
+                    continue;
+                }
+
+
+                if (displayLabel) {
+                    if (['hasDesignLicense', 'hasSupervisionLicense', 'hasExecutionLicense', 'isAssistantExecutor', 'employerHasCompany', 'engineerHasOfficeInfo'].includes(key)) {
+                         val = (data[key] === 'on'); 
+                    }
+
+                    if (currentUserRole === 'engineer') {
+                         const isAnyLegal = data['designExecutorType'] === 'legal' || data['supervisionExecutorType'] === 'legal' || data['executionExecutorType'] === 'legal';
+                         const isAnyIndividual = data['designExecutorType'] === 'individual' || data['supervisionExecutorType'] === 'individual' || data['executionExecutorType'] === 'individual';
+                         const isExecutionIndividual = data['executionExecutorType'] === 'individual';
+
+                         if (!isAnyLegal && key.startsWith('company')) continue;
+                         if (!isExecutionIndividual && key === 'isAssistantExecutor') continue;
+                         if (!isAnyIndividual && (key === 'engineerHasOfficeInfo' || key.startsWith('office'))) continue;
+                         if (isAnyIndividual && (key.startsWith('office')) && data['engineerHasOfficeInfo'] !== 'on') continue;
+                    }
+                    if (currentUserRole === 'employer' && (key.startsWith('employerCompany') && key !== 'employerHasCompany' ) && data['employerHasCompany'] !== 'on' && data['employerHasCompany'] !== true) continue;
+                    
+                    let fullWidth = false;
+                    if (['residentialAddress', 'companyOfficeAddress', 'officeAddress', 'employerAddress', 'employerCompanyAddress'].includes(key)) {
+                        fullWidth = true;
+                    }
+
+                    if (key === 'applicantImage') { 
+                        const fileInput = document.getElementById('applicantImage');
+                        if (fileInput && fileInput.files.length > 0) {
+                            addSummaryItem(displayLabel, fileInput.files[0], fullWidth);
+                        } else {
+                            addSummaryItem(displayLabel, "انتخاب نشده", fullWidth);
+                        }
+                    } else {
+                        addSummaryItem(displayLabel, val, fullWidth);
+                    }
+                }
+            }
+            
+            if (currentUserRole === 'engineer') {
+                const discipline = getDisciplineFromLicenseNumber(data['licenseNumber']);
+                if (discipline) addSummaryItem("رشته", discipline);
+
+                const resMapInfoDiv = document.getElementById('engineerResidentialMapInfo');
+                if (resMapInfoDiv && resMapInfoDiv.innerHTML && !resMapInfoDiv.innerHTML.includes('موقعیت مکانی انتخاب شده روی نقشه در اینجا نمایش داده می‌شود')) {
+                    addSummaryItem("اطلاعات نقشه محل سکونت", resMapInfoDiv.innerHTML, true, true);
+                }
+                const isAnyLegal = data['designExecutorType'] === 'legal' || data['supervisionExecutorType'] === 'legal' || data['executionExecutorType'] === 'legal';
+                const companyMapInfoDiv = document.getElementById('companyOfficeMapInfo');
+                if (isAnyLegal && companyMapInfoDiv && companyMapInfoDiv.innerHTML && !companyMapInfoDiv.innerHTML.includes('موقعیت مکانی انتخاب شده روی نقشه در اینجا نمایش داده می‌شود')) {
+                    addSummaryItem("اطلاعات نقشه دفتر شرکت", companyMapInfoDiv.innerHTML, true, true);
+                }
+                const isAnyIndividual = data['designExecutorType'] === 'individual' || data['supervisionExecutorType'] === 'individual' || data['executionExecutorType'] === 'individual';
+                const officeMapInfoDiv = document.getElementById('officeMapInfo');
+                if (isAnyIndividual && document.getElementById('engineerHasOfficeInfo')?.checked && officeMapInfoDiv && officeMapInfoDiv.innerHTML && !officeMapInfoDiv.innerHTML.includes('موقعیت مکانی انتخاب شده روی نقشه در اینجا نمایش داده می‌شود')) {
+                    addSummaryItem("اطلاعات نقشه دفتر کار", officeMapInfoDiv.innerHTML, true, true);
+                }
+            } else if (currentUserRole === 'employer') {
+                 const empAddrMapInfoDiv = document.getElementById('employerAddressMapInfo');
+                if (empAddrMapInfoDiv && empAddrMapInfoDiv.innerHTML && !empAddrMapInfoDiv.innerHTML.includes('موقعیت مکانی انتخاب شده روی نقشه در اینجا نمایش داده می‌شود')) {
+                    addSummaryItem("اطلاعات نقشه آدرس", empAddrMapInfoDiv.innerHTML, true, true);
+                }
+                const empCompMapInfoDiv = document.getElementById('employerCompanyMapInfo');
+                if (document.getElementById('employerHasCompany')?.checked && empCompMapInfoDiv && empCompMapInfoDiv.innerHTML && !empCompMapInfoDiv.innerHTML.includes('موقعیت مکانی انتخاب شده روی نقشه در اینجا نمایش داده می‌شود')) {
+                    addSummaryItem("اطلاعات نقشه شرکت", empCompMapInfoDiv.innerHTML, true, true);
+                }
+            }
+
+
+            addSectionTitle("مدارک بارگذاری شده:");
+            const filesToSummarize = currentUserRole === 'engineer' ?
+                [
+                    {id: 'workPermitPdf', label: 'پروانه اشتغال'}, 
+                    {id: 'nationalIdCardImageEngineer', label: 'کارت ملی'}, 
+                ] :
+                [
+                    {id: 'employerNationalIdCardImage', label: 'کارت ملی'},
+                    {id: 'employerOtherDocs', label: 'سایر مدارک'}
+                ];
+            
+            filesToSummarize.forEach(fInfo => {
+                const fileInput = document.getElementById(fInfo.id);
+                let fileDetails = "انتخاب نشده";
+                if (fileInput && fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    fileDetails = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                }
+                addSummaryItem(fInfo.label, fileDetails);
+            });
+        }
+        
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                    // result includes "data:mime/type;base64," prefix, which we need to remove
+                    resolve(reader.result.split(',')[1]);
+                };
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        async function prepareAndSubmitData() {
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2 ml-2"></i> در حال آماده سازی...';
+
+            const formData = new FormData(activeForm);
+            const textData = {};
+            const filesData = {};
+
+            // Helper to add file to filesData object after converting to Base64
+            const processFile = async (inputId, fieldName) => {
+                const input = document.getElementById(inputId);
+                if (input && input.files.length > 0) {
+                    const file = input.files[0];
+                    try {
+                        const base64Data = await fileToBase64(file);
+                        filesData[fieldName] = {
+                            fileName: file.name,
+                            mimeType: file.type,
+                            base64Data: base64Data
+                        };
+                    } catch (error) {
+                        console.error(`Error converting file ${file.name} to Base64:`, error);
+                        throw new Error(`خطا در پردازش فایل: ${file.name}`);
+                    }
+                }
+            };
+
+            // Populate textData from FormData
+            for (const [key, value] of formData.entries()) {
+                 if (!(value instanceof File)) {
+                    textData[key] = value;
+                }
+            }
+
+            try {
+                // Process all file inputs
+                const fileInputs = activeForm.querySelectorAll('input[type="file"]');
+                for (const input of fileInputs) {
+                    if (input.files.length > 0) {
+                        await processFile(input.id, input.name);
+                    }
+                }
+                
+                const payload = {
+                    email: initialUserData.email,
+                    role: currentUserRole,
+                    formDataJson: JSON.stringify(textData),
+                    files: filesData
+                };
+
+                submitButton.innerHTML = '<i class="fas fa-paper-plane mr-2 ml-2"></i> در حال ارسال...';
+
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`خطا در ارتباط با سرور: ${response.status} ${errorText}`);
+                }
+
+                const result = await response.json();
+                if (result.status === "success") {
+                    showMessageModal("اطلاعات پروفایل با موفقیت ارسال و ذخیره شد!", 'success');
+                    activeForm.reset();
+                    // Reset UI elements after successful submission
+                    setTimeout(() => window.location.reload(), 3000); // Reload page after 3 seconds
+                } else {
+                    throw new Error(result.message || "خطای ناشناخته در پردازش اطلاعات در سرور.");
+                }
+
+            } catch (error) {
+                console.error("Submission Error: ", error);
+                showMessageModal(`خطا در ارسال اطلاعات: ${error.message}`, 'error');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'ثبت نهایی اطلاعات';
+            }
+        }
+
+
+        submitButton.addEventListener('click', () => {
+             if (GOOGLE_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbzPhnmZTDlcGYJYoCS4rHCNG_4sySwTmx_oQbDou-Ls8hHx6zyFXjaIQPU63BPG7ihg/exec' || !GOOGLE_SCRIPT_URL) {
+                showMessageModal("خطا: URL اسکریپت گوگل تنظیم نشده است. لطفاً با پشتیبانی تماس بگیرید.", 'error'); 
+                return;
+            }
+             for (let i = 1; i <= totalSteps; i++) { 
+                 if (i === totalSteps) continue; 
+                if (!validateStep(i)) {
+                    const stepDataArray = currentUserRole === 'engineer' ? stepIndicatorDataEngineer : stepIndicatorDataEmployer;
+                    const stepLabel = stepDataArray.find(s=>s.id===i)?.label.split('. ')[1] || `مرحله ${i}`;
+                    showMessageModal(`لطفاً خطاهای ${stepLabel} را برطرف کنید.`, 'error'); 
+                    goToStep(i); 
+                    return;
+                }
+            }
+            if (!validateStep(currentUserRole === 'engineer' ? 4 : 4)) { 
+                 showMessageModal(`لطفاً خطاهای مرحله ۴ (آپلود مدارک) را برطرف کنید.`, 'error'); 
+                 goToStep(4);
+                 return;
+            }
+
+            prepareAndSubmitData();
+        });
+        
+        // --- INITIAL PAGE LOAD ---
+        showWelcomeScreen(); 
+        
+        handleFileUpload('workPermitPdf', 'workPermitPdfPreviewContainer');
+        handleFileUpload('nationalIdCardImageEngineer', 'nationalIdCardImageEngineerPreviewContainer');
+        handleFileUpload('employerNationalIdCardImage', 'employerNationalIdCardImagePreviewContainer');
+        handleFileUpload('employerOtherDocs', 'employerOtherDocsPreviewContainer');
+
+    </script>
+    </body>
 </html>
