@@ -780,10 +780,10 @@
         let totalSteps = 5; 
         let currentUserRole = null; 
         let initialUserData = { 
-            firstName: "محمد", 
-            lastName: "رضایی",  
-            userType: "مهندس", 
-            email: "mohammad.rezaei@example.com", 
+            firstName: "", 
+            lastName: "",  
+            userType: "", 
+            email: "", 
             gender: "مرد" 
         };
         let firstClickRole = null; 
@@ -853,24 +853,25 @@
         ];
 
         // --- INITIALIZATION FUNCTIONS ---
+        function getUserDataFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            initialUserData.email = params.get('email') || '';
+            initialUserData.firstName = params.get('firstName') || '';
+            initialUserData.lastName = params.get('lastName') || '';
+            initialUserData.userType = params.get('role') || ''; // 'engineer' or 'employer'
+        }
+
         function showWelcomeScreen() {
             welcomeScreen.style.display = 'flex';
             mainFormView.style.display = 'none';
             
             let rolePrefix = "";
-            if (firstClickRole === "مهندس") {
-                rolePrefix = "مهندس ";
-            } else if (!firstClickRole && initialUserData.userType === "مهندس") { 
+            if (initialUserData.userType === "engineer") { 
                 rolePrefix = "مهندس ";
             }
 
-            welcomeMessageElLine1.textContent = `${rolePrefix}${initialUserData.firstName || ''} ${initialUserData.lastName || ''} عزیز،`;
-
-            if(firstClickRole) {
-                 welcomeMessageElLine2.textContent = `برای تأیید نقش ${firstClickRole === 'engineer' ? 'مهندس' : 'کارفرما'}، دوباره کلیک کنید.`;
-            } else {
-                welcomeMessageElLine2.textContent = `لطفا با انتخاب نقش، ثبت نام را به پایان برسانید.`;
-            }
+            welcomeMessageElLine1.textContent = `${rolePrefix}${initialUserData.firstName || ''} ${initialUserData.lastName || ''} عزیز، خوش آمدید!`;
+            welcomeMessageElLine2.textContent = `لطفا با انتخاب نقش، ثبت نام را به پایان برسانید.`;
 
             if (firstClickRole === 'engineer') {
                 selectEngineerRoleButton.classList.add('active');
@@ -1613,7 +1614,7 @@
                 lName = employerLastNameInput.value.trim();
             } else { 
                  let tempRoleForTitle = firstClickRole || initialUserData.userType;
-                 if (tempRoleForTitle === "مهندس") {
+                 if (tempRoleForTitle === "engineer") {
                     titlePrefix = (initialUserData.gender === "مرد" ? "مهندس " : "مهندس ");
                  } else {
                      titlePrefix = (initialUserData.gender === "مرد" ? "آقای " : "خانم ");
@@ -1635,7 +1636,7 @@
             } else if (currentUserRole === 'employer'){
                  sidebarTitlePrefixCalculated = (document.getElementById('employerGender')?.value || initialUserData.gender) === "مرد" ? "آقای " : "خانم ";
             } else { 
-                 sidebarTitlePrefixCalculated = initialUserData.userType === "مهندس" 
+                 sidebarTitlePrefixCalculated = initialUserData.userType === "engineer" 
                     ? (initialUserData.gender === "مرد" ? "آقای مهندس " : "خانم مهندس ")
                     : (initialUserData.gender === "مرد" ? "آقای " : "خانم ");
             }
@@ -2115,12 +2116,19 @@
         });
         
         // --- INITIAL PAGE LOAD ---
-        showWelcomeScreen(); 
-        
-        handleFileUpload('workPermitPdf', 'workPermitPdfPreviewContainer');
-        handleFileUpload('nationalIdCardImageEngineer', 'nationalIdCardImageEngineerPreviewContainer');
-        handleFileUpload('employerNationalIdCardImage', 'employerNationalIdCardImagePreviewContainer');
-        handleFileUpload('employerOtherDocs', 'employerOtherDocsPreviewContainer');
+        document.addEventListener('DOMContentLoaded', () => {
+            getUserDataFromURL();
+            if (initialUserData.role === 'engineer' || initialUserData.role === 'employer') {
+                initializeFormForRole(initialUserData.role);
+            } else {
+                showWelcomeScreen();
+            }
+            
+            handleFileUpload('workPermitPdf', 'workPermitPdfPreviewContainer');
+            handleFileUpload('nationalIdCardImageEngineer', 'nationalIdCardImageEngineerPreviewContainer');
+            handleFileUpload('employerNationalIdCardImage', 'employerNationalIdCardImagePreviewContainer');
+            handleFileUpload('employerOtherDocs', 'employerOtherDocsPreviewContainer');
+        });
 
     </script>
     </body>
