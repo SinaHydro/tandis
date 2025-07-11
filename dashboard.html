@@ -773,7 +773,7 @@
         </div>
         <script type="module">
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzPhnmZTDlcGYJYoCS4rHCNG_4sySwTmx_oQbDou-Ls8hHx6zyFXjaIQPU63BPG7ihg/exec'; // <-- آدرس وب اپ خود را اینجا قرار دهید
+        const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE'; // <-- آدرس وب اپ خود را اینجا قرار دهید
         
         // --- STATE VARIABLES ---
         let currentStep = 1;
@@ -871,18 +871,26 @@
             }
 
             welcomeMessageElLine1.textContent = `${rolePrefix}${initialUserData.firstName || ''} ${initialUserData.lastName || ''} عزیز، خوش آمدید!`;
-            welcomeMessageElLine2.textContent = `لطفا با انتخاب نقش، ثبت نام را به پایان برسانید.`;
-
-            if (firstClickRole === 'engineer') {
+            
+            // Check if a role was passed from the previous page
+            if (initialUserData.userType === 'engineer') {
                 selectEngineerRoleButton.classList.add('active');
                 selectEmployerRoleButton.classList.remove('active');
-            } else if (firstClickRole === 'employer') {
+                firstClickRole = 'engineer'; // Set this to require a second click
+                welcomeMessageElLine2.textContent = `لطفا با تایید دوباره نقش، ثبت نام را به پایان برسانید.`;
+            } else if (initialUserData.userType === 'employer') {
                 selectEmployerRoleButton.classList.add('active');
                 selectEngineerRoleButton.classList.remove('active');
-            } else { 
+                firstClickRole = 'employer'; // Set this to require a second click
+                welcomeMessageElLine2.textContent = `لطفا با تایید دوباره نقش، ثبت نام را به پایان برسانید.`;
+            } else {
+                // Default behavior if no role is passed
                 selectEngineerRoleButton.classList.remove('active');
                 selectEmployerRoleButton.classList.remove('active');
+                firstClickRole = null;
+                welcomeMessageElLine2.textContent = `لطفا با انتخاب نقش، ثبت نام را به پایان برسانید.`;
             }
+
             updateSidebarName(); 
         }
 
@@ -955,7 +963,9 @@
                 initializeFormForRole('engineer');
             } else {
                 firstClickRole = 'engineer';
-                showWelcomeScreen(); 
+                selectEngineerRoleButton.classList.add('active');
+                selectEmployerRoleButton.classList.remove('active');
+                welcomeMessageElLine2.textContent = `برای تأیید نقش مهندس، دوباره کلیک کنید.`;
             }
         });
         selectEmployerRoleButton.addEventListener('click', () => {
@@ -963,7 +973,9 @@
                 initializeFormForRole('employer');
             } else {
                 firstClickRole = 'employer';
-                showWelcomeScreen(); 
+                selectEmployerRoleButton.classList.add('active');
+                selectEngineerRoleButton.classList.remove('active');
+                welcomeMessageElLine2.textContent = `برای تأیید نقش کارفرما، دوباره کلیک کنید.`;
             }
         });
 
@@ -2092,7 +2104,7 @@
 
 
         submitButton.addEventListener('click', () => {
-             if (GOOGLE_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbzPhnmZTDlcGYJYoCS4rHCNG_4sySwTmx_oQbDou-Ls8hHx6zyFXjaIQPU63BPG7ihg/exec' || !GOOGLE_SCRIPT_URL) {
+             if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE' || !GOOGLE_SCRIPT_URL) {
                 showMessageModal("خطا: URL اسکریپت گوگل تنظیم نشده است. لطفاً با پشتیبانی تماس بگیرید.", 'error'); 
                 return;
             }
@@ -2118,11 +2130,7 @@
         // --- INITIAL PAGE LOAD ---
         document.addEventListener('DOMContentLoaded', () => {
             getUserDataFromURL();
-            if (initialUserData.role === 'engineer' || initialUserData.role === 'employer') {
-                initializeFormForRole(initialUserData.role);
-            } else {
-                showWelcomeScreen();
-            }
+            showWelcomeScreen(); // Always show the welcome screen. Logic for pre-selection is inside.
             
             handleFileUpload('workPermitPdf', 'workPermitPdfPreviewContainer');
             handleFileUpload('nationalIdCardImageEngineer', 'nationalIdCardImageEngineerPreviewContainer');
