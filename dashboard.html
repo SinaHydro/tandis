@@ -866,19 +866,19 @@
             mainFormView.style.display = 'none';
             
             let rolePrefix = "";
-            if (initialUserData.userType === "engineer") { 
+            if (initialUserData.userType.toLowerCase() === "engineer") { 
                 rolePrefix = "مهندس ";
             }
 
             welcomeMessageElLine1.textContent = `${rolePrefix}${initialUserData.firstName || ''} ${initialUserData.lastName || ''} عزیز، خوش آمدید!`;
             
             // Check if a role was passed from the previous page
-            if (initialUserData.userType === 'engineer') {
+            if (initialUserData.userType.toLowerCase() === 'engineer') {
                 selectEngineerRoleButton.classList.add('active');
                 selectEmployerRoleButton.classList.remove('active');
                 firstClickRole = 'engineer'; // Set this to require a second click for confirmation
                 welcomeMessageElLine2.textContent = `لطفا با تایید دوباره نقش، ثبت نام را به پایان برسانید.`;
-            } else if (initialUserData.userType === 'employer') {
+            } else if (initialUserData.userType.toLowerCase() === 'employer') {
                 selectEmployerRoleButton.classList.add('active');
                 selectEngineerRoleButton.classList.remove('active');
                 firstClickRole = 'employer'; // Set this to require a second click for confirmation
