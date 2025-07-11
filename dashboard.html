@@ -876,12 +876,12 @@
             if (initialUserData.userType === 'engineer') {
                 selectEngineerRoleButton.classList.add('active');
                 selectEmployerRoleButton.classList.remove('active');
-                firstClickRole = 'engineer'; // Set this to require a second click
+                firstClickRole = 'engineer'; // Set this to require a second click for confirmation
                 welcomeMessageElLine2.textContent = `لطفا با تایید دوباره نقش، ثبت نام را به پایان برسانید.`;
             } else if (initialUserData.userType === 'employer') {
                 selectEmployerRoleButton.classList.add('active');
                 selectEngineerRoleButton.classList.remove('active');
-                firstClickRole = 'employer'; // Set this to require a second click
+                firstClickRole = 'employer'; // Set this to require a second click for confirmation
                 welcomeMessageElLine2.textContent = `لطفا با تایید دوباره نقش، ثبت نام را به پایان برسانید.`;
             } else {
                 // Default behavior if no role is passed
