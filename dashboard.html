@@ -2104,10 +2104,10 @@
 
 
         submitButton.addEventListener('click', () => {
-             if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE' || !GOOGLE_SCRIPT_URL) {
-                showMessageModal("خطا: URL اسکریپت گوگل تنظیم نشده است. لطفاً با پشتیبانی تماس بگیرید.", 'error'); 
-                return;
-            }
+             //if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE' || !GOOGLE_SCRIPT_URL) {
+                //showMessageModal("خطا: URL اسکریپت گوگل تنظیم نشده است. لطفاً با پشتیبانی تماس بگیرید.", 'error'); 
+                //return;
+            //}
              for (let i = 1; i <= totalSteps; i++) { 
                  if (i === totalSteps) continue; 
                 if (!validateStep(i)) {
