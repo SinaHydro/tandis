@@ -31,7 +31,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(243, 244, 246, 0.8);
+            background-color: rgba(255, 255, 255, 0.8);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -481,6 +481,7 @@
                     hideLoading();
                     if (data.success) {
                         showMessage('اگر ایمیل شما در سیستم موجود باشد، رمز عبور برایتان ارسال خواهد شد.', 'success');
+                        loginTab.click(); // انتقال به تب ورود
                     } else {
                         showMessage('کاربری با این ایمیل یافت نشد.', 'error');
                     }
