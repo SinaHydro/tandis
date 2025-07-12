@@ -50,6 +50,10 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        /* Fix for loading overlay visibility */
+        #loading-overlay.hidden {
+            display: none;
+        }
         </style>         
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     </head>     
@@ -362,16 +366,16 @@
         const loadingOverlay = document.getElementById('loading-overlay');
 
         function showLoading() {
-            loadingOverlay.classList.remove('hidden');
+            if (loadingOverlay) loadingOverlay.classList.remove('hidden');
         }
 
         function hideLoading() {
-            loadingOverlay.classList.add('hidden');
+            if (loadingOverlay) loadingOverlay.classList.add('hidden');
         }
 
         // تابع برای هدایت کاربر به صفحه پروفایل
         function redirectToProfile(email, firstName, lastName, role) {
-            const profileUrl = `Tandis_Profile.html?email=${encodeURIComponent(email)}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&role=${encodeURIComponent(role)}`;
+            const profileUrl = `dashboard.html?email=${encodeURIComponent(email)}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&role=${encodeURIComponent(role)}`;
             window.location.href = profileUrl;
         }
 
