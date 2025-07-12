@@ -384,7 +384,7 @@
             const role = userInfo[8]; // نقش کاربر در ایندکس هشتم قرار دارد
             
             // ساخت URL با پارامترها
-            const profileUrl = `dashboard.html?email=${encodeURIComponent(email)}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&role=${encodeURIComponent(role)}`;
+            const profileUrl = `Tandis_Profile.html?email=${encodeURIComponent(email)}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&role=${encodeURIComponent(role)}`;
             
             // هدایت کاربر
             window.location.href = profileUrl;
@@ -438,7 +438,9 @@
                 .then(data => {
                     if (data.success && data.data) {
                         showMessage('ثبت‌نام با موفقیت انجام شد! در حال انتقال...', 'success');
-                        redirectToProfile(data.data);
+                        // ساختن آرایه اطلاعات کاربر به صورت دستی چون سرور آن را برنمی‌گرداند
+                        const userInfo = [email, firstName, lastName, "", "", "", "", "", accountType];
+                        redirectToProfile(userInfo);
                     } else {
                         if (data.error === 'EmailExists') {
                             showMessage('این ایمیل قبلاً ثبت شده است.', 'error');
