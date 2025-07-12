@@ -71,14 +71,9 @@
                         </div>                         
                     </div>                     
                 </div>                 
-                <!-- Logo Card -->                 
-                <!-- Mission Card -->                 
-                <!-- Benefits Card -->                 
                 <div class="bg-glass card-hover delay-300 mx-auto p-6 rounded-xl shadow-lg slide-in-left w-full"> 
-                    <p class="text-center text-gray-900 text-xs">تمامی حقوق این پلتفرم برای شرکت مهندسین مشاور شهرآوند محفوظ است &copy; ۱۴۰۲</p> 
+                    <p class="text-center text-gray-900 text-xs">تمامی حقوق این پلتفرم برای شرکت مهندسین مشاور شهرآوند محفوظ است &copy; ۱۴۰۳</p> 
                 </div>                 
-                <!-- Company Info Card -->                 
-                <!-- Scroll Indicator -->                 
                 <div class="absolute bottom-4 left-0 right-0 flex justify-center scroll-down"> </div>                 
             </div>             
         </div>         
@@ -130,7 +125,7 @@
                                     <input id="remember-me" name="remember-me" type="checkbox" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 border-gray-300 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500"> 
                                     <label for="remember-me" class="mr-2 block text-sm text-gray-700 dark:text-gray-300">مرا بخاطر بسپار</label>                                     
                                 </div>                                 
-                                <button id="forgotPassword-tab" class="border-b-2 border-blue-500 dark:text-blue-400 font-medium text-blue-600">فراموشی رمز عبور؟</button>                                 
+                                <button id="forgotPassword-tab" type="button" class="border-b-2 border-blue-500 dark:text-blue-400 font-medium text-blue-600">فراموشی رمز عبور؟</button>                                 
                             </div>                             
                             <button type="submit" class="bg-blue-600 dark:bg-blue-700 dark:hover:bg-blue-600 duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium hover:-translate-y-0.5 hover:bg-blue-700 leading-10 p-2.5 rounded-lg text-white transform transition-all w-full">
                                 <i class="fa-sign-in-alt fas mx-2"></i> 
@@ -195,7 +190,7 @@
                                         </div>                                         
                                         <input type="password" id="signup-password" class="w-full pr-10 pl-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white" placeholder="رمز ورود"> 
                                         <p id="signup-password-error" class="text-red-500 text-sm hidden"></p>
-                                        <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3"> <i class="fas fa-eye-slash text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"></i> 
+                                        <button type="button" class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3"> <i class="fas fa-eye-slash text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"></i> 
                                         </button>                                         
                                     </div>                                     
                                 </div>
@@ -373,289 +368,182 @@
             loginForm.classList.add('hidden');
         });
 
-document.addEventListener('DOMContentLoaded', function() {
-    // تابع تبدیل اعداد انگلیسی به فارسی
-    function convertToPersianNumbers(input) {
-        const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-        return input.toString().replace(/\d/g, (digit) => persianDigits[digit]);
-    }
-
-    // تبدیل تمام اعداد در متن‌های صفحه
-    function convertAllNumbersInTextNodes() {
-        const walker = document.createTreeWalker(
-            document.body,
-            NodeFilter.SHOW_TEXT,
-            null,
-            false
-        );
-
-        let node;
-        while (node = walker.nextNode()) {
-            if (node.nodeValue.trim() && /\d/.test(node.nodeValue)) {
-                node.nodeValue = convertToPersianNumbers(node.nodeValue);
-            }
-        }
-    }
-
-    // تبدیل اعداد در inputها و textareaها (برای فرم‌ها)
-    function convertInputNumbers() {
-        document.querySelectorAll('input, textarea').forEach(input => {
-            if (input.value && /\d/.test(input.value)) {
-                input.value = convertToPersianNumbers(input.value);
-            }
-            // برای تغییر اعداد هنگام تایپ کاربر
-            input.addEventListener('input', function(e) {
-                if (/\d/.test(e.target.value)) {
-                    e.target.value = convertToPersianNumbers(e.target.value); 
-                }
-            });
-        });
-    }
-
-    // اجرای توابع
-    convertAllNumbersInTextNodes();
-    convertInputNumbers();
-});
-
         // URL وب اپ Google Apps Script
-        const webAppUrl = 'https://script.google.com/macros/s/AKfycbw1v4s2fFvo6kSPOnfpSk8hilmGAs84dgbYAjc-KgE6PkEmMOe_phtQ9uISRWaXq3s/exec';
+        const webAppUrl = 'https://script.google.com/macros/s/AKfycbzPhnmZTDlcGYJYoCS4rHCNG_4sySwTmx_oQbDou-Ls8hHx6zyFXjaIQPU63BPG7ihg/exec';
+
+        // تابع برای هدایت کاربر به صفحه پروفایل
+        function redirectToProfile(userInfo) {
+             if (!userInfo || !Array.isArray(userInfo) || userInfo.length < 9) {
+                showMessage('پاسخ دریافتی از سرور معتبر نیست.', 'error');
+                console.error('Invalid userInfo array received:', userInfo);
+                return;
+            }
+            const email = userInfo[0];
+            const firstName = userInfo[1];
+            const lastName = userInfo[2];
+            const role = userInfo[8]; // نقش کاربر در ایندکس هشتم قرار دارد
+            
+            // ساخت URL با پارامترها
+            const profileUrl = `dashboard.html?email=${encodeURIComponent(email)}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&role=${encodeURIComponent(role)}`;
+            
+            // هدایت کاربر
+            window.location.href = profileUrl;
+        }
 
         // ثبت‌نام
-document.getElementById('signupFormInner').addEventListener('submit', function(e) {
-    e.preventDefault(); // جلوگیری از ارسال پیش‌فرض فرم
+        document.getElementById('signupFormInner').addEventListener('submit', function(e) {
+            e.preventDefault();
 
-    // دریافت مقادیر از فیلدهای فرم ثبت نام
-    const email = document.getElementById('signup-email').value;
-    const password = document.getElementById('signup-password').value;
-    const firstName = document.getElementById('first-name').value;
-    const lastName = document.getElementById('last-name').value;
-    // برای رادیو باتن، مقدار radio button انتخاب شده را دریافت می‌کنیم
-    const accountType = document.querySelector('input[name="account-type"]:checked').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const firstName = document.getElementById('first-name').value;
+            const lastName = document.getElementById('last-name').value;
+            const accountType = document.querySelector('input[name="account-type"]:checked').value;
 
+            const emailError = document.getElementById('signup-email-error');
+            const passwordError = document.getElementById('signup-password-error');
+            const firstNameError = document.getElementById('first-name-error');
+            const lastNameError = document.getElementById('last-name-error');
 
-    // انتخاب المنت‌های نمایش خطا
-    // فرض بر این است که این IDها در HTML شما وجود دارند.
-    // اگر وجود ندارند، باید آنها را در HTML اضافه کنید (مثلاً یک <p> زیر هر input با id مربوطه و کلاس hidden)
-    const emailError = document.getElementById('signup-email-error');
-    const passwordError = document.getElementById('signup-password-error');
-    const firstNameError = document.getElementById('first-name-error');
-    const lastNameError = document.getElementById('last-name-error');
+            if (emailError) emailError.classList.add('hidden');
+            if (passwordError) passwordError.classList.add('hidden');
+            if (firstNameError) firstNameError.classList.add('hidden');
+            if (lastNameError) lastNameError.classList.add('hidden');
 
-
-    // پنهان کردن خطاهای قبلی
-    if (emailError) emailError.classList.add('hidden');
-    if (passwordError) passwordError.classList.add('hidden');
-    if (firstNameError) firstNameError.classList.add('hidden');
-    if (lastNameError) lastNameError.classList.add('hidden');
-
-
-    // اعتبارسنجی (Validation)
-    let hasError = false;
-
-    // اعتبارسنجی نام
-    if (!firstName.trim()) { // بررسی خالی نبودن و فضای خالی
-        if (firstNameError) {
-            firstNameError.textContent = 'نام الزامی است.';
-            firstNameError.classList.remove('hidden');
-        } else {
-            showMessage('نام الزامی است.', 'error');
-        }
-        hasError = true;
-    }
-
-    // اعتبارسنجی نام خانوادگی
-    if (!lastName.trim()) { // بررسی خالی نبودن و فضای خالی
-        if (lastNameError) {
-            lastNameError.textContent = 'نام خانوادگی الزامی است.';
-            lastNameError.classList.remove('hidden');
-        } else {
-            showMessage('نام خانوادگی الزامی است.', 'error');
-        }
-        hasError = true;
-    }
-
-    // اعتبارسنجی ایمیل
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email)) {
-        if (emailError) {
-            emailError.textContent = 'لطفاً یک آدرس ایمیل معتبر وارد کنید.';
-            emailError.classList.remove('hidden');
-        } else {
-            showMessage('لطفاً یک آدرس ایمیل معتبر وارد کنید.', 'error');
-        }
-        hasError = true;
-    }
-
-    // اعتبارسنجی رمز عبور (حداقل 8 کاراکتر)
-    if (password.length < 8) {
-        if (passwordError) {
-            passwordError.textContent = 'رمز عبور باید حداقل 8 کاراکتر باشد.';
-            passwordError.classList.remove('hidden');
-        } else {
-            showMessage('رمز عبور باید حداقل 8 کاراکتر باشد.', 'error');
-        }
-        hasError = true;
-    }
-
-    if (hasError) {
-        return; // اگر هر خطایی وجود دارد، ارسال فرم را متوقف کن
-    }
-
-
-    // URL مربوط به Google Apps Script شما
-    // const webAppUrl = 'https://script.google.com/macros/s/AKfycbw1v4s2fFvo6kSPOnfpSk8hilmGAs84dgbYAjc-KgE6PkEmMOe_phtQ9uISRWaXq3s/exec';
-
-    // ساخت queryString برای ارسال تمام داده‌ها با متد GET
-    const queryString = `?func=Create` +
-                        `&email=${encodeURIComponent(email)}` +
-                        `&password=${encodeURIComponent(password)}` +
-                        `&firstName=${encodeURIComponent(firstName)}` +
-                        `&lastName=${encodeURIComponent(lastName)}` +
-                        `&accountType=${encodeURIComponent(accountType)}`; // اضافه کردن نقش کاربری
-    const fullUrl = webAppUrl + queryString;
-
-    // ارسال درخواست به Google Apps Script با متد GET
-    fetch(fullUrl, {
-            method: 'GET'
-        })
-        .then(response => response.json()) // فرض بر این است که پاسخ JSON است
-        .then(data => {
-            if (data.success) {
-                showMessage('ثبت‌نام با موفقیت انجام شد!', 'success');
-                // اگر نیاز دارید اطلاعات کاربری را پس از ثبت نام ذخیره کنید
-                // localStorage.setItem('userInfo', JSON.stringify(data.data)); // اگر Google Apps Script اطلاعات برگشت می‌دهد
-                // هدایت به صفحه داشبورد یا صفحه ورود
-                window.location.href = 'dashboard.html'; // یا 'login.html'
-            } else {
-                if (data.error === 'EmailExists') { // فرض بر این است که خطای "ایمیل موجود است" را به این شکل برمی‌گرداند
-                    showMessage('این ایمیل قبلاً ثبت شده است.', 'error');
-                } else {
-                    showMessage(`خطا در ثبت‌نام: ${data.error}`, 'error');
-                }
+            let hasError = false;
+            if (!firstName.trim()) {
+                if (firstNameError) { firstNameError.textContent = 'نام الزامی است.'; firstNameError.classList.remove('hidden'); }
+                hasError = true;
             }
-        })
-        .catch(error => {
-            // نمایش پیام خطا در صورت بروز مشکل در ارتباط یا پاسخ سرور
-            showMessage(`خطا در ارتباط با سرور: ${error.message}`, 'error');
-        });
-});
+            if (!lastName.trim()) {
+                if (lastNameError) { lastNameError.textContent = 'نام خانوادگی الزامی است.'; lastNameError.classList.remove('hidden'); }
+                hasError = true;
+            }
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(email)) {
+                if (emailError) { emailError.textContent = 'لطفاً یک آدرس ایمیل معتبر وارد کنید.'; emailError.classList.remove('hidden'); }
+                hasError = true;
+            }
+            if (password.length < 8) {
+                if (passwordError) { passwordError.textContent = 'رمز عبور باید حداقل 8 کاراکتر باشد.'; passwordError.classList.remove('hidden'); }
+                hasError = true;
+            }
+            if (hasError) return;
 
-// این تابع showMessage را باید در جایی دیگر در کد خود داشته باشید، همانند آنچه در کد ورود استفاده کرده‌اید.
-// مثال:
-// function showMessage(message, type) {
-//     const messageDiv = document.getElementById('message-container'); // یا هر المان دیگری
-//     messageDiv.textContent = message;
-//     messageDiv.className = type === 'success' ? 'alert success' : 'alert error';
-//     messageDiv.classList.remove('hidden');
-//     // می توانید بعد از چند ثانیه آن را پنهان کنید
-//     setTimeout(() => {
-//         messageDiv.classList.add('hidden');
-//     }, 5000);
-// }
+            const queryString = `?func=Create&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&accountType=${encodeURIComponent(accountType)}`;
+            const fullUrl = webAppUrl + queryString;
+
+            fetch(fullUrl, { method: 'GET' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.data) {
+                        showMessage('ثبت‌نام با موفقیت انجام شد! در حال انتقال...', 'success');
+                        redirectToProfile(data.data);
+                    } else {
+                        if (data.error === 'EmailExists') {
+                            showMessage('این ایمیل قبلاً ثبت شده است.', 'error');
+                        } else {
+                            showMessage(`خطا در ثبت‌نام: ${data.error || 'پاسخ نامعتبر از سرور'}`, 'error');
+                        }
+                    }
+                })
+                .catch(error => {
+                    showMessage(`خطا در ارتباط با سرور: ${error.message}`, 'error');
+                });
+        });
 
         // ورود
-document.getElementById('loginFormInner').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
-    const emailError = document.getElementById('email-error');
-    const passwordError = document.getElementById('password-error');
+        document.getElementById('loginFormInner').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const emailError = document.getElementById('email-error');
+            const passwordError = document.getElementById('password-error');
 
-    emailError.classList.add('hidden');
-    passwordError.classList.add('hidden');
+            emailError.classList.add('hidden');
+            passwordError.classList.add('hidden');
 
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email)) {
-        emailError.classList.remove('hidden');
-        return;
-    }
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(email)) {
+                emailError.classList.remove('hidden');
+                return;
+            }
+            if (password.length < 8) {
+                passwordError.classList.remove('hidden');
+                return;
+            }
 
-    if (password.length < 8) {
-        passwordError.classList.remove('hidden');
-        return;
-    }
+            const queryString = `?func=Login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+            const fullUrl = webAppUrl + queryString;
 
-    // const webAppUrl = 'https://script.google.com/macros/s/AKfycbw1v4s2fFvo6kSPOnfpSk8hilmGAs84dgbYAjc-KgE6PkEmMOe_phtQ9uISRWaXq3s/exec';
-    const queryString = `?func=Login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
-    const fullUrl = webAppUrl + queryString;
-
-    fetch(fullUrl, {
-        method: 'GET'
-    })
-  .then(response => response.json()) // پاسخ JSON است
-  .then(data => {
-    if (!data.success) {
-      if (data.error === 'ERPWD') {
-        showMessage('رمز عبور اشتباه است', 'error');
-      } else if (data.error === 'NoUser') {
-        showMessage('کاربر یافت نشد', 'error');
-      } else {
-        showMessage(`خطا: ${data.error}`, 'error');
-      }
-    } else {
-      showMessage('ورود موفقیت‌آمیز بود!', 'success');
-      // ذخیره اطلاعات برای داشبورد
-      localStorage.setItem('userInfo', JSON.stringify(data.data));
-      // هدایت به صفحه داشبورد
-      window.location.href = 'dashboard.html';
-    }
-  })
-  .catch(error => {
-    showMessage(`خطا در ارتباط با سرور: ${error.message}`, 'error');
-  });
-});
+            fetch(fullUrl, { method: 'GET' })
+              .then(response => response.json())
+              .then(data => {
+                if (!data.success) {
+                  if (data.error === 'ERPWD') {
+                    showMessage('رمز عبور اشتباه است', 'error');
+                  } else if (data.error === 'NoUser') {
+                    showMessage('کاربر یافت نشد', 'error');
+                  } else {
+                    showMessage(`خطا: ${data.error}`, 'error');
+                  }
+                } else {
+                  showMessage('ورود موفقیت‌آمیز بود! در حال انتقال...', 'success');
+                  redirectToProfile(data.data);
+                }
+              })
+              .catch(error => {
+                showMessage(`خطا در ارتباط با سرور: ${error.message}`, 'error');
+              });
+        });
             
         // فراموشی رمز عبور
         document.getElementById('forgotPasswordInner').addEventListener('submit', function(e) {
             e.preventDefault();
-            const formData = new FormData(this);
-            const data = {
-                func: 'SendEmail',
-                email: formData.get('forgotEmail')
-            };
-            fetch(scriptURL, {
-                method: 'POST',
-                body: JSON.stringify(data),
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then(response => response.text())
-            .then(data => {
-                if (data === '') {
-                    alert('کاربری با این ایمیل یافت نشد.');
-                } else {
-                    alert('رمز عبور به ایمیل شما ارسال شد.');
-                }
-            })
-            .catch(error => alert('خطا: ' + error.message));
+            const email = document.getElementById('forgotEmail').value;
+            const queryString = `?func=SendEmail&email=${encodeURIComponent(email)}`;
+            const fullUrl = webAppUrl + queryString;
+
+            fetch(fullUrl, { method: 'GET' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('اگر ایمیل شما در سیستم موجود باشد، رمز عبور برایتان ارسال خواهد شد.', 'success');
+                    } else {
+                        showMessage('کاربری با این ایمیل یافت نشد.', 'error');
+                    }
+                })
+                .catch(error => showMessage(`خطا در ارتباط با سرور: ${error.message}`, 'error'));
         });
 
-document.querySelector('.password-toggle').addEventListener('click', function() {
-    const passwordInput = document.getElementById('login-password');
-    const icon = this.querySelector('i');
-    if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        icon.classList.replace('fa-eye-slash', 'fa-eye');
-    } else {
-        passwordInput.type = 'password';
-        icon.classList.replace('fa-eye', 'fa-eye-slash');
-    }
-});
+        document.querySelectorAll('.password-toggle').forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                const passwordInput = this.parentElement.querySelector('input[type="password"], input[type="text"]');
+                const icon = this.querySelector('i');
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    icon.classList.replace('fa-eye-slash', 'fa-eye');
+                } else {
+                    passwordInput.type = 'password';
+                    icon.classList.replace('fa-eye', 'fa-eye-slash');
+                }
+            });
+        });
 
-// تابع نمایش پیام با Toastify
-function showMessage(message, type) {
-  Toastify({
-    text: message,
-    duration: 5000,
-    close: true,
-    gravity: "top",
-    position: "center",
-    // خط زیر اصلاح شده است:
-    style: {
-      fontFamily: "Vazirmatn, sans-serif",
-      background: type === 'success' ? "#4CAF50" : "#F44336" // استفاده از 'background' در داخل 'style'
-    }
-  }).showToast();
-}        
+        // تابع نمایش پیام با Toastify
+        function showMessage(message, type) {
+          Toastify({
+            text: message,
+            duration: 5000,
+            close: true,
+            gravity: "top",
+            position: "center",
+            style: {
+              fontFamily: "Vazirmatn, sans-serif",
+              background: type === 'success' ? "#4CAF50" : "#F44336"
+            }
+          }).showToast();
+        }        
     </script>         
         <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     </body>     
