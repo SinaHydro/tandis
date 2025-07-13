@@ -2022,11 +2022,31 @@
             submitButton.disabled = true;
             submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2 ml-2"></i> در حال آماده سازی...';
 
-            const formData = new FormData(activeForm);
-            const textData = {};
             const filesData = {};
+            const stepsData = {};
 
-            // Helper to add file to filesData object after converting to Base64
+            // 1. Collect data from each step's form fields
+            for (let i = 1; i <= totalSteps; i++) {
+                const stepContainer = document.getElementById(`${currentUserRole}-step-${i}`);
+                const stepDataObject = {};
+                if (stepContainer) {
+                    const formElements = stepContainer.querySelectorAll('input:not([type="file"]), select, textarea');
+                    formElements.forEach(el => {
+                        if (el.type === 'checkbox') {
+                            stepDataObject[el.name] = el.checked;
+                        } else if (el.type === 'radio') {
+                            if (el.checked) {
+                                stepDataObject[el.name] = el.value;
+                            }
+                        } else {
+                            stepDataObject[el.name] = el.value;
+                        }
+                    });
+                }
+                stepsData[`step${i}`] = stepDataObject;
+            }
+
+            // 2. Helper to process file uploads to Base64
             const processFile = async (inputId, fieldName) => {
                 const input = document.getElementById(inputId);
                 if (input && input.files.length > 0) {
@@ -2045,33 +2065,26 @@
                 }
             };
 
-            // Populate textData from FormData
-            for (const [key, value] of formData.entries()) {
-                 if (!(value instanceof File)) {
-                    textData[key] = value;
-                }
-            }
-
             try {
-                // Process all file inputs
-                const fileInputs = activeForm.querySelectorAll('input[type="file"]');
-                for (const input of fileInputs) {
+                // 3. Process all file inputs from the entire form
+                const allFileInputs = activeForm.querySelectorAll('input[type="file"]');
+                for (const input of allFileInputs) {
                     if (input.files.length > 0) {
                         await processFile(input.id, input.name);
                     }
                 }
                 
+                // 4. Construct the final payload
                 const payload = {
                     email: initialUserData.email,
                     role: currentUserRole,
-                    formDataJson: JSON.stringify(textData),
+                    stepsData: stepsData, // Send the structured step data
                     files: filesData
                 };
 
                 submitButton.innerHTML = '<i class="fas fa-paper-plane mr-2 ml-2"></i> در حال ارسال...';
 
-                // By sending as text/plain, we can often avoid the CORS preflight/redirect issue with Google Apps Script.
-                // The server-side script is updated to handle this.
+                // 5. Send the request
                 const response = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'cors',
@@ -2091,8 +2104,7 @@
                 if (result.status === "success") {
                     showMessageModal("اطلاعات پروفایل با موفقیت ارسال و ذخیره شد!", 'success');
                     activeForm.reset();
-                    // Reset UI elements after successful submission
-                    setTimeout(() => window.location.reload(), 3000); // Reload page after 3 seconds
+                    setTimeout(() => window.location.reload(), 3000);
                 } else {
                     throw new Error(result.message || "خطای ناشناخته در پردازش اطلاعات در سرور.");
                 }
