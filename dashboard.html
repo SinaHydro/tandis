@@ -773,7 +773,7 @@
         </div>
         <script type="module">
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxWArV0FTyroeFr5IhlMHr1PjCVNbDGri7I1VWcTH9B-EanBDak3zxkmr9nBtzi4CjD/exec'; 
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxmfyJe8kEHNcxYAjIK6c0rYRYfXG2hBzALcuCobWP6mi7KKrQlt1RYtBuN3qo3rBc/exec'; // <-- آدرس وب اپ خود را اینجا قرار دهید
         
         // --- STATE VARIABLES ---
         let currentStep = 1;
@@ -2070,11 +2070,15 @@
 
                 submitButton.innerHTML = '<i class="fas fa-paper-plane mr-2 ml-2"></i> در حال ارسال...';
 
+                // By sending as text/plain, we can often avoid the CORS preflight/redirect issue with Google Apps Script.
+                // The server-side script is updated to handle this.
                 const response = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'cors',
                     cache: 'no-cache',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8',
+                    },
                     body: JSON.stringify(payload)
                 });
 
@@ -2104,6 +2108,10 @@
 
 
         submitButton.addEventListener('click', () => {
+             if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE' || !GOOGLE_SCRIPT_URL) {
+                showMessageModal("خطا: URL اسکریپت گوگل تنظیم نشده است. لطفاً با پشتیبانی تماس بگیرید.", 'error'); 
+                return;
+            }
              for (let i = 1; i <= totalSteps; i++) { 
                  if (i === totalSteps) continue; 
                 if (!validateStep(i)) {
