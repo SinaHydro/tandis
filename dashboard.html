@@ -162,6 +162,18 @@
                 color: #1D4ED8; 
                 transition: color 0.3s ease, text-shadow 0.3s ease;
             }
+            .spinner {
+                border: 4px solid rgba(0, 0, 0, 0.1);
+                width: 48px;
+                height: 48px;
+                border-radius: 50%;
+                border-left-color: #0ea5e9;
+                animation: spin 1s ease infinite;
+            }
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
         </style>
     </head>
     <body class="bg-slate-50">
@@ -775,12 +787,17 @@
         </div>
 
         <!-- Loading Modal -->
-        <div id="loadingModal" class="modal" style="display: none; background-color: rgba(15, 23, 42, 0.8); z-index: 2000;">
-            <div class="modal-content" style="background: none; border: none; box-shadow: none; display: flex; align-items: center; justify-content: center; height: 100%;">
-                <div class="text-white text-center">
-                    <i class="fas fa-spinner fa-spin text-6xl mb-4"></i>
-                    <p id="loadingModalText" class="text-2xl font-semibold">لطفا منتظر بمانید ...</p>
+        <div id="loadingModal" class="modal" style="display: none; background-color: rgba(15, 23, 42, 0.8); z-index: 2000; align-items:center; justify-content:center;">
+            <div class="flex flex-col items-center bg-white p-8 rounded-xl shadow-2xl text-center">
+                <div class="flex items-center justify-center mb-4">
+                    <img src="https://tandis.shahraavand.ir/images/new-TLogo_B.avif" alt="Tandis Shahraavand Logo" class="h-16 w-16" width="64" height="64" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/64x64/1D4ED8/FFFFFF?text=T';">
+                    <div class="mr-4">
+                        <h1 class="font-black text-3xl text-blue-700 text-center">نظام تندیس</h1>
+                        <p class="font-extrabold pt-1 text-sm text-center" style="color: #CB9214;">تدارک نیازمندی دقیق و یکپارچه ساختمان</p>
+                    </div>
                 </div>
+                <div class="spinner my-4"></div>
+                <p id="loadingModalText" class="text-lg font-semibold text-gray-700">لطفا منتظر بمانید...</p>
             </div>
         </div>
 
@@ -2139,10 +2156,6 @@
 
 
         submitButton.addEventListener('click', () => {
-             if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE' || !GOOGLE_SCRIPT_URL) {
-                showMessageModal("خطا: URL اسکریپت گوگل تنظیم نشده است. لطفاً با پشتیبانی تماس بگیرید.", 'error'); 
-                return;
-            }
 
             // New check for mandatory profile picture
             const applicantImageInput = document.getElementById('applicantImage');
