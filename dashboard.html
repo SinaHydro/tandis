@@ -763,6 +763,8 @@
                 <p>&copy; تمامی حقوق سایت نظام تندیس متعلق به شرکت شهرآوند است. - ۱۴۰۳</p>
             </div>
         </div>
+        
+        <!-- Message Modal -->
         <div id="messageModal" class="modal">
             <div class="modal-content">
                 <div id="modalIconContainer" class="mb-4 text-5xl">
@@ -771,9 +773,20 @@
                 <button id="modalCloseButton" class="mt-6 btn btn-primary w-full sm:w-auto">متوجه شدم</button>
             </div>
         </div>
+
+        <!-- Loading Modal -->
+        <div id="loadingModal" class="modal" style="display: none; background-color: rgba(15, 23, 42, 0.8); z-index: 2000;">
+            <div class="modal-content" style="background: none; border: none; box-shadow: none; display: flex; align-items: center; justify-content: center; height: 100%;">
+                <div class="text-white text-center">
+                    <i class="fas fa-spinner fa-spin text-6xl mb-4"></i>
+                    <p id="loadingModalText" class="text-2xl font-semibold">لطفا منتظر بمانید ...</p>
+                </div>
+            </div>
+        </div>
+
         <script type="module">
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyJhpiMOYJ3nRu_Fyf99zoWl23_u6G-ykzYKqXwLvE82Ajfuuf3FpOHPq3fw-eNlIIm/exec'; // <-- آدرس وب اپ خود را اینجا قرار دهید
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyVxXq8YCIdsj_r_w3Os7t4cEcSW78gqmPp0Ql-PYVr5sQ0PIIb4mRtyAWTCHHSRva1/exec'; // <-- آدرس وب اپ خود را اینجا قرار دهید
         
         // --- STATE VARIABLES ---
         let currentStep = 1;
@@ -816,6 +829,9 @@
         const prevButton = document.getElementById('prevButton');
         const nextButton = document.getElementById('nextButton');
         const submitButton = document.getElementById('submitButton');
+        
+        const loadingModal = document.getElementById('loadingModal');
+        const loadingModalText = document.getElementById('loadingModalText');
 
         const adBannerImage = document.getElementById('adBannerImage');
         const adBannerText = document.getElementById('adBannerText');
@@ -823,10 +839,10 @@
         const maps = {}; 
 
         const stepIndicatorDataEngineer = [
-            { id: 1, icon: "fa-user", label: "۱. مشخصات فردی", recommendation: "تکمیل دقیق اطلاعات هویتی، اولین گام برای ساخت یک پروفایل حرفه‌ای است.", detailedExplanation: "در این بخش، نام، نام خانوادگی، کدملی (۱۰ رقمی و معتبر)، تاریخ تولد (حداقل ۱۸ سال) و جنسیت خود را وارد نمایید. شماره موبایل صحیح برای اطلاع‌رسانی‌ها ضروری است." }, 
+            { id: 1, icon: "fa-user", label: "۱. مشخصات فردی", recommendation: "تکمیل دقیق اطلاعات هویتی، اولین گام برای ساخت یک پروفایل حرفه‌ای است.", detailedExplanation: "<strong class='text-red-600'>توجه: بارگذاری عکس پروفایل (از طریق پنل کناری) اجباری و حجم آن باید کمتر از ۲۵۰ کیلوبایت باشد.</strong><br>در این بخش، نام، نام خانوادگی، کدملی، تاریخ تولد و جنسیت خود را وارد نمایید. شماره موبایل صحیح برای اطلاع‌رسانی‌ها ضروری است." }, 
             { id: 2, icon: "fa-map-marker-alt", label: "۲. اطلاعات تماس", recommendation: "اطلاعات تماس کامل و دقیق، دسترسی کارفرمایان به شما را تسهیل می‌کند.", detailedExplanation: "شماره تلفن ثابت (۱۱ رقمی با کد شهرستان)، کدپستی (۱۰ رقمی)، استان، شهر و آدرس محل سکونت خود را وارد کنید. سپس موقعیت دقیق محل سکونت خود را روی نقشه انتخاب نمایید." }, 
             { id: 3, icon: "fa-id-card", label: "۳. اطلاعات حرفه‌ای", recommendation: "ارائه اطلاعات دقیق حرفه‌ای و پروانه، اعتبار شما را به عنوان یک متخصص افزایش می‌دهد.", detailedExplanation: "تاریخ اولین صدور پروانه، تاریخ شروع و مدت اعتبار پروانه، شماره پروانه (با فرمت صحیح مانند 0-13-30-012345)، شماره عضویت و استان فعالیت پروانه را وارد کنید. سپس برای هر یک از صلاحیت‌های طراحی، نظارت و اجرا، پایه و نوع فعالیت (حقیقی، حقوقی یا عدم فعالیت در آن صلاحیت) را مشخص نمایید. انتخاب حداقل یکی از صلاحیت‌ها به همراه پایه آن الزامی است. بر اساس انتخاب شما، فیلدهای مربوط به اطلاعات شرکت (برای فعالیت حقوقی) یا دفتر کار (برای فعالیت حقیقی) نمایش داده خواهد شد." }, 
-            { id: 4, icon: "fa-cloud-upload-alt", label: "۴. آپلود مدارک", recommendation: "آپلود مدارک واضح و صحیح، گامی مهم در جهت تکمیل و تایید نهایی پروفایل شماست.", detailedExplanation: "تصویر پروفایل خود را (اختیاری، از طریق پنل کناری)، فایل PDF پروانه اشتغال و تصویر کارت ملی را بارگذاری کنید. دقت کنید که هر فایل باید کمتر از ۲۵۰ کیلوبایت حجم داشته باشد." }, 
+            { id: 4, icon: "fa-cloud-upload-alt", label: "۴. آپلود مدارک", recommendation: "آپلود مدارک واضح و صحیح، گامی مهم در جهت تکمیل و تایید نهایی پروفایل شماست.", detailedExplanation: "فایل PDF پروانه اشتغال و تصویر کارت ملی را بارگذاری کنید. دقت کنید که هر فایل باید کمتر از ۲۵۰ کیلوبایت حجم داشته باشد." }, 
             { id: 5, icon: "fa-check-circle", label: "۵. تأیید نهایی", recommendation: "این آخرین مرحله است! اطلاعات خود را به دقت بررسی کنید.", detailedExplanation: "یک بار دیگر تمامی اطلاعات وارد شده در مراحل قبل را مرور کنید. در صورت اطمینان از صحت کامل اطلاعات، دکمه «ثبت نهایی اطلاعات» را برای ارسال پروفایل خود کلیک کنید." }
         ];
         const advertisementDataEngineer = [
@@ -838,7 +854,7 @@
         ];
 
         const stepIndicatorDataEmployer = [
-            { id: 1, icon: "fa-user-tie", label: "۱. مشخصات فردی", recommendation: "تکمیل دقیق اطلاعات شناسایی، به ایجاد اعتماد و شفافیت در همکاری‌ها کمک می‌کند.", detailedExplanation: "نام، نام خانوادگی، کدملی (۱۰ رقمی و معتبر)، تاریخ تولد (حداقل ۱۸ سال) و جنسیت خود را به عنوان کارفرما وارد نمایید. شماره موبایل صحیح برای ارتباطات بعدی ضروری است." },
+            { id: 1, icon: "fa-user-tie", label: "۱. مشخصات فردی", recommendation: "تکمیل دقیق اطلاعات شناسایی، به ایجاد اعتماد و شفافیت در همکاری‌ها کمک می‌کند.", detailedExplanation: "<strong class='text-red-600'>توجه: بارگذاری عکس پروفایل (از طریق پنل کناری) اجباری و حجم آن باید کمتر از ۲۵۰ کیلوبایت باشد.</strong><br>نام، نام خانوادگی، کدملی، تاریخ تولد و جنسیت خود را به عنوان کارفرما وارد نمایید. شماره موبایل صحیح برای ارتباطات بعدی ضروری است." },
             { id: 2, icon: "fa-address-book", label: "۲. اطلاعات تماس", recommendation: "ارائه اطلاعات تماس دقیق، ارتباط موثر مهندسین با شما را تضمین می‌کند.", detailedExplanation: "شماره تماس ثابت (۱۰ رقمی با کد شهرستان یا ۱۱ رقمی موبایل)، کدپستی (۱۰ رقمی)، استان، شهر و آدرس خود را وارد کنید. سپس موقعیت دقیق خود را روی نقشه انتخاب نمایید." }, 
             { id: 3, icon: "fa-building", label: "۳. اطلاعات شرکت", recommendation: "معرفی کسب‌وکار یا شرکت شما (در صورت وجود) به شناخت بهتر مهندسین کمک خواهد کرد.", detailedExplanation: "اگر به عنوان شخص حقوقی (شرکت) فعالیت می‌کنید، گزینه «شرکت دارم» را انتخاب کرده و نام شرکت، شماره ثبت و آدرس آن را به همراه موقعیت مکانی دفتر شرکت روی نقشه مشخص کنید. در غیر این صورت، گزینه «شرکت ندارم» را انتخاب شده باقی بگذارید." },
             { id: 4, icon: "fa-id-badge", label: "۴. آپلود مدارک", recommendation: "بارگذاری مدارک شناسایی، به اعتبارسنجی هویت شما به عنوان کارفرما کمک می‌کند.", detailedExplanation: "تصویر کارت ملی خود را بارگذاری کنید. ارائه رزومه کاری اختیاری است اما می‌تواند به شناخت بهتر شما کمک کند. دقت کنید که هر فایل باید کمتر از ۲۵۰ کیلوبایت حجم داشته باشد." }, 
@@ -2019,8 +2035,8 @@
         }
 
         async function prepareAndSubmitData() {
-            submitButton.disabled = true;
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2 ml-2"></i> در حال آماده سازی...';
+            loadingModalText.textContent = "لطفا منتظر بمانید ...";
+            loadingModal.style.display = 'flex';
 
             const filesData = {};
             const stepsData = {};
@@ -2066,6 +2082,7 @@
             };
 
             try {
+                loadingModalText.textContent = "در حال آماده سازی اطلاعات...";
                 // 3. Process all file inputs from the entire form
                 const allFileInputs = activeForm.querySelectorAll('input[type="file"]');
                 for (const input of allFileInputs) {
@@ -2073,6 +2090,8 @@
                         await processFile(input.id, input.name);
                     }
                 }
+                // Don't forget the sidebar profile image
+                await processFile('applicantImage', 'applicantImage');
                 
                 // 4. Construct the final payload
                 const payload = {
@@ -2082,7 +2101,7 @@
                     files: filesData
                 };
 
-                submitButton.innerHTML = '<i class="fas fa-paper-plane mr-2 ml-2"></i> در حال ارسال...';
+                loadingModalText.textContent = "در حال ارسال به سرور...";
 
                 // 5. Send the request
                 const response = await fetch(GOOGLE_SCRIPT_URL, {
@@ -2102,6 +2121,7 @@
 
                 const result = await response.json();
                 if (result.status === "success") {
+                    loadingModal.style.display = 'none';
                     showMessageModal("اطلاعات پروفایل با موفقیت ارسال و ذخیره شد!", 'success');
                     activeForm.reset();
                     setTimeout(() => window.location.reload(), 3000);
@@ -2113,8 +2133,7 @@
                 console.error("Submission Error: ", error);
                 showMessageModal(`خطا در ارسال اطلاعات: ${error.message}`, 'error');
             } finally {
-                submitButton.disabled = false;
-                submitButton.innerHTML = 'ثبت نهایی اطلاعات';
+                loadingModal.style.display = 'none';
             }
         }
 
@@ -2124,6 +2143,17 @@
                 showMessageModal("خطا: URL اسکریپت گوگل تنظیم نشده است. لطفاً با پشتیبانی تماس بگیرید.", 'error'); 
                 return;
             }
+
+            // New check for mandatory profile picture
+            const applicantImageInput = document.getElementById('applicantImage');
+            if (applicantImageInput.files.length === 0) {
+                showMessageModal('لطفاً عکس پروفایل خود را از نوار کناری بارگذاری کنید. این فیلد اجباری است.', 'error');
+                const sidebarImgContainer = sidebarProfileImagePreview.parentElement;
+                sidebarImgContainer.classList.add('ring-2', 'ring-red-500');
+                setTimeout(() => sidebarImgContainer.classList.remove('ring-2', 'ring-red-500'), 3000);
+                return;
+            }
+
              for (let i = 1; i <= totalSteps; i++) { 
                  if (i === totalSteps) continue; 
                 if (!validateStep(i)) {
