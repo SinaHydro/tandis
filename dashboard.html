@@ -311,7 +311,8 @@
                                         </div>
                                         <div>
                                             <label for="engineerDob" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ تولد</label>
-                                            <input type="text" id="engineerDob" name="engineerDob" required class="mt-1 block w-full sm:text-sm jalali-datepicker" data-gregorian-date="">
+                                            <input type="text" id="engineerDob" required class="mt-1 block w-full sm:text-sm jalali-datepicker-display" readonly>
+                                            <input type="hidden" name="engineerDob" class="jalali-datepicker-value">
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-slate-700 mb-1 required">جنسیت</label>
@@ -400,11 +401,13 @@
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6 pt-4">
                                         <div>
                                             <label for="licenseFirstIssueDate" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ اولین صدور پروانه</label>
-                                            <input type="text" id="licenseFirstIssueDate" name="licenseFirstIssueDate" required class="mt-1 block w-full sm:text-sm jalali-datepicker" data-gregorian-date="">
+                                            <input type="text" id="licenseFirstIssueDate" required class="mt-1 block w-full sm:text-sm jalali-datepicker-display" readonly>
+                                            <input type="hidden" name="licenseFirstIssueDate" class="jalali-datepicker-value">
                                         </div>
                                         <div>
                                             <label for="licenseStartDate" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ شروع اعتبار پروانه</label>
-                                            <input type="text" id="licenseStartDate" name="licenseStartDate" required class="mt-1 block w-full sm:text-sm jalali-datepicker" data-gregorian-date="">
+                                            <input type="text" id="licenseStartDate" required class="mt-1 block w-full sm:text-sm jalali-datepicker-display" readonly>
+                                            <input type="hidden" name="licenseStartDate" class="jalali-datepicker-value">
                                         </div>
                                         <div>
                                             <label for="licenseValidity" class="block text-sm font-medium text-slate-700 mb-1 required">مدت اعتبار پروانه (سال)</label>
@@ -647,7 +650,8 @@
                                         </div>
                                         <div>
                                             <label for="employerDob" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ تولد</label>
-                                            <input type="text" id="employerDob" name="employerDob" required class="mt-1 block w-full sm:text-sm jalali-datepicker" data-gregorian-date="">
+                                            <input type="text" id="employerDob" required class="mt-1 block w-full sm:text-sm jalali-datepicker-display" readonly>
+                                            <input type="hidden" name="employerDob" class="jalali-datepicker-value">
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-slate-700 mb-1 required">جنسیت</label>
@@ -1294,7 +1298,7 @@
                 for (const field of currentStepFields) {
                     let fieldIsValid = true;
                     let errorMessage = `لطفاً فیلد "${getLabelForField(field)}" را تکمیل کنید.`;
-
+                    
                     if (field.closest('.hidden')) {
                         continue;
                     }
@@ -1302,9 +1306,11 @@
                     if (currentUserRole === 'employer' && field.closest('#employerCompanyFields') && !document.getElementById('employerHasCompany').checked) {
                         continue;
                     }
+                    
+                    if (field.classList.contains('jalali-datepicker-display')) {
+                        const hiddenField = field.nextElementSibling;
+                        const gregorianValue = hiddenField ? hiddenField.value : null;
 
-                    if (field.classList.contains('jalali-datepicker')) {
-                        const gregorianValue = field.getAttribute('data-gregorian-date');
                         if (!gregorianValue) {
                             errorMessage = `لطفاً "${getLabelForField(field)}" را از تقویم انتخاب کنید.`;
                             fieldIsValid = false;
@@ -1381,7 +1387,9 @@
                 if (isValid && currentUserRole === 'engineer' && step === 3) {
                     const licenseStartDateInput = document.getElementById('licenseStartDate');
                     const licenseValidityInput = document.getElementById('licenseValidity');
-                    const gregorianStartDate = licenseStartDateInput.getAttribute('data-gregorian-date');
+                    const hiddenField = licenseStartDateInput.nextElementSibling;
+                    const gregorianStartDate = hiddenField ? hiddenField.value : null;
+
                     if (gregorianStartDate && licenseValidityInput.value) {
                         const startDate = new Date(gregorianStartDate);
                         const validityYears = parseInt(licenseValidityInput.value, 10);
@@ -1978,6 +1986,10 @@
                 for (const key in data) {
                     const displayLabel = fieldLabels[key] || key; 
                     let val = data[key];
+                    const visibleInput = document.getElementById(key);
+                    if (visibleInput && visibleInput.classList.contains('jalali-datepicker-display')) {
+                        val = visibleInput.value;
+                    }
 
                     const fieldsToSkipForEngineerSummary = [
                         'engineerResidentialLat', 'engineerResidentialLng', 'engineerResidentialNeighborhood',
@@ -2124,16 +2136,16 @@
                     if (stepContainer) {
                         const formElements = stepContainer.querySelectorAll('input:not([type="file"]), select, textarea');
                         formElements.forEach(el => {
-                            if (el.classList.contains('jalali-datepicker')) {
-                                // Send the gregorian date for backend processing
-                                stepDataObject[el.name] = el.getAttribute('data-gregorian-date') || '';
+                            if (el.classList.contains('jalali-datepicker-value')) {
+                                // This is the hidden input, its value is what we want
+                                stepDataObject[el.name] = el.value || '';
                             } else if (el.type === 'checkbox') {
                                 stepDataObject[el.name] = el.checked;
                             } else if (el.type === 'radio') {
                                 if (el.checked) {
                                     stepDataObject[el.name] = el.value;
                                 }
-                            } else {
+                            } else if(el.name) { // Ensure the element has a name
                                 stepDataObject[el.name] = el.value;
                             }
                         });
@@ -2325,43 +2337,45 @@
 
             // --- Jalali Date Picker Initialization ---
             function initializeDatePickers() {
-                $(".jalali-datepicker").persianDatepicker({
-                    format: 'YYYY/MM/DD',
-                    observer: true,
-                    autoClose: true,
-                    navigator: {
-                        enabled: true,
-                        scroll: {
-                            enabled: false
-                        },
-                        text: {
-                            btnNextText: '>',
-                            btnPrevText: '<'
-                        }
-                    },
-                    toolbox: {
-                        enabled: true,
-                        calendarSwitch: {
-                            enabled: false,
-                        },
-                        todayButton: {
+                $(".jalali-datepicker-display").each(function() {
+                    var $displayInput = $(this);
+                    var $valueInput = $displayInput.next('.jalali-datepicker-value');
+
+                    $displayInput.persianDatepicker({
+                        format: 'YYYY/MM/DD',
+                        altField: $valueInput,
+                        altFormat: 'YYYY-MM-DD',
+                        observer: true,
+                        autoClose: true,
+                        navigator: {
                             enabled: true,
+                            scroll: {
+                                enabled: false
+                            },
                             text: {
-                                fa: 'امروز',
-                                en: 'Today'
+                                btnNextText: '>',
+                                btnPrevText: '<'
                             }
+                        },
+                        toolbox: {
+                            enabled: true,
+                            calendarSwitch: {
+                                enabled: false,
+                            },
+                            todayButton: {
+                                enabled: true,
+                                text: {
+                                    fa: 'امروز',
+                                    en: 'Today'
+                                }
+                            }
+                        },
+                        onSelect: function() {
+                            // The altField is updated automatically.
+                            // We can trigger a change event on the hidden field if needed for other scripts.
+                            $valueInput.trigger('change');
                         }
-                    },
-                    onSelect: function(unix) {
-                        const input = $(this.el);
-                        // Convert unix timestamp to a standard YYYY-MM-DD format
-                        const date = new Date(unix);
-                        const year = date.getFullYear();
-                        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-                        const day = date.getDate().toString().padStart(2, '0');
-                        input.attr('data-gregorian-date', `${year}-${month}-${day}`);
-                        calculateProfileCompleteness();
-                    }
+                    });
                 });
             }
 
