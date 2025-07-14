@@ -1285,33 +1285,48 @@
             }
 
             function validateStep(step) {
-                if (!activeForm || !activeSteps.length) return true; 
+                if (!activeForm || !activeSteps.length) return true;
                 let isValid = true;
                 const currentStepElement = activeSteps[step - 1];
                 if (!currentStepElement) return true;
                 const currentStepFields = currentStepElement.querySelectorAll('[required]');
-                
+
                 for (const field of currentStepFields) {
                     let fieldIsValid = true;
-                    let errorMessage = `لطفاً فیلد "${getLabelForField(field)}" را به درستی تکمیل کنید.`;
-                    
-                    // Skip validation for fields in hidden containers
+                    let errorMessage = `لطفاً فیلد "${getLabelForField(field)}" را تکمیل کنید.`;
+
                     if (field.closest('.hidden')) {
                         continue;
                     }
 
-                    if (currentUserRole === 'employer' && field.closest('#employerCompanyFields')) {
-                        if (!document.getElementById('employerHasCompany').checked) {
-                            continue; 
-                        }
+                    if (currentUserRole === 'employer' && field.closest('#employerCompanyFields') && !document.getElementById('employerHasCompany').checked) {
+                        continue;
                     }
 
-                    if (field.id === 'engineerNationalId' || field.id === 'employerNationalId') {
+                    if (field.classList.contains('jalali-datepicker')) {
+                        const gregorianValue = field.getAttribute('data-gregorian-date');
+                        if (!gregorianValue) {
+                            errorMessage = `لطفاً "${getLabelForField(field)}" را از تقویم انتخاب کنید.`;
+                            fieldIsValid = false;
+                        } else if (field.id === 'engineerDob' || field.id === 'employerDob') {
+                            const birthDate = new Date(gregorianValue);
+                            const today = new Date();
+                            let age = today.getFullYear() - birthDate.getFullYear();
+                            const m = today.getMonth() - birthDate.getMonth();
+                            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                                age--;
+                            }
+                            if (age < 18) {
+                                errorMessage = "سن شما باید حداقل ۱۸ سال باشد.";
+                                fieldIsValid = false;
+                            }
+                        }
+                    } else if (field.id === 'engineerNationalId' || field.id === 'employerNationalId') {
                         const nationalIdValue = convertPersianToEnglishDigits(field.value);
-                        if (!nationalIdValue || !/^\d{10}$/.test(nationalIdValue)) { 
+                        if (!nationalIdValue || !/^\d{10}$/.test(nationalIdValue)) {
                             errorMessage = "کد ملی باید ۱۰ رقم باشد.";
                             fieldIsValid = false;
-                        } else if (!isValidKodemelli(nationalIdValue)) { 
+                        } else if (!isValidKodemelli(nationalIdValue)) {
                             errorMessage = "کد ملی وارد شده معتبر نیست.";
                             fieldIsValid = false;
                         }
@@ -1321,50 +1336,31 @@
                             errorMessage = "کدپستی باید ۱۰ رقم باشد.";
                             fieldIsValid = false;
                         }
-                    } else if (field.id === 'engineerPhone' || field.id === 'officePhone') { 
+                    } else if (field.id === 'engineerPhone' || field.id === 'officePhone') {
                         const phoneValue = convertPersianToEnglishDigits(field.value);
                         if (!phoneValue || !/^0\d{10}$/.test(phoneValue)) {
                             errorMessage = `فیلد "${getLabelForField(field)}" باید ۱۱ رقم با کد شهرستان (شروع با ۰) باشد.`;
                             fieldIsValid = false;
                         }
-                    } else if (field.classList.contains('jalali-datepicker')) {
-                        const dobValue = field.getAttribute('data-gregorian-date');
-                        if (dobValue) {
-                            if (field.id === 'engineerDob' || field.id === 'employerDob') {
-                                const birthDate = new Date(dobValue);
-                                const today = new Date();
-                                let age = today.getFullYear() - birthDate.getFullYear();
-                                const m = today.getMonth() - birthDate.getMonth();
-                                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-                                    age--;
-                                }
-                                if (age < 18) {
-                                    errorMessage = "سن شما باید حداقل ۱۸ سال باشد.";
-                                    fieldIsValid = false;
-                                }
-                            }
-                        } else if (field.required) { 
-                            fieldIsValid = false; 
-                        }
                     } else if (field.type === 'file' && field.required && field.files.length === 0) {
                         errorMessage = `لطفاً فایل "${getLabelForField(field)}" را بارگذاری کنید.`;
                         fieldIsValid = false;
-                    } else if (!field.checkValidity()) { 
-                        if (field.title && field.id !== 'engineerNationalId' && field.id !== 'employerNationalId') errorMessage += ` (${field.title})`; 
+                    } else if (!field.checkValidity()) {
+                        if (field.title) errorMessage += ` (${field.title})`;
                         fieldIsValid = false;
                     }
 
                     if (!fieldIsValid) {
                         showMessageModal(errorMessage, 'error');
                         field.focus();
-                        field.classList.add('border-red-500', 'ring-1', 'ring-red-500'); 
+                        field.classList.add('border-red-500', 'ring-1', 'ring-red-500');
                         setTimeout(() => field.classList.remove('border-red-500', 'ring-1', 'ring-red-500'), 3000);
                         isValid = false;
-                        break; 
+                        break;
                     }
                 }
-                
-                if (currentUserRole === 'engineer' && step === 3 && isValid) {
+
+                if (isValid && currentUserRole === 'engineer' && step === 3) {
                     const hasDesignCb = document.getElementById('hasDesignLicense');
                     const designGradeSelect = document.getElementById('designLicenseGrade');
                     const hasSupervisionCb = document.getElementById('hasSupervisionLicense');
@@ -1378,34 +1374,30 @@
 
                     if (!(designSelected || supervisionSelected || executionSelected)) {
                         showMessageModal("لطفاً حداقل یکی از صلاحیت‌های پروانه (طراحی، نظارت یا اجرا) را به همراه پایه آن به طور کامل انتخاب کنید.", 'error');
-                        if (hasDesignCb.checked && !designGradeSelect.value) designGradeSelect.focus();
-                        else if (hasSupervisionCb.checked && !supervisionGradeSelect.value) supervisionGradeSelect.focus();
-                        else if (hasExecutionCb.checked && !executionGradeSelect.value) executionGradeSelect.focus();
-                        else hasDesignCb.focus(); 
                         isValid = false;
                     }
-                    
-                    if (isValid) { 
-                        const licenseStartDateInput = document.getElementById('licenseStartDate');
-                        const licenseValidityInput = document.getElementById('licenseValidity'); 
-                        const gregorianStartDate = licenseStartDateInput.getAttribute('data-gregorian-date');
-                        if (gregorianStartDate && licenseValidityInput.value) {
-                            const startDate = new Date(gregorianStartDate);
-                            const validityYears = parseInt(licenseValidityInput.value, 10);
-                            if (!isNaN(validityYears)) {
-                                const expiryDate = new Date(startDate);
-                                expiryDate.setFullYear(startDate.getFullYear() + validityYears);
-                                const today = new Date();
-                                const oneMonthFromToday = new Date(); 
-                                oneMonthFromToday.setMonth(today.getMonth() + 1);
-                                expiryDate.setHours(0,0,0,0);
-                                oneMonthFromToday.setHours(0,0,0,0);
+                }
+                
+                if (isValid && currentUserRole === 'engineer' && step === 3) {
+                    const licenseStartDateInput = document.getElementById('licenseStartDate');
+                    const licenseValidityInput = document.getElementById('licenseValidity');
+                    const gregorianStartDate = licenseStartDateInput.getAttribute('data-gregorian-date');
+                    if (gregorianStartDate && licenseValidityInput.value) {
+                        const startDate = new Date(gregorianStartDate);
+                        const validityYears = parseInt(licenseValidityInput.value, 10);
+                        if (!isNaN(validityYears)) {
+                            const expiryDate = new Date(startDate);
+                            expiryDate.setFullYear(startDate.getFullYear() + validityYears);
+                            const today = new Date();
+                            const oneMonthFromToday = new Date();
+                            oneMonthFromToday.setMonth(today.getMonth() + 1);
+                            expiryDate.setHours(0, 0, 0, 0);
+                            oneMonthFromToday.setHours(0, 0, 0, 0);
 
-                                if (expiryDate < oneMonthFromToday) {
-                                    showMessageModal("اعتبار پروانه باید حداقل برای یک ماه از تاریخ امروز معتبر باشد.", 'error');
-                                    licenseValidityInput.focus();
-                                    isValid = false;
-                                }
+                            if (expiryDate < oneMonthFromToday) {
+                                showMessageModal("اعتبار پروانه باید حداقل برای یک ماه از تاریخ امروز معتبر باشد.", 'error');
+                                licenseValidityInput.focus();
+                                isValid = false;
                             }
                         }
                     }
@@ -1624,7 +1616,7 @@
                 const map = L.map(mapId).setView(defaultCoords, defaultZoom);
                 maps[mapId + 'Instance'] = map; 
             
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{y}.png', {
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; OpenStreetMap contributors',
                     maxZoom: 19
                 }).addTo(map);
@@ -2362,6 +2354,7 @@
                     },
                     onSelect: function(unix) {
                         const input = $(this.el);
+                        // Convert unix timestamp to a standard YYYY-MM-DD format
                         const date = new Date(unix);
                         const year = date.getFullYear();
                         const month = (date.getMonth() + 1).toString().padStart(2, '0');
