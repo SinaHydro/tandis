@@ -1323,19 +1323,21 @@
                         errorMessage = `فیلد "${getLabelForField(field)}" باید ۱۱ رقم با کد شهرستان (شروع با ۰) باشد.`;
                         fieldIsValid = false;
                     }
-                } else if (field.id === 'engineerDob' || field.id === 'employerDob') {
+                } else if (field.classList.contains('jalali-datepicker')) {
                     const dobValue = field.getAttribute('data-gregorian-date');
                     if (dobValue) {
-                        const birthDate = new Date(dobValue);
-                        const today = new Date();
-                        let age = today.getFullYear() - birthDate.getFullYear();
-                        const m = today.getMonth() - birthDate.getMonth();
-                        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-                            age--;
-                        }
-                        if (age < 18) {
-                            errorMessage = "سن شما باید حداقل ۱۸ سال باشد.";
-                            fieldIsValid = false;
+                        if (field.id === 'engineerDob' || field.id === 'employerDob') {
+                            const birthDate = new Date(dobValue);
+                            const today = new Date();
+                            let age = today.getFullYear() - birthDate.getFullYear();
+                            const m = today.getMonth() - birthDate.getMonth();
+                            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                                age--;
+                            }
+                            if (age < 18) {
+                                errorMessage = "سن شما باید حداقل ۱۸ سال باشد.";
+                                fieldIsValid = false;
+                            }
                         }
                     } else if (field.required) { 
                          fieldIsValid = false; 
@@ -2127,6 +2129,7 @@
                     const formElements = stepContainer.querySelectorAll('input:not([type="file"]), select, textarea');
                     formElements.forEach(el => {
                         if (el.classList.contains('jalali-datepicker')) {
+                            // Send the gregorian date for backend processing
                             stepDataObject[el.name] = el.getAttribute('data-gregorian-date') || '';
                         } else if (el.type === 'checkbox') {
                             stepDataObject[el.name] = el.checked;
@@ -2339,6 +2342,8 @@
                 kamadatepicker(input.id, {
                     ...datePickerOptions,
                     onselect: (e) => {
+                        // When a date is selected, store the Gregorian date in a data attribute
+                        // The input's value will be the Jalali date (handled by the library)
                         if (e.gregorianDate) {
                             const year = e.gregorianDate.getFullYear();
                             const month = (e.gregorianDate.getMonth() + 1).toString().padStart(2, '0');
@@ -2347,6 +2352,7 @@
                         } else {
                              input.setAttribute('data-gregorian-date', '');
                         }
+                        // Manually trigger validation or completeness check if needed
                         calculateProfileCompleteness();
                     }
                 });
@@ -2355,7 +2361,7 @@
 
 
         // --- INITIAL PAGE LOAD ---
-        document.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('load', () => {
             getUserDataFromURL();
             showWelcomeScreen(); // Always show the welcome screen. Logic for pre-selection is inside.
             
