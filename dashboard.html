@@ -196,6 +196,7 @@
                 max-width: 100%;
                 height: auto;
             }
+            /* This makes the cropper selection look like a circle */
             .cropper-view-box {
                 box-shadow: 0 0 0 1px #39f;
                 border-radius: 50%;
@@ -203,6 +204,14 @@
             }
             .cropper-face {
                 background-color: inherit !important;
+            }
+            /* Hide the lines and side handles to only show corner handles */
+            .cropper-line,
+            .cropper-point.point-n,
+            .cropper-point.point-s,
+            .cropper-point.point-e,
+            .cropper-point.point-w {
+                display: none;
             }
         </style>
     </head>
@@ -2198,9 +2207,13 @@
                 const result = await response.json();
                 if (result.status === "success") {
                     loadingModal.style.display = 'none';
-                    showMessageModal("اطلاعات پروفایل با موفقیت ارسال و ذخیره شد!", 'success');
+                    showMessageModal("اطلاعات پروفایل با موفقیت ارسال شد! در حال انتقال شما...", 'success');
                     activeForm.reset();
-                    setTimeout(() => window.location.reload(), 3000);
+                    // --- REDIRECT ON SUCCESS ---
+                    setTimeout(() => {
+                        // Redirect to the next work page. Change the URL to your desired destination.
+                        window.location.href = './next-dashboard.html'; // <-- آدرس صفحه کاری بعدی را در اینجا قرار دهید
+                    }, 3000);
                 } else {
                     throw new Error(result.message || "خطای ناشناخته در پردازش اطلاعات در سرور.");
                 }
@@ -2259,6 +2272,7 @@
                     if(cropper) {
                         cropper.destroy();
                     }
+                    // Initialize Cropper with movable and resizable options
                     cropper = new Cropper(imageToCrop, {
                         aspectRatio: 1,
                         viewMode: 1,
@@ -2270,8 +2284,8 @@
                         guides: true,
                         center: true,
                         highlight: false,
-                        cropBoxMovable: false,
-                        cropBoxResizable: false,
+                        cropBoxMovable: true, // Allow moving the crop box
+                        cropBoxResizable: true, // Allow resizing the crop box
                         toggleDragModeOnDblclick: false,
                     });
                 };
