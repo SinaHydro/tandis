@@ -5,10 +5,17 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>تکمیل پروفایل - نظام تندیس</title>
         <script src="https://cdn.tailwindcss.com"></script>
+        <!-- Leaflet (for maps) -->
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+        <!-- Font Awesome (for icons) -->
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+        <!-- Vazirmatn Font -->
         <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css"/>
+        <!-- Cropper.js (for image cropping) -->
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
         <style>
             body { font-family: 'Vazirmatn', 'Tahoma', sans-serif; background-color: #f8fafc; }
             .form-step { display: none; }
@@ -173,6 +180,29 @@
             @keyframes spin {
                 0% { transform: rotate(0deg); }
                 100% { transform: rotate(360deg); }
+            }
+            /* Cropper Modal Styles */
+            #cropperModal .modal-content {
+                max-width: 90vw;
+                width: 600px;
+            }
+            #cropperContainer {
+                width: 100%;
+                height: 400px;
+                overflow: hidden;
+                background: #f1f1f1;
+            }
+            #cropperContainer img {
+                max-width: 100%;
+                height: auto;
+            }
+            .cropper-view-box {
+                box-shadow: 0 0 0 1px #39f;
+                border-radius: 50%;
+                outline: 0;
+            }
+            .cropper-face {
+                background-color: inherit !important;
             }
         </style>
     </head>
@@ -787,7 +817,7 @@
         </div>
 
         <!-- Loading Modal -->
-        <div id="loadingModal" class="modal" style="display: none; background-color: rgba(15, 23, 42, 0.8); z-index: 2000; align-items:center; justify-content:center;">
+        <div id="loadingModal" class="modal" style="display: none; background-color: rgba(255, 255, 255, 0.8); z-index: 2000; align-items:center; justify-content:center;">
             <div class="flex flex-col items-center bg-white p-8 rounded-xl shadow-2xl text-center">
                 <div class="flex items-center justify-center mb-4">
                     <img src="https://tandis.shahraavand.ir/images/new-TLogo_B.avif" alt="Tandis Shahraavand Logo" class="h-16 w-16" width="64" height="64" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/64x64/1D4ED8/FFFFFF?text=T';">
@@ -800,6 +830,21 @@
                 <p id="loadingModalText" class="text-lg font-semibold text-gray-700">لطفا منتظر بمانید...</p>
             </div>
         </div>
+        
+        <!-- Cropper Modal -->
+        <div id="cropperModal" class="modal">
+            <div class="modal-content">
+                <h3 class="text-xl font-bold mb-4">برش و تنظیم عکس پروفایل</h3>
+                <div id="cropperContainer">
+                    <img id="imageToCrop" src="">
+                </div>
+                <div class="mt-6 flex justify-center gap-4">
+                    <button id="cancelCropButton" class="btn btn-secondary">انصراف</button>
+                    <button id="cropButton" class="btn btn-primary">برش و ذخیره</button>
+                </div>
+            </div>
+        </div>
+
 
         <script type="module">
         // --- CONFIGURATION ---
@@ -817,6 +862,8 @@
             gender: "مرد" 
         };
         let firstClickRole = null; 
+        let cropper = null;
+        let croppedImageBlob = null;
 
         // --- DOM ELEMENTS ---
         const welcomeScreen = document.getElementById('welcomeScreen');
@@ -849,6 +896,11 @@
         
         const loadingModal = document.getElementById('loadingModal');
         const loadingModalText = document.getElementById('loadingModalText');
+
+        const cropperModal = document.getElementById('cropperModal');
+        const imageToCrop = document.getElementById('imageToCrop');
+        const cropButton = document.getElementById('cropButton');
+        const cancelCropButton = document.getElementById('cancelCropButton');
 
         const adBannerImage = document.getElementById('adBannerImage');
         const adBannerText = document.getElementById('adBannerText');
@@ -1698,22 +1750,6 @@
         const licenseNumberInputForSidebar = document.getElementById('licenseNumber');
         if(licenseNumberInputForSidebar) licenseNumberInputForSidebar.addEventListener('input', updateSidebarName);
 
-        if (applicantImageInput && sidebarProfileImagePreview) {
-            applicantImageInput.addEventListener('change', function(event) {
-                const file = event.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        sidebarProfileImagePreview.src = e.target.result;
-                    }
-                    reader.readAsDataURL(file);
-                } else { 
-                     sidebarProfileImagePreview.src = "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740"; 
-                }
-                calculateProfileCompleteness(); 
-            });
-        }
-
         function handleFileUpload(inputId, previewContainerId) {
             const input = document.getElementById(inputId);
             const previewContainer = document.getElementById(previewContainerId);
@@ -2050,6 +2086,18 @@
                 reader.onerror = error => reject(error);
             });
         }
+        
+        function blobToBase64(blob) {
+             return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onload = () => {
+                    resolve(reader.result.split(',')[1]);
+                };
+                reader.onerror = error => reject(error);
+            });
+        }
+
 
         async function prepareAndSubmitData() {
             loadingModalText.textContent = "لطفا منتظر بمانید ...";
@@ -2100,15 +2148,26 @@
 
             try {
                 loadingModalText.textContent = "در حال آماده سازی اطلاعات...";
+                
                 // 3. Process all file inputs from the entire form
                 const allFileInputs = activeForm.querySelectorAll('input[type="file"]');
                 for (const input of allFileInputs) {
-                    if (input.files.length > 0) {
-                        await processFile(input.id, input.name);
+                    await processFile(input.id, input.name);
+                }
+                
+                // Special handling for the cropped profile image
+                if (croppedImageBlob) {
+                    try {
+                        const base64Data = await blobToBase64(croppedImageBlob);
+                        filesData['applicantImage'] = {
+                            fileName: 'profile_image.png',
+                            mimeType: croppedImageBlob.type,
+                            base64Data: base64Data
+                        };
+                    } catch (error) {
+                         throw new Error(`خطا در پردازش عکس پروفایل.`);
                     }
                 }
-                // Don't forget the sidebar profile image
-                await processFile('applicantImage', 'applicantImage');
                 
                 // 4. Construct the final payload
                 const payload = {
@@ -2156,11 +2215,14 @@
 
 
         submitButton.addEventListener('click', () => {
+             if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE' || !GOOGLE_SCRIPT_URL) {
+                showMessageModal("خطا: URL اسکریپت گوگل تنظیم نشده است. لطفاً با پشتیبانی تماس بگیرید.", 'error'); 
+                return;
+            }
 
-            // New check for mandatory profile picture
-            const applicantImageInput = document.getElementById('applicantImage');
-            if (applicantImageInput.files.length === 0) {
-                showMessageModal('لطفاً عکس پروفایل خود را از نوار کناری بارگذاری کنید. این فیلد اجباری است.', 'error');
+            // New check for mandatory profile picture (using the cropped blob)
+            if (!croppedImageBlob) {
+                showMessageModal('لطفاً عکس پروفایل خود را از نوار کناری بارگذاری و برش دهید. این فیلد اجباری است.', 'error');
                 const sidebarImgContainer = sidebarProfileImagePreview.parentElement;
                 sidebarImgContainer.classList.add('ring-2', 'ring-red-500');
                 setTimeout(() => sidebarImgContainer.classList.remove('ring-2', 'ring-red-500'), 3000);
@@ -2186,6 +2248,63 @@
             prepareAndSubmitData();
         });
         
+        // --- CROPPER LOGIC ---
+        applicantImageInput.addEventListener('change', (e) => {
+            const files = e.target.files;
+            if (files && files.length > 0) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    imageToCrop.src = reader.result;
+                    cropperModal.style.display = 'block';
+                    if(cropper) {
+                        cropper.destroy();
+                    }
+                    cropper = new Cropper(imageToCrop, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        background: false,
+                        responsive: true,
+                        restore: true,
+                        checkOrientation: true,
+                        modal: true,
+                        guides: true,
+                        center: true,
+                        highlight: false,
+                        cropBoxMovable: false,
+                        cropBoxResizable: false,
+                        toggleDragModeOnDblclick: false,
+                    });
+                };
+                reader.readAsDataURL(files[0]);
+            }
+        });
+
+        cancelCropButton.addEventListener('click', () => {
+            cropperModal.style.display = 'none';
+            if(cropper) {
+                cropper.destroy();
+            }
+            applicantImageInput.value = ''; // Clear the file input
+        });
+
+        cropButton.addEventListener('click', () => {
+            if (cropper) {
+                const canvas = cropper.getCroppedCanvas({
+                    width: 512, // Set a fixed output size for consistency
+                    height: 512,
+                    imageSmoothingQuality: 'high',
+                });
+                canvas.toBlob((blob) => {
+                    croppedImageBlob = blob; // Store the blob
+                    const imageUrl = URL.createObjectURL(blob);
+                    sidebarProfileImagePreview.src = imageUrl;
+                    cropperModal.style.display = 'none';
+                    cropper.destroy();
+                }, 'image/png');
+            }
+        });
+
+
         // --- INITIAL PAGE LOAD ---
         document.addEventListener('DOMContentLoaded', () => {
             getUserDataFromURL();
