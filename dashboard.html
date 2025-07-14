@@ -858,1521 +858,1522 @@
         </div>
 
 
-        <script type="module">
-        // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3df4j-LARK4vhExP6gtuJRw7P7bsTbVRwi98WwHm6-KlTQRWmhjlqk9V925FggPfH/exec'; // <-- آدرس وب اپ خود را اینجا قرار دهید
-        
-        // --- STATE VARIABLES ---
-        let currentStep = 1;
-        let totalSteps = 5; 
-        let currentUserRole = null; 
-        let initialUserData = { 
-            firstName: "", 
-            lastName: "",  
-            userType: "", 
-            email: "", 
-            gender: "مرد" 
-        };
-        let firstClickRole = null; 
-        let cropper = null;
-        let croppedImageBlob = null;
-
-        // --- DOM ELEMENTS ---
-        const welcomeScreen = document.getElementById('welcomeScreen');
-        const mainFormView = document.getElementById('mainFormView');
-        const welcomeMessageElLine1 = document.getElementById('welcomeMessageLine1');
-        const welcomeMessageElLine2 = document.getElementById('welcomeMessageLine2');
-        const selectEngineerRoleButton = document.getElementById('selectEngineerRoleBtn'); 
-        const selectEmployerRoleButton = document.getElementById('selectEmployerRoleBtn'); 
-        const changeRoleButton = document.getElementById('changeRoleButton');
-
-        const engineerFormContainer = document.getElementById('engineerFormContainer');
-        const employerFormContainer = document.getElementById('employerFormContainer');
-        const engineerForm = document.getElementById('engineerForm');
-        const employerForm = document.getElementById('employerForm');
-        
-        let activeForm = null; 
-        let activeSteps = []; 
-
-        const stepsNavigationMobile = document.getElementById('stepsNavigationMobile');
-        const stepsNavigationDesktop = document.getElementById('stepsNavigationDesktop');
-        const sidebarProfileImagePreview = document.getElementById('sidebarProfileImagePreview');
-        const applicantImageInput = document.getElementById('applicantImage'); 
-        const sidebarProfileName = document.getElementById('sidebarProfileName');
-        const sidebarUserEmail = document.getElementById('sidebarUserEmail');
-        const sidebarEngineerDiscipline = document.getElementById('sidebarEngineerDiscipline');
-
-        const prevButton = document.getElementById('prevButton');
-        const nextButton = document.getElementById('nextButton');
-        const submitButton = document.getElementById('submitButton');
-        
-        const loadingModal = document.getElementById('loadingModal');
-        const loadingModalText = document.getElementById('loadingModalText');
-
-        const cropperModal = document.getElementById('cropperModal');
-        const imageToCrop = document.getElementById('imageToCrop');
-        const cropButton = document.getElementById('cropButton');
-        const cancelCropButton = document.getElementById('cancelCropButton');
-
-        const adBannerImage = document.getElementById('adBannerImage');
-        const adBannerText = document.getElementById('adBannerText');
-        
-        const maps = {}; 
-
-        const stepIndicatorDataEngineer = [
-            { id: 1, icon: "fa-user", label: "۱. مشخصات فردی", recommendation: "تکمیل دقیق اطلاعات هویتی، اولین گام برای ساخت یک پروفایل حرفه‌ای است.", detailedExplanation: "<strong class='text-red-600'>توجه: بارگذاری عکس پروفایل (از طریق پنل کناری) اجباری و حجم آن باید کمتر از ۲۵۰ کیلوبایت باشد.</strong><br>در این بخش، نام، نام خانوادگی، کدملی، تاریخ تولد و جنسیت خود را وارد نمایید. شماره موبایل صحیح برای اطلاع‌رسانی‌ها ضروری است." }, 
-            { id: 2, icon: "fa-map-marker-alt", label: "۲. اطلاعات تماس", recommendation: "اطلاعات تماس کامل و دقیق، دسترسی کارفرمایان به شما را تسهیل می‌کند.", detailedExplanation: "شماره تلفن ثابت (۱۱ رقمی با کد شهرستان)، کدپستی (۱۰ رقمی)، استان، شهر و آدرس محل سکونت خود را وارد کنید. سپس موقعیت دقیق محل سکونت خود را روی نقشه انتخاب نمایید." }, 
-            { id: 3, icon: "fa-id-card", label: "۳. اطلاعات حرفه‌ای", recommendation: "ارائه اطلاعات دقیق حرفه‌ای و پروانه، اعتبار شما را به عنوان یک متخصص افزایش می‌دهد.", detailedExplanation: "تاریخ اولین صدور پروانه، تاریخ شروع و مدت اعتبار پروانه، شماره پروانه (با فرمت صحیح مانند 0-13-30-012345)، شماره عضویت و استان فعالیت پروانه را وارد کنید. سپس برای هر یک از صلاحیت‌های طراحی، نظارت و اجرا، پایه و نوع فعالیت (حقیقی، حقوقی یا عدم فعالیت در آن صلاحیت) را مشخص نمایید. انتخاب حداقل یکی از صلاحیت‌ها به همراه پایه آن الزامی است. بر اساس انتخاب شما، فیلدهای مربوط به اطلاعات شرکت (برای فعالیت حقوقی) یا دفتر کار (برای فعالیت حقیقی) نمایش داده خواهد شد." }, 
-            { id: 4, icon: "fa-cloud-upload-alt", label: "۴. آپلود مدارک", recommendation: "آپلود مدارک واضح و صحیح، گامی مهم در جهت تکمیل و تایید نهایی پروفایل شماست.", detailedExplanation: "فایل PDF پروانه اشتغال و تصویر کارت ملی را بارگذاری کنید. دقت کنید که هر فایل باید کمتر از ۲۵۰ کیلوبایت حجم داشته باشد." }, 
-            { id: 5, icon: "fa-check-circle", label: "۵. تأیید نهایی", recommendation: "این آخرین مرحله است! اطلاعات خود را به دقت بررسی کنید.", detailedExplanation: "یک بار دیگر تمامی اطلاعات وارد شده در مراحل قبل را مرور کنید. در صورت اطمینان از صحت کامل اطلاعات، دکمه «ثبت نهایی اطلاعات» را برای ارسال پروفایل خود کلیک کنید." }
-        ];
-        const advertisementDataEngineer = [
-            { step: 1, imageUrl: 'https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Y29tcGFueXxlbnwwfHwwfHx8MA%3D%3D', text: 'با تکمیل دقیق اطلاعات، به جامعه‌ای متحد از مهندسان برای ارتقاء صنعت ساختمان بپیوندید.' },
-            { step: 2, imageUrl: 'https://images.unsplash.com/photo-1596524430615-b46475ddff6e?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Y29udGFjdCUyMHVzfGVufDB8fDB8fHww', text: 'اطلاعات تماس شما، پلی برای همکاری‌های سازنده و دستیابی به فرصت‌های بهتر در بازار کار است.'},
-            { step: 3, imageUrl: 'https://images.unsplash.com/photo-1490351267196-b7a67e26e41b?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fGNvbXBhbnl8ZW58MHwxfDB8fHww', text: 'تخصص و صلاحیت شما، در کنار هم‌افزایی مهندسان، به تنظیم عادلانه حق‌الزحمه‌ها و تعادل در عرضه و تقاضا کمک می‌کند.' },
-            { step: 4, imageUrl: 'https://images.unsplash.com/photo-1622260872090-5c558010a67e?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGNvbGxhYm9yYXRpb258ZW58MHwxfDB8fHww', text: 'مدارک شما، سندی بر تعهد و حرفه‌ای‌گری شماست؛ با هم، جایگاه مهندسی را اعتلا می‌بخشیم.' },
-            { step: 5, imageUrl: 'https://images.unsplash.com/photo-1578357078586-491adf1aa5ba?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGNvbGxhYm9yYXRpb258ZW58MHwxfDB8fHww', text: 'با نهایی کردن پروفایل خود، به حرکتی جمعی برای بهبود صنعت ساختمان و احقاق حقوق مهندسین می‌پیوندید.' }
-        ];
-
-        const stepIndicatorDataEmployer = [
-            { id: 1, icon: "fa-user-tie", label: "۱. مشخصات فردی", recommendation: "تکمیل دقیق اطلاعات شناسایی، به ایجاد اعتماد و شفافیت در همکاری‌ها کمک می‌کند.", detailedExplanation: "<strong class='text-red-600'>توجه: بارگذاری عکس پروفایل (از طریق پنل کناری) اجباری و حجم آن باید کمتر از ۲۵۰ کیلوبایت باشد.</strong><br>نام، نام خانوادگی، کدملی، تاریخ تولد و جنسیت خود را به عنوان کارفرما وارد نمایید. شماره موبایل صحیح برای ارتباطات بعدی ضروری است." },
-            { id: 2, icon: "fa-address-book", label: "۲. اطلاعات تماس", recommendation: "ارائه اطلاعات تماس دقیق، ارتباط موثر مهندسین با شما را تضمین می‌کند.", detailedExplanation: "شماره تماس ثابت (۱۰ رقمی با کد شهرستان یا ۱۱ رقمی موبایل)، کدپستی (۱۰ رقمی)، استان، شهر و آدرس خود را وارد کنید. سپس موقعیت دقیق خود را روی نقشه انتخاب نمایید." }, 
-            { id: 3, icon: "fa-building", label: "۳. اطلاعات شرکت", recommendation: "معرفی کسب‌وکار یا شرکت شما (در صورت وجود) به شناخت بهتر مهندسین کمک خواهد کرد.", detailedExplanation: "اگر به عنوان شخص حقوقی (شرکت) فعالیت می‌کنید، گزینه «شرکت دارم» را انتخاب کرده و نام شرکت، شماره ثبت و آدرس آن را به همراه موقعیت مکانی دفتر شرکت روی نقشه مشخص کنید. در غیر این صورت، گزینه «شرکت ندارم» را انتخاب شده باقی بگذارید." },
-            { id: 4, icon: "fa-id-badge", label: "۴. آپلود مدارک", recommendation: "بارگذاری مدارک شناسایی، به اعتبارسنجی هویت شما به عنوان کارفرما کمک می‌کند.", detailedExplanation: "تصویر کارت ملی خود را بارگذاری کنید. ارائه رزومه کاری اختیاری است اما می‌تواند به شناخت بهتر شما کمک کند. دقت کنید که هر فایل باید کمتر از ۲۵۰ کیلوبایت حجم داشته باشد." }, 
-            { id: 5, icon: "fa-clipboard-check", label: "۵. تأیید نهایی", recommendation: "مرحله نهایی! لطفاً اطلاعات خود را برای آخرین بار بررسی کنید.", detailedExplanation: "پیش از ثبت نهایی، تمامی اطلاعات وارد شده در مراحل قبل را به دقت مرور کنید. در صورت اطمینان از صحت کامل اطلاعات، دکمه «ثبت نهایی اطلاعات» را برای ارسال پروفایل خود کلیک کنید." }
-        ];
-         const advertisementDataEmployer = [
-            { step: 1, imageUrl: 'https://plus.unsplash.com/premium_photo-1672759360872-791a5ba6e2cc?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8ZGlmZmVyZW50fGVufDB8fDB8fHww', text: 'اطلاعات دقیق شما، شروع یک همکاری شفاف و منصفانه با جامعه مهندسی برای پروژه‌های موفق است.' },
-            { step: 2, imageUrl: 'https://plus.unsplash.com/premium_photo-1687362298502-1881385c786f?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8dGVsZXBob25lfGVufDB8fDB8fHww', text: 'ارتباط موثر با شما، به مهندسان امکان می‌دهد تا بهترین خدمات را با در نظر گرفتن شرایط عادلانه ارائه دهند.' },
-            { step: 3, imageUrl: 'https://images.unsplash.com/photo-1713299429500-aaee4444fe56?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGJ1c3NpbmVzc3xlbnwwfDF8MHx8fDA%3D', text: 'همکاری با مهندسان متخصص، به تنظیم منطقی هزینه‌ها و ایجاد تعادل در بازار خدمات مهندسی کمک می‌کند.' },
-            { step: 4, imageUrl: 'https://images.unsplash.com/photo-1715865171871-e02c0b656825?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGlkJTIwY2FyZHxlbnwwfDF8MHx8fDA%3D', text: 'تعهد شما به شفافیت، در کنار تخصص مهندسان، زمینه‌ساز پروژه‌هایی با کیفیت و با رعایت حقوق طرفین خواهد بود.' },
-            { step: 5, imageUrl: 'https://images.unsplash.com/photo-1564846824194-346b7871b855?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8ZG9jdW1lbnR8ZW58MHwxfDB8fHww', text: 'با تکمیل اطلاعات، شما نیز در ایجاد بازاری سالم و مبتنی بر همکاری و احترام متقابل در صنعت ساختمان سهیم می‌شوید.' }
-        ];
-
-        // --- INITIALIZATION FUNCTIONS ---
-        function getUserDataFromURL() {
-            const params = new URLSearchParams(window.location.search);
-            initialUserData.email = params.get('email') || '';
-            initialUserData.firstName = params.get('firstName') || '';
-            initialUserData.lastName = params.get('lastName') || '';
-            initialUserData.userType = params.get('role') || ''; // 'engineer' or 'employer'
-        }
-
-        function showWelcomeScreen() {
-            welcomeScreen.style.display = 'flex';
-            mainFormView.style.display = 'none';
+        <script>
+        (function() {
+            // --- CONFIGURATION ---
+            const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3df4j-LARK4vhExP6gtuJRw7P7bsTbVRwi98WwHm6-KlTQRWmhjlqk9V925FggPfH/exec'; // <-- آدرس وب اپ خود را اینجا قرار دهید
             
-            let rolePrefix = "";
-            if (initialUserData.userType.toLowerCase() === "engineer") { 
-                rolePrefix = "مهندس ";
-            }
+            // --- STATE VARIABLES ---
+            let currentStep = 1;
+            let totalSteps = 5; 
+            let currentUserRole = null; 
+            let initialUserData = { 
+                firstName: "", 
+                lastName: "",  
+                userType: "", 
+                email: "", 
+                gender: "مرد" 
+            };
+            let firstClickRole = null; 
+            let cropper = null;
+            let croppedImageBlob = null;
 
-            welcomeMessageElLine1.textContent = `${rolePrefix}${initialUserData.firstName || ''} ${initialUserData.lastName || ''} عزیز، خوش آمدید!`;
+            // --- DOM ELEMENTS ---
+            const welcomeScreen = document.getElementById('welcomeScreen');
+            const mainFormView = document.getElementById('mainFormView');
+            const welcomeMessageElLine1 = document.getElementById('welcomeMessageLine1');
+            const welcomeMessageElLine2 = document.getElementById('welcomeMessageLine2');
+            const selectEngineerRoleButton = document.getElementById('selectEngineerRoleBtn'); 
+            const selectEmployerRoleButton = document.getElementById('selectEmployerRoleBtn'); 
+            const changeRoleButton = document.getElementById('changeRoleButton');
+
+            const engineerFormContainer = document.getElementById('engineerFormContainer');
+            const employerFormContainer = document.getElementById('employerFormContainer');
+            const engineerForm = document.getElementById('engineerForm');
+            const employerForm = document.getElementById('employerForm');
             
-            // Check if a role was passed from the previous page
-            if (initialUserData.userType.toLowerCase() === 'engineer') {
-                selectEngineerRoleButton.classList.add('active');
-                selectEmployerRoleButton.classList.remove('active');
-                firstClickRole = 'engineer'; // Set this to require a second click for confirmation
-                welcomeMessageElLine2.textContent = `لطفا با تایید دوباره نقش، ثبت نام را به پایان برسانید.`;
-            } else if (initialUserData.userType.toLowerCase() === 'employer') {
-                selectEmployerRoleButton.classList.add('active');
-                selectEngineerRoleButton.classList.remove('active');
-                firstClickRole = 'employer'; // Set this to require a second click for confirmation
-                welcomeMessageElLine2.textContent = `لطفا با تایید دوباره نقش، ثبت نام را به پایان برسانید.`;
-            } else {
-                // Default behavior if no role is passed
-                selectEngineerRoleButton.classList.remove('active');
-                selectEmployerRoleButton.classList.remove('active');
-                firstClickRole = null;
-                welcomeMessageElLine2.textContent = `لطفا با انتخاب نقش، ثبت نام را به پایان برسانید.`;
-            }
+            let activeForm = null; 
+            let activeSteps = []; 
 
-            updateSidebarName(); 
-        }
+            const stepsNavigationMobile = document.getElementById('stepsNavigationMobile');
+            const stepsNavigationDesktop = document.getElementById('stepsNavigationDesktop');
+            const sidebarProfileImagePreview = document.getElementById('sidebarProfileImagePreview');
+            const applicantImageInput = document.getElementById('applicantImage'); 
+            const sidebarProfileName = document.getElementById('sidebarProfileName');
+            const sidebarUserEmail = document.getElementById('sidebarUserEmail');
+            const sidebarEngineerDiscipline = document.getElementById('sidebarEngineerDiscipline');
 
-        function initializeFormForRole(role) {
-            currentUserRole = role; 
-            initialUserData.userType = role; 
-            currentStep = 1; 
-
-            welcomeScreen.style.display = 'none';
-            mainFormView.style.display = 'flex';
-
-            if (engineerForm) {
-                engineerForm.removeEventListener('input', calculateProfileCompleteness);
-                engineerForm.removeEventListener('change', calculateProfileCompleteness);
-            }
-            if (employerForm) {
-                employerForm.removeEventListener('input', calculateProfileCompleteness);
-                employerForm.removeEventListener('change', calculateProfileCompleteness);
-            }
-
-            if (role === 'engineer') {
-                activeForm = engineerForm;
-                activeSteps = Array.from(engineerFormContainer.querySelectorAll('.form-step'));
-                totalSteps = stepIndicatorDataEngineer.length;
-                engineerFormContainer.classList.remove('hidden');
-                employerFormContainer.classList.add('hidden');
-                document.getElementById('engineerFirstName').value = initialUserData.firstName || '';
-                document.getElementById('engineerLastName').value = initialUserData.lastName || '';
-                const engineerGenderInput = document.getElementById('engineerGender');
-                const engineerGenderToggle = document.getElementById('engineerGenderToggle');
-                engineerGenderInput.value = initialUserData.gender || 'مرد'; 
-                engineerGenderToggle.textContent = engineerGenderInput.value;
-                const engineerPostalCodeInput = document.getElementById('engineerPostalCode');
-                if (engineerPostalCodeInput) engineerPostalCodeInput.value = ''; 
-                const engineerPhoneInput = document.getElementById('engineerPhone');
-                if (engineerPhoneInput) engineerPhoneInput.value = ''; 
-                // Initialize professional info visibility
-                updateProfessionalInfoVisibility();
-            } else if (role === 'employer') {
-                activeForm = employerForm;
-                activeSteps = Array.from(employerFormContainer.querySelectorAll('.form-step'));
-                totalSteps = stepIndicatorDataEmployer.length;
-                employerFormContainer.classList.remove('hidden');
-                engineerFormContainer.classList.add('hidden');
-                document.getElementById('employerFirstName').value = initialUserData.firstName || '';
-                document.getElementById('employerLastName').value = initialUserData.lastName || '';
-                const employerPostalCodeInput = document.getElementById('employerPostalCode');
-                 if (employerPostalCodeInput) employerPostalCodeInput.value = ''; 
-                const employerGenderInput = document.getElementById('employerGender');
-                const employerGenderToggle = document.getElementById('employerGenderToggle');
-                employerGenderInput.value = initialUserData.gender || 'مرد'; 
-                employerGenderToggle.textContent = employerGenderInput.value;
-            }
+            const prevButton = document.getElementById('prevButton');
+            const nextButton = document.getElementById('nextButton');
+            const submitButton = document.getElementById('submitButton');
             
-            if (activeForm) {
-                activeForm.addEventListener('input', calculateProfileCompleteness);
-                activeForm.addEventListener('change', calculateProfileCompleteness);
-            }
-            if(sidebarUserEmail) sidebarUserEmail.textContent = initialUserData.email || 'ایمیل ثبت نشده';
+            const loadingModal = document.getElementById('loadingModal');
+            const loadingModalText = document.getElementById('loadingModalText');
 
-            updateSidebarName(); 
-            populateStepIndicators();
-            updateStepDescriptions(); 
-            updateStepView();
-            firstClickRole = null; 
-        }
-        
-        selectEngineerRoleButton.addEventListener('click', () => {
-            if (firstClickRole === 'engineer') {
-                initializeFormForRole('engineer');
-            } else {
-                firstClickRole = 'engineer';
-                selectEngineerRoleButton.classList.add('active');
-                selectEmployerRoleButton.classList.remove('active');
-                welcomeMessageElLine2.textContent = `برای تأیید نقش مهندس، دوباره کلیک کنید.`;
-            }
-        });
-        selectEmployerRoleButton.addEventListener('click', () => {
-             if (firstClickRole === 'employer') {
-                initializeFormForRole('employer');
-            } else {
-                firstClickRole = 'employer';
-                selectEmployerRoleButton.classList.add('active');
-                selectEngineerRoleButton.classList.remove('active');
-                welcomeMessageElLine2.textContent = `برای تأیید نقش کارفرما، دوباره کلیک کنید.`;
-            }
-        });
+            const cropperModal = document.getElementById('cropperModal');
+            const imageToCrop = document.getElementById('imageToCrop');
+            const cropButton = document.getElementById('cropButton');
+            const cancelCropButton = document.getElementById('cancelCropButton');
 
-        changeRoleButton.addEventListener('click', showWelcomeScreen);
-
-        function createStepIndicatorDOM(stepData, isMobile) {
-            const indicator = document.createElement('div');
-            indicator.id = `step-indicator-${currentUserRole}-${isMobile ? 'm' : 'd'}-${stepData.id}`;
-            indicator.className = 'step-indicator';
-            indicator.innerHTML = `
-                <div class="step-icon-container"><i class="fas ${stepData.icon} step-icon"></i></div>
-                <span class="step-label">${stepData.label}</span>
-            `;
-            return indicator;
-        }
-
-        function populateStepIndicators() {
-            stepsNavigationMobile.innerHTML = '';
-            stepsNavigationDesktop.innerHTML = '';
-            const currentStepData = currentUserRole === 'engineer' ? stepIndicatorDataEngineer : stepIndicatorDataEmployer;
+            const adBannerImage = document.getElementById('adBannerImage');
+            const adBannerText = document.getElementById('adBannerText');
             
-            currentStepData.forEach(data => {
-                stepsNavigationMobile.appendChild(createStepIndicatorDOM(data, true));
-                stepsNavigationDesktop.appendChild(createStepIndicatorDOM(data, false)); 
-            });
-        }
+            const maps = {}; 
 
-        function updateStepDescriptions() {
-            const currentStepDescData = currentUserRole === 'engineer' ? stepIndicatorDataEngineer : stepIndicatorDataEmployer;
-            currentStepDescData.forEach(stepInfo => {
-                const containerId = `stepDescriptionContainer-${currentUserRole}-${stepInfo.id}`;
-                const container = document.getElementById(containerId);
-                if (container) {
-                    container.innerHTML = `
-                        <p class="text-sm text-slate-800 font-semibold mb-2">${stepInfo.recommendation}</p>
-                        <hr class="my-2 border-sky-300">
-                        <p class="text-xs text-slate-600 leading-relaxed"><i class="fas fa-info-circle mr-1 ml-2 text-sky-600"></i>${stepInfo.detailedExplanation}</p>
-                    `;
+            const stepIndicatorDataEngineer = [
+                { id: 1, icon: "fa-user", label: "۱. مشخصات فردی", recommendation: "تکمیل دقیق اطلاعات هویتی، اولین گام برای ساخت یک پروفایل حرفه‌ای است.", detailedExplanation: "<strong class='text-red-600'>توجه: بارگذاری عکس پروفایل (از طریق پنل کناری) اجباری و حجم آن باید کمتر از ۲۵۰ کیلوبایت باشد.</strong><br>در این بخش، نام، نام خانوادگی، کدملی، تاریخ تولد و جنسیت خود را وارد نمایید. شماره موبایل صحیح برای اطلاع‌رسانی‌ها ضروری است." }, 
+                { id: 2, icon: "fa-map-marker-alt", label: "۲. اطلاعات تماس", recommendation: "اطلاعات تماس کامل و دقیق، دسترسی کارفرمایان به شما را تسهیل می‌کند.", detailedExplanation: "شماره تلفن ثابت (۱۱ رقمی با کد شهرستان)، کدپستی (۱۰ رقمی)، استان، شهر و آدرس محل سکونت خود را وارد کنید. سپس موقعیت دقیق محل سکونت خود را روی نقشه انتخاب نمایید." }, 
+                { id: 3, icon: "fa-id-card", label: "۳. اطلاعات حرفه‌ای", recommendation: "ارائه اطلاعات دقیق حرفه‌ای و پروانه، اعتبار شما را به عنوان یک متخصص افزایش می‌دهد.", detailedExplanation: "تاریخ اولین صدور پروانه، تاریخ شروع و مدت اعتبار پروانه، شماره پروانه (با فرمت صحیح مانند 0-13-30-012345)، شماره عضویت و استان فعالیت پروانه را وارد کنید. سپس برای هر یک از صلاحیت‌های طراحی، نظارت و اجرا، پایه و نوع فعالیت (حقیقی، حقوقی یا عدم فعالیت در آن صلاحیت) را مشخص نمایید. انتخاب حداقل یکی از صلاحیت‌ها به همراه پایه آن الزامی است. بر اساس انتخاب شما، فیلدهای مربوط به اطلاعات شرکت (برای فعالیت حقوقی) یا دفتر کار (برای فعالیت حقیقی) نمایش داده خواهد شد." }, 
+                { id: 4, icon: "fa-cloud-upload-alt", label: "۴. آپلود مدارک", recommendation: "آپلود مدارک واضح و صحیح، گامی مهم در جهت تکمیل و تایید نهایی پروفایل شماست.", detailedExplanation: "فایل PDF پروانه اشتغال و تصویر کارت ملی را بارگذاری کنید. دقت کنید که هر فایل باید کمتر از ۲۵۰ کیلوبایت حجم داشته باشد." }, 
+                { id: 5, icon: "fa-check-circle", label: "۵. تأیید نهایی", recommendation: "این آخرین مرحله است! اطلاعات خود را به دقت بررسی کنید.", detailedExplanation: "یک بار دیگر تمامی اطلاعات وارد شده در مراحل قبل را مرور کنید. در صورت اطمینان از صحت کامل اطلاعات، دکمه «ثبت نهایی اطلاعات» را برای ارسال پروفایل خود کلیک کنید." }
+            ];
+            const advertisementDataEngineer = [
+                { step: 1, imageUrl: 'https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Y29tcGFueXxlbnwwfHwwfHx8MA%3D%3D', text: 'با تکمیل دقیق اطلاعات، به جامعه‌ای متحد از مهندسان برای ارتقاء صنعت ساختمان بپیوندید.' },
+                { step: 2, imageUrl: 'https://images.unsplash.com/photo-1596524430615-b46475ddff6e?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Y29udGFjdCUyMHVzfGVufDB8fDB8fHww', text: 'اطلاعات تماس شما، پلی برای همکاری‌های سازنده و دستیابی به فرصت‌های بهتر در بازار کار است.'},
+                { step: 3, imageUrl: 'https://images.unsplash.com/photo-1490351267196-b7a67e26e41b?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fGNvbXBhbnl8ZW58MHwxfDB8fHww', text: 'تخصص و صلاحیت شما، در کنار هم‌افزایی مهندسان، به تنظیم عادلانه حق‌الزحمه‌ها و تعادل در عرضه و تقاضا کمک می‌کند.' },
+                { step: 4, imageUrl: 'https://images.unsplash.com/photo-1622260872090-5c558010a67e?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGNvbGxhYm9yYXRpb258ZW58MHwxfDB8fHww', text: 'مدارک شما، سندی بر تعهد و حرفه‌ای‌گری شماست؛ با هم، جایگاه مهندسی را اعتلا می‌بخشیم.' },
+                { step: 5, imageUrl: 'https://images.unsplash.com/photo-1578357078586-491adf1aa5ba?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGNvbGxhYm9yYXRpb258ZW58MHwxfDB8fHww', text: 'با نهایی کردن پروفایل خود، به حرکتی جمعی برای بهبود صنعت ساختمان و احقاق حقوق مهندسین می‌پیوندید.' }
+            ];
+
+            const stepIndicatorDataEmployer = [
+                { id: 1, icon: "fa-user-tie", label: "۱. مشخصات فردی", recommendation: "تکمیل دقیق اطلاعات شناسایی، به ایجاد اعتماد و شفافیت در همکاری‌ها کمک می‌کند.", detailedExplanation: "<strong class='text-red-600'>توجه: بارگذاری عکس پروفایل (از طریق پنل کناری) اجباری و حجم آن باید کمتر از ۲۵۰ کیلوبایت باشد.</strong><br>نام، نام خانوادگی، کدملی، تاریخ تولد و جنسیت خود را به عنوان کارفرما وارد نمایید. شماره موبایل صحیح برای ارتباطات بعدی ضروری است." },
+                { id: 2, icon: "fa-address-book", label: "۲. اطلاعات تماس", recommendation: "ارائه اطلاعات تماس دقیق، ارتباط موثر مهندسین با شما را تضمین می‌کند.", detailedExplanation: "شماره تماس ثابت (۱۰ رقمی با کد شهرستان یا ۱۱ رقمی موبایل)، کدپستی (۱۰ رقمی)، استان، شهر و آدرس خود را وارد کنید. سپس موقعیت دقیق خود را روی نقشه انتخاب نمایید." }, 
+                { id: 3, icon: "fa-building", label: "۳. اطلاعات شرکت", recommendation: "معرفی کسب‌وکار یا شرکت شما (در صورت وجود) به شناخت بهتر مهندسین کمک خواهد کرد.", detailedExplanation: "اگر به عنوان شخص حقوقی (شرکت) فعالیت می‌کنید، گزینه «شرکت دارم» را انتخاب کرده و نام شرکت، شماره ثبت و آدرس آن را به همراه موقعیت مکانی دفتر شرکت روی نقشه مشخص کنید. در غیر این صورت، گزینه «شرکت ندارم» را انتخاب شده باقی بگذارید." },
+                { id: 4, icon: "fa-id-badge", label: "۴. آپلود مدارک", recommendation: "بارگذاری مدارک شناسایی، به اعتبارسنجی هویت شما به عنوان کارفرما کمک می‌کند.", detailedExplanation: "تصویر کارت ملی خود را بارگذاری کنید. ارائه رزومه کاری اختیاری است اما می‌تواند به شناخت بهتر شما کمک کند. دقت کنید که هر فایل باید کمتر از ۲۵۰ کیلوبایت حجم داشته باشد." }, 
+                { id: 5, icon: "fa-clipboard-check", label: "۵. تأیید نهایی", recommendation: "مرحله نهایی! لطفاً اطلاعات خود را برای آخرین بار بررسی کنید.", detailedExplanation: "پیش از ثبت نهایی، تمامی اطلاعات وارد شده در مراحل قبل را به دقت مرور کنید. در صورت اطمینان از صحت کامل اطلاعات، دکمه «ثبت نهایی اطلاعات» را برای ارسال پروفایل خود کلیک کنید." }
+            ];
+            const advertisementDataEmployer = [
+                { step: 1, imageUrl: 'https://plus.unsplash.com/premium_photo-1672759360872-791a5ba6e2cc?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8ZGlmZmVyZW50fGVufDB8fDB8fHww', text: 'اطلاعات دقیق شما، شروع یک همکاری شفاف و منصفانه با جامعه مهندسی برای پروژه‌های موفق است.' },
+                { step: 2, imageUrl: 'https://plus.unsplash.com/premium_photo-1687362298502-1881385c786f?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8dGVsZXBob25lfGVufDB8fDB8fHww', text: 'ارتباط موثر با شما، به مهندسان امکان می‌دهد تا بهترین خدمات را با در نظر گرفتن شرایط عادلانه ارائه دهند.' },
+                { step: 3, imageUrl: 'https://images.unsplash.com/photo-1713299429500-aaee4444fe56?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGJ1c3NpbmVzc3xlbnwwfDF8MHx8fDA%3D', text: 'همکاری با مهندسان متخصص، به تنظیم منطقی هزینه‌ها و ایجاد تعادل در بازار خدمات مهندسی کمک می‌کند.' },
+                { step: 4, imageUrl: 'https://images.unsplash.com/photo-1715865171871-e02c0b656825?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGlkJTIwY2FyZHxlbnwwfDF8MHx8fDA%3D', text: 'تعهد شما به شفافیت، در کنار تخصص مهندسان، زمینه‌ساز پروژه‌هایی با کیفیت و با رعایت حقوق طرفین خواهد بود.' },
+                { step: 5, imageUrl: 'https://images.unsplash.com/photo-1564846824194-346b7871b855?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8ZG9jdW1lbnR8ZW58MHwxfDB8fHww', text: 'با تکمیل اطلاعات، شما نیز در ایجاد بازاری سالم و مبتنی بر همکاری و احترام متقابل در صنعت ساختمان سهیم می‌شوید.' }
+            ];
+
+            // --- INITIALIZATION FUNCTIONS ---
+            function getUserDataFromURL() {
+                const params = new URLSearchParams(window.location.search);
+                initialUserData.email = params.get('email') || '';
+                initialUserData.firstName = params.get('firstName') || '';
+                initialUserData.lastName = params.get('lastName') || '';
+                initialUserData.userType = params.get('role') || ''; // 'engineer' or 'employer'
+            }
+
+            function showWelcomeScreen() {
+                welcomeScreen.style.display = 'flex';
+                mainFormView.style.display = 'none';
+                
+                let rolePrefix = "";
+                if (initialUserData.userType.toLowerCase() === "engineer") { 
+                    rolePrefix = "مهندس ";
                 }
-            });
-        }
 
-
-        function updateStepView() {
-            if (!currentUserRole || !activeSteps.length) return;
-
-            activeSteps.forEach((step, index) => {
-                step.classList.toggle('active', (index + 1) === currentStep);
-            });
-
-            const allIndicators = document.querySelectorAll(`.step-indicator[id*="step-indicator-${currentUserRole}-"]`);
-            allIndicators.forEach(indicator => {
-                const idParts = indicator.id.split('-');
-                const stepNum = parseInt(idParts[idParts.length -1]);
-
-                indicator.classList.toggle('active', stepNum === currentStep);
-                indicator.classList.toggle('completed', stepNum < currentStep);
-
-                if (stepNum < currentStep) {
-                    indicator.style.cursor = 'pointer';
-                    indicator.onclick = () => goToStep(stepNum);
+                welcomeMessageElLine1.textContent = `${rolePrefix}${initialUserData.firstName || ''} ${initialUserData.lastName || ''} عزیز، خوش آمدید!`;
+                
+                // Check if a role was passed from the previous page
+                if (initialUserData.userType.toLowerCase() === 'engineer') {
+                    selectEngineerRoleButton.classList.add('active');
+                    selectEmployerRoleButton.classList.remove('active');
+                    firstClickRole = 'engineer'; // Set this to require a second click for confirmation
+                    welcomeMessageElLine2.textContent = `لطفا با تایید دوباره نقش، ثبت نام را به پایان برسانید.`;
+                } else if (initialUserData.userType.toLowerCase() === 'employer') {
+                    selectEmployerRoleButton.classList.add('active');
+                    selectEngineerRoleButton.classList.remove('active');
+                    firstClickRole = 'employer'; // Set this to require a second click for confirmation
+                    welcomeMessageElLine2.textContent = `لطفا با تایید دوباره نقش، ثبت نام را به پایان برسانید.`;
                 } else {
-                    indicator.style.cursor = 'default';
-                    indicator.onclick = null; 
+                    // Default behavior if no role is passed
+                    selectEngineerRoleButton.classList.remove('active');
+                    selectEmployerRoleButton.classList.remove('active');
+                    firstClickRole = null;
+                    welcomeMessageElLine2.textContent = `لطفا با انتخاب نقش، ثبت نام را به پایان برسانید.`;
                 }
-            });
-            
-            prevButton.disabled = currentStep === 1;
-            nextButton.classList.toggle('hidden', currentStep === totalSteps);
-            submitButton.classList.toggle('hidden', currentStep !== totalSteps);
 
-            if (currentUserRole === 'engineer') {
-                if (currentStep === 2) { 
-                    initMap('engineerResidentialMap', 'engineerResidentialLat', 'engineerResidentialLng', 'engineerResidentialNeighborhood', 'engineerResidentialMapInfo');
-                }
-                if (currentStep === 3) {
-                    // Re-check visibility and init maps if needed, as this can be called when navigating back/forth
-                    updateProfessionalInfoVisibility(); 
-                }
-            } else if (currentUserRole === 'employer') {
-                if (currentStep === 2) { 
-                    initMap('employerAddressMap', 'employerAddressLat', 'employerAddressLng', 'employerAddressNeighborhood', 'employerAddressMapInfo');
-                }
-                if (currentStep === 3 && document.getElementById('employerHasCompany')?.checked) { 
-                    initMap('employerCompanyMap', 'employerCompanyAddressLat', 'employerCompanyAddressLng', 'employerCompanyAddressNeighborhood', 'employerCompanyMapInfo');
-                }
+                updateSidebarName(); 
             }
 
-            if (currentStep === totalSteps) {
-                generateSummary();
-            }
+            function initializeFormForRole(role) {
+                currentUserRole = role; 
+                initialUserData.userType = role; 
+                currentStep = 1; 
 
-            const currentAdDataArray = currentUserRole === 'engineer' ? advertisementDataEngineer : advertisementDataEmployer;
-            const currentAd = currentAdDataArray.find(ad => ad.step === currentStep);
-            if (currentAd && adBannerImage && adBannerText) {
-                adBannerImage.src = currentAd.imageUrl;
-                adBannerImage.alt = `تبلیغ مرحله ${currentStep} - ${currentUserRole === 'engineer' ? 'مهندس' : 'کارفرما'}`;
-                adBannerText.textContent = currentAd.text; 
-            } else if (adBannerImage && adBannerText) { 
-                adBannerImage.src = 'https://images.unsplash.com/photo-1434873740857-1bc5653afda8?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bGVhZGVyc2hpcHxlbnwwfDF8MHx8fDA%3D';
-                adBannerImage.alt = 'بنر تبلیغاتی عمومی';
-                adBannerText.textContent = 'با همکاری و اتحاد، آینده‌ای روشن‌تر برای صنعت ساختمان رقم بزنیم.';
-            }
+                welcomeScreen.style.display = 'none';
+                mainFormView.style.display = 'flex';
 
-            calculateProfileCompleteness();
-            if (activeForm) { 
-                const formContentContainer = activeForm.closest('.form-content');
-                if(formContentContainer) formContentContainer.scrollTop = 0;
-            }
-        }
-        
-        function goToStep(stepNumber) {
-            if (stepNumber >= 1 && stepNumber <= totalSteps) {
-                if (stepNumber < currentStep) {
-                     currentStep = stepNumber;
-                     updateStepView();
-                } 
-                else if (stepNumber > currentStep && validateStep(currentStep)) { 
-                    currentStep = stepNumber;
-                    updateStepView();
+                if (engineerForm) {
+                    engineerForm.removeEventListener('input', calculateProfileCompleteness);
+                    engineerForm.removeEventListener('change', calculateProfileCompleteness);
                 }
-            }
-        }
-
-        nextButton.addEventListener('click', () => {
-            if (validateStep(currentStep)) {
-                if (currentStep < totalSteps) {
-                    currentStep++;
-                    updateStepView();
+                if (employerForm) {
+                    employerForm.removeEventListener('input', calculateProfileCompleteness);
+                    employerForm.removeEventListener('change', calculateProfileCompleteness);
                 }
-            }
-        });
 
-        prevButton.addEventListener('click', () => {
-            if (currentStep > 1) {
-                currentStep--;
+                if (role === 'engineer') {
+                    activeForm = engineerForm;
+                    activeSteps = Array.from(engineerFormContainer.querySelectorAll('.form-step'));
+                    totalSteps = stepIndicatorDataEngineer.length;
+                    engineerFormContainer.classList.remove('hidden');
+                    employerFormContainer.classList.add('hidden');
+                    document.getElementById('engineerFirstName').value = initialUserData.firstName || '';
+                    document.getElementById('engineerLastName').value = initialUserData.lastName || '';
+                    const engineerGenderInput = document.getElementById('engineerGender');
+                    const engineerGenderToggle = document.getElementById('engineerGenderToggle');
+                    engineerGenderInput.value = initialUserData.gender || 'مرد'; 
+                    engineerGenderToggle.textContent = engineerGenderInput.value;
+                    const engineerPostalCodeInput = document.getElementById('engineerPostalCode');
+                    if (engineerPostalCodeInput) engineerPostalCodeInput.value = ''; 
+                    const engineerPhoneInput = document.getElementById('engineerPhone');
+                    if (engineerPhoneInput) engineerPhoneInput.value = ''; 
+                    // Initialize professional info visibility
+                    updateProfessionalInfoVisibility();
+                } else if (role === 'employer') {
+                    activeForm = employerForm;
+                    activeSteps = Array.from(employerFormContainer.querySelectorAll('.form-step'));
+                    totalSteps = stepIndicatorDataEmployer.length;
+                    employerFormContainer.classList.remove('hidden');
+                    engineerFormContainer.classList.add('hidden');
+                    document.getElementById('employerFirstName').value = initialUserData.firstName || '';
+                    document.getElementById('employerLastName').value = initialUserData.lastName || '';
+                    const employerPostalCodeInput = document.getElementById('employerPostalCode');
+                    if (employerPostalCodeInput) employerPostalCodeInput.value = ''; 
+                    const employerGenderInput = document.getElementById('employerGender');
+                    const employerGenderToggle = document.getElementById('employerGenderToggle');
+                    employerGenderInput.value = initialUserData.gender || 'مرد'; 
+                    employerGenderToggle.textContent = employerGenderInput.value;
+                }
+                
+                if (activeForm) {
+                    activeForm.addEventListener('input', calculateProfileCompleteness);
+                    activeForm.addEventListener('change', calculateProfileCompleteness);
+                }
+                if(sidebarUserEmail) sidebarUserEmail.textContent = initialUserData.email || 'ایمیل ثبت نشده';
+
+                updateSidebarName(); 
+                populateStepIndicators();
+                updateStepDescriptions(); 
                 updateStepView();
+                firstClickRole = null; 
             }
-        });
-
-        const messageModal = document.getElementById('messageModal');
-        const modalMessageText = document.getElementById('modalMessageText');
-        const modalCloseButton = document.getElementById('modalCloseButton');
-        const modalIconContainer = document.getElementById('modalIconContainer');
-
-        function showMessageModal(message, type = 'info') { 
-            modalMessageText.textContent = message;
-            modalMessageText.className = 'text-slate-700 text-base'; 
-            let iconHtml = '';
-            switch(type) {
-                case 'error':
-                    modalMessageText.classList.add('text-red-600', 'font-semibold');
-                    iconHtml = '<i class="fas fa-times-circle text-red-500"></i>';
-                    break;
-                case 'success':
-                    modalMessageText.classList.add('text-green-600', 'font-semibold');
-                    iconHtml = '<i class="fas fa-check-circle text-green-500"></i>';
-                    break;
-                case 'warning':
-                    modalMessageText.classList.add('text-amber-600', 'font-semibold');
-                    iconHtml = '<i class="fas fa-exclamation-triangle text-amber-500"></i>';
-                    break;
-                default: 
-                    iconHtml = '<i class="fas fa-info-circle text-sky-500"></i>';
-                    break;
-            }
-            modalIconContainer.innerHTML = iconHtml;
-            messageModal.style.display = 'block';
-        }
-        modalCloseButton.onclick = () => { messageModal.style.display = 'none'; };
-        window.onclick = (event) => { if (event.target == messageModal) messageModal.style.display = 'none'; };
-
-        function convertPersianToEnglishDigits(s) {
-            if (!s) return "";
-            const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-            const englishDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-            let result = "";
-            for (let i = 0; i < s.length; i++) {
-                const char = s[i];
-                const persianIndex = persianDigits.indexOf(char);
-                if (persianIndex !== -1) {
-                    result += englishDigits[persianIndex];
+            
+            selectEngineerRoleButton.addEventListener('click', () => {
+                if (firstClickRole === 'engineer') {
+                    initializeFormForRole('engineer');
                 } else {
-                    result += char; 
+                    firstClickRole = 'engineer';
+                    selectEngineerRoleButton.classList.add('active');
+                    selectEmployerRoleButton.classList.remove('active');
+                    welcomeMessageElLine2.textContent = `برای تأیید نقش مهندس، دوباره کلیک کنید.`;
                 }
-            }
-            return result;
-        }
+            });
+            selectEmployerRoleButton.addEventListener('click', () => {
+                if (firstClickRole === 'employer') {
+                    initializeFormForRole('employer');
+                } else {
+                    firstClickRole = 'employer';
+                    selectEmployerRoleButton.classList.add('active');
+                    selectEngineerRoleButton.classList.remove('active');
+                    welcomeMessageElLine2.textContent = `برای تأیید نقش کارفرما، دوباره کلیک کنید.`;
+                }
+            });
 
-        function isValidKodemelli(kodemelli) {
-            const code = convertPersianToEnglishDigits(kodemelli.toString()); 
-            if (!/^\d{10}$/.test(code)) return false; 
+            changeRoleButton.addEventListener('click', showWelcomeScreen);
 
-            const check = parseInt(code[9], 10);
-            let sum = 0;
-            for (let i = 0; i < 9; i++) {
-                sum += parseInt(code[i], 10) * (10 - i);
+            function createStepIndicatorDOM(stepData, isMobile) {
+                const indicator = document.createElement('div');
+                indicator.id = `step-indicator-${currentUserRole}-${isMobile ? 'm' : 'd'}-${stepData.id}`;
+                indicator.className = 'step-indicator';
+                indicator.innerHTML = `
+                    <div class="step-icon-container"><i class="fas ${stepData.icon} step-icon"></i></div>
+                    <span class="step-label">${stepData.label}</span>
+                `;
+                return indicator;
             }
-            const remainder = sum % 11;
-            
-            if (remainder < 2) {
-                return check === remainder;
-            } else {
-                return check === (11 - remainder);
-            }
-        }
 
-        function validateStep(step) {
-            if (!activeForm || !activeSteps.length) return true; 
-            let isValid = true;
-            const currentStepElement = activeSteps[step - 1];
-            if (!currentStepElement) return true;
-            const currentStepFields = currentStepElement.querySelectorAll('[required]');
-            
-            for (const field of currentStepFields) {
-                let fieldIsValid = true;
-                let errorMessage = `لطفاً فیلد "${getLabelForField(field)}" را به درستی تکمیل کنید.`;
+            function populateStepIndicators() {
+                stepsNavigationMobile.innerHTML = '';
+                stepsNavigationDesktop.innerHTML = '';
+                const currentStepData = currentUserRole === 'engineer' ? stepIndicatorDataEngineer : stepIndicatorDataEmployer;
                 
-                // Skip validation for fields in hidden containers
-                if (field.closest('.hidden')) {
-                    continue;
+                currentStepData.forEach(data => {
+                    stepsNavigationMobile.appendChild(createStepIndicatorDOM(data, true));
+                    stepsNavigationDesktop.appendChild(createStepIndicatorDOM(data, false)); 
+                });
+            }
+
+            function updateStepDescriptions() {
+                const currentStepDescData = currentUserRole === 'engineer' ? stepIndicatorDataEngineer : stepIndicatorDataEmployer;
+                currentStepDescData.forEach(stepInfo => {
+                    const containerId = `stepDescriptionContainer-${currentUserRole}-${stepInfo.id}`;
+                    const container = document.getElementById(containerId);
+                    if (container) {
+                        container.innerHTML = `
+                            <p class="text-sm text-slate-800 font-semibold mb-2">${stepInfo.recommendation}</p>
+                            <hr class="my-2 border-sky-300">
+                            <p class="text-xs text-slate-600 leading-relaxed"><i class="fas fa-info-circle mr-1 ml-2 text-sky-600"></i>${stepInfo.detailedExplanation}</p>
+                        `;
+                    }
+                });
+            }
+
+
+            function updateStepView() {
+                if (!currentUserRole || !activeSteps.length) return;
+
+                activeSteps.forEach((step, index) => {
+                    step.classList.toggle('active', (index + 1) === currentStep);
+                });
+
+                const allIndicators = document.querySelectorAll(`.step-indicator[id*="step-indicator-${currentUserRole}-"]`);
+                allIndicators.forEach(indicator => {
+                    const idParts = indicator.id.split('-');
+                    const stepNum = parseInt(idParts[idParts.length -1]);
+
+                    indicator.classList.toggle('active', stepNum === currentStep);
+                    indicator.classList.toggle('completed', stepNum < currentStep);
+
+                    if (stepNum < currentStep) {
+                        indicator.style.cursor = 'pointer';
+                        indicator.onclick = () => goToStep(stepNum);
+                    } else {
+                        indicator.style.cursor = 'default';
+                        indicator.onclick = null; 
+                    }
+                });
+                
+                prevButton.disabled = currentStep === 1;
+                nextButton.classList.toggle('hidden', currentStep === totalSteps);
+                submitButton.classList.toggle('hidden', currentStep !== totalSteps);
+
+                if (currentUserRole === 'engineer') {
+                    if (currentStep === 2) { 
+                        initMap('engineerResidentialMap', 'engineerResidentialLat', 'engineerResidentialLng', 'engineerResidentialNeighborhood', 'engineerResidentialMapInfo');
+                    }
+                    if (currentStep === 3) {
+                        // Re-check visibility and init maps if needed, as this can be called when navigating back/forth
+                        updateProfessionalInfoVisibility(); 
+                    }
+                } else if (currentUserRole === 'employer') {
+                    if (currentStep === 2) { 
+                        initMap('employerAddressMap', 'employerAddressLat', 'employerAddressLng', 'employerAddressNeighborhood', 'employerAddressMapInfo');
+                    }
+                    if (currentStep === 3 && document.getElementById('employerHasCompany')?.checked) { 
+                        initMap('employerCompanyMap', 'employerCompanyAddressLat', 'employerCompanyAddressLng', 'employerCompanyAddressNeighborhood', 'employerCompanyMapInfo');
+                    }
                 }
 
-                 if (currentUserRole === 'employer' && field.closest('#employerCompanyFields')) {
-                    if (!document.getElementById('employerHasCompany').checked) {
-                        continue; 
-                    }
+                if (currentStep === totalSteps) {
+                    generateSummary();
                 }
 
-                if (field.id === 'engineerNationalId' || field.id === 'employerNationalId') {
-                    const nationalIdValue = convertPersianToEnglishDigits(field.value);
-                    if (!nationalIdValue || !/^\d{10}$/.test(nationalIdValue)) { 
-                         errorMessage = "کد ملی باید ۱۰ رقم باشد.";
-                         fieldIsValid = false;
-                    } else if (!isValidKodemelli(nationalIdValue)) { 
-                        errorMessage = "کد ملی وارد شده معتبر نیست.";
-                        fieldIsValid = false;
+                const currentAdDataArray = currentUserRole === 'engineer' ? advertisementDataEngineer : advertisementDataEmployer;
+                const currentAd = currentAdDataArray.find(ad => ad.step === currentStep);
+                if (currentAd && adBannerImage && adBannerText) {
+                    adBannerImage.src = currentAd.imageUrl;
+                    adBannerImage.alt = `تبلیغ مرحله ${currentStep} - ${currentUserRole === 'engineer' ? 'مهندس' : 'کارفرما'}`;
+                    adBannerText.textContent = currentAd.text; 
+                } else if (adBannerImage && adBannerText) { 
+                    adBannerImage.src = 'https://images.unsplash.com/photo-1434873740857-1bc5653afda8?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bGVhZGVyc2hpcHxlbnwwfDF8MHx8fDA%3D';
+                    adBannerImage.alt = 'بنر تبلیغاتی عمومی';
+                    adBannerText.textContent = 'با همکاری و اتحاد، آینده‌ای روشن‌تر برای صنعت ساختمان رقم بزنیم.';
+                }
+
+                calculateProfileCompleteness();
+                if (activeForm) { 
+                    const formContentContainer = activeForm.closest('.form-content');
+                    if(formContentContainer) formContentContainer.scrollTop = 0;
+                }
+            }
+            
+            function goToStep(stepNumber) {
+                if (stepNumber >= 1 && stepNumber <= totalSteps) {
+                    if (stepNumber < currentStep) {
+                        currentStep = stepNumber;
+                        updateStepView();
+                    } 
+                    else if (stepNumber > currentStep && validateStep(currentStep)) { 
+                        currentStep = stepNumber;
+                        updateStepView();
                     }
-                } else if (field.id === 'engineerPostalCode' || field.id === 'employerPostalCode') {
-                    const postalCodeValue = convertPersianToEnglishDigits(field.value);
-                    if (!postalCodeValue || !/^\d{10}$/.test(postalCodeValue)) {
-                        errorMessage = "کدپستی باید ۱۰ رقم باشد.";
-                        fieldIsValid = false;
+                }
+            }
+
+            nextButton.addEventListener('click', () => {
+                if (validateStep(currentStep)) {
+                    if (currentStep < totalSteps) {
+                        currentStep++;
+                        updateStepView();
                     }
-                } else if (field.id === 'engineerPhone' || field.id === 'officePhone') { 
-                    const phoneValue = convertPersianToEnglishDigits(field.value);
-                    if (!phoneValue || !/^0\d{10}$/.test(phoneValue)) {
-                        errorMessage = `فیلد "${getLabelForField(field)}" باید ۱۱ رقم با کد شهرستان (شروع با ۰) باشد.`;
-                        fieldIsValid = false;
+                }
+            });
+
+            prevButton.addEventListener('click', () => {
+                if (currentStep > 1) {
+                    currentStep--;
+                    updateStepView();
+                }
+            });
+
+            const messageModal = document.getElementById('messageModal');
+            const modalMessageText = document.getElementById('modalMessageText');
+            const modalCloseButton = document.getElementById('modalCloseButton');
+            const modalIconContainer = document.getElementById('modalIconContainer');
+
+            function showMessageModal(message, type = 'info') { 
+                modalMessageText.textContent = message;
+                modalMessageText.className = 'text-slate-700 text-base'; 
+                let iconHtml = '';
+                switch(type) {
+                    case 'error':
+                        modalMessageText.classList.add('text-red-600', 'font-semibold');
+                        iconHtml = '<i class="fas fa-times-circle text-red-500"></i>';
+                        break;
+                    case 'success':
+                        modalMessageText.classList.add('text-green-600', 'font-semibold');
+                        iconHtml = '<i class="fas fa-check-circle text-green-500"></i>';
+                        break;
+                    case 'warning':
+                        modalMessageText.classList.add('text-amber-600', 'font-semibold');
+                        iconHtml = '<i class="fas fa-exclamation-triangle text-amber-500"></i>';
+                        break;
+                    default: 
+                        iconHtml = '<i class="fas fa-info-circle text-sky-500"></i>';
+                        break;
+                }
+                modalIconContainer.innerHTML = iconHtml;
+                messageModal.style.display = 'block';
+            }
+            modalCloseButton.onclick = () => { messageModal.style.display = 'none'; };
+            window.onclick = (event) => { if (event.target == messageModal) messageModal.style.display = 'none'; };
+
+            function convertPersianToEnglishDigits(s) {
+                if (!s) return "";
+                const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+                const englishDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+                let result = "";
+                for (let i = 0; i < s.length; i++) {
+                    const char = s[i];
+                    const persianIndex = persianDigits.indexOf(char);
+                    if (persianIndex !== -1) {
+                        result += englishDigits[persianIndex];
+                    } else {
+                        result += char; 
                     }
-                } else if (field.classList.contains('jalali-datepicker')) {
-                    const dobValue = field.getAttribute('data-gregorian-date');
-                    if (dobValue) {
-                        if (field.id === 'engineerDob' || field.id === 'employerDob') {
-                            const birthDate = new Date(dobValue);
-                            const today = new Date();
-                            let age = today.getFullYear() - birthDate.getFullYear();
-                            const m = today.getMonth() - birthDate.getMonth();
-                            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-                                age--;
+                }
+                return result;
+            }
+
+            function isValidKodemelli(kodemelli) {
+                const code = convertPersianToEnglishDigits(kodemelli.toString()); 
+                if (!/^\d{10}$/.test(code)) return false; 
+
+                const check = parseInt(code[9], 10);
+                let sum = 0;
+                for (let i = 0; i < 9; i++) {
+                    sum += parseInt(code[i], 10) * (10 - i);
+                }
+                const remainder = sum % 11;
+                
+                if (remainder < 2) {
+                    return check === remainder;
+                } else {
+                    return check === (11 - remainder);
+                }
+            }
+
+            function validateStep(step) {
+                if (!activeForm || !activeSteps.length) return true; 
+                let isValid = true;
+                const currentStepElement = activeSteps[step - 1];
+                if (!currentStepElement) return true;
+                const currentStepFields = currentStepElement.querySelectorAll('[required]');
+                
+                for (const field of currentStepFields) {
+                    let fieldIsValid = true;
+                    let errorMessage = `لطفاً فیلد "${getLabelForField(field)}" را به درستی تکمیل کنید.`;
+                    
+                    // Skip validation for fields in hidden containers
+                    if (field.closest('.hidden')) {
+                        continue;
+                    }
+
+                    if (currentUserRole === 'employer' && field.closest('#employerCompanyFields')) {
+                        if (!document.getElementById('employerHasCompany').checked) {
+                            continue; 
+                        }
+                    }
+
+                    if (field.id === 'engineerNationalId' || field.id === 'employerNationalId') {
+                        const nationalIdValue = convertPersianToEnglishDigits(field.value);
+                        if (!nationalIdValue || !/^\d{10}$/.test(nationalIdValue)) { 
+                            errorMessage = "کد ملی باید ۱۰ رقم باشد.";
+                            fieldIsValid = false;
+                        } else if (!isValidKodemelli(nationalIdValue)) { 
+                            errorMessage = "کد ملی وارد شده معتبر نیست.";
+                            fieldIsValid = false;
+                        }
+                    } else if (field.id === 'engineerPostalCode' || field.id === 'employerPostalCode') {
+                        const postalCodeValue = convertPersianToEnglishDigits(field.value);
+                        if (!postalCodeValue || !/^\d{10}$/.test(postalCodeValue)) {
+                            errorMessage = "کدپستی باید ۱۰ رقم باشد.";
+                            fieldIsValid = false;
+                        }
+                    } else if (field.id === 'engineerPhone' || field.id === 'officePhone') { 
+                        const phoneValue = convertPersianToEnglishDigits(field.value);
+                        if (!phoneValue || !/^0\d{10}$/.test(phoneValue)) {
+                            errorMessage = `فیلد "${getLabelForField(field)}" باید ۱۱ رقم با کد شهرستان (شروع با ۰) باشد.`;
+                            fieldIsValid = false;
+                        }
+                    } else if (field.classList.contains('jalali-datepicker')) {
+                        const dobValue = field.getAttribute('data-gregorian-date');
+                        if (dobValue) {
+                            if (field.id === 'engineerDob' || field.id === 'employerDob') {
+                                const birthDate = new Date(dobValue);
+                                const today = new Date();
+                                let age = today.getFullYear() - birthDate.getFullYear();
+                                const m = today.getMonth() - birthDate.getMonth();
+                                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                                    age--;
+                                }
+                                if (age < 18) {
+                                    errorMessage = "سن شما باید حداقل ۱۸ سال باشد.";
+                                    fieldIsValid = false;
+                                }
                             }
-                            if (age < 18) {
-                                errorMessage = "سن شما باید حداقل ۱۸ سال باشد.";
-                                fieldIsValid = false;
+                        } else if (field.required) { 
+                            fieldIsValid = false; 
+                        }
+                    } else if (field.type === 'file' && field.required && field.files.length === 0) {
+                        errorMessage = `لطفاً فایل "${getLabelForField(field)}" را بارگذاری کنید.`;
+                        fieldIsValid = false;
+                    } else if (!field.checkValidity()) { 
+                        if (field.title && field.id !== 'engineerNationalId' && field.id !== 'employerNationalId') errorMessage += ` (${field.title})`; 
+                        fieldIsValid = false;
+                    }
+
+                    if (!fieldIsValid) {
+                        showMessageModal(errorMessage, 'error');
+                        field.focus();
+                        field.classList.add('border-red-500', 'ring-1', 'ring-red-500'); 
+                        setTimeout(() => field.classList.remove('border-red-500', 'ring-1', 'ring-red-500'), 3000);
+                        isValid = false;
+                        break; 
+                    }
+                }
+                
+                if (currentUserRole === 'engineer' && step === 3 && isValid) {
+                    const hasDesignCb = document.getElementById('hasDesignLicense');
+                    const designGradeSelect = document.getElementById('designLicenseGrade');
+                    const hasSupervisionCb = document.getElementById('hasSupervisionLicense');
+                    const supervisionGradeSelect = document.getElementById('supervisionLicenseGrade');
+                    const hasExecutionCb = document.getElementById('hasExecutionLicense');
+                    const executionGradeSelect = document.getElementById('executionLicenseGrade');
+
+                    const designSelected = hasDesignCb.checked && designGradeSelect.value;
+                    const supervisionSelected = hasSupervisionCb.checked && supervisionGradeSelect.value;
+                    const executionSelected = hasExecutionCb.checked && executionGradeSelect.value;
+
+                    if (!(designSelected || supervisionSelected || executionSelected)) {
+                        showMessageModal("لطفاً حداقل یکی از صلاحیت‌های پروانه (طراحی، نظارت یا اجرا) را به همراه پایه آن به طور کامل انتخاب کنید.", 'error');
+                        if (hasDesignCb.checked && !designGradeSelect.value) designGradeSelect.focus();
+                        else if (hasSupervisionCb.checked && !supervisionGradeSelect.value) supervisionGradeSelect.focus();
+                        else if (hasExecutionCb.checked && !executionGradeSelect.value) executionGradeSelect.focus();
+                        else hasDesignCb.focus(); 
+                        isValid = false;
+                    }
+                    
+                    if (isValid) { 
+                        const licenseStartDateInput = document.getElementById('licenseStartDate');
+                        const licenseValidityInput = document.getElementById('licenseValidity'); 
+                        const gregorianStartDate = licenseStartDateInput.getAttribute('data-gregorian-date');
+                        if (gregorianStartDate && licenseValidityInput.value) {
+                            const startDate = new Date(gregorianStartDate);
+                            const validityYears = parseInt(licenseValidityInput.value, 10);
+                            if (!isNaN(validityYears)) {
+                                const expiryDate = new Date(startDate);
+                                expiryDate.setFullYear(startDate.getFullYear() + validityYears);
+                                const today = new Date();
+                                const oneMonthFromToday = new Date(); 
+                                oneMonthFromToday.setMonth(today.getMonth() + 1);
+                                expiryDate.setHours(0,0,0,0);
+                                oneMonthFromToday.setHours(0,0,0,0);
+
+                                if (expiryDate < oneMonthFromToday) {
+                                    showMessageModal("اعتبار پروانه باید حداقل برای یک ماه از تاریخ امروز معتبر باشد.", 'error');
+                                    licenseValidityInput.focus();
+                                    isValid = false;
+                                }
                             }
                         }
-                    } else if (field.required) { 
-                         fieldIsValid = false; 
                     }
-                } else if (field.type === 'file' && field.required && field.files.length === 0) {
-                     errorMessage = `لطفاً فایل "${getLabelForField(field)}" را بارگذاری کنید.`;
-                     fieldIsValid = false;
-                } else if (!field.checkValidity()) { 
-                    if (field.title && field.id !== 'engineerNationalId' && field.id !== 'employerNationalId') errorMessage += ` (${field.title})`; 
-                    fieldIsValid = false;
                 }
+                return isValid;
+            }
 
-                if (!fieldIsValid) {
-                    showMessageModal(errorMessage, 'error');
-                    field.focus();
-                    field.classList.add('border-red-500', 'ring-1', 'ring-red-500'); 
-                    setTimeout(() => field.classList.remove('border-red-500', 'ring-1', 'ring-red-500'), 3000);
-                    isValid = false;
-                    break; 
+            function getLabelForField(field) {
+                const labelElement = document.querySelector(`label[for="${field.id}"]`) || field.closest('div').querySelector('label');
+                let labelText = field.name || field.id; 
+                if (labelElement) {
+                    labelText = labelElement.textContent.replace('*', '').trim();
                 }
+                return labelText;
             }
             
-            if (currentUserRole === 'engineer' && step === 3 && isValid) {
-                const hasDesignCb = document.getElementById('hasDesignLicense');
-                const designGradeSelect = document.getElementById('designLicenseGrade');
-                const hasSupervisionCb = document.getElementById('hasSupervisionLicense');
-                const supervisionGradeSelect = document.getElementById('supervisionLicenseGrade');
-                const hasExecutionCb = document.getElementById('hasExecutionLicense');
-                const executionGradeSelect = document.getElementById('executionLicenseGrade');
+            const engineerGenderToggle = document.getElementById('engineerGenderToggle');
+            const engineerGenderInput = document.getElementById('engineerGender');
+            engineerGenderToggle.addEventListener('click', () => {
+                engineerGenderInput.value = (engineerGenderInput.value === 'مرد') ? 'زن' : 'مرد';
+                engineerGenderToggle.textContent = engineerGenderInput.value;
+                updateSidebarName(); 
+                calculateProfileCompleteness();
+            });
 
-                const designSelected = hasDesignCb.checked && designGradeSelect.value;
-                const supervisionSelected = hasSupervisionCb.checked && supervisionGradeSelect.value;
-                const executionSelected = hasExecutionCb.checked && executionGradeSelect.value;
+            const employerGenderToggle = document.getElementById('employerGenderToggle');
+            const employerGenderInput = document.getElementById('employerGender');
+            employerGenderToggle.addEventListener('click', () => {
+                employerGenderInput.value = (employerGenderInput.value === 'مرد') ? 'زن' : 'مرد';
+                employerGenderToggle.textContent = employerGenderInput.value;
+                updateSidebarName(); 
+                calculateProfileCompleteness();
+            });
 
-                if (!(designSelected || supervisionSelected || executionSelected)) {
-                     showMessageModal("لطفاً حداقل یکی از صلاحیت‌های پروانه (طراحی، نظارت یا اجرا) را به همراه پایه آن به طور کامل انتخاب کنید.", 'error');
-                     if (hasDesignCb.checked && !designGradeSelect.value) designGradeSelect.focus();
-                     else if (hasSupervisionCb.checked && !supervisionGradeSelect.value) supervisionGradeSelect.focus();
-                     else if (hasExecutionCb.checked && !executionGradeSelect.value) executionGradeSelect.focus();
-                     else hasDesignCb.focus(); 
-                     isValid = false;
-                }
+            function setupLicenseField(checkboxId, labelId, selectId, hasText, نداردText) {
+                const checkbox = document.getElementById(checkboxId);
+                const label = document.getElementById(labelId);
+                const select = document.getElementById(selectId);
                 
-                if (isValid) { 
-                    const licenseStartDateInput = document.getElementById('licenseStartDate');
-                    const licenseValidityInput = document.getElementById('licenseValidity'); 
-                    const gregorianStartDate = licenseStartDateInput.getAttribute('data-gregorian-date');
-                    if (gregorianStartDate && licenseValidityInput.value) {
-                        const startDate = new Date(gregorianStartDate);
-                        const validityYears = parseInt(licenseValidityInput.value, 10);
-                        if (!isNaN(validityYears)) {
-                            const expiryDate = new Date(startDate);
-                            expiryDate.setFullYear(startDate.getFullYear() + validityYears);
-                            const today = new Date();
-                            const oneMonthFromToday = new Date(); 
-                            oneMonthFromToday.setMonth(today.getMonth() + 1);
-                            expiryDate.setHours(0,0,0,0);
-                            oneMonthFromToday.setHours(0,0,0,0);
+                if (!checkbox || !select) return; 
 
-                            if (expiryDate < oneMonthFromToday) {
-                                showMessageModal("اعتبار پروانه باید حداقل برای یک ماه از تاریخ امروز معتبر باشد.", 'error');
-                                licenseValidityInput.focus();
-                                isValid = false;
-                            }
-                        }
-                    }
-                }
-            }
-            return isValid;
-        }
-
-        function getLabelForField(field) {
-            const labelElement = document.querySelector(`label[for="${field.id}"]`) || field.closest('div').querySelector('label');
-            let labelText = field.name || field.id; 
-            if (labelElement) {
-                labelText = labelElement.textContent.replace('*', '').trim();
-            }
-            return labelText;
-        }
-        
-        const engineerGenderToggle = document.getElementById('engineerGenderToggle');
-        const engineerGenderInput = document.getElementById('engineerGender');
-        engineerGenderToggle.addEventListener('click', () => {
-            engineerGenderInput.value = (engineerGenderInput.value === 'مرد') ? 'زن' : 'مرد';
-            engineerGenderToggle.textContent = engineerGenderInput.value;
-            updateSidebarName(); 
-            calculateProfileCompleteness();
-        });
-
-        const employerGenderToggle = document.getElementById('employerGenderToggle');
-        const employerGenderInput = document.getElementById('employerGender');
-        employerGenderToggle.addEventListener('click', () => {
-            employerGenderInput.value = (employerGenderInput.value === 'مرد') ? 'زن' : 'مرد';
-            employerGenderToggle.textContent = employerGenderInput.value;
-            updateSidebarName(); 
-            calculateProfileCompleteness();
-        });
-
-        function setupLicenseField(checkboxId, labelId, selectId, hasText, نداردText) {
-            const checkbox = document.getElementById(checkboxId);
-            const label = document.getElementById(labelId);
-            const select = document.getElementById(selectId);
-            
-            if (!checkbox || !select) return; 
-
-            checkbox.addEventListener('change', () => {
+                checkbox.addEventListener('change', () => {
+                    if (label) label.textContent = checkbox.checked ? hasText : نداردText;
+                    select.disabled = !checkbox.checked;
+                    select.classList.toggle('bg-slate-100', !checkbox.checked); 
+                    select.classList.toggle('bg-slate-50', checkbox.checked); 
+                    if (!checkbox.checked) select.value = '';
+                    select.required = checkbox.checked; 
+                    calculateProfileCompleteness();
+                });
                 if (label) label.textContent = checkbox.checked ? hasText : نداردText;
                 select.disabled = !checkbox.checked;
-                select.classList.toggle('bg-slate-100', !checkbox.checked); 
-                select.classList.toggle('bg-slate-50', checkbox.checked); 
-                if (!checkbox.checked) select.value = '';
-                select.required = checkbox.checked; 
-                calculateProfileCompleteness();
-            });
-            if (label) label.textContent = checkbox.checked ? hasText : نداردText;
-            select.disabled = !checkbox.checked;
-            select.classList.toggle('bg-slate-100', !checkbox.checked);
-            select.classList.toggle('bg-slate-50', checkbox.checked);
-            select.required = checkbox.checked;
-        }
-        setupLicenseField('hasDesignLicense', 'designLicenseLabel', 'designLicenseGrade', 'پروانه طراحی دارم', 'پروانه طراحی ندارم');
-        setupLicenseField('hasSupervisionLicense', 'supervisionLicenseLabel', 'supervisionLicenseGrade', 'پروانه نظارت دارم', 'پروانه نظارت ندارم');
-        setupLicenseField('hasExecutionLicense', 'executionLicenseLabel', 'executionLicenseGrade', 'پروانه اجرا دارم', 'پروانه اجرا ندارم');
-        
-        function updateProfessionalInfoVisibility() {
-            if (currentUserRole !== 'engineer') return;
-
-            const designType = document.querySelector('input[name="designExecutorType"]:checked')?.value;
-            const supervisionType = document.querySelector('input[name="supervisionExecutorType"]:checked')?.value;
-            const executionType = document.querySelector('input[name="executionExecutorType"]:checked')?.value;
-        
-            const isAnyLegal = designType === 'legal' || supervisionType === 'legal' || executionType === 'legal';
-            const isAnyIndividual = designType === 'individual' || supervisionType === 'individual' || executionType === 'individual';
-            const isExecutionIndividual = executionType === 'individual';
-        
-            const legalExecutorFields = document.getElementById('legalExecutorFields');
-            const individualExecutorFieldsContainer = document.getElementById('individualExecutorFieldsContainer');
-            const individualExecutorFields = document.getElementById('individualExecutorFields'); // "کمک مجری" section
-
-            // --- Legal Fields Visibility ---
-            const wasLegalHidden = legalExecutorFields.classList.contains('hidden');
-            legalExecutorFields.classList.toggle('hidden', !isAnyLegal);
-            if (wasLegalHidden && isAnyLegal) {
-                initMap('companyOfficeMap', 'companyOfficeMapLat', 'companyOfficeMapLng', 'companyOfficeMapNeighborhood', 'companyOfficeMapInfo');
+                select.classList.toggle('bg-slate-100', !checkbox.checked);
+                select.classList.toggle('bg-slate-50', checkbox.checked);
+                select.required = checkbox.checked;
             }
-           
-            // --- Individual Fields Visibility ---
-            individualExecutorFieldsContainer.classList.toggle('hidden', !isAnyIndividual);
+            setupLicenseField('hasDesignLicense', 'designLicenseLabel', 'designLicenseGrade', 'پروانه طراحی دارم', 'پروانه طراحی ندارم');
+            setupLicenseField('hasSupervisionLicense', 'supervisionLicenseLabel', 'supervisionLicenseGrade', 'پروانه نظارت دارم', 'پروانه نظارت ندارم');
+            setupLicenseField('hasExecutionLicense', 'executionLicenseLabel', 'executionLicenseGrade', 'پروانه اجرا دارم', 'پروانه اجرا ندارم');
+            
+            function updateProfessionalInfoVisibility() {
+                if (currentUserRole !== 'engineer') return;
 
-            // "Assistant Executor" section visibility
-            individualExecutorFields.classList.toggle('hidden', !isExecutionIndividual);
+                const designType = document.querySelector('input[name="designExecutorType"]:checked')?.value;
+                const supervisionType = document.querySelector('input[name="supervisionExecutorType"]:checked')?.value;
+                const executionType = document.querySelector('input[name="executionExecutorType"]:checked')?.value;
+            
+                const isAnyLegal = designType === 'legal' || supervisionType === 'legal' || executionType === 'legal';
+                const isAnyIndividual = designType === 'individual' || supervisionType === 'individual' || executionType === 'individual';
+                const isExecutionIndividual = executionType === 'individual';
+            
+                const legalExecutorFields = document.getElementById('legalExecutorFields');
+                const individualExecutorFieldsContainer = document.getElementById('individualExecutorFieldsContainer');
+                const individualExecutorFields = document.getElementById('individualExecutorFields'); // "کمک مجری" section
 
-            // Office Info Map Initialization
-            const hasOfficeCheckbox = document.getElementById('engineerHasOfficeInfo');
-            const officeInfoFields = document.getElementById('engineerOfficeInfoFields');
-            if (isAnyIndividual && hasOfficeCheckbox.checked && !officeInfoFields.classList.contains('hidden')) {
-                initMap('officeMap', 'officeMapLat', 'officeMapLng', 'officeMapNeighborhood', 'officeMapInfo');
-            }
-
-            // Update required attributes
-            document.getElementById('companyName').required = isAnyLegal;
-            document.getElementById('companyRegNumber').required = isAnyLegal;
-            const companyOfficeAddress = document.getElementById('companyOfficeAddress');
-            if (companyOfficeAddress) {
-                 companyOfficeAddress.required = isAnyLegal;
-            }
-
-            const hasOffice = hasOfficeCheckbox ? hasOfficeCheckbox.checked : false;
-            document.getElementById('officeName').required = isAnyIndividual && hasOffice;
-            document.getElementById('officePhone').required = isAnyIndividual && hasOffice;
-            document.getElementById('officeAddress').required = isAnyIndividual && hasOffice;
-        }
-        
-        const qualificationRadios = document.querySelectorAll('input[name="designExecutorType"], input[name="supervisionExecutorType"], input[name="executionExecutorType"]');
-        qualificationRadios.forEach(radio => radio.addEventListener('change', updateProfessionalInfoVisibility));
-
-        const employerHasCompanyCheckbox = document.getElementById('employerHasCompany');
-        const employerCompanyFieldsDiv = document.getElementById('employerCompanyFields');
-        const employerCompanyNameInput = document.getElementById('employerCompanyName');
-        const employerCompanyRegNumberInput = document.getElementById('employerCompanyRegNumber');
-        const employerCompanyAddressTextarea = document.getElementById('employerCompanyAddress');
-        const employerHasCompanyLabel = document.querySelector('label[for="employerHasCompany"]');
-
-        if(employerHasCompanyCheckbox && employerCompanyFieldsDiv && employerHasCompanyLabel){
-            function updateEmployerCompanyLabelAndFields() {
-                const hasCompany = employerHasCompanyCheckbox.checked;
-                employerHasCompanyLabel.textContent = hasCompany ? "شرکت دارم" : "شرکت ندارم (شخص حقیقی هستم)";
-                employerCompanyFieldsDiv.classList.toggle('hidden', !hasCompany);
-                employerCompanyNameInput.required = hasCompany;
-                employerCompanyRegNumberInput.required = hasCompany;
-                employerCompanyAddressTextarea.required = hasCompany;
-                if (hasCompany && currentStep === 3 && currentUserRole === 'employer') {
-                     initMap('employerCompanyMap', 'employerCompanyAddressLat', 'employerCompanyAddressLng', 'employerCompanyAddressNeighborhood', 'employerCompanyMapInfo');
+                // --- Legal Fields Visibility ---
+                const wasLegalHidden = legalExecutorFields.classList.contains('hidden');
+                legalExecutorFields.classList.toggle('hidden', !isAnyLegal);
+                if (wasLegalHidden && isAnyLegal) {
+                    initMap('companyOfficeMap', 'companyOfficeMapLat', 'companyOfficeMapLng', 'companyOfficeMapNeighborhood', 'companyOfficeMapInfo');
                 }
-                calculateProfileCompleteness();
-            }
-            employerHasCompanyCheckbox.addEventListener('change', updateEmployerCompanyLabelAndFields);
-            updateEmployerCompanyLabelAndFields(); 
-        }
+            
+                // --- Individual Fields Visibility ---
+                individualExecutorFieldsContainer.classList.toggle('hidden', !isAnyIndividual);
 
-        const engineerHasOfficeInfoCheckbox = document.getElementById('engineerHasOfficeInfo');
-        const engineerOfficeInfoFieldsDiv = document.getElementById('engineerOfficeInfoFields');
-        
-        if (engineerHasOfficeInfoCheckbox && engineerOfficeInfoFieldsDiv) {
-            engineerHasOfficeInfoCheckbox.addEventListener('change', () => {
-                const hasOffice = engineerHasOfficeInfoCheckbox.checked;
+                // "Assistant Executor" section visibility
+                individualExecutorFields.classList.toggle('hidden', !isExecutionIndividual);
+
+                // Office Info Map Initialization
+                const hasOfficeCheckbox = document.getElementById('engineerHasOfficeInfo');
+                const officeInfoFields = document.getElementById('engineerOfficeInfoFields');
+                if (isAnyIndividual && hasOfficeCheckbox.checked && !officeInfoFields.classList.contains('hidden')) {
+                    initMap('officeMap', 'officeMapLat', 'officeMapLng', 'officeMapNeighborhood', 'officeMapInfo');
+                }
+
+                // Update required attributes
+                document.getElementById('companyName').required = isAnyLegal;
+                document.getElementById('companyRegNumber').required = isAnyLegal;
+                const companyOfficeAddress = document.getElementById('companyOfficeAddress');
+                if (companyOfficeAddress) {
+                    companyOfficeAddress.required = isAnyLegal;
+                }
+
+                const hasOffice = hasOfficeCheckbox ? hasOfficeCheckbox.checked : false;
+                document.getElementById('officeName').required = isAnyIndividual && hasOffice;
+                document.getElementById('officePhone').required = isAnyIndividual && hasOffice;
+                document.getElementById('officeAddress').required = isAnyIndividual && hasOffice;
+            }
+            
+            const qualificationRadios = document.querySelectorAll('input[name="designExecutorType"], input[name="supervisionExecutorType"], input[name="executionExecutorType"]');
+            qualificationRadios.forEach(radio => radio.addEventListener('change', updateProfessionalInfoVisibility));
+
+            const employerHasCompanyCheckbox = document.getElementById('employerHasCompany');
+            const employerCompanyFieldsDiv = document.getElementById('employerCompanyFields');
+            const employerCompanyNameInput = document.getElementById('employerCompanyName');
+            const employerCompanyRegNumberInput = document.getElementById('employerCompanyRegNumber');
+            const employerCompanyAddressTextarea = document.getElementById('employerCompanyAddress');
+            const employerHasCompanyLabel = document.querySelector('label[for="employerHasCompany"]');
+
+            if(employerHasCompanyCheckbox && employerCompanyFieldsDiv && employerHasCompanyLabel){
+                function updateEmployerCompanyLabelAndFields() {
+                    const hasCompany = employerHasCompanyCheckbox.checked;
+                    employerHasCompanyLabel.textContent = hasCompany ? "شرکت دارم" : "شرکت ندارم (شخص حقیقی هستم)";
+                    employerCompanyFieldsDiv.classList.toggle('hidden', !hasCompany);
+                    employerCompanyNameInput.required = hasCompany;
+                    employerCompanyRegNumberInput.required = hasCompany;
+                    employerCompanyAddressTextarea.required = hasCompany;
+                    if (hasCompany && currentStep === 3 && currentUserRole === 'employer') {
+                        initMap('employerCompanyMap', 'employerCompanyAddressLat', 'employerCompanyAddressLng', 'employerCompanyAddressNeighborhood', 'employerCompanyMapInfo');
+                    }
+                    calculateProfileCompleteness();
+                }
+                employerHasCompanyCheckbox.addEventListener('change', updateEmployerCompanyLabelAndFields);
+                updateEmployerCompanyLabelAndFields(); 
+            }
+
+            const engineerHasOfficeInfoCheckbox = document.getElementById('engineerHasOfficeInfo');
+            const engineerOfficeInfoFieldsDiv = document.getElementById('engineerOfficeInfoFields');
+            
+            if (engineerHasOfficeInfoCheckbox && engineerOfficeInfoFieldsDiv) {
+                engineerHasOfficeInfoCheckbox.addEventListener('change', () => {
+                    const hasOffice = engineerHasOfficeInfoCheckbox.checked;
+                    const label = document.getElementById('engineerHasOfficeInfoLabel');
+                    if (label) label.textContent = hasOffice ? "دفتر کار دارم" : "دفتر کار ندارم";
+                    engineerOfficeInfoFieldsDiv.classList.toggle('hidden', !hasOffice);
+                    // After toggling visibility, re-run the main visibility function to handle map initialization
+                    updateProfessionalInfoVisibility(); 
+                    calculateProfileCompleteness();
+                });
+                // Initial setup
                 const label = document.getElementById('engineerHasOfficeInfoLabel');
-                if (label) label.textContent = hasOffice ? "دفتر کار دارم" : "دفتر کار ندارم";
-                engineerOfficeInfoFieldsDiv.classList.toggle('hidden', !hasOffice);
-                // After toggling visibility, re-run the main visibility function to handle map initialization
-                updateProfessionalInfoVisibility(); 
-                calculateProfileCompleteness();
-            });
-            // Initial setup
-            const label = document.getElementById('engineerHasOfficeInfoLabel');
-            if (label) label.textContent = engineerHasOfficeInfoCheckbox.checked ? "دفتر کار دارم" : "دفتر کار ندارم";
-             engineerOfficeInfoFieldsDiv.classList.toggle('hidden', !engineerHasOfficeInfoCheckbox.checked);
+                if (label) label.textContent = engineerHasOfficeInfoCheckbox.checked ? "دفتر کار دارم" : "دفتر کار ندارم";
+                engineerOfficeInfoFieldsDiv.classList.toggle('hidden', !engineerHasOfficeInfoCheckbox.checked);
 
-        }
-
-        const defaultCoords = [38.0800, 46.2900]; 
-        const defaultZoom = 13;
-
-        async function getAddressFromLatLng(lat, lng) {
-            try {
-                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&accept-language=fa`);
-                if (!response.ok) throw new Error(`Nominatim request failed: ${response.status}`);
-                const data = await response.json();
-                return data.display_name || 'محله یافت نشد';
-            } catch (error) {
-                console.error("Error fetching address: ", error);
-                return 'خطا در دریافت نام محله';
             }
-        }
-        
-        function initMap(mapId, latInputId, lngInputId, neighborhoodInputId, mapInfoDisplayId) {
-            const updateLocationUI = async (lat, lng, currentLatInputId, currentLngInputId, currentNeighborhoodInputId, currentMapInfoDisplayId) => {
-                const fLat = lat.toFixed(6), fLng = lng.toFixed(6);
-                if (currentLatInputId && document.getElementById(currentLatInputId)) document.getElementById(currentLatInputId).value = fLat;
-                if (currentLngInputId && document.getElementById(currentLngInputId)) document.getElementById(currentLngInputId).value = fLng;
-                
-                const fullAddress = await getAddressFromLatLng(lat, lng);
 
-                if (currentNeighborhoodInputId && document.getElementById(currentNeighborhoodInputId) ) {
-                    document.getElementById(currentNeighborhoodInputId).value = fullAddress; 
+            const defaultCoords = [38.0800, 46.2900]; 
+            const defaultZoom = 13;
+
+            async function getAddressFromLatLng(lat, lng) {
+                try {
+                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&accept-language=fa`);
+                    if (!response.ok) throw new Error(`Nominatim request failed: ${response.status}`);
+                    const data = await response.json();
+                    return data.display_name || 'محله یافت نشد';
+                } catch (error) {
+                    console.error("Error fetching address: ", error);
+                    return 'خطا در دریافت نام محله';
                 }
+            }
+            
+            function initMap(mapId, latInputId, lngInputId, neighborhoodInputId, mapInfoDisplayId) {
+                const updateLocationUI = async (lat, lng, currentLatInputId, currentLngInputId, currentNeighborhoodInputId, currentMapInfoDisplayId) => {
+                    const fLat = lat.toFixed(6), fLng = lng.toFixed(6);
+                    if (currentLatInputId && document.getElementById(currentLatInputId)) document.getElementById(currentLatInputId).value = fLat;
+                    if (currentLngInputId && document.getElementById(currentLngInputId)) document.getElementById(currentLngInputId).value = fLng;
+                    
+                    const fullAddress = await getAddressFromLatLng(lat, lng);
 
-                const currentMapInfoDiv = document.getElementById(mapInfoDisplayId);
-                if (currentMapInfoDiv) {
-                     currentMapInfoDiv.innerHTML = `<p><strong class="font-semibold text-slate-800">موقعیت انتخاب شده:</strong> <span class="font-mono text-slate-600">${fLat}, ${fLng}</span>. ${fullAddress}</p>`;
+                    if (currentNeighborhoodInputId && document.getElementById(currentNeighborhoodInputId) ) {
+                        document.getElementById(currentNeighborhoodInputId).value = fullAddress; 
+                    }
+
+                    const currentMapInfoDiv = document.getElementById(mapInfoDisplayId);
+                    if (currentMapInfoDiv) {
+                        currentMapInfoDiv.innerHTML = `<p><strong class="font-semibold text-slate-800">موقعیت انتخاب شده:</strong> <span class="font-mono text-slate-600">${fLat}, ${fLng}</span>. ${fullAddress}</p>`;
+                    }
+                    calculateProfileCompleteness();
+                };
+
+                const mapDiv = document.getElementById(mapId);
+                if (!mapDiv) {
+                    console.error(`Map container ${mapId} not found.`);
+                    return;
                 }
-                calculateProfileCompleteness();
-            };
-
-            const mapDiv = document.getElementById(mapId);
-            if (!mapDiv) {
-                console.error(`Map container ${mapId} not found.`);
-                return;
-            }
-        
-            if (maps[mapId + 'Instance']) {
-                maps[mapId + 'Instance'].invalidateSize();
-                const currentLatLng = maps[mapId + 'Instance'].getCenter();
-                updateLocationUI(currentLatLng.lat, currentLatLng.lng, latInputId, lngInputId, neighborhoodInputId, mapInfoDisplayId);
-                return;
-            }
-        
-            if (mapDiv._leaflet_id) {
-                const existingMapInstance = L.DomUtil.get(mapDiv)._leaflet_id;
-                 if (existingMapInstance && typeof existingMapInstance.invalidateSize === 'function') {
-                    maps[mapId + 'Instance'] = existingMapInstance;
-                    existingMapInstance.invalidateSize();
-                    const currentLatLng = existingMapInstance.getCenter();
+            
+                if (maps[mapId + 'Instance']) {
+                    maps[mapId + 'Instance'].invalidateSize();
+                    const currentLatLng = maps[mapId + 'Instance'].getCenter();
                     updateLocationUI(currentLatLng.lat, currentLatLng.lng, latInputId, lngInputId, neighborhoodInputId, mapInfoDisplayId);
                     return;
                 }
-                return;
-            }
-        
-            const map = L.map(mapId).setView(defaultCoords, defaultZoom);
-            maps[mapId + 'Instance'] = map; 
-        
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors',
-                maxZoom: 19
-            }).addTo(map);
-        
-            let marker = L.marker(defaultCoords, {
-                draggable: true,
-                icon: L.icon({
-                    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-                    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41]
-                })
-            }).addTo(map);
-        
-            map.on('click', (e) => { marker.setLatLng(e.latlng); updateLocationUI(e.latlng.lat, e.latlng.lng, latInputId, lngInputId, neighborhoodInputId, mapInfoDisplayId); });
-            marker.on('dragend', () => { const ll = marker.getLatLng(); updateLocationUI(ll.lat, ll.lng, latInputId, lngInputId, neighborhoodInputId, mapInfoDisplayId); });
-        
-            updateLocationUI(defaultCoords[0], defaultCoords[1], latInputId, lngInputId, neighborhoodInputId, mapInfoDisplayId); 
-            setTimeout(() => {
-                if (maps[mapId + 'Instance']) {
-                     maps[mapId + 'Instance'].invalidateSize();
-                }
-            }, 150);
-        }
-
-        const licenseNumberInputEl = document.getElementById('licenseNumber');
-        if (licenseNumberInputEl) {
-            licenseNumberInputEl.addEventListener('input', function(e) {
-                let value = e.target.value.replace(/\D/g, ''); 
-                let formattedValue = '';
-                if (value.length > 0) {
-                    formattedValue += value.substring(0, 1);
-                }
-                if (value.length > 1) {
-                    formattedValue += '-' + value.substring(1, 3);
-                }
-                if (value.length > 3) {
-                    formattedValue += '-' + value.substring(3, 5);
-                }
-                if (value.length > 5) {
-                    formattedValue += '-' + value.substring(5, Math.min(value.length, 11)); 
-                }
-                e.target.value = formattedValue;
-            });
-        }
-
-
-        function calculateProfileCompleteness() {
-            if(!activeForm) return;
-            let filledFields = 0;
-            let totalConsideredFields = 0;
-            const allInputsAndSelects = activeForm.querySelectorAll('input:not([type="hidden"]), select, textarea');
-
-            allInputsAndSelects.forEach(input => {
-                if (input.closest('.hidden')) return; 
-                if (input.disabled && input.id.includes('LicenseGrade')) return; 
-
-                if (currentUserRole === 'engineer'){
-                    if (input.id === 'designLicenseGrade' && !document.getElementById('hasDesignLicense').checked) return;
-                    if (input.id === 'supervisionLicenseGrade' && !document.getElementById('hasSupervisionLicense').checked) return;
-                    if (input.id === 'executionLicenseGrade' && !document.getElementById('hasExecutionLicense').checked) return;
-                }
-                if (currentUserRole === 'employer' && input.closest('#employerCompanyFields') && !document.getElementById('employerHasCompany').checked && !input.required) return;
-                
-                totalConsideredFields++;
-
-                if (input.type === 'checkbox' || input.type === 'radio') {
-                    if (input.checked) filledFields++;
-                } else if (input.type === 'file') {
-                    if (input.files && input.files.length > 0) {
-                        filledFields++;
+            
+                if (mapDiv._leaflet_id) {
+                    const existingMapInstance = L.DomUtil.get(mapDiv)._leaflet_id;
+                    if (existingMapInstance && typeof existingMapInstance.invalidateSize === 'function') {
+                        maps[mapId + 'Instance'] = existingMapInstance;
+                        existingMapInstance.invalidateSize();
+                        const currentLatLng = existingMapInstance.getCenter();
+                        updateLocationUI(currentLatLng.lat, currentLatLng.lng, latInputId, lngInputId, neighborhoodInputId, mapInfoDisplayId);
+                        return;
                     }
-                } else if (input.value !== undefined && input.value.trim() !== '') {
-                    filledFields++; 
-                }
-            });
-            
-            const completion = totalConsideredFields > 0 ? Math.round((filledFields / totalConsideredFields) * 100) : 0;
-        }
-        
-        const engineerFirstNameInput = document.getElementById('engineerFirstName');
-        const engineerLastNameInput = document.getElementById('engineerLastName');
-        const employerFirstNameInput = document.getElementById('employerFirstName');
-        const employerLastNameInput = document.getElementById('employerLastName');
-
-        function updateSidebarName() {
-            let titlePrefix = "";
-            let fName = "";
-            let lName = "";
-            let currentGender = initialUserData.gender || 'مرد'; 
-            let currentDiscipline = "";
-
-            if (currentUserRole === 'engineer') {
-                currentGender = document.getElementById('engineerGender').value;
-                titlePrefix = currentGender === "مرد" ? "آقای مهندس " : "خانم مهندس ";
-                fName = engineerFirstNameInput.value.trim();
-                lName = engineerLastNameInput.value.trim();
-                currentDiscipline = getDisciplineFromLicenseNumber(document.getElementById('licenseNumber')?.value || "");
-            } else if (currentUserRole === 'employer') {
-                 currentGender = document.getElementById('employerGender').value;
-                titlePrefix = currentGender === "مرد" ? "آقای " : "خانم ";
-                fName = employerFirstNameInput.value.trim();
-                lName = employerLastNameInput.value.trim();
-            } else { 
-                 let tempRoleForTitle = firstClickRole || initialUserData.userType;
-                 if (tempRoleForTitle === "engineer") {
-                    titlePrefix = (initialUserData.gender === "مرد" ? "مهندس " : "مهندس ");
-                 } else {
-                     titlePrefix = (initialUserData.gender === "مرد" ? "آقای " : "خانم ");
-                 }
-                fName = initialUserData.firstName || "";
-                lName = initialUserData.lastName || "";
-            }
-            
-            let nameToDisplay;
-            if (fName || lName) { 
-                nameToDisplay = (fName + " " + lName).trim();
-            } else {
-                nameToDisplay = "نام و نام خانوادگی"; 
-            }
-            
-            let sidebarTitlePrefixCalculated = "";
-             if(currentUserRole === 'engineer'){
-                 sidebarTitlePrefixCalculated = (document.getElementById('engineerGender')?.value || initialUserData.gender) === "مرد" ? "آقای مهندس " : "خانم مهندس ";
-            } else if (currentUserRole === 'employer'){
-                 sidebarTitlePrefixCalculated = (document.getElementById('employerGender')?.value || initialUserData.gender) === "مرد" ? "آقای " : "خانم ";
-            } else { 
-                 sidebarTitlePrefixCalculated = initialUserData.userType === "engineer" 
-                    ? (initialUserData.gender === "مرد" ? "آقای مهندس " : "خانم مهندس ")
-                    : (initialUserData.gender === "مرد" ? "آقای " : "خانم ");
-            }
-            sidebarProfileName.textContent = sidebarTitlePrefixCalculated + nameToDisplay;
-
-
-            if(sidebarUserEmail) sidebarUserEmail.textContent = initialUserData.email || 'ایمیل ثبت نشده';
-            if(sidebarEngineerDiscipline) sidebarEngineerDiscipline.textContent = currentUserRole === 'engineer' ? currentDiscipline : '';
-        }
-        if(engineerFirstNameInput) engineerFirstNameInput.addEventListener('input', updateSidebarName);
-        if(engineerLastNameInput) engineerLastNameInput.addEventListener('input', updateSidebarName);
-        if(employerFirstNameInput) employerFirstNameInput.addEventListener('input', updateSidebarName);
-        if(employerLastNameInput) employerLastNameInput.addEventListener('input', updateSidebarName);
-        const licenseNumberInputForSidebar = document.getElementById('licenseNumber');
-        if(licenseNumberInputForSidebar) licenseNumberInputForSidebar.addEventListener('input', updateSidebarName);
-
-        function handleFileUpload(inputId, previewContainerId) {
-            const input = document.getElementById(inputId);
-            const previewContainer = document.getElementById(previewContainerId);
-            if (!input || !previewContainer) return;
-
-            const originalPlaceholder = previewContainer.innerHTML;
-            const MAX_FILE_SIZE = 250 * 1024; // 250 KB
-
-            input.addEventListener('change', function(event) {
-                // Always reset to the placeholder first
-                previewContainer.innerHTML = originalPlaceholder;
-                const file = event.target.files[0];
-
-                if (!file) {
-                    calculateProfileCompleteness();
                     return;
                 }
-
-                if (file.size > MAX_FILE_SIZE) {
-                    showMessageModal(`فایل انتخاب شده (${file.name}) بزرگتر از ۲۵۰ کیلوبایت است.`, 'error');
-                    input.value = '';
-                    calculateProfileCompleteness();
-                    return;
-                }
-                
-                const acceptedTypes = input.accept.split(',');
-
-                if (acceptedTypes.some(type => file.type.match(type.replace(/,\s*/g, '|').replace(/\./g, '\\.').replace(/\*/g, '.*')))) {
-                     if (file.type === 'application/pdf') {
-                        previewContainer.innerHTML = ''; // Clear placeholder
-                        const iframe = document.createElement('iframe');
-                        iframe.src = URL.createObjectURL(file);
-                        iframe.className = "w-full h-full border-0";
-                        previewContainer.appendChild(iframe);
-                    } else if (file.type.startsWith('image/')) {
-                        previewContainer.innerHTML = ''; // Clear placeholder
-                        const img = document.createElement('img');
-                        img.src = URL.createObjectURL(file);
-                        img.className = "w-full h-full object-cover";
-                        img.onload = () => URL.revokeObjectURL(img.src); // Free memory
-                        previewContainer.appendChild(img);
+            
+                const map = L.map(mapId).setView(defaultCoords, defaultZoom);
+                maps[mapId + 'Instance'] = map; 
+            
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors',
+                    maxZoom: 19
+                }).addTo(map);
+            
+                let marker = L.marker(defaultCoords, {
+                    draggable: true,
+                    icon: L.icon({
+                        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41]
+                    })
+                }).addTo(map);
+            
+                map.on('click', (e) => { marker.setLatLng(e.latlng); updateLocationUI(e.latlng.lat, e.latlng.lng, latInputId, lngInputId, neighborhoodInputId, mapInfoDisplayId); });
+                marker.on('dragend', () => { const ll = marker.getLatLng(); updateLocationUI(ll.lat, ll.lng, latInputId, lngInputId, neighborhoodInputId, mapInfoDisplayId); });
+            
+                updateLocationUI(defaultCoords[0], defaultCoords[1], latInputId, lngInputId, neighborhoodInputId, mapInfoDisplayId); 
+                setTimeout(() => {
+                    if (maps[mapId + 'Instance']) {
+                        maps[mapId + 'Instance'].invalidateSize();
                     }
-                } else {
-                     showMessageModal(`نوع فایل معتبر نیست. لطفاً یک فایل با فرمت ${input.accept} انتخاب کنید.`, 'error');
-                     input.value = '';
-                }
-                calculateProfileCompleteness();
-            });
-        }
-
-        function getDisciplineFromLicenseNumber(licenseNumber) {
-            if (!licenseNumber || typeof licenseNumber !== 'string') return "";
-            const parts = licenseNumber.split('-');
-            if (parts.length >= 3) {
-                const code = parts[2]; 
-                switch (code) {
-                    case '30': return "مهندسی عمران";
-                    case '10': return "مهندسی معماری";
-                    case '11': return "مرتبط با مهندسی معماری";
-                    case '20': return "مهندسی شهرسازی";
-                    case '31': return "مرتبط با مهندسی عمران";
-                    case '40': return "مهندسی تاسیسات مکانیکی";
-                    case '41': return "مرتبط با مهندسی تاسیسات مکانیکی";
-                    case '50': return "مهندسی تاسیسات برقی";
-                    case '51': return "مرتبط با مهندسی تاسیسات برقی";
-                    case '60': return "مهندسی نقشه برداری";
-                    case '61': return "مرتبط با مهندسی نقشه برداری";
-                    case '70': return "مهندسی ترافیک";
-                    case '71': return "مرتبط با مهندسی ترافیک";
-                    default: return "";
-                }
-            }
-            return "";
-        }
-
-        function generateSummary() {
-            const summaryContainerId = currentUserRole === 'engineer' ? 'summaryContainerEngineer' : 'summaryContainerEmployer';
-            const summaryContainer = document.getElementById(summaryContainerId);
-            if(!summaryContainer) return;
-
-            summaryContainer.className = 'bg-slate-100 p-5 sm:p-6 rounded-lg shadow border border-slate-200 grid grid-cols-1 md:grid-cols-2 md:gap-x-8 gap-y-1';
-            summaryContainer.innerHTML = ''; 
-
-            const mainTitle = document.createElement('h3');
-            mainTitle.className = "text-xl font-bold mb-6 border-b pb-3 text-slate-800 text-center md:col-span-2";
-            mainTitle.textContent = "خلاصه اطلاعات وارد شده";
-            summaryContainer.appendChild(mainTitle);
-            
-            const formData = new FormData(activeForm); 
-            const data = {}; 
-            
-            const baseFieldLabels = { 
-                firstName: "نام", lastName: "نام خانوادگی", nationalId: "کدملی", dob: "تاریخ تولد", gender: "جنسیت", mobile: "تلفن موبایل",
-                postalCode: "کدپستی", 
-                applicantImage: "عکس پروفایل" 
-            };
-            const engineerFieldLabels = {
-                ...baseFieldLabels,
-                engineerPhone: "شماره تلفن ثابت", 
-                engineerProvince: "استان سکونت", 
-                engineerCity: "شهر سکونت", 
-                engineerPostalCode: "کدپستی", 
-                residentialAddress: "آدرس محل سکونت", 
-                licenseFirstIssueDate: "تاریخ اولین صدور پروانه",
-                licenseNumber: "شماره پروانه", discipline: "رشته", membershipNumber: "شماره عضویت", licenseStartDate: "تاریخ شروع اعتبار پروانه", licenseValidity: "مدت اعتبار پروانه (سال)", 
-                licenseActivityProvince: "استان فعالیت پروانه",
-                hasDesignLicense: "پروانه طراحی", designLicenseGrade: "پایه طراحی", designExecutorType: "نوع صلاحیت طراحی",
-                hasSupervisionLicense: "پروانه نظارت", supervisionLicenseGrade: "پایه نظارت", supervisionExecutorType: "نوع صلاحیت نظارت",
-                hasExecutionLicense: "پروانه اجرا", executionLicenseGrade: "پایه اجرا", executionExecutorType: "نوع صلاحیت اجرا",
-                companyName: "نام شرکت (حقوقی)", companyRegNumber: "شماره ثبت (حقوقی)", companyOfficeAddress: "آدرس دفتر شرکت (حقوقی)", 
-                isAssistantExecutor: "کمک مجری (حقیقی)",
-                engineerHasOfficeInfo: "دفتر کار دارم",
-                officeName: "نام دفتر کار مهندسی",
-                officePhone: "تلفن دفتر کار",
-                officeAddress: "آدرس دفتر کار"
-            };
-            const employerFieldLabels = {
-                 firstName: "نام", lastName: "نام خانوادگی", nationalId: "کدملی", dob: "تاریخ تولد", gender: "جنسیت", 
-                 mobile: "تلفن موبایل",
-                 employerPhone: "شماره تماس", 
-                 postalCode: "کدپستی",
-                 employerProvince: "استان سکونت", 
-                 employerCity: "شهر سکونت", 
-                 employerAddress: "آدرس", 
-                employerHasCompany: "شرکت دارم", employerCompanyName: "نام شرکت", employerCompanyRegNumber: "شماره ثبت شرکت", employerCompanyAddress: "آدرس شرکت", 
-                applicantImage: "عکس پروفایل" 
-            };
-            const fieldLabels = currentUserRole === 'engineer' ? engineerFieldLabels : employerFieldLabels;
-
-            function addSummaryItem(label, value, isFullWidth = false, isHtml = false) {
-                if (value === undefined || value === null || (typeof value === 'string' && value.trim() === '' && !isHtml)) return; 
-                if (isHtml && typeof value === 'string' && value.includes('موقعیت مکانی انتخاب شده روی نقشه در اینجا نمایش داده می‌شود')) return;
-
-                let displayValue = value;
-                if (!isHtml) {
-                    if (typeof value === 'boolean') {
-                        displayValue = value ? 'دارد <i class="fas fa-check text-green-500"></i>' : 'ندارد <i class="fas fa-times text-red-500"></i>';
-                    } else if (value === 'individual') {
-                        displayValue = 'حقیقی';
-                    } else if (value === 'legal') {
-                        displayValue = 'حقوقی';
-                    } else if (value === 'none' && label.includes('نوع صلاحیت')) {
-                        displayValue = 'فعالیت ندارم';
-                    } else if (label.includes('پایه') && value) { 
-                        const grades = { '3': 'پایه ۳', '2': 'پایه ۲', '1': 'پایه ۱', 'arshad': 'پایه ارشد'};
-                        let stars = '';
-                        if (value === '3') stars = '★<span class="text-slate-300">☆☆☆</span>'; 
-                        else if (value === '2') stars = '★★<span class="text-slate-300">☆☆</span>';
-                        else if (value === '1') stars = '★★★<span class="text-slate-300">☆</span>'; 
-                        else if (value === 'arshad') stars = '★★★★';
-                        displayValue = (grades[value] || value) + ` <span class="text-amber-500 text-lg">${stars}</span>`;
-                    } else if (label === fieldLabels.applicantImage && value instanceof File) { 
-                        displayValue = `${value.name} (${(value.size / 1024).toFixed(1)} KB)`;
-                    }
-                }
-
-                const p = document.createElement('p');
-                let pClasses = "text-sm py-1 flex justify-between items-start";
-                if (isFullWidth) {
-                    pClasses += " md:col-span-2"; 
-                } else {
-                     pClasses += " md:col-span-1"; 
-                }
-                p.className = pClasses;
-                if (isHtml) {
-                    p.innerHTML = `<strong class="text-slate-700 font-semibold whitespace-nowrap">${label}:</strong> <span class="text-slate-600 mr-2 text-right break-words ml-auto w-full">${displayValue}</span>`;
-                } else {
-                    p.innerHTML = `<strong class="text-slate-700 font-semibold whitespace-nowrap">${label}:</strong> <span class="text-slate-600 mr-2 text-right break-words ml-auto">${displayValue}</span>`;
-                }
-                summaryContainer.appendChild(p);
-            }
-            
-            function addSectionTitle(titleText) {
-                const titleEl = document.createElement('h4');
-                titleEl.className = "text-md font-semibold mt-4 mb-1 text-slate-800 pt-2 border-t border-slate-300 md:col-span-2";
-                titleEl.textContent = titleText;
-                summaryContainer.appendChild(titleEl);
+                }, 150);
             }
 
-            for (const [key, value] of formData.entries()) {
-                let adjustedKey = key;
-                 if (currentUserRole === 'engineer') {
-                    if (key === 'engineerFirstName') adjustedKey = 'firstName';
-                    if (key === 'engineerLastName') adjustedKey = 'lastName';
-                    if (key === 'engineerNationalId') adjustedKey = 'nationalId';
-                    if (key === 'engineerDob') adjustedKey = 'dob';
-                    if (key === 'engineerGender') adjustedKey = 'gender';
-                    if (key === 'engineerMobile') adjustedKey = 'mobile';
-                    if (key === 'engineerPostalCode') adjustedKey = 'postalCode'; 
-                    if (key === 'engineerProvince') adjustedKey = 'engineerProvince'; 
-                    if (key === 'engineerCity') adjustedKey = 'engineerCity'; 
-                    if (key === 'engineerResidentialAddress') adjustedKey = 'residentialAddress';
-                    if (key === 'engineerPhone') adjustedKey = 'engineerPhone'; 
-                } else if (currentUserRole === 'employer') {
-                    if (key === 'employerFirstName') adjustedKey = 'firstName';
-                    if (key === 'employerLastName') adjustedKey = 'lastName';
-                    if (key === 'employerNationalId') adjustedKey = 'nationalId';
-                    if (key === 'employerDob') adjustedKey = 'dob';
-                    if (key === 'employerGender') adjustedKey = 'gender';
-                    if (key === 'employerMobile') adjustedKey = 'mobile'; 
-                    if (key === 'employerPostalCode') adjustedKey = 'postalCode'; 
-                    if (key === 'employerProvince') adjustedKey = 'employerProvince'; 
-                    if (key === 'employerCity') adjustedKey = 'employerCity'; 
-                }
-
-                if (key.startsWith('fee-')) continue; 
-                if (key.endsWith('[]')) { 
-                    if (!data[adjustedKey]) data[adjustedKey] = [];
-                    data[adjustedKey].push(value);
-                } else {
-                    data[adjustedKey] = value;
-                }
+            const licenseNumberInputEl = document.getElementById('licenseNumber');
+            if (licenseNumberInputEl) {
+                licenseNumberInputEl.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, ''); 
+                    let formattedValue = '';
+                    if (value.length > 0) {
+                        formattedValue += value.substring(0, 1);
+                    }
+                    if (value.length > 1) {
+                        formattedValue += '-' + value.substring(1, 3);
+                    }
+                    if (value.length > 3) {
+                        formattedValue += '-' + value.substring(3, 5);
+                    }
+                    if (value.length > 5) {
+                        formattedValue += '-' + value.substring(5, Math.min(value.length, 11)); 
+                    }
+                    e.target.value = formattedValue;
+                });
             }
-            
-            for (const key in data) {
-                const displayLabel = fieldLabels[key] || key; 
-                let val = data[key];
-
-                const fieldsToSkipForEngineerSummary = [
-                    'engineerResidentialLat', 'engineerResidentialLng', 'engineerResidentialNeighborhood',
-                    'companyOfficeMapLat', 'companyOfficeMapLng', 'companyOfficeMapNeighborhood',
-                    'officeMapLat', 'officeMapLng', 'officeMapNeighborhood',
-                    'workPermitPdf', 'nationalIdCardImageEngineer', 'councilCardImage',
-                ];
-                const fieldsToSkipForEmployerSummary = [
-                    'employerAddressLat', 'employerAddressLng', 'employerAddressNeighborhood',
-                    'employerCompanyAddressLat', 'employerCompanyAddressLng', 'employerCompanyAddressNeighborhood',
-                    'employerNationalIdCardImage', 'employerBirthCertificateImage', 'employerOtherDocs' 
-                ];
-
-                if (currentUserRole === 'engineer' && fieldsToSkipForEngineerSummary.includes(key)) {
-                    continue;
-                }
-                if (currentUserRole === 'employer' && fieldsToSkipForEmployerSummary.includes(key)) {
-                    continue;
-                }
 
 
-                if (displayLabel) {
-                    if (['hasDesignLicense', 'hasSupervisionLicense', 'hasExecutionLicense', 'isAssistantExecutor', 'employerHasCompany', 'engineerHasOfficeInfo'].includes(key)) {
-                         val = (data[key] === 'on'); 
+            function calculateProfileCompleteness() {
+                if(!activeForm) return;
+                let filledFields = 0;
+                let totalConsideredFields = 0;
+                const allInputsAndSelects = activeForm.querySelectorAll('input:not([type="hidden"]), select, textarea');
+
+                allInputsAndSelects.forEach(input => {
+                    if (input.closest('.hidden')) return; 
+                    if (input.disabled && input.id.includes('LicenseGrade')) return; 
+
+                    if (currentUserRole === 'engineer'){
+                        if (input.id === 'designLicenseGrade' && !document.getElementById('hasDesignLicense').checked) return;
+                        if (input.id === 'supervisionLicenseGrade' && !document.getElementById('hasSupervisionLicense').checked) return;
+                        if (input.id === 'executionLicenseGrade' && !document.getElementById('hasExecutionLicense').checked) return;
                     }
-
-                    if (currentUserRole === 'engineer') {
-                         const isAnyLegal = data['designExecutorType'] === 'legal' || data['supervisionExecutorType'] === 'legal' || data['executionExecutorType'] === 'legal';
-                         const isAnyIndividual = data['designExecutorType'] === 'individual' || data['supervisionExecutorType'] === 'individual' || data['executionExecutorType'] === 'individual';
-                         const isExecutionIndividual = data['executionExecutorType'] === 'individual';
-
-                         if (!isAnyLegal && key.startsWith('company')) continue;
-                         if (!isExecutionIndividual && key === 'isAssistantExecutor') continue;
-                         if (!isAnyIndividual && (key === 'engineerHasOfficeInfo' || key.startsWith('office'))) continue;
-                         if (isAnyIndividual && (key.startsWith('office')) && data['engineerHasOfficeInfo'] !== 'on') continue;
-                    }
-                    if (currentUserRole === 'employer' && (key.startsWith('employerCompany') && key !== 'employerHasCompany' ) && data['employerHasCompany'] !== 'on' && data['employerHasCompany'] !== true) continue;
+                    if (currentUserRole === 'employer' && input.closest('#employerCompanyFields') && !document.getElementById('employerHasCompany').checked && !input.required) return;
                     
-                    let fullWidth = false;
-                    if (['residentialAddress', 'companyOfficeAddress', 'officeAddress', 'employerAddress', 'employerCompanyAddress'].includes(key)) {
-                        fullWidth = true;
+                    totalConsideredFields++;
+
+                    if (input.type === 'checkbox' || input.type === 'radio') {
+                        if (input.checked) filledFields++;
+                    } else if (input.type === 'file') {
+                        if (input.files && input.files.length > 0) {
+                            filledFields++;
+                        }
+                    } else if (input.value !== undefined && input.value.trim() !== '') {
+                        filledFields++; 
+                    }
+                });
+                
+                const completion = totalConsideredFields > 0 ? Math.round((filledFields / totalConsideredFields) * 100) : 0;
+            }
+            
+            const engineerFirstNameInput = document.getElementById('engineerFirstName');
+            const engineerLastNameInput = document.getElementById('engineerLastName');
+            const employerFirstNameInput = document.getElementById('employerFirstName');
+            const employerLastNameInput = document.getElementById('employerLastName');
+
+            function updateSidebarName() {
+                let titlePrefix = "";
+                let fName = "";
+                let lName = "";
+                let currentGender = initialUserData.gender || 'مرد'; 
+                let currentDiscipline = "";
+
+                if (currentUserRole === 'engineer') {
+                    currentGender = document.getElementById('engineerGender').value;
+                    titlePrefix = currentGender === "مرد" ? "آقای مهندس " : "خانم مهندس ";
+                    fName = engineerFirstNameInput.value.trim();
+                    lName = engineerLastNameInput.value.trim();
+                    currentDiscipline = getDisciplineFromLicenseNumber(document.getElementById('licenseNumber')?.value || "");
+                } else if (currentUserRole === 'employer') {
+                    currentGender = document.getElementById('employerGender').value;
+                    titlePrefix = currentGender === "مرد" ? "آقای " : "خانم ";
+                    fName = employerFirstNameInput.value.trim();
+                    lName = employerLastNameInput.value.trim();
+                } else { 
+                    let tempRoleForTitle = firstClickRole || initialUserData.userType;
+                    if (tempRoleForTitle === "engineer") {
+                        titlePrefix = (initialUserData.gender === "مرد" ? "مهندس " : "مهندس ");
+                    } else {
+                        titlePrefix = (initialUserData.gender === "مرد" ? "آقای " : "خانم ");
+                    }
+                    fName = initialUserData.firstName || "";
+                    lName = initialUserData.lastName || "";
+                }
+                
+                let nameToDisplay;
+                if (fName || lName) { 
+                    nameToDisplay = (fName + " " + lName).trim();
+                } else {
+                    nameToDisplay = "نام و نام خانوادگی"; 
+                }
+                
+                let sidebarTitlePrefixCalculated = "";
+                if(currentUserRole === 'engineer'){
+                    sidebarTitlePrefixCalculated = (document.getElementById('engineerGender')?.value || initialUserData.gender) === "مرد" ? "آقای مهندس " : "خانم مهندس ";
+                } else if (currentUserRole === 'employer'){
+                    sidebarTitlePrefixCalculated = (document.getElementById('employerGender')?.value || initialUserData.gender) === "مرد" ? "آقای " : "خانم ";
+                } else { 
+                    sidebarTitlePrefixCalculated = initialUserData.userType === "engineer" 
+                        ? (initialUserData.gender === "مرد" ? "آقای مهندس " : "خانم مهندس ")
+                        : (initialUserData.gender === "مرد" ? "آقای " : "خانم ");
+                }
+                sidebarProfileName.textContent = sidebarTitlePrefixCalculated + nameToDisplay;
+
+
+                if(sidebarUserEmail) sidebarUserEmail.textContent = initialUserData.email || 'ایمیل ثبت نشده';
+                if(sidebarEngineerDiscipline) sidebarEngineerDiscipline.textContent = currentUserRole === 'engineer' ? currentDiscipline : '';
+            }
+            if(engineerFirstNameInput) engineerFirstNameInput.addEventListener('input', updateSidebarName);
+            if(engineerLastNameInput) engineerLastNameInput.addEventListener('input', updateSidebarName);
+            if(employerFirstNameInput) employerFirstNameInput.addEventListener('input', updateSidebarName);
+            if(employerLastNameInput) employerLastNameInput.addEventListener('input', updateSidebarName);
+            const licenseNumberInputForSidebar = document.getElementById('licenseNumber');
+            if(licenseNumberInputForSidebar) licenseNumberInputForSidebar.addEventListener('input', updateSidebarName);
+
+            function handleFileUpload(inputId, previewContainerId) {
+                const input = document.getElementById(inputId);
+                const previewContainer = document.getElementById(previewContainerId);
+                if (!input || !previewContainer) return;
+
+                const originalPlaceholder = previewContainer.innerHTML;
+                const MAX_FILE_SIZE = 250 * 1024; // 250 KB
+
+                input.addEventListener('change', function(event) {
+                    // Always reset to the placeholder first
+                    previewContainer.innerHTML = originalPlaceholder;
+                    const file = event.target.files[0];
+
+                    if (!file) {
+                        calculateProfileCompleteness();
+                        return;
                     }
 
-                    if (key === 'applicantImage') { 
-                        const fileInput = document.getElementById('applicantImage');
-                        if (fileInput && fileInput.files.length > 0) {
-                            addSummaryItem(displayLabel, fileInput.files[0], fullWidth);
-                        } else {
-                            addSummaryItem(displayLabel, "انتخاب نشده", fullWidth);
+                    if (file.size > MAX_FILE_SIZE) {
+                        showMessageModal(`فایل انتخاب شده (${file.name}) بزرگتر از ۲۵۰ کیلوبایت است.`, 'error');
+                        input.value = '';
+                        calculateProfileCompleteness();
+                        return;
+                    }
+                    
+                    const acceptedTypes = input.accept.split(',');
+
+                    if (acceptedTypes.some(type => file.type.match(type.replace(/,\s*/g, '|').replace(/\./g, '\\.').replace(/\*/g, '.*')))) {
+                        if (file.type === 'application/pdf') {
+                            previewContainer.innerHTML = ''; // Clear placeholder
+                            const iframe = document.createElement('iframe');
+                            iframe.src = URL.createObjectURL(file);
+                            iframe.className = "w-full h-full border-0";
+                            previewContainer.appendChild(iframe);
+                        } else if (file.type.startsWith('image/')) {
+                            previewContainer.innerHTML = ''; // Clear placeholder
+                            const img = document.createElement('img');
+                            img.src = URL.createObjectURL(file);
+                            img.className = "w-full h-full object-cover";
+                            img.onload = () => URL.revokeObjectURL(img.src); // Free memory
+                            previewContainer.appendChild(img);
                         }
                     } else {
-                        addSummaryItem(displayLabel, val, fullWidth);
+                        showMessageModal(`نوع فایل معتبر نیست. لطفاً یک فایل با فرمت ${input.accept} انتخاب کنید.`, 'error');
+                        input.value = '';
+                    }
+                    calculateProfileCompleteness();
+                });
+            }
+
+            function getDisciplineFromLicenseNumber(licenseNumber) {
+                if (!licenseNumber || typeof licenseNumber !== 'string') return "";
+                const parts = licenseNumber.split('-');
+                if (parts.length >= 3) {
+                    const code = parts[2]; 
+                    switch (code) {
+                        case '30': return "مهندسی عمران";
+                        case '10': return "مهندسی معماری";
+                        case '11': return "مرتبط با مهندسی معماری";
+                        case '20': return "مهندسی شهرسازی";
+                        case '31': return "مرتبط با مهندسی عمران";
+                        case '40': return "مهندسی تاسیسات مکانیکی";
+                        case '41': return "مرتبط با مهندسی تاسیسات مکانیکی";
+                        case '50': return "مهندسی تاسیسات برقی";
+                        case '51': return "مرتبط با مهندسی تاسیسات برقی";
+                        case '60': return "مهندسی نقشه برداری";
+                        case '61': return "مرتبط با مهندسی نقشه برداری";
+                        case '70': return "مهندسی ترافیک";
+                        case '71': return "مرتبط با مهندسی ترافیک";
+                        default: return "";
                     }
                 }
-            }
-            
-            if (currentUserRole === 'engineer') {
-                const discipline = getDisciplineFromLicenseNumber(data['licenseNumber']);
-                if (discipline) addSummaryItem("رشته", discipline);
-
-                const resMapInfoDiv = document.getElementById('engineerResidentialMapInfo');
-                if (resMapInfoDiv && resMapInfoDiv.innerHTML && !resMapInfoDiv.innerHTML.includes('موقعیت مکانی انتخاب شده روی نقشه در اینجا نمایش داده می‌شود')) {
-                    addSummaryItem("اطلاعات نقشه محل سکونت", resMapInfoDiv.innerHTML, true, true);
-                }
-                const isAnyLegal = data['designExecutorType'] === 'legal' || data['supervisionExecutorType'] === 'legal' || data['executionExecutorType'] === 'legal';
-                const companyMapInfoDiv = document.getElementById('companyOfficeMapInfo');
-                if (isAnyLegal && companyMapInfoDiv && companyMapInfoDiv.innerHTML && !companyMapInfoDiv.innerHTML.includes('موقعیت مکانی انتخاب شده روی نقشه در اینجا نمایش داده می‌شود')) {
-                    addSummaryItem("اطلاعات نقشه دفتر شرکت", companyMapInfoDiv.innerHTML, true, true);
-                }
-                const isAnyIndividual = data['designExecutorType'] === 'individual' || data['supervisionExecutorType'] === 'individual' || data['executionExecutorType'] === 'individual';
-                const officeMapInfoDiv = document.getElementById('officeMapInfo');
-                if (isAnyIndividual && document.getElementById('engineerHasOfficeInfo')?.checked && officeMapInfoDiv && officeMapInfoDiv.innerHTML && !officeMapInfoDiv.innerHTML.includes('موقعیت مکانی انتخاب شده روی نقشه در اینجا نمایش داده می‌شود')) {
-                    addSummaryItem("اطلاعات نقشه دفتر کار", officeMapInfoDiv.innerHTML, true, true);
-                }
-            } else if (currentUserRole === 'employer') {
-                 const empAddrMapInfoDiv = document.getElementById('employerAddressMapInfo');
-                if (empAddrMapInfoDiv && empAddrMapInfoDiv.innerHTML && !empAddrMapInfoDiv.innerHTML.includes('موقعیت مکانی انتخاب شده روی نقشه در اینجا نمایش داده می‌شود')) {
-                    addSummaryItem("اطلاعات نقشه آدرس", empAddrMapInfoDiv.innerHTML, true, true);
-                }
-                const empCompMapInfoDiv = document.getElementById('employerCompanyMapInfo');
-                if (document.getElementById('employerHasCompany')?.checked && empCompMapInfoDiv && empCompMapInfoDiv.innerHTML && !empCompMapInfoDiv.innerHTML.includes('موقعیت مکانی انتخاب شده روی نقشه در اینجا نمایش داده می‌شود')) {
-                    addSummaryItem("اطلاعات نقشه شرکت", empCompMapInfoDiv.innerHTML, true, true);
-                }
+                return "";
             }
 
+            function generateSummary() {
+                const summaryContainerId = currentUserRole === 'engineer' ? 'summaryContainerEngineer' : 'summaryContainerEmployer';
+                const summaryContainer = document.getElementById(summaryContainerId);
+                if(!summaryContainer) return;
 
-            addSectionTitle("مدارک بارگذاری شده:");
-            const filesToSummarize = currentUserRole === 'engineer' ?
-                [
-                    {id: 'workPermitPdf', label: 'پروانه اشتغال'}, 
-                    {id: 'nationalIdCardImageEngineer', label: 'کارت ملی'}, 
-                ] :
-                [
-                    {id: 'employerNationalIdCardImage', label: 'کارت ملی'},
-                    {id: 'employerOtherDocs', label: 'سایر مدارک'}
-                ];
-            
-            filesToSummarize.forEach(fInfo => {
-                const fileInput = document.getElementById(fInfo.id);
-                let fileDetails = "انتخاب نشده";
-                if (fileInput && fileInput.files.length > 0) {
-                    const file = fileInput.files[0];
-                    fileDetails = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                summaryContainer.className = 'bg-slate-100 p-5 sm:p-6 rounded-lg shadow border border-slate-200 grid grid-cols-1 md:grid-cols-2 md:gap-x-8 gap-y-1';
+                summaryContainer.innerHTML = ''; 
+
+                const mainTitle = document.createElement('h3');
+                mainTitle.className = "text-xl font-bold mb-6 border-b pb-3 text-slate-800 text-center md:col-span-2";
+                mainTitle.textContent = "خلاصه اطلاعات وارد شده";
+                summaryContainer.appendChild(mainTitle);
+                
+                const formData = new FormData(activeForm); 
+                const data = {}; 
+                
+                const baseFieldLabels = { 
+                    firstName: "نام", lastName: "نام خانوادگی", nationalId: "کدملی", dob: "تاریخ تولد", gender: "جنسیت", mobile: "تلفن موبایل",
+                    postalCode: "کدپستی", 
+                    applicantImage: "عکس پروفایل" 
+                };
+                const engineerFieldLabels = {
+                    ...baseFieldLabels,
+                    engineerPhone: "شماره تلفن ثابت", 
+                    engineerProvince: "استان سکونت", 
+                    engineerCity: "شهر سکونت", 
+                    engineerPostalCode: "کدپستی", 
+                    residentialAddress: "آدرس محل سکونت", 
+                    licenseFirstIssueDate: "تاریخ اولین صدور پروانه",
+                    licenseNumber: "شماره پروانه", discipline: "رشته", membershipNumber: "شماره عضویت", licenseStartDate: "تاریخ شروع اعتبار پروانه", licenseValidity: "مدت اعتبار پروانه (سال)", 
+                    licenseActivityProvince: "استان فعالیت پروانه",
+                    hasDesignLicense: "پروانه طراحی", designLicenseGrade: "پایه طراحی", designExecutorType: "نوع صلاحیت طراحی",
+                    hasSupervisionLicense: "پروانه نظارت", supervisionLicenseGrade: "پایه نظارت", supervisionExecutorType: "نوع صلاحیت نظارت",
+                    hasExecutionLicense: "پروانه اجرا", executionLicenseGrade: "پایه اجرا", executionExecutorType: "نوع صلاحیت اجرا",
+                    companyName: "نام شرکت (حقوقی)", companyRegNumber: "شماره ثبت (حقوقی)", companyOfficeAddress: "آدرس دفتر شرکت (حقوقی)", 
+                    isAssistantExecutor: "کمک مجری (حقیقی)",
+                    engineerHasOfficeInfo: "دفتر کار دارم",
+                    officeName: "نام دفتر کار مهندسی",
+                    officePhone: "تلفن دفتر کار",
+                    officeAddress: "آدرس دفتر کار"
+                };
+                const employerFieldLabels = {
+                    firstName: "نام", lastName: "نام خانوادگی", nationalId: "کدملی", dob: "تاریخ تولد", gender: "جنسیت", 
+                    mobile: "تلفن موبایل",
+                    employerPhone: "شماره تماس", 
+                    postalCode: "کدپستی",
+                    employerProvince: "استان سکونت", 
+                    employerCity: "شهر سکونت", 
+                    employerAddress: "آدرس", 
+                    employerHasCompany: "شرکت دارم", employerCompanyName: "نام شرکت", employerCompanyRegNumber: "شماره ثبت شرکت", employerCompanyAddress: "آدرس شرکت", 
+                    applicantImage: "عکس پروفایل" 
+                };
+                const fieldLabels = currentUserRole === 'engineer' ? engineerFieldLabels : employerFieldLabels;
+
+                function addSummaryItem(label, value, isFullWidth = false, isHtml = false) {
+                    if (value === undefined || value === null || (typeof value === 'string' && value.trim() === '' && !isHtml)) return; 
+                    if (isHtml && typeof value === 'string' && value.includes('موقعیت مکانی انتخاب شده روی نقشه در اینجا نمایش داده می‌شود')) return;
+
+                    let displayValue = value;
+                    if (!isHtml) {
+                        if (typeof value === 'boolean') {
+                            displayValue = value ? 'دارد <i class="fas fa-check text-green-500"></i>' : 'ندارد <i class="fas fa-times text-red-500"></i>';
+                        } else if (value === 'individual') {
+                            displayValue = 'حقیقی';
+                        } else if (value === 'legal') {
+                            displayValue = 'حقوقی';
+                        } else if (value === 'none' && label.includes('نوع صلاحیت')) {
+                            displayValue = 'فعالیت ندارم';
+                        } else if (label.includes('پایه') && value) { 
+                            const grades = { '3': 'پایه ۳', '2': 'پایه ۲', '1': 'پایه ۱', 'arshad': 'پایه ارشد'};
+                            let stars = '';
+                            if (value === '3') stars = '★<span class="text-slate-300">☆☆☆</span>'; 
+                            else if (value === '2') stars = '★★<span class="text-slate-300">☆☆</span>';
+                            else if (value === '1') stars = '★★★<span class="text-slate-300">☆</span>'; 
+                            else if (value === 'arshad') stars = '★★★★';
+                            displayValue = (grades[value] || value) + ` <span class="text-amber-500 text-lg">${stars}</span>`;
+                        } else if (label === fieldLabels.applicantImage && value instanceof File) { 
+                            displayValue = `${value.name} (${(value.size / 1024).toFixed(1)} KB)`;
+                        }
+                    }
+
+                    const p = document.createElement('p');
+                    let pClasses = "text-sm py-1 flex justify-between items-start";
+                    if (isFullWidth) {
+                        pClasses += " md:col-span-2"; 
+                    } else {
+                        pClasses += " md:col-span-1"; 
+                    }
+                    p.className = pClasses;
+                    if (isHtml) {
+                        p.innerHTML = `<strong class="text-slate-700 font-semibold whitespace-nowrap">${label}:</strong> <span class="text-slate-600 mr-2 text-right break-words ml-auto w-full">${displayValue}</span>`;
+                    } else {
+                        p.innerHTML = `<strong class="text-slate-700 font-semibold whitespace-nowrap">${label}:</strong> <span class="text-slate-600 mr-2 text-right break-words ml-auto">${displayValue}</span>`;
+                    }
+                    summaryContainer.appendChild(p);
                 }
-                addSummaryItem(fInfo.label, fileDetails);
-            });
-        }
-        
-        function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => {
-                    // result includes "data:mime/type;base64," prefix, which we need to remove
-                    resolve(reader.result.split(',')[1]);
-                };
-                reader.onerror = error => reject(error);
-            });
-        }
-        
-        function blobToBase64(blob) {
-             return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(blob);
-                reader.onload = () => {
-                    resolve(reader.result.split(',')[1]);
-                };
-                reader.onerror = error => reject(error);
-            });
-        }
+                
+                function addSectionTitle(titleText) {
+                    const titleEl = document.createElement('h4');
+                    titleEl.className = "text-md font-semibold mt-4 mb-1 text-slate-800 pt-2 border-t border-slate-300 md:col-span-2";
+                    titleEl.textContent = titleText;
+                    summaryContainer.appendChild(titleEl);
+                }
+
+                for (const [key, value] of formData.entries()) {
+                    let adjustedKey = key;
+                    if (currentUserRole === 'engineer') {
+                        if (key === 'engineerFirstName') adjustedKey = 'firstName';
+                        if (key === 'engineerLastName') adjustedKey = 'lastName';
+                        if (key === 'engineerNationalId') adjustedKey = 'nationalId';
+                        if (key === 'engineerDob') adjustedKey = 'dob';
+                        if (key === 'engineerGender') adjustedKey = 'gender';
+                        if (key === 'engineerMobile') adjustedKey = 'mobile';
+                        if (key === 'engineerPostalCode') adjustedKey = 'postalCode'; 
+                        if (key === 'engineerProvince') adjustedKey = 'engineerProvince'; 
+                        if (key === 'engineerCity') adjustedKey = 'engineerCity'; 
+                        if (key === 'engineerResidentialAddress') adjustedKey = 'residentialAddress';
+                        if (key === 'engineerPhone') adjustedKey = 'engineerPhone'; 
+                    } else if (currentUserRole === 'employer') {
+                        if (key === 'employerFirstName') adjustedKey = 'firstName';
+                        if (key === 'employerLastName') adjustedKey = 'lastName';
+                        if (key === 'employerNationalId') adjustedKey = 'nationalId';
+                        if (key === 'employerDob') adjustedKey = 'dob';
+                        if (key === 'employerGender') adjustedKey = 'gender';
+                        if (key === 'employerMobile') adjustedKey = 'mobile'; 
+                        if (key === 'employerPostalCode') adjustedKey = 'postalCode'; 
+                        if (key === 'employerProvince') adjustedKey = 'employerProvince'; 
+                        if (key === 'employerCity') adjustedKey = 'employerCity'; 
+                    }
+
+                    if (key.startsWith('fee-')) continue; 
+                    if (key.endsWith('[]')) { 
+                        if (!data[adjustedKey]) data[adjustedKey] = [];
+                        data[adjustedKey].push(value);
+                    } else {
+                        data[adjustedKey] = value;
+                    }
+                }
+                
+                for (const key in data) {
+                    const displayLabel = fieldLabels[key] || key; 
+                    let val = data[key];
+
+                    const fieldsToSkipForEngineerSummary = [
+                        'engineerResidentialLat', 'engineerResidentialLng', 'engineerResidentialNeighborhood',
+                        'companyOfficeMapLat', 'companyOfficeMapLng', 'companyOfficeMapNeighborhood',
+                        'officeMapLat', 'officeMapLng', 'officeMapNeighborhood',
+                        'workPermitPdf', 'nationalIdCardImageEngineer', 'councilCardImage',
+                    ];
+                    const fieldsToSkipForEmployerSummary = [
+                        'employerAddressLat', 'employerAddressLng', 'employerAddressNeighborhood',
+                        'employerCompanyAddressLat', 'employerCompanyAddressLng', 'employerCompanyAddressNeighborhood',
+                        'employerNationalIdCardImage', 'employerBirthCertificateImage', 'employerOtherDocs' 
+                    ];
+
+                    if (currentUserRole === 'engineer' && fieldsToSkipForEngineerSummary.includes(key)) {
+                        continue;
+                    }
+                    if (currentUserRole === 'employer' && fieldsToSkipForEmployerSummary.includes(key)) {
+                        continue;
+                    }
 
 
-        async function prepareAndSubmitData() {
-            loadingModalText.textContent = "لطفا منتظر بمانید ...";
-            loadingModal.style.display = 'flex';
+                    if (displayLabel) {
+                        if (['hasDesignLicense', 'hasSupervisionLicense', 'hasExecutionLicense', 'isAssistantExecutor', 'employerHasCompany', 'engineerHasOfficeInfo'].includes(key)) {
+                            val = (data[key] === 'on'); 
+                        }
 
-            const filesData = {};
-            const stepsData = {};
+                        if (currentUserRole === 'engineer') {
+                            const isAnyLegal = data['designExecutorType'] === 'legal' || data['supervisionExecutorType'] === 'legal' || data['executionExecutorType'] === 'legal';
+                            const isAnyIndividual = data['designExecutorType'] === 'individual' || data['supervisionExecutorType'] === 'individual' || data['executionExecutorType'] === 'individual';
+                            const isExecutionIndividual = data['executionExecutorType'] === 'individual';
 
-            // 1. Collect data from each step's form fields
-            for (let i = 1; i <= totalSteps; i++) {
-                const stepContainer = document.getElementById(`${currentUserRole}-step-${i}`);
-                const stepDataObject = {};
-                if (stepContainer) {
-                    const formElements = stepContainer.querySelectorAll('input:not([type="file"]), select, textarea');
-                    formElements.forEach(el => {
-                        if (el.classList.contains('jalali-datepicker')) {
-                            // Send the gregorian date for backend processing
-                            stepDataObject[el.name] = el.getAttribute('data-gregorian-date') || '';
-                        } else if (el.type === 'checkbox') {
-                            stepDataObject[el.name] = el.checked;
-                        } else if (el.type === 'radio') {
-                            if (el.checked) {
-                                stepDataObject[el.name] = el.value;
+                            if (!isAnyLegal && key.startsWith('company')) continue;
+                            if (!isExecutionIndividual && key === 'isAssistantExecutor') continue;
+                            if (!isAnyIndividual && (key === 'engineerHasOfficeInfo' || key.startsWith('office'))) continue;
+                            if (isAnyIndividual && (key.startsWith('office')) && data['engineerHasOfficeInfo'] !== 'on') continue;
+                        }
+                        if (currentUserRole === 'employer' && (key.startsWith('employerCompany') && key !== 'employerHasCompany' ) && data['employerHasCompany'] !== 'on' && data['employerHasCompany'] !== true) continue;
+                        
+                        let fullWidth = false;
+                        if (['residentialAddress', 'companyOfficeAddress', 'officeAddress', 'employerAddress', 'employerCompanyAddress'].includes(key)) {
+                            fullWidth = true;
+                        }
+
+                        if (key === 'applicantImage') { 
+                            const fileInput = document.getElementById('applicantImage');
+                            if (fileInput && fileInput.files.length > 0) {
+                                addSummaryItem(displayLabel, fileInput.files[0], fullWidth);
+                            } else {
+                                addSummaryItem(displayLabel, "انتخاب نشده", fullWidth);
                             }
                         } else {
-                            stepDataObject[el.name] = el.value;
+                            addSummaryItem(displayLabel, val, fullWidth);
                         }
-                    });
+                    }
                 }
-                stepsData[`step${i}`] = stepDataObject;
+                
+                if (currentUserRole === 'engineer') {
+                    const discipline = getDisciplineFromLicenseNumber(data['licenseNumber']);
+                    if (discipline) addSummaryItem("رشته", discipline);
+
+                    const resMapInfoDiv = document.getElementById('engineerResidentialMapInfo');
+                    if (resMapInfoDiv && resMapInfoDiv.innerHTML && !resMapInfoDiv.innerHTML.includes('موقعیت مکانی انتخاب شده روی نقشه در اینجا نمایش داده می‌شود')) {
+                        addSummaryItem("اطلاعات نقشه محل سکونت", resMapInfoDiv.innerHTML, true, true);
+                    }
+                    const isAnyLegal = data['designExecutorType'] === 'legal' || data['supervisionExecutorType'] === 'legal' || data['executionExecutorType'] === 'legal';
+                    const companyMapInfoDiv = document.getElementById('companyOfficeMapInfo');
+                    if (isAnyLegal && companyMapInfoDiv && companyMapInfoDiv.innerHTML && !companyMapInfoDiv.innerHTML.includes('موقعیت مکانی انتخاب شده روی نقشه در اینجا نمایش داده می‌شود')) {
+                        addSummaryItem("اطلاعات نقشه دفتر شرکت", companyMapInfoDiv.innerHTML, true, true);
+                    }
+                    const isAnyIndividual = data['designExecutorType'] === 'individual' || data['supervisionExecutorType'] === 'individual' || data['executionExecutorType'] === 'individual';
+                    const officeMapInfoDiv = document.getElementById('officeMapInfo');
+                    if (isAnyIndividual && document.getElementById('engineerHasOfficeInfo')?.checked && officeMapInfoDiv && officeMapInfoDiv.innerHTML && !officeMapInfoDiv.innerHTML.includes('موقعیت مکانی انتخاب شده روی نقشه در اینجا نمایش داده می‌شود')) {
+                        addSummaryItem("اطلاعات نقشه دفتر کار", officeMapInfoDiv.innerHTML, true, true);
+                    }
+                } else if (currentUserRole === 'employer') {
+                    const empAddrMapInfoDiv = document.getElementById('employerAddressMapInfo');
+                    if (empAddrMapInfoDiv && empAddrMapInfoDiv.innerHTML && !empAddrMapInfoDiv.innerHTML.includes('موقعیت مکانی انتخاب شده روی نقشه در اینجا نمایش داده می‌شود')) {
+                        addSummaryItem("اطلاعات نقشه آدرس", empAddrMapInfoDiv.innerHTML, true, true);
+                    }
+                    const empCompMapInfoDiv = document.getElementById('employerCompanyMapInfo');
+                    if (document.getElementById('employerHasCompany')?.checked && empCompMapInfoDiv && empCompMapInfoDiv.innerHTML && !empCompMapInfoDiv.innerHTML.includes('موقعیت مکانی انتخاب شده روی نقشه در اینجا نمایش داده می‌شود')) {
+                        addSummaryItem("اطلاعات نقشه شرکت", empCompMapInfoDiv.innerHTML, true, true);
+                    }
+                }
+
+
+                addSectionTitle("مدارک بارگذاری شده:");
+                const filesToSummarize = currentUserRole === 'engineer' ?
+                    [
+                        {id: 'workPermitPdf', label: 'پروانه اشتغال'}, 
+                        {id: 'nationalIdCardImageEngineer', label: 'کارت ملی'}, 
+                    ] :
+                    [
+                        {id: 'employerNationalIdCardImage', label: 'کارت ملی'},
+                        {id: 'employerOtherDocs', label: 'سایر مدارک'}
+                    ];
+                
+                filesToSummarize.forEach(fInfo => {
+                    const fileInput = document.getElementById(fInfo.id);
+                    let fileDetails = "انتخاب نشده";
+                    if (fileInput && fileInput.files.length > 0) {
+                        const file = fileInput.files[0];
+                        fileDetails = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                    }
+                    addSummaryItem(fInfo.label, fileDetails);
+                });
+            }
+            
+            function fileToBase64(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = () => {
+                        // result includes "data:mime/type;base64," prefix, which we need to remove
+                        resolve(reader.result.split(',')[1]);
+                    };
+                    reader.onerror = error => reject(error);
+                });
+            }
+            
+            function blobToBase64(blob) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(blob);
+                    reader.onload = () => {
+                        resolve(reader.result.split(',')[1]);
+                    };
+                    reader.onerror = error => reject(error);
+                });
             }
 
-            // 2. Helper to process file uploads to Base64
-            const processFile = async (inputId, fieldName) => {
-                const input = document.getElementById(inputId);
-                if (input && input.files.length > 0) {
-                    const file = input.files[0];
-                    try {
-                        const base64Data = await fileToBase64(file);
-                        filesData[fieldName] = {
-                            fileName: file.name,
-                            mimeType: file.type,
-                            base64Data: base64Data
-                        };
-                    } catch (error) {
-                        console.error(`Error converting file ${file.name} to Base64:`, error);
-                        throw new Error(`خطا در پردازش فایل: ${file.name}`);
-                    }
-                }
-            };
 
-            try {
-                loadingModalText.textContent = "در حال آماده سازی اطلاعات...";
-                
-                // 3. Process all file inputs from the entire form
-                const allFileInputs = activeForm.querySelectorAll('input[type="file"]');
-                for (const input of allFileInputs) {
-                    await processFile(input.id, input.name);
-                }
-                
-                // Special handling for the cropped profile image
-                if (croppedImageBlob) {
-                    try {
-                        const base64Data = await blobToBase64(croppedImageBlob);
-                        filesData['applicantImage'] = {
-                            fileName: 'profile_image.png',
-                            mimeType: croppedImageBlob.type,
-                            base64Data: base64Data
-                        };
-                    } catch (error) {
-                         throw new Error(`خطا در پردازش عکس پروفایل.`);
+            async function prepareAndSubmitData() {
+                loadingModalText.textContent = "لطفا منتظر بمانید ...";
+                loadingModal.style.display = 'flex';
+
+                const filesData = {};
+                const stepsData = {};
+
+                // 1. Collect data from each step's form fields
+                for (let i = 1; i <= totalSteps; i++) {
+                    const stepContainer = document.getElementById(`${currentUserRole}-step-${i}`);
+                    const stepDataObject = {};
+                    if (stepContainer) {
+                        const formElements = stepContainer.querySelectorAll('input:not([type="file"]), select, textarea');
+                        formElements.forEach(el => {
+                            if (el.classList.contains('jalali-datepicker')) {
+                                // Send the gregorian date for backend processing
+                                stepDataObject[el.name] = el.getAttribute('data-gregorian-date') || '';
+                            } else if (el.type === 'checkbox') {
+                                stepDataObject[el.name] = el.checked;
+                            } else if (el.type === 'radio') {
+                                if (el.checked) {
+                                    stepDataObject[el.name] = el.value;
+                                }
+                            } else {
+                                stepDataObject[el.name] = el.value;
+                            }
+                        });
                     }
+                    stepsData[`step${i}`] = stepDataObject;
                 }
-                
-                // 4. Construct the final payload
-                const payload = {
-                    email: initialUserData.email,
-                    role: currentUserRole,
-                    stepsData: stepsData, // Send the structured step data
-                    files: filesData
+
+                // 2. Helper to process file uploads to Base64
+                const processFile = async (inputId, fieldName) => {
+                    const input = document.getElementById(inputId);
+                    if (input && input.files.length > 0) {
+                        const file = input.files[0];
+                        try {
+                            const base64Data = await fileToBase64(file);
+                            filesData[fieldName] = {
+                                fileName: file.name,
+                                mimeType: file.type,
+                                base64Data: base64Data
+                            };
+                        } catch (error) {
+                            console.error(`Error converting file ${file.name} to Base64:`, error);
+                            throw new Error(`خطا در پردازش فایل: ${file.name}`);
+                        }
+                    }
                 };
 
-                loadingModalText.textContent = "در حال ارسال به سرور...";
+                try {
+                    loadingModalText.textContent = "در حال آماده سازی اطلاعات...";
+                    
+                    // 3. Process all file inputs from the entire form
+                    const allFileInputs = activeForm.querySelectorAll('input[type="file"]');
+                    for (const input of allFileInputs) {
+                        await processFile(input.id, input.name);
+                    }
+                    
+                    // Special handling for the cropped profile image
+                    if (croppedImageBlob) {
+                        try {
+                            const base64Data = await blobToBase64(croppedImageBlob);
+                            filesData['applicantImage'] = {
+                                fileName: 'profile_image.png',
+                                mimeType: croppedImageBlob.type,
+                                base64Data: base64Data
+                            };
+                        } catch (error) {
+                            throw new Error(`خطا در پردازش عکس پروفایل.`);
+                        }
+                    }
+                    
+                    // 4. Construct the final payload
+                    const payload = {
+                        email: initialUserData.email,
+                        role: currentUserRole,
+                        stepsData: stepsData, // Send the structured step data
+                        files: filesData
+                    };
 
-                // 5. Send the request
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    cache: 'no-cache',
-                    headers: {
-                        'Content-Type': 'text/plain;charset=utf-8',
-                    },
-                    body: JSON.stringify(payload)
-                });
+                    loadingModalText.textContent = "در حال ارسال به سرور...";
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`خطا در ارتباط با سرور: ${response.status} ${errorText}`);
-                }
+                    // 5. Send the request
+                    const response = await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'cors',
+                        cache: 'no-cache',
+                        headers: {
+                            'Content-Type': 'text/plain;charset=utf-8',
+                        },
+                        body: JSON.stringify(payload)
+                    });
 
-                const result = await response.json();
-                if (result.status === "success") {
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`خطا در ارتباط با سرور: ${response.status} ${errorText}`);
+                    }
+
+                    const result = await response.json();
+                    if (result.status === "success") {
+                        loadingModal.style.display = 'none';
+                        showMessageModal("اطلاعات پروفایل با موفقیت ارسال شد! در حال انتقال شما...", 'success');
+                        activeForm.reset();
+                        // --- REDIRECT ON SUCCESS ---
+                        setTimeout(() => {
+                            // Redirect to the next work page. Change the URL to your desired destination.
+                            window.location.href = './next-dashboard.html'; // <-- آدرس صفحه کاری بعدی را در اینجا قرار دهید
+                        }, 3000);
+                    } else {
+                        throw new Error(result.message || "خطای ناشناخته در پردازش اطلاعات در سرور.");
+                    }
+
+                } catch (error) {
+                    console.error("Submission Error: ", error);
+                    showMessageModal(`خطا در ارسال اطلاعات: ${error.message}`, 'error');
+                } finally {
                     loadingModal.style.display = 'none';
-                    showMessageModal("اطلاعات پروفایل با موفقیت ارسال شد! در حال انتقال شما...", 'success');
-                    activeForm.reset();
-                    // --- REDIRECT ON SUCCESS ---
-                    setTimeout(() => {
-                        // Redirect to the next work page. Change the URL to your desired destination.
-                        window.location.href = './next-dashboard.html'; // <-- آدرس صفحه کاری بعدی را در اینجا قرار دهید
-                    }, 3000);
-                } else {
-                    throw new Error(result.message || "خطای ناشناخته در پردازش اطلاعات در سرور.");
                 }
-
-            } catch (error) {
-                console.error("Submission Error: ", error);
-                showMessageModal(`خطا در ارسال اطلاعات: ${error.message}`, 'error');
-            } finally {
-                loadingModal.style.display = 'none';
-            }
-        }
-
-
-        submitButton.addEventListener('click', () => {
-             if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE' || !GOOGLE_SCRIPT_URL) {
-                showMessageModal("خطا: URL اسکریپت گوگل تنظیم نشده است. لطفاً با پشتیبانی تماس بگیرید.", 'error'); 
-                return;
             }
 
-            // New check for mandatory profile picture (using the cropped blob)
-            if (!croppedImageBlob) {
-                showMessageModal('لطفاً عکس پروفایل خود را از نوار کناری بارگذاری و برش دهید. این فیلد اجباری است.', 'error');
-                const sidebarImgContainer = sidebarProfileImagePreview.parentElement;
-                sidebarImgContainer.classList.add('ring-2', 'ring-red-500');
-                setTimeout(() => sidebarImgContainer.classList.remove('ring-2', 'ring-red-500'), 3000);
-                return;
-            }
 
-             for (let i = 1; i <= totalSteps; i++) { 
-                 if (i === totalSteps) continue; 
-                if (!validateStep(i)) {
-                    const stepDataArray = currentUserRole === 'engineer' ? stepIndicatorDataEngineer : stepIndicatorDataEmployer;
-                    const stepLabel = stepDataArray.find(s=>s.id===i)?.label.split('. ')[1] || `مرحله ${i}`;
-                    showMessageModal(`لطفاً خطاهای ${stepLabel} را برطرف کنید.`, 'error'); 
-                    goToStep(i); 
+            submitButton.addEventListener('click', () => {
+                if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE' || !GOOGLE_SCRIPT_URL) {
+                    showMessageModal("خطا: URL اسکریپت گوگل تنظیم نشده است. لطفاً با پشتیبانی تماس بگیرید.", 'error'); 
                     return;
                 }
-            }
-            if (!validateStep(currentUserRole === 'engineer' ? 4 : 4)) { 
-                 showMessageModal(`لطفاً خطاهای مرحله ۴ (آپلود مدارک) را برطرف کنید.`, 'error'); 
-                 goToStep(4);
-                 return;
-            }
 
-            prepareAndSubmitData();
-        });
-        
-        // --- CROPPER LOGIC ---
-        applicantImageInput.addEventListener('change', (e) => {
-            const files = e.target.files;
-            if (files && files.length > 0) {
-                const reader = new FileReader();
-                reader.onload = () => {
-                    imageToCrop.src = reader.result;
-                    cropperModal.style.display = 'block';
-                    if(cropper) {
-                        cropper.destroy();
+                // New check for mandatory profile picture (using the cropped blob)
+                if (!croppedImageBlob) {
+                    showMessageModal('لطفاً عکس پروفایل خود را از نوار کناری بارگذاری و برش دهید. این فیلد اجباری است.', 'error');
+                    const sidebarImgContainer = sidebarProfileImagePreview.parentElement;
+                    sidebarImgContainer.classList.add('ring-2', 'ring-red-500');
+                    setTimeout(() => sidebarImgContainer.classList.remove('ring-2', 'ring-red-500'), 3000);
+                    return;
+                }
+
+                for (let i = 1; i <= totalSteps; i++) { 
+                    if (i === totalSteps) continue; 
+                    if (!validateStep(i)) {
+                        const stepDataArray = currentUserRole === 'engineer' ? stepIndicatorDataEngineer : stepIndicatorDataEmployer;
+                        const stepLabel = stepDataArray.find(s=>s.id===i)?.label.split('. ')[1] || `مرحله ${i}`;
+                        showMessageModal(`لطفاً خطاهای ${stepLabel} را برطرف کنید.`, 'error'); 
+                        goToStep(i); 
+                        return;
                     }
-                    // Initialize Cropper with movable and resizable options
-                    cropper = new Cropper(imageToCrop, {
-                        aspectRatio: 1,
-                        viewMode: 1,
-                        background: false,
-                        responsive: true,
-                        restore: true,
-                        checkOrientation: true,
-                        modal: true,
-                        guides: true,
-                        center: true,
-                        highlight: false,
-                        cropBoxMovable: true, // Allow moving the crop box
-                        cropBoxResizable: true, // Allow resizing the crop box
-                        toggleDragModeOnDblclick: false,
-                    });
-                };
-                reader.readAsDataURL(files[0]);
-            }
-        });
+                }
+                if (!validateStep(currentUserRole === 'engineer' ? 4 : 4)) { 
+                    showMessageModal(`لطفاً خطاهای مرحله ۴ (آپلود مدارک) را برطرف کنید.`, 'error'); 
+                    goToStep(4);
+                    return;
+                }
 
-        cancelCropButton.addEventListener('click', () => {
-            cropperModal.style.display = 'none';
-            if(cropper) {
-                cropper.destroy();
-            }
-            applicantImageInput.value = ''; // Clear the file input
-        });
-
-        cropButton.addEventListener('click', () => {
-            if (cropper) {
-                const canvas = cropper.getCroppedCanvas({
-                    width: 512, // Set a fixed output size for consistency
-                    height: 512,
-                    imageSmoothingQuality: 'high',
-                });
-                canvas.toBlob((blob) => {
-                    croppedImageBlob = blob; // Store the blob
-                    const imageUrl = URL.createObjectURL(blob);
-                    sidebarProfileImagePreview.src = imageUrl;
-                    cropperModal.style.display = 'none';
-                    cropper.destroy();
-                }, 'image/png');
-            }
-        });
-
-        // --- Jalali Date Picker Initialization ---
-        function initializeDatePickers() {
-            const datePickerOptions = {
-                buttonsColor: "sky",
-                forceFarsiDigits: true,
-                placeholder: "YYYY/MM/DD",
-                sync: true,
-                gotoToday: true,
-            };
-
-            const dateInputs = document.querySelectorAll('.jalali-datepicker');
-            dateInputs.forEach(input => {
-                kamadatepicker(input.id, {
-                    ...datePickerOptions,
-                    onselect: (e) => {
-                        // When a date is selected, store the Gregorian date in a data attribute
-                        // The input's value will be the Jalali date (handled by the library)
-                        if (e.gregorianDate) {
-                            const year = e.gregorianDate.getFullYear();
-                            const month = (e.gregorianDate.getMonth() + 1).toString().padStart(2, '0');
-                            const day = e.gregorianDate.getDate().toString().padStart(2, '0');
-                            input.setAttribute('data-gregorian-date', `${year}-${month}-${day}`);
-                        } else {
-                             input.setAttribute('data-gregorian-date', '');
-                        }
-                        // Manually trigger validation or completeness check if needed
-                        calculateProfileCompleteness();
-                    }
-                });
+                prepareAndSubmitData();
             });
-        }
-
-
-        // --- INITIAL PAGE LOAD ---
-        window.addEventListener('load', () => {
-            getUserDataFromURL();
-            showWelcomeScreen(); // Always show the welcome screen. Logic for pre-selection is inside.
             
-            handleFileUpload('workPermitPdf', 'workPermitPdfPreviewContainer');
-            handleFileUpload('nationalIdCardImageEngineer', 'nationalIdCardImageEngineerPreviewContainer');
-            handleFileUpload('employerNationalIdCardImage', 'employerNationalIdCardImagePreviewContainer');
-            handleFileUpload('employerOtherDocs', 'employerOtherDocsPreviewContainer');
-            
-            initializeDatePickers(); // Initialize all Jalali date pickers
-        });
+            // --- CROPPER LOGIC ---
+            applicantImageInput.addEventListener('change', (e) => {
+                const files = e.target.files;
+                if (files && files.length > 0) {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        imageToCrop.src = reader.result;
+                        cropperModal.style.display = 'block';
+                        if(cropper) {
+                            cropper.destroy();
+                        }
+                        // Initialize Cropper with movable and resizable options
+                        cropper = new Cropper(imageToCrop, {
+                            aspectRatio: 1,
+                            viewMode: 1,
+                            background: false,
+                            responsive: true,
+                            restore: true,
+                            checkOrientation: true,
+                            modal: true,
+                            guides: true,
+                            center: true,
+                            highlight: false,
+                            cropBoxMovable: true, // Allow moving the crop box
+                            cropBoxResizable: true, // Allow resizing the crop box
+                            toggleDragModeOnDblclick: false,
+                        });
+                    };
+                    reader.readAsDataURL(files[0]);
+                }
+            });
 
-    </script>
+            cancelCropButton.addEventListener('click', () => {
+                cropperModal.style.display = 'none';
+                if(cropper) {
+                    cropper.destroy();
+                }
+                applicantImageInput.value = ''; // Clear the file input
+            });
+
+            cropButton.addEventListener('click', () => {
+                if (cropper) {
+                    const canvas = cropper.getCroppedCanvas({
+                        width: 512, // Set a fixed output size for consistency
+                        height: 512,
+                        imageSmoothingQuality: 'high',
+                    });
+                    canvas.toBlob((blob) => {
+                        croppedImageBlob = blob; // Store the blob
+                        const imageUrl = URL.createObjectURL(blob);
+                        sidebarProfileImagePreview.src = imageUrl;
+                        cropperModal.style.display = 'none';
+                        cropper.destroy();
+                    }, 'image/png');
+                }
+            });
+
+            // --- Jalali Date Picker Initialization ---
+            function initializeDatePickers() {
+                const datePickerOptions = {
+                    buttonsColor: "sky",
+                    forceFarsiDigits: true,
+                    placeholder: "YYYY/MM/DD",
+                    sync: true,
+                    gotoToday: true,
+                };
+
+                const dateInputs = document.querySelectorAll('.jalali-datepicker');
+                dateInputs.forEach(input => {
+                    kamadatepicker(input.id, {
+                        ...datePickerOptions,
+                        onselect: (e) => {
+                            // When a date is selected, store the Gregorian date in a data attribute
+                            // The input's value will be the Jalali date (handled by the library)
+                            if (e.gregorianDate) {
+                                const year = e.gregorianDate.getFullYear();
+                                const month = (e.gregorianDate.getMonth() + 1).toString().padStart(2, '0');
+                                const day = e.gregorianDate.getDate().toString().padStart(2, '0');
+                                input.setAttribute('data-gregorian-date', `${year}-${month}-${day}`);
+                            } else {
+                                input.setAttribute('data-gregorian-date', '');
+                            }
+                            // Manually trigger validation or completeness check if needed
+                            calculateProfileCompleteness();
+                        }
+                    });
+                });
+            }
+
+
+            // --- INITIAL PAGE LOAD ---
+            window.addEventListener('load', () => {
+                getUserDataFromURL();
+                showWelcomeScreen(); // Always show the welcome screen. Logic for pre-selection is inside.
+                
+                handleFileUpload('workPermitPdf', 'workPermitPdfPreviewContainer');
+                handleFileUpload('nationalIdCardImageEngineer', 'nationalIdCardImageEngineerPreviewContainer');
+                handleFileUpload('employerNationalIdCardImage', 'employerNationalIdCardImagePreviewContainer');
+                handleFileUpload('employerOtherDocs', 'employerOtherDocsPreviewContainer');
+                
+                initializeDatePickers(); // Initialize all Jalali date pickers
+            });
+        })();
+        </script>
     </body>
 </html>
