@@ -15,6 +15,9 @@
         <!-- Cropper.js (for image cropping) -->
         <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+        <!-- Jalali Date Picker -->
+        <link rel="stylesheet" href="https://unpkg.com/kamadatepicker/dist/kamadatepicker.min.css">
+        <script src="https://unpkg.com/kamadatepicker/dist/kamadatepicker.min.js"></script>
 
         <style>
             body { font-family: 'Vazirmatn', 'Tahoma', sans-serif; background-color: #f8fafc; }
@@ -305,7 +308,7 @@
                                         </div>
                                         <div>
                                             <label for="engineerDob" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ تولد</label>
-                                            <input type="date" id="engineerDob" name="engineerDob" required class="mt-1 block w-full sm:text-sm">
+                                            <input type="text" id="engineerDob" name="engineerDob" required class="mt-1 block w-full sm:text-sm jalali-datepicker" data-gregorian-date="">
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-slate-700 mb-1 required">جنسیت</label>
@@ -394,11 +397,11 @@
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6 pt-4">
                                         <div>
                                             <label for="licenseFirstIssueDate" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ اولین صدور پروانه</label>
-                                            <input type="date" id="licenseFirstIssueDate" name="licenseFirstIssueDate" required class="mt-1 block w-full sm:text-sm">
+                                            <input type="text" id="licenseFirstIssueDate" name="licenseFirstIssueDate" required class="mt-1 block w-full sm:text-sm jalali-datepicker" data-gregorian-date="">
                                         </div>
                                         <div>
                                             <label for="licenseStartDate" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ شروع اعتبار پروانه</label>
-                                            <input type="date" id="licenseStartDate" name="licenseStartDate" required class="mt-1 block w-full sm:text-sm">
+                                            <input type="text" id="licenseStartDate" name="licenseStartDate" required class="mt-1 block w-full sm:text-sm jalali-datepicker" data-gregorian-date="">
                                         </div>
                                         <div>
                                             <label for="licenseValidity" class="block text-sm font-medium text-slate-700 mb-1 required">مدت اعتبار پروانه (سال)</label>
@@ -641,7 +644,7 @@
                                         </div>
                                         <div>
                                             <label for="employerDob" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ تولد</label>
-                                            <input type="date" id="employerDob" name="employerDob" required class="mt-1 block w-full sm:text-sm">
+                                            <input type="text" id="employerDob" name="employerDob" required class="mt-1 block w-full sm:text-sm jalali-datepicker" data-gregorian-date="">
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-slate-700 mb-1 required">جنسیت</label>
@@ -857,7 +860,7 @@
 
         <script type="module">
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyVxXq8YCIdsj_r_w3Os7t4cEcSW78gqmPp0Ql-PYVr5sQ0PIIb4mRtyAWTCHHSRva1/exec'; // <-- آدرس وب اپ خود را اینجا قرار دهید
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3df4j-LARK4vhExP6gtuJRw7P7bsTbVRwi98WwHm6-KlTQRWmhjlqk9V925FggPfH/exec'; // <-- آدرس وب اپ خود را اینجا قرار دهید
         
         // --- STATE VARIABLES ---
         let currentStep = 1;
@@ -1321,7 +1324,7 @@
                         fieldIsValid = false;
                     }
                 } else if (field.id === 'engineerDob' || field.id === 'employerDob') {
-                    const dobValue = field.value;
+                    const dobValue = field.getAttribute('data-gregorian-date');
                     if (dobValue) {
                         const birthDate = new Date(dobValue);
                         const today = new Date();
@@ -1379,8 +1382,9 @@
                 if (isValid) { 
                     const licenseStartDateInput = document.getElementById('licenseStartDate');
                     const licenseValidityInput = document.getElementById('licenseValidity'); 
-                    if (licenseStartDateInput.value && licenseValidityInput.value) {
-                        const startDate = new Date(licenseStartDateInput.value);
+                    const gregorianStartDate = licenseStartDateInput.getAttribute('data-gregorian-date');
+                    if (gregorianStartDate && licenseValidityInput.value) {
+                        const startDate = new Date(gregorianStartDate);
                         const validityYears = parseInt(licenseValidityInput.value, 10);
                         if (!isNaN(validityYears)) {
                             const expiryDate = new Date(startDate);
@@ -2122,7 +2126,9 @@
                 if (stepContainer) {
                     const formElements = stepContainer.querySelectorAll('input:not([type="file"]), select, textarea');
                     formElements.forEach(el => {
-                        if (el.type === 'checkbox') {
+                        if (el.classList.contains('jalali-datepicker')) {
+                            stepDataObject[el.name] = el.getAttribute('data-gregorian-date') || '';
+                        } else if (el.type === 'checkbox') {
                             stepDataObject[el.name] = el.checked;
                         } else if (el.type === 'radio') {
                             if (el.checked) {
@@ -2318,6 +2324,35 @@
             }
         });
 
+        // --- Jalali Date Picker Initialization ---
+        function initializeDatePickers() {
+            const datePickerOptions = {
+                buttonsColor: "sky",
+                forceFarsiDigits: true,
+                placeholder: "YYYY/MM/DD",
+                sync: true,
+                gotoToday: true,
+            };
+
+            const dateInputs = document.querySelectorAll('.jalali-datepicker');
+            dateInputs.forEach(input => {
+                kamadatepicker(input.id, {
+                    ...datePickerOptions,
+                    onselect: (e) => {
+                        if (e.gregorianDate) {
+                            const year = e.gregorianDate.getFullYear();
+                            const month = (e.gregorianDate.getMonth() + 1).toString().padStart(2, '0');
+                            const day = e.gregorianDate.getDate().toString().padStart(2, '0');
+                            input.setAttribute('data-gregorian-date', `${year}-${month}-${day}`);
+                        } else {
+                             input.setAttribute('data-gregorian-date', '');
+                        }
+                        calculateProfileCompleteness();
+                    }
+                });
+            });
+        }
+
 
         // --- INITIAL PAGE LOAD ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -2328,6 +2363,8 @@
             handleFileUpload('nationalIdCardImageEngineer', 'nationalIdCardImageEngineerPreviewContainer');
             handleFileUpload('employerNationalIdCardImage', 'employerNationalIdCardImagePreviewContainer');
             handleFileUpload('employerOtherDocs', 'employerOtherDocsPreviewContainer');
+            
+            initializeDatePickers(); // Initialize all Jalali date pickers
         });
 
     </script>
