@@ -15,9 +15,12 @@
         <!-- Cropper.js (for image cropping) -->
         <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-        <!-- Jalali Date Picker -->
-        <link rel="stylesheet" href="https://unpkg.com/kamadatepicker/dist/kamadatepicker.min.css">
-        <script src="https://unpkg.com/kamadatepicker/dist/kamadatepicker.min.js"></script>
+        
+        <!-- Persian Datepicker -->
+        <link rel="stylesheet" href="https://unpkg.com/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css"/>
+        <script src="https://unpkg.com/jquery@3.5.1/dist/jquery.min.js"></script>
+        <script src="https://unpkg.com/persian-date@1.1.0/dist/persian-date.min.js"></script>
+        <script src="https://unpkg.com/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
 
         <style>
             body { font-family: 'Vazirmatn', 'Tahoma', sans-serif; background-color: #f8fafc; }
@@ -1621,7 +1624,7 @@
                 const map = L.map(mapId).setView(defaultCoords, defaultZoom);
                 maps[mapId + 'Instance'] = map; 
             
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{y}.png', {
                     attribution: '&copy; OpenStreetMap contributors',
                     maxZoom: 19
                 }).addTo(map);
@@ -2330,39 +2333,50 @@
 
             // --- Jalali Date Picker Initialization ---
             function initializeDatePickers() {
-                const datePickerOptions = {
-                    buttonsColor: "sky",
-                    forceFarsiDigits: true,
-                    placeholder: "YYYY/MM/DD",
-                    sync: true,
-                    gotoToday: true,
-                };
-
-                const dateInputs = document.querySelectorAll('.jalali-datepicker');
-                dateInputs.forEach(input => {
-                    kamadatepicker(input.id, {
-                        ...datePickerOptions,
-                        onselect: (e) => {
-                            // When a date is selected, store the Gregorian date in a data attribute
-                            // The input's value will be the Jalali date (handled by the library)
-                            if (e.gregorianDate) {
-                                const year = e.gregorianDate.getFullYear();
-                                const month = (e.gregorianDate.getMonth() + 1).toString().padStart(2, '0');
-                                const day = e.gregorianDate.getDate().toString().padStart(2, '0');
-                                input.setAttribute('data-gregorian-date', `${year}-${month}-${day}`);
-                            } else {
-                                input.setAttribute('data-gregorian-date', '');
-                            }
-                            // Manually trigger validation or completeness check if needed
-                            calculateProfileCompleteness();
+                $(".jalali-datepicker").persianDatepicker({
+                    format: 'YYYY/MM/DD',
+                    altField: '.jalali-datepicker-gregorian',
+                    altFormat: 'YYYY-MM-DD',
+                    observer: true,
+                    autoClose: true,
+                    navigator: {
+                        enabled: true,
+                        scroll: {
+                            enabled: false
+                        },
+                        text: {
+                            btnNextText: '>',
+                            btnPrevText: '<'
                         }
-                    });
+                    },
+                    toolbox: {
+                        enabled: true,
+                        calendarSwitch: {
+                            enabled: false,
+                        },
+                        todayButton: {
+                            enabled: true,
+                            text: {
+                                fa: 'امروز',
+                                en: 'Today'
+                            }
+                        }
+                    },
+                    onSelect: function(unix) {
+                        const input = $(this.el);
+                        const date = new Date(unix);
+                        const year = date.getFullYear();
+                        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                        const day = date.getDate().toString().padStart(2, '0');
+                        input.attr('data-gregorian-date', `${year}-${month}-${day}`);
+                        calculateProfileCompleteness();
+                    }
                 });
             }
 
 
             // --- INITIAL PAGE LOAD ---
-            window.addEventListener('load', () => {
+            $(document).ready(function() {
                 getUserDataFromURL();
                 showWelcomeScreen(); // Always show the welcome screen. Logic for pre-selection is inside.
                 
