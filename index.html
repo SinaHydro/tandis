@@ -371,7 +371,7 @@
         });
 
         // URL وب اپ Google Apps Script
-        const webAppUrl = 'https://script.google.com/macros/s/AKfycbyBE91RW4JJE22AqkfLUGRX3yYl1DKiq3eOVSkdg45skrubuDwMNjxKRQ0i65FaV0Yw/exec';
+        const webAppUrl = 'https://script.google.com/macros/s/AKfycbyuO_BXzXFv_GNXteQsumLNfzgqs5U2rKXQ0IndKIPlGe9NgYVByqzaOeP9g3rj-dzE/exec';
         const loadingOverlay = document.getElementById('loading-overlay');
 
         function showLoading() {
@@ -444,23 +444,41 @@
 
             fetch(fullUrl, { method: 'GET' })
               .then(response => response.json())
-              .then(data => {
-                hideLoading();
-                if (!data.success) {
-                  if (data.error === 'ERPWD') {
-                    showMessage('رمز عبور اشتباه است', 'error');
-                  } else if (data.error === 'NoUser') {
-                    showMessage('کاربر یافت نشد', 'error');
-                  } else {
-                    showMessage(`خطا: ${data.error}`, 'error');
-                  }
-                } else {
-                  showMessage('ورود موفقیت‌آمیز بود! در حال انتقال...', 'success');
-                  const userInfo = data.data;
-                  // استخراج اطلاعات از پاسخ سرور
-                  redirectToProfile(userInfo[0], userInfo[2], userInfo[3], userInfo[8]);
-                }
-              })
+.then(result => {
+    hideLoading();
+    if (result.success) {
+        // بر اساس وضعیت کاربر، تصمیم‌گیری انجام می‌شود
+        switch (result.status) {
+            
+            case 'LOGIN_SUCCESS':
+                showMessage(result.message, 'success');
+                // کاربر به ایستگاه کار هدایت می‌شود
+                setTimeout(() => {
+                    window.location.href = `${result.redirectUrl}?email=${encodeURIComponent(email)}`;
+                }, 1500);
+                break;
+            
+            case 'INCOMPLETE_REGISTRATION':
+                showMessage(result.message, 'warning');
+                // کاربر به صفحه تکمیل ثبت‌نام هدایت می‌شود
+                setTimeout(() => {
+                    window.location.href = `${result.redirectUrl}?email=${encodeURIComponent(email)}`;
+                }, 1500);
+                break;
+
+            case 'PENDING_APPROVAL':
+                // فقط پیام نمایش داده می‌شود و کاربر در همین صفحه باقی می‌ماند
+                showMessage(result.message, 'warning');
+                break;
+                
+            default:
+                 showMessage('پاسخ سرور نامشخص است.', 'error');
+        }
+    } else {
+        // اگر ورود ناموفق بود (مثلاً رمز اشتباه یا کاربر یافت نشد)
+        showMessage(result.message || 'خطایی رخ داد.', 'error');
+    }
+})
               .catch(error => {
                 hideLoading();
                 showMessage(`خطا در ارتباط با سرور: ${error.message}`, 'error');
@@ -507,20 +525,21 @@
             });
         });
 
-        // تابع نمایش پیام با Toastify
-        function showMessage(message, type) {
-          Toastify({
-            text: message,
-            duration: 5000,
-            close: true,
-            gravity: "top",
-            position: "center",
-            style: {
-              fontFamily: "Vazirmatn, sans-serif",
-              background: type === 'success' ? "#4CAF50" : "#F44336"
-            }
-          }).showToast();
-        }        
+// نسخه بهبود یافته تابع showMessage
+function showMessage(message, type = 'info') {
+  Toastify({
+    text: message,
+    duration: 5000,
+    close: true,
+    gravity: "top",
+    position: "center",
+    style: {
+      fontFamily: "Vazirmatn, sans-serif",
+      background: type === 'success' ? "#4CAF50" : (type === 'warning' ? '#FFA000' : '#F44336'),
+      borderRadius: "8px"
+    }
+  }).showToast();
+}
     </script>         
         <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     </body>     
