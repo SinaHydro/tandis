@@ -28,8 +28,9 @@
             .form-step.active { display: block; }
             .form-container-wrapper { display: flex; flex-direction: column; height: 100vh; max-height: 100vh; margin: 0 auto; background-color: white; overflow: hidden; }
             #stepsSidebar { background-color: #f1f5f9; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; }
+/* --- اصلاحیه برای مخفی‌سازی سایدبار در موبایل --- */
+            @media (max-width: 767px) { #stepsSidebar { display: none; } }
             #advertisementSidebar { background-color: #f1f5f9; border-right: 1px solid #e2e8f0; }
-            .mobile-steps-header { background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 0.75rem 1rem; }
             .step-indicator { display: flex; align-items: center; text-align: right; color: #64748b; font-size: 0.875rem; position: relative; transition: all 0.3s ease; cursor: default; }
             .step-indicator .step-icon-container { width: 32px; height: 32px; border-radius: 50%; background-color: #cbd5e1; color: #475569; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; border: 2px solid transparent; flex-shrink: 0; }
             .step-indicator .step-icon { font-size: 0.9rem; }
@@ -52,17 +53,12 @@
             .sidebar-profile-section { border-bottom: 1px solid #cbd5e1; padding-bottom: 1rem; margin-bottom: 1rem; }
             #sidebarUserEmail { font-size: 0.75rem; color: #64748b; margin-top: 0.5rem; margin-bottom: 0.25rem; word-break: break-all; }
             #sidebarEngineerDiscipline { font-size: 0.8rem; color: #0ea5e9; font-weight: 500; margin-bottom: 0.5rem; }
-            .steps-header-info { padding: 0.5rem 0; }
             .form-content-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
             .form-content { padding: 1.5rem 2rem; overflow-y: auto; flex-grow: 1; }
             .form-navigation { padding: 1rem 2rem; border-top: 1px solid #e2e8f0; background-color: #f8fafc; flex-shrink: 0; }
             .app-footer { background-color: #f1f5f9; color: #475569; padding: 0.75rem; text-align: center; font-size: 0.75rem; border-top: 1px solid #e2e8f0; flex-shrink: 0; }
             .map-container { height: 220px; border-radius: 0.5rem; border: 1px solid #cbd5e1; }
-            .map-info-display { 
-                background-color: #e0f2fe; 
-                border: 1px solid #bae6fd; 
-                color: #0c4a6e; 
-            }
+            .map-info-display { background-color: #e0f2fe; border: 1px solid #bae6fd; color: #0c4a6e; }
             .map-info-display p { margin: 0; line-height: 1.6; }
             .map-info-display strong { color: #0369a1; } 
 
@@ -74,7 +70,7 @@
             .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(15, 23, 42, 0.6); }
             .modal-content { background-color: #ffffff; margin: 12% auto; padding: 2rem 2.5rem; border: none; width: 90%; max-width: 480px; border-radius: 0.75rem; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
             input[type="text"], input[type="date"], input[type="tel"], input[type="number"], textarea, select { background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.625rem 0.875rem; transition: border-color 0.2s ease, box-shadow 0.2s ease; line-height: 1.5; height: calc(1.5em + 0.75rem + 2px + 0.5rem); }
-            select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E"); background-position: left 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-left: 2.5rem; padding-right: 0.875rem; /* Ensure right padding for text */ }
+            select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E"); background-position: left 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-left: 2.5rem; padding-right: 0.875rem; }
             input[type="text"]:focus, input[type="date"]:focus, input[type="tel"]:focus, input[type="number"]:focus, textarea:focus, select:focus { border-color: #0ea5e9; background-color: white; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2); outline: none; }
             input[type="file"] { background-color: #f8fafc; border: 2px dashed #cbd5e1; padding: 0.75rem; border-radius: 0.5rem; transition: border-color 0.2s ease; }
             input[type="file"]:hover { border-color: #94a3b8; }
@@ -101,16 +97,7 @@
             #adMainTitle { font-size: 1.25rem; font-weight: 700; color: #1e293b; margin-bottom: 0.25rem; }
             .ad-subtitle { font-size: 0.875rem; color: #475569; margin-bottom: 0.125rem; }
             
-            #welcomeScreen { 
-                display: flex; 
-                flex-direction: row; 
-                align-items: stretch; 
-                justify-content: center; 
-                height: 100%; 
-                padding: 0; 
-                text-align: center; 
-                background: linear-gradient(135deg, #FDFEFF 0%, #FCFDFF 50%, #EFF9FF 100%); 
-            }
+            #welcomeScreen { display: flex; flex-direction: row; align-items: stretch; justify-content: center; height: 100%; padding: 0; text-align: center; background: linear-gradient(135deg, #FDFEFF 0%, #FCFDFF 50%, #EFF9FF 100%); }
             .welcome-banner { width: 20vw; max-width: 220px; min-width:150px; background-color: rgba(255,255,255,0.5); display: none; align-items: center; justify-content: center; overflow: hidden; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.03); margin: 2rem; height: calc(100vh - 8rem); } 
             .welcome-banner img { width: 100%; height: 100%; object-fit: cover; }
             .left-banner-img { object-position: left center; }
@@ -125,100 +112,23 @@
              @media (min-width: 1024px) { 
                 .welcome-banner { display: flex; }
             }
-            .role-selection-button-group { 
-                display: flex; 
-                border-radius: 0.75rem; 
-                overflow: hidden; 
-                box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
-                border: 1px solid #BDBDBD; 
-                width: auto; 
-                max-width: 550px; 
-                margin-left: auto;
-                margin-right: auto;
-            }
-            .role-button {
-                flex: 1; 
-                padding: 1.25rem 1.5rem; 
-                font-size: 1.5rem;  
-                font-weight: 600; 
-                transition: all 0.3s cubic-bezier(.25,.8,.25,1);
-                cursor: pointer;
-                border: none; 
-                background-color: white; 
-                color: #1D4ED8; 
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                text-align: center;
-                gap: 0.75rem; 
-            }
-            .role-button:not(:last-child) {
-                 border-right: 1px solid #BDBDBD; 
-            }
-            .role-button.active {
-                background-color: #1D4ED8; 
-                color: white; 
-                border-color: #176BBF; 
-            }
-             .role-button.active i {
-                color: #FFB300; 
-            }
-            .role-button:not(.active):hover {
-                background-color: #E3F2FD; 
-                color: #1D4ED8; 
-            }
-             .role-button:not(.active):hover i {
-                color: #1D4ED8; 
-            }
-            .role-button i { 
-                font-size: 1.5em; 
-                color: #1D4ED8; 
-                transition: color 0.3s ease, text-shadow 0.3s ease;
-            }
-            .spinner {
-                border: 4px solid rgba(0, 0, 0, 0.1);
-                width: 48px;
-                height: 48px;
-                border-radius: 50%;
-                border-left-color: #0ea5e9;
-                animation: spin 1s ease infinite;
-            }
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-            }
+            .role-selection-button-group { display: flex; border-radius: 0.75rem; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #BDBDBD; width: auto; max-width: 550px; margin-left: auto; margin-right: auto; }
+            .role-button { flex: 1; padding: 1.25rem 1.5rem; font-size: 1.5rem; font-weight: 600; transition: all 0.3s cubic-bezier(.25,.8,.25,1); cursor: pointer; border: none; background-color: white; color: #1D4ED8; display: flex; align-items: center; justify-content: center; text-align: center; gap: 0.75rem; }
+            .role-button:not(:last-child) { border-right: 1px solid #BDBDBD; }
+            .role-button.active { background-color: #1D4ED8; color: white; border-color: #176BBF; }
+            .role-button.active i { color: #FFB300; }
+            .role-button:not(.active):hover { background-color: #E3F2FD; color: #1D4ED8; }
+            .role-button:not(.active):hover i { color: #1D4ED8; }
+            .role-button i { font-size: 1.5em; color: #1D4ED8; transition: color 0.3s ease, text-shadow 0.3s ease; }
+            .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 48px; height: 48px; border-radius: 50%; border-left-color: #0ea5e9; animation: spin 1s ease infinite; }
+            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
             /* Cropper Modal Styles */
-            #cropperModal .modal-content {
-                max-width: 90vw;
-                width: 600px;
-            }
-            #cropperContainer {
-                width: 100%;
-                height: 400px;
-                overflow: hidden;
-                background: #f1f1f1;
-            }
-            #cropperContainer img {
-                max-width: 100%;
-                height: auto;
-            }
-            /* This makes the cropper selection look like a circle */
-            .cropper-view-box {
-                box-shadow: 0 0 0 1px #39f;
-                border-radius: 50%;
-                outline: 0;
-            }
-            .cropper-face {
-                background-color: inherit !important;
-            }
-            /* Hide the lines and side handles to only show corner handles */
-            .cropper-line,
-            .cropper-point.point-n,
-            .cropper-point.point-s,
-            .cropper-point.point-e,
-            .cropper-point.point-w {
-                display: none;
-            }
+            #cropperModal .modal-content { max-width: 90vw; width: 600px; }
+            #cropperContainer { width: 100%; height: 400px; overflow: hidden; background: #f1f1f1; }
+            #cropperContainer img { max-width: 100%; height: auto; }
+            .cropper-view-box { box-shadow: 0 0 0 1px #39f; border-radius: 50%; outline: 0; }
+            .cropper-face { background-color: inherit !important; }
+            .cropper-line, .cropper-point.point-n, .cropper-point.point-s, .cropper-point.point-e, .cropper-point.point-w { display: none; }
         </style>
     </head>
     <body class="bg-slate-50">
@@ -263,6 +173,7 @@
             </div>
 
             <div id="mainFormView" class="flex flex-col md:flex-row flex-1 overflow-hidden"> 
+                <!-- Sidebar for Desktop -->
                 <div id="stepsSidebar" class="flex-shrink-0 hidden overflow-y-auto p-5 w-64 md:flex md:flex-col lg:w-72"> 
                     <div id="sidebarProfileSection" class="mb-5 text-center">
                         <div class="relative w-36 h-36 mx-auto mb-3 rounded-full overflow-hidden border-2 border-sky-400 shadow-lg"> 
@@ -283,14 +194,32 @@
                         <i class="fas fa-check-circle mr-1 ml-1"></i> کاربر معتبر 
                     </span>
                 </div>
+
+                <!-- Main Content Area -->
                 <div class="form-content-area flex-1"> 
-                    <div class="mobile-steps-header md:hidden">
-                        <div id="stepsNavigationMobile" class="steps-navigation-horizontal mb-2">
+                    <!-- New Mobile Header with Profile Info and Steps -->
+                    <div id="mobileHeader" class="md:hidden bg-slate-50 border-b border-slate-200 p-3">
+                        <div class="flex items-center space-x-3 space-x-reverse mb-3">
+                            <div class="relative w-16 h-16 flex-shrink-0">
+                                <img id="mobileProfileImagePreview" src="https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740" alt="عکس پروفایل" class="w-full h-full object-cover rounded-full border-2 border-sky-300">
+                                <label for="applicantImage" class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center text-white text-xs opacity-0 hover:opacity-100 transition-opacity duration-300 cursor-pointer rounded-full"><i class="fas fa-camera"></i></label>
                             </div>
-                        <span id="verifiedBadgeMobile" class="mt-1.5 ml-2 hidden text-xs font-semibold py-1 px-2 uppercase rounded-full text-green-700 bg-green-100"> 
-                            <i class="fas fa-check-circle mr-1 ml-1"></i> کاربر معتبر 
+                            <div class="flex-grow overflow-hidden">
+                                <h3 id="mobileProfileName" class="text-sm font-bold text-slate-800 truncate">نام و نام خانوادگی</h3>
+                                <p id="mobileUserEmail" class="text-xs text-slate-500 truncate"></p>
+                                <div id="mobileEngineerDiscipline" class="text-xs text-sky-600 font-semibold mt-1"></div>
+                            </div>
+                            <button id="changeRoleButtonMobile" class="btn btn-secondary !p-2 text-xs"><i class="fas fa-exchange-alt"></i></button>
+                        </div>
+                        <div id="stepsNavigationMobile" class="steps-navigation-horizontal">
+                            <!-- Steps will be populated by JS here -->
+                        </div>
+                        <span id="verifiedBadgeMobile" class="mt-2 text-center block hidden text-xs font-semibold py-1 px-2 uppercase rounded-full text-green-700 bg-green-100">
+                            <i class="fas fa-check-circle mr-1 ml-1"></i> کاربر معتبر
                         </span>
                     </div>
+
+                    <!-- Form Content (Scrollable) -->
                     <div class="form-content">
                         <div id="engineerFormContainer">
                             <form id="engineerForm">
@@ -800,6 +729,7 @@
                             </form>
                         </div>
                     </div>
+                    <!-- Form Navigation Buttons -->
                     <div class="form-navigation">
                         <div class="flex justify-between items-center">
                             <button type="button" id="prevButton" class="btn btn-secondary">گام قبلی</button>
@@ -808,6 +738,7 @@
                         </div>
                     </div>
                 </div>
+                <!-- Advertisement Sidebar for Desktop -->
                 <div id="advertisementSidebar" class="hidden md:flex flex-col flex-shrink-0 w-64 lg:w-72 bg-slate-100 border-r border-slate-200 p-5 space-y-4 overflow-y-auto">
                     <div id="adBrandingContainer">
                         <img id="adLogoImage" src="https://tandis.shahraavand.ir/images/new-TLogo_B.avif" alt="لوگوی نظام تندیس">
@@ -893,6 +824,7 @@
             const selectEngineerRoleButton = document.getElementById('selectEngineerRoleBtn'); 
             const selectEmployerRoleButton = document.getElementById('selectEmployerRoleBtn'); 
             const changeRoleButton = document.getElementById('changeRoleButton');
+            const changeRoleButtonMobile = document.getElementById('changeRoleButtonMobile');
 
             const engineerFormContainer = document.getElementById('engineerFormContainer');
             const employerFormContainer = document.getElementById('employerFormContainer');
@@ -904,11 +836,20 @@
 
             const stepsNavigationMobile = document.getElementById('stepsNavigationMobile');
             const stepsNavigationDesktop = document.getElementById('stepsNavigationDesktop');
+            
+            // Desktop Sidebar Elements
             const sidebarProfileImagePreview = document.getElementById('sidebarProfileImagePreview');
             const applicantImageInput = document.getElementById('applicantImage'); 
             const sidebarProfileName = document.getElementById('sidebarProfileName');
             const sidebarUserEmail = document.getElementById('sidebarUserEmail');
             const sidebarEngineerDiscipline = document.getElementById('sidebarEngineerDiscipline');
+            
+            // Mobile Header Elements
+            const mobileProfileImagePreview = document.getElementById('mobileProfileImagePreview');
+            const mobileProfileName = document.getElementById('mobileProfileName');
+            const mobileUserEmail = document.getElementById('mobileUserEmail');
+            const mobileEngineerDiscipline = document.getElementById('mobileEngineerDiscipline');
+
 
             const prevButton = document.getElementById('prevButton');
             const nextButton = document.getElementById('nextButton');
@@ -977,26 +918,24 @@
 
                 welcomeMessageElLine1.textContent = `${rolePrefix}${initialUserData.firstName || ''} ${initialUserData.lastName || ''} عزیز، خوش آمدید!`;
                 
-                // Check if a role was passed from the previous page
                 if (initialUserData.userType.toLowerCase() === 'engineer') {
                     selectEngineerRoleButton.classList.add('active');
                     selectEmployerRoleButton.classList.remove('active');
-                    firstClickRole = 'engineer'; // Set this to require a second click for confirmation
+                    firstClickRole = 'engineer';
                     welcomeMessageElLine2.textContent = `لطفا با تایید دوباره نقش، ثبت نام را به پایان برسانید.`;
                 } else if (initialUserData.userType.toLowerCase() === 'employer') {
                     selectEmployerRoleButton.classList.add('active');
                     selectEngineerRoleButton.classList.remove('active');
-                    firstClickRole = 'employer'; // Set this to require a second click for confirmation
+                    firstClickRole = 'employer';
                     welcomeMessageElLine2.textContent = `لطفا با تایید دوباره نقش، ثبت نام را به پایان برسانید.`;
                 } else {
-                    // Default behavior if no role is passed
                     selectEngineerRoleButton.classList.remove('active');
                     selectEmployerRoleButton.classList.remove('active');
                     firstClickRole = null;
                     welcomeMessageElLine2.textContent = `لطفا با انتخاب نقش، ثبت نام را به پایان برسانید.`;
                 }
 
-                updateSidebarName(); 
+                updateProfileDisplay(); 
             }
 
             function initializeFormForRole(role) {
@@ -1032,7 +971,6 @@
                     if (engineerPostalCodeInput) engineerPostalCodeInput.value = ''; 
                     const engineerPhoneInput = document.getElementById('engineerPhone');
                     if (engineerPhoneInput) engineerPhoneInput.value = ''; 
-                    // Initialize professional info visibility
                     updateProfessionalInfoVisibility();
                 } else if (role === 'employer') {
                     activeForm = employerForm;
@@ -1055,8 +993,9 @@
                     activeForm.addEventListener('change', calculateProfileCompleteness);
                 }
                 if(sidebarUserEmail) sidebarUserEmail.textContent = initialUserData.email || 'ایمیل ثبت نشده';
+                if(mobileUserEmail) mobileUserEmail.textContent = initialUserData.email || 'ایمیل ثبت نشده';
 
-                updateSidebarName(); 
+                updateProfileDisplay(); 
                 populateStepIndicators();
                 updateStepDescriptions(); 
                 updateStepView();
@@ -1085,6 +1024,7 @@
             });
 
             changeRoleButton.addEventListener('click', showWelcomeScreen);
+            changeRoleButtonMobile.addEventListener('click', showWelcomeScreen);
 
             function createStepIndicatorDOM(stepData, isMobile) {
                 const indicator = document.createElement('div');
@@ -1157,7 +1097,6 @@
                         initMap('engineerResidentialMap', 'engineerResidentialLat', 'engineerResidentialLng', 'engineerResidentialNeighborhood', 'engineerResidentialMapInfo');
                     }
                     if (currentStep === 3) {
-                        // Re-check visibility and init maps if needed, as this can be called when navigating back/forth
                         updateProfessionalInfoVisibility(); 
                     }
                 } else if (currentUserRole === 'employer') {
@@ -1427,7 +1366,7 @@
             engineerGenderToggle.addEventListener('click', () => {
                 engineerGenderInput.value = (engineerGenderInput.value === 'مرد') ? 'زن' : 'مرد';
                 engineerGenderToggle.textContent = engineerGenderInput.value;
-                updateSidebarName(); 
+                updateProfileDisplay(); 
                 calculateProfileCompleteness();
             });
 
@@ -1436,7 +1375,7 @@
             employerGenderToggle.addEventListener('click', () => {
                 employerGenderInput.value = (employerGenderInput.value === 'مرد') ? 'زن' : 'مرد';
                 employerGenderToggle.textContent = employerGenderInput.value;
-                updateSidebarName(); 
+                updateProfileDisplay(); 
                 calculateProfileCompleteness();
             });
 
@@ -1479,29 +1418,23 @@
             
                 const legalExecutorFields = document.getElementById('legalExecutorFields');
                 const individualExecutorFieldsContainer = document.getElementById('individualExecutorFieldsContainer');
-                const individualExecutorFields = document.getElementById('individualExecutorFields'); // "کمک مجری" section
+                const individualExecutorFields = document.getElementById('individualExecutorFields'); 
 
-                // --- Legal Fields Visibility ---
                 const wasLegalHidden = legalExecutorFields.classList.contains('hidden');
                 legalExecutorFields.classList.toggle('hidden', !isAnyLegal);
                 if (wasLegalHidden && isAnyLegal) {
                     initMap('companyOfficeMap', 'companyOfficeMapLat', 'companyOfficeMapLng', 'companyOfficeMapNeighborhood', 'companyOfficeMapInfo');
                 }
             
-                // --- Individual Fields Visibility ---
                 individualExecutorFieldsContainer.classList.toggle('hidden', !isAnyIndividual);
-
-                // "Assistant Executor" section visibility
                 individualExecutorFields.classList.toggle('hidden', !isExecutionIndividual);
 
-                // Office Info Map Initialization
                 const hasOfficeCheckbox = document.getElementById('engineerHasOfficeInfo');
                 const officeInfoFields = document.getElementById('engineerOfficeInfoFields');
                 if (isAnyIndividual && hasOfficeCheckbox.checked && !officeInfoFields.classList.contains('hidden')) {
                     initMap('officeMap', 'officeMapLat', 'officeMapLng', 'officeMapNeighborhood', 'officeMapInfo');
                 }
 
-                // Update required attributes
                 document.getElementById('companyName').required = isAnyLegal;
                 document.getElementById('companyRegNumber').required = isAnyLegal;
                 const companyOfficeAddress = document.getElementById('companyOfficeAddress');
@@ -1551,11 +1484,9 @@
                     const label = document.getElementById('engineerHasOfficeInfoLabel');
                     if (label) label.textContent = hasOffice ? "دفتر کار دارم" : "دفتر کار ندارم";
                     engineerOfficeInfoFieldsDiv.classList.toggle('hidden', !hasOffice);
-                    // After toggling visibility, re-run the main visibility function to handle map initialization
                     updateProfessionalInfoVisibility(); 
                     calculateProfileCompleteness();
                 });
-                // Initial setup
                 const label = document.getElementById('engineerHasOfficeInfoLabel');
                 if (label) label.textContent = engineerHasOfficeInfoCheckbox.checked ? "دفتر کار دارم" : "دفتر کار ندارم";
                 engineerOfficeInfoFieldsDiv.classList.toggle('hidden', !engineerHasOfficeInfoCheckbox.checked);
@@ -1710,7 +1641,7 @@
             const employerFirstNameInput = document.getElementById('employerFirstName');
             const employerLastNameInput = document.getElementById('employerLastName');
 
-            function updateSidebarName() {
+            function updateProfileDisplay() {
                 let titlePrefix = "";
                 let fName = "";
                 let lName = "";
@@ -1746,28 +1677,33 @@
                     nameToDisplay = "نام و نام خانوادگی"; 
                 }
                 
-                let sidebarTitlePrefixCalculated = "";
+                let profileTitlePrefix = "";
                 if(currentUserRole === 'engineer'){
-                    sidebarTitlePrefixCalculated = (document.getElementById('engineerGender')?.value || initialUserData.gender) === "مرد" ? "آقای مهندس " : "خانم مهندس ";
+                    profileTitlePrefix = (document.getElementById('engineerGender')?.value || initialUserData.gender) === "مرد" ? "آقای مهندس " : "خانم مهندس ";
                 } else if (currentUserRole === 'employer'){
-                    sidebarTitlePrefixCalculated = (document.getElementById('employerGender')?.value || initialUserData.gender) === "مرد" ? "آقای " : "خانم ";
+                    profileTitlePrefix = (document.getElementById('employerGender')?.value || initialUserData.gender) === "مرد" ? "آقای " : "خانم ";
                 } else { 
-                    sidebarTitlePrefixCalculated = initialUserData.userType === "engineer" 
+                    profileTitlePrefix = initialUserData.userType === "engineer" 
                         ? (initialUserData.gender === "مرد" ? "آقای مهندس " : "خانم مهندس ")
                         : (initialUserData.gender === "مرد" ? "آقای " : "خانم ");
                 }
-                sidebarProfileName.textContent = sidebarTitlePrefixCalculated + nameToDisplay;
+                
+                // Update both desktop and mobile views
+                sidebarProfileName.textContent = profileTitlePrefix + nameToDisplay;
+                mobileProfileName.textContent = profileTitlePrefix + nameToDisplay;
 
+                sidebarUserEmail.textContent = initialUserData.email || 'ایمیل ثبت نشده';
+                mobileUserEmail.textContent = initialUserData.email || 'ایمیل ثبت نشده';
 
-                if(sidebarUserEmail) sidebarUserEmail.textContent = initialUserData.email || 'ایمیل ثبت نشده';
-                if(sidebarEngineerDiscipline) sidebarEngineerDiscipline.textContent = currentUserRole === 'engineer' ? currentDiscipline : '';
+                sidebarEngineerDiscipline.textContent = currentUserRole === 'engineer' ? currentDiscipline : '';
+                mobileEngineerDiscipline.textContent = currentUserRole === 'engineer' ? currentDiscipline : '';
             }
-            if(engineerFirstNameInput) engineerFirstNameInput.addEventListener('input', updateSidebarName);
-            if(engineerLastNameInput) engineerLastNameInput.addEventListener('input', updateSidebarName);
-            if(employerFirstNameInput) employerFirstNameInput.addEventListener('input', updateSidebarName);
-            if(employerLastNameInput) employerLastNameInput.addEventListener('input', updateSidebarName);
+            if(engineerFirstNameInput) engineerFirstNameInput.addEventListener('input', updateProfileDisplay);
+            if(engineerLastNameInput) engineerLastNameInput.addEventListener('input', updateProfileDisplay);
+            if(employerFirstNameInput) employerFirstNameInput.addEventListener('input', updateProfileDisplay);
+            if(employerLastNameInput) employerLastNameInput.addEventListener('input', updateProfileDisplay);
             const licenseNumberInputForSidebar = document.getElementById('licenseNumber');
-            if(licenseNumberInputForSidebar) licenseNumberInputForSidebar.addEventListener('input', updateSidebarName);
+            if(licenseNumberInputForSidebar) licenseNumberInputForSidebar.addEventListener('input', updateProfileDisplay);
 
             function handleFileUpload(inputId, previewContainerId) {
                 const input = document.getElementById(inputId);
@@ -1778,7 +1714,6 @@
                 const MAX_FILE_SIZE = 250 * 1024; // 250 KB
 
                 input.addEventListener('change', function(event) {
-                    // Always reset to the placeholder first
                     previewContainer.innerHTML = originalPlaceholder;
                     const file = event.target.files[0];
 
@@ -1798,17 +1733,17 @@
 
                     if (acceptedTypes.some(type => file.type.match(type.replace(/,\s*/g, '|').replace(/\./g, '\\.').replace(/\*/g, '.*')))) {
                         if (file.type === 'application/pdf') {
-                            previewContainer.innerHTML = ''; // Clear placeholder
+                            previewContainer.innerHTML = ''; 
                             const iframe = document.createElement('iframe');
                             iframe.src = URL.createObjectURL(file);
                             iframe.className = "w-full h-full border-0";
                             previewContainer.appendChild(iframe);
                         } else if (file.type.startsWith('image/')) {
-                            previewContainer.innerHTML = ''; // Clear placeholder
+                            previewContainer.innerHTML = '';
                             const img = document.createElement('img');
                             img.src = URL.createObjectURL(file);
                             img.className = "w-full h-full object-cover";
-                            img.onload = () => URL.revokeObjectURL(img.src); // Free memory
+                            img.onload = () => URL.revokeObjectURL(img.src);
                             previewContainer.appendChild(img);
                         }
                     } else {
@@ -2103,7 +2038,6 @@
                     const reader = new FileReader();
                     reader.readAsDataURL(file);
                     reader.onload = () => {
-                        // result includes "data:mime/type;base64," prefix, which we need to remove
                         resolve(reader.result.split(',')[1]);
                     };
                     reader.onerror = error => reject(error);
@@ -2129,7 +2063,6 @@
                 const filesData = {};
                 const stepsData = {};
 
-                // 1. Collect data from each step's form fields
                 for (let i = 1; i <= totalSteps; i++) {
                     const stepContainer = document.getElementById(`${currentUserRole}-step-${i}`);
                     const stepDataObject = {};
@@ -2137,7 +2070,6 @@
                         const formElements = stepContainer.querySelectorAll('input:not([type="file"]), select, textarea');
                         formElements.forEach(el => {
                             if (el.classList.contains('jalali-datepicker-value')) {
-                                // This is the hidden input, its value is what we want
                                 stepDataObject[el.name] = el.value || '';
                             } else if (el.type === 'checkbox') {
                                 stepDataObject[el.name] = el.checked;
@@ -2145,7 +2077,7 @@
                                 if (el.checked) {
                                     stepDataObject[el.name] = el.value;
                                 }
-                            } else if(el.name) { // Ensure the element has a name
+                            } else if(el.name) {
                                 stepDataObject[el.name] = el.value;
                             }
                         });
@@ -2153,7 +2085,6 @@
                     stepsData[`step${i}`] = stepDataObject;
                 }
 
-                // 2. Helper to process file uploads to Base64
                 const processFile = async (inputId, fieldName) => {
                     const input = document.getElementById(inputId);
                     if (input && input.files.length > 0) {
@@ -2175,13 +2106,11 @@
                 try {
                     loadingModalText.textContent = "در حال آماده سازی اطلاعات...";
                     
-                    // 3. Process all file inputs from the entire form
                     const allFileInputs = activeForm.querySelectorAll('input[type="file"]');
                     for (const input of allFileInputs) {
                         await processFile(input.id, input.name);
                     }
                     
-                    // Special handling for the cropped profile image
                     if (croppedImageBlob) {
                         try {
                             const base64Data = await blobToBase64(croppedImageBlob);
@@ -2195,17 +2124,15 @@
                         }
                     }
                     
-                    // 4. Construct the final payload
                     const payload = {
                         email: initialUserData.email,
                         role: currentUserRole,
-                        stepsData: stepsData, // Send the structured step data
+                        stepsData: stepsData,
                         files: filesData
                     };
 
                     loadingModalText.textContent = "در حال ارسال به سرور...";
 
-                    // 5. Send the request
                     const response = await fetch(GOOGLE_SCRIPT_URL, {
                         method: 'POST',
                         mode: 'cors',
@@ -2226,10 +2153,8 @@
                         loadingModal.style.display = 'none';
                         showMessageModal("اطلاعات پروفایل با موفقیت ارسال شد! در حال انتقال شما...", 'success');
                         activeForm.reset();
-                        // --- REDIRECT ON SUCCESS ---
                         setTimeout(() => {
-                            // Redirect to the next work page. Change the URL to your desired destination.
-                            window.location.href = './next-dashboard.html'; // <-- آدرس صفحه کاری بعدی را در اینجا قرار دهید
+                            window.location.href = './next-dashboard.html';
                         }, 3000);
                     } else {
                         throw new Error(result.message || "خطای ناشناخته در پردازش اطلاعات در سرور.");
@@ -2250,7 +2175,6 @@
                     return;
                 }
 
-                // New check for mandatory profile picture (using the cropped blob)
                 if (!croppedImageBlob) {
                     showMessageModal('لطفاً عکس پروفایل خود را از نوار کناری بارگذاری و برش دهید. این فیلد اجباری است.', 'error');
                     const sidebarImgContainer = sidebarProfileImagePreview.parentElement;
@@ -2278,7 +2202,6 @@
                 prepareAndSubmitData();
             });
             
-            // --- CROPPER LOGIC ---
             applicantImageInput.addEventListener('change', (e) => {
                 const files = e.target.files;
                 if (files && files.length > 0) {
@@ -2289,7 +2212,6 @@
                         if(cropper) {
                             cropper.destroy();
                         }
-                        // Initialize Cropper with movable and resizable options
                         cropper = new Cropper(imageToCrop, {
                             aspectRatio: 1,
                             viewMode: 1,
@@ -2301,8 +2223,8 @@
                             guides: true,
                             center: true,
                             highlight: false,
-                            cropBoxMovable: true, // Allow moving the crop box
-                            cropBoxResizable: true, // Allow resizing the crop box
+                            cropBoxMovable: true,
+                            cropBoxResizable: true,
                             toggleDragModeOnDblclick: false,
                         });
                     };
@@ -2315,27 +2237,27 @@
                 if(cropper) {
                     cropper.destroy();
                 }
-                applicantImageInput.value = ''; // Clear the file input
+                applicantImageInput.value = '';
             });
 
             cropButton.addEventListener('click', () => {
                 if (cropper) {
                     const canvas = cropper.getCroppedCanvas({
-                        width: 512, // Set a fixed output size for consistency
+                        width: 512,
                         height: 512,
                         imageSmoothingQuality: 'high',
                     });
                     canvas.toBlob((blob) => {
-                        croppedImageBlob = blob; // Store the blob
+                        croppedImageBlob = blob;
                         const imageUrl = URL.createObjectURL(blob);
                         sidebarProfileImagePreview.src = imageUrl;
+                        mobileProfileImagePreview.src = imageUrl; // Update mobile image as well
                         cropperModal.style.display = 'none';
                         cropper.destroy();
                     }, 'image/png');
                 }
             });
 
-            // --- Jalali Date Picker Initialization ---
             function initializeDatePickers() {
                 $(".jalali-datepicker-display").each(function() {
                     var $displayInput = $(this);
@@ -2371,26 +2293,22 @@
                             }
                         },
                         onSelect: function() {
-                            // The altField is updated automatically.
-                            // We can trigger a change event on the hidden field if needed for other scripts.
                             $valueInput.trigger('change');
                         }
                     });
                 });
             }
 
-
-            // --- INITIAL PAGE LOAD ---
             $(document).ready(function() {
                 getUserDataFromURL();
-                showWelcomeScreen(); // Always show the welcome screen. Logic for pre-selection is inside.
+                showWelcomeScreen();
                 
                 handleFileUpload('workPermitPdf', 'workPermitPdfPreviewContainer');
                 handleFileUpload('nationalIdCardImageEngineer', 'nationalIdCardImageEngineerPreviewContainer');
                 handleFileUpload('employerNationalIdCardImage', 'employerNationalIdCardImagePreviewContainer');
                 handleFileUpload('employerOtherDocs', 'employerOtherDocsPreviewContainer');
                 
-                initializeDatePickers(); // Initialize all Jalali date pickers
+                initializeDatePickers();
             });
         })();
         </script>
