@@ -799,7 +799,7 @@
         <script>
         (function() {
             // --- CONFIGURATION ---
-            const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyBE91RW4JJE22AqkfLUGRX3yYl1DKiq3eOVSkdg45skrubuDwMNjxKRQ0i65FaV0Yw/exec'; // <-- آدرس وب اپ خود را اینجا قرار دهید
+            const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyuO_BXzXFv_GNXteQsumLNfzgqs5U2rKXQ0IndKIPlGe9NgYVByqzaOeP9g3rj-dzE/exec'; // <-- آدرس وب اپ خود را اینجا قرار دهید
             
             // --- STATE VARIABLES ---
             let currentStep = 1;
@@ -2154,7 +2154,7 @@
                         showMessageModal("اطلاعات پروفایل با موفقیت ارسال شد! در حال انتقال شما...", 'success');
                         activeForm.reset();
                         setTimeout(() => {
-                            window.location.href = './next-dashboard.html';
+                            window.location.href = `./next-dashboard.html?email=${encodeURIComponent(initialUserData.email)}`;
                         }, 3000);
                     } else {
                         throw new Error(result.message || "خطای ناشناخته در پردازش اطلاعات در سرور.");
@@ -2170,10 +2170,7 @@
 
 
             submitButton.addEventListener('click', () => {
-                if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE' || !GOOGLE_SCRIPT_URL) {
-                    showMessageModal("خطا: URL اسکریپت گوگل تنظیم نشده است. لطفاً با پشتیبانی تماس بگیرید.", 'error'); 
-                    return;
-                }
+
 
                 if (!croppedImageBlob) {
                     showMessageModal('لطفاً عکس پروفایل خود را از نوار کناری بارگذاری و برش دهید. این فیلد اجباری است.', 'error');
