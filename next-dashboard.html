@@ -3,292 +3,450 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>کارت ویزیت سینا سلطانی آذر</title>
+    <title>ایستگاه کار - نظام تندیس</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
-        
         body {
-            font-family: 'Vazirmatn', sans-serif;
-            background-color: #111;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            perspective: 1000px;
+            font-family: 'Vazirmatn', 'Tahoma', sans-serif;
+            background-color: #f8fafc;
         }
-        
-        .card-container {
-            position: relative;
-            width: 350px;
-            height: 200px;
-            transform-style: preserve-3d;
-            transition: transform 0.8s;
-        }
-        
-        .card-container.flipped {
-            transform: rotateY(180deg);
-        }
-        
-        .card {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
-        }
-        
-        .card-front {
-            background: linear-gradient(135deg, #1a1a1a 0%, #000 100%);
-        }
-        
-        .card-back {
-            background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
-            transform: rotateY(180deg);
-        }
-        
-        .card-bg {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path fill="%23D4AF37" fill-opacity="0.1" d="M0 0h100v100H0z"/><path fill="%23D4AF37" fill-opacity="0.1" d="M0 0h100v100H0z"/><path fill="%23D4AF37" fill-opacity="0.05" d="M20 20h60v60H20z"/></svg>');
-            background-size: 200px;
-            opacity: 0.8;
-        }
-        
-        .glow {
-            position: absolute;
-            width: calc(100% + 10px);
-            height: calc(100% + 10px);
-            top: -5px;
-            left: -5px;
-            border-radius: 18px;
-            background: linear-gradient(45deg, #D4AF37, #F5D042, #D4AF37);
-            background-size: 200% 200%;
-            animation: glow 3s linear infinite;
-            z-index: -1;
-            filter: blur(5px);
-        }
-        
-        @keyframes glow {
-            0% {
-                background-position: 0% 50%;
-            }
-            100% {
-                background-position: 200% 50%;
-            }
-        }
-        
-        .logo {
-            width: 50px;
-            height: 50px;
-            background-color: #D4AF37;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            color: #000;
-            font-size: 18px;
-        }
-        
-        .divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, #D4AF37, transparent);
-            margin: 10px 0;
-        }
-        
-        .social-icon {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background-color: rgba(212, 175, 55, 0.2);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #D4AF37;
-            transition: all 0.3s;
-        }
-        
-        .social-icon:hover {
-            background-color: #D4AF37;
-            color: #000;
-            transform: scale(1.1);
-        }
-        
-        .qr-code {
-            width: 70px;
-            height: 70px;
-            background-color: white;
-            padding: 5px;
-            border-radius: 5px;
-        }
-        
-        .flip-btn {
-            position: absolute;
-            bottom: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: #D4AF37;
-            color: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            box-shadow: 0 2px 10px rgba(212, 175, 55, 0.5);
-            transition: all 0.3s;
-            z-index: 10;
-        }
-        
-        .flip-btn:hover {
-            transform: translateX(-50%) scale(1.1);
-        }
+        .workstation-wrapper { display: flex; height: 100vh; max-height: 100vh; background-color: #ffffff; }
+        #mainNavSidebar { width: 288px; background-color: #f1f5f9; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; transition: width 0.3s ease; }
+        #mainContentArea { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+        #pageContent { flex-grow: 1; overflow-y: auto; padding: 2rem; }
+        #pageContent::-webkit-scrollbar { width: 8px; }
+        #pageContent::-webkit-scrollbar-track { background: #f1f5f9; }
+        #pageContent::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 8px; }
+        #pageContent::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        #advertisementSidebar { width: 288px; background-color: #f1f5f9; border-right: 1px solid #e2e8f0; transition: width 0.3s ease; }
+        .main-nav-link { display: flex; align-items: center; padding: 0.875rem 1.25rem; border-radius: 0.5rem; color: #475569; font-weight: 600; transition: all 0.2s ease-in-out; border-right: 4px solid transparent; }
+        .main-nav-link:hover { background-color: #e2e8f0; color: #1e293b; }
+        .main-nav-link.active { background-color: #e0f2fe; color: #0c4a6e; border-right-color: #0ea5e9; }
+        .main-nav-link i { margin-left: 0.75rem; width: 20px; text-align: center; }
+        .stat-card { background-color: white; padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1); display: flex; align-items: center; }
+        .project-card { background-color: white; border-radius: 0.75rem; box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1); overflow: hidden; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .project-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1); }
+        .accordion-item { border: 1px solid #e2e8f0; border-radius: 0.5rem; margin-bottom: 1rem; overflow: hidden; }
+        .accordion-header { background-color: #f8fafc; padding: 1rem 1.5rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+        .accordion-header:hover { background-color: #f1f5f9; }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out, padding 0.4s ease-out; background-color: white; padding: 0 1.5rem; }
+        .accordion-content.open { padding: 1.5rem; max-height: 2000px; transition: max-height 0.5s ease-in, padding 0.5s ease-in; }
+        .accordion-icon { transition: transform 0.3s ease; }
+        .accordion-header.open .accordion-icon { transform: rotate(180deg); }
+        .profile-data-row { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #f1f5f9; }
+        .profile-data-row:last-child { border-bottom: none; }
+        .profile-data-label { font-weight: 500; color: #64748b; }
+        .profile-data-value { color: #1e293b; font-weight: 500; }
+        #slideshowContainer { position: relative; width: 100%; height: 200px; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        #slideshowContainer img { width: 100%; height: 100%; object-fit: cover; position: absolute; opacity: 0; transition: opacity 1s ease-in-out; }
+        #slideshowContainer img.active { opacity: 1; }
+        .edit-mode-input { width: 100%; background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.5rem 0.75rem; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+        .edit-mode-input:focus { border-color: #0ea5e9; background-color: white; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2); outline: none; }
+        .content-view { display: none; }
+        .content-view.active { display: block; }
+        .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 48px; height: 48px; border-radius: 50%; border-left-color: #0ea5e9; animation: spin 1s ease infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @media (max-width: 1023px) { #mainNavSidebar, #advertisementSidebar { display: none; } }
     </style>
 </head>
-<body>
-    <div class="card-container" id="cardContainer">
-        <div class="glow"></div>
-        
-        <!-- Front Side -->
-        <div class="card card-front">
-            <div class="card-bg"></div>
-            <div class="p-5 h-full flex flex-col">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h1 class="text-xl font-bold text-gold-500 text-[#D4AF37]">سینا سلطانی آذر</h1>
-                        <p class="text-sm text-[#D4AF37]/80">مدیرعامل شرکت شهرآوند</p>
-                    </div>
-                    <div class="logo">ش</div>
-                </div>
-                
-                <div class="divider"></div>
-                
-                <div class="flex-1 flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center mb-2">
-                            <i class="fas fa-briefcase ml-2 text-[#D4AF37]"></i>
-                            <p class="text-sm text-white">پایه دو نظام مهندسی</p>
-                        </div>
-                        <div class="flex items-center mb-2">
-                            <i class="fas fa-building ml-2 text-[#D4AF37]"></i>
-                            <p class="text-sm text-white">مدیریت پروژه های آبی</p>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-chart-line ml-2 text-[#D4AF37]"></i>
-                            <p class="text-sm text-white">مشاور ارشد مدیریت منابع آب</p>
-                        </div>
-                    </div>
-                    
-                    <div class="flex justify-between items-center">
-                        <div class="flex space-x-2 space-x-reverse">
-                            <a href="#" class="social-icon">
-                                <i class="fab fa-instagram"></i>
-                            </a>
-                            <a href="#" class="social-icon">
-                                <i class="fab fa-linkedin-in"></i>
-                            </a>
-                        </div>
-                        <div class="text-xs text-[#D4AF37]">
-                            <p>shahraavand.ir</p>
-                        </div>
-                    </div>
+<body class="bg-slate-50">
+
+    <div id="loadingModal" class="fixed inset-0 z-50 flex items-center justify-center" style="background-color: rgba(255, 255, 255, 0.9);">
+        <div class="flex flex-col items-center bg-white p-8 rounded-xl shadow-2xl text-center">
+            <div class="flex items-center justify-center mb-4">
+                <img src="https://tandis.shahraavand.ir/images/new-TLogo_B.avif" alt="Tandis Shahraavand Logo" class="h-16 w-16" onerror="this.onerror=null;this.src='https://placehold.co/64x64/1D4ED8/FFFFFF?text=T';">
+                <div class="mr-4">
+                    <h1 class="font-black text-3xl text-blue-700 text-center">نظام تندیس</h1>
+                    <p class="font-extrabold pt-1 text-sm text-center" style="color: #CB9214;">تدارک نیازمندی دقیق و یکپارچه ساختمان</p>
                 </div>
             </div>
-        </div>
-        
-        <!-- Back Side -->
-        <div class="card card-back">
-            <div class="card-bg"></div>
-            <div class="p-5 h-full flex flex-col">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h1 class="text-xl font-bold text-[#D4AF37]">سوابق علمی</h1>
-                    </div>
-                    <div class="qr-code" id="qrCode"></div>
-                </div>
-                
-                <div class="divider"></div>
-                
-                <div class="flex-1 flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center mb-2">
-                            <i class="fas fa-graduation-cap ml-2 text-[#D4AF37]"></i>
-                            <p class="text-sm text-white">دانشجوی دکتری حکمرانی آب - دانشگاه تهران</p>
-                        </div>
-                        <div class="flex items-center mb-2">
-                            <i class="fas fa-university ml-2 text-[#D4AF37]"></i>
-                            <p class="text-sm text-white">کارشناسی ارشد مهندسی منابع آب - صنعتی شریف</p>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-book ml-2 text-[#D4AF37]"></i>
-                            <p class="text-sm text-white">مدرس دوره های مدیریت منابع آب</p>
-                        </div>
-                    </div>
-                    
-                    <div class="flex flex-col space-y-2">
-                        <div class="flex items-center">
-                            <i class="fas fa-envelope ml-2 text-[#D4AF37]"></i>
-                            <p class="text-xs text-white">ceo@shahraavand.ir</p>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-envelope ml-2 text-[#D4AF37]"></i>
-                            <p class="text-xs text-white">sina.soltani@ut.ac.ir</p>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-phone ml-2 text-[#D4AF37]"></i>
-                            <p class="text-xs text-white">+98 912 345 6789</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="flip-btn" id="flipBtn">
-            <i class="fas fa-sync-alt"></i>
+            <div class="spinner my-4"></div>
+            <p id="loadingModalText" class="text-lg font-semibold text-gray-700">در حال بارگذاری اطلاعات...</p>
         </div>
     </div>
 
+    <div id="appContainer" class="workstation-wrapper hidden">
+        <aside id="mainNavSidebar" class="p-5">
+            <div class="text-center mb-8">
+                <div class="relative w-32 h-32 mx-auto mb-3">
+                    <img id="userProfileImage" src="" alt="عکس پروفایل" class="w-full h-full object-cover rounded-full border-4 border-white shadow-lg">
+                </div>
+                <h2 id="userProfileName" class="text-lg font-bold text-slate-800"></h2>
+                <p id="userProfileRole" class="text-sm font-medium text-sky-600"></p>
+            </div>
+            <nav id="mainNav" class="flex flex-col space-y-2">
+                <a href="#dashboard" data-view="dashboard" class="main-nav-link active"><i class="fas fa-tachometer-alt"></i><span>داشبورد</span></a>
+                <a href="#profile" data-view="profile" class="main-nav-link"><i class="fas fa-user-circle"></i><span>پروفایل من</span></a>
+                <a href="#settings" data-view="settings" class="main-nav-link"><i class="fas fa-cog"></i><span>تنظیمات</span></a>
+            </nav>
+            <div class="mt-auto">
+                <a href="#" id="logoutButton" class="main-nav-link hover:bg-red-100 hover:text-red-700"><i class="fas fa-sign-out-alt"></i><span>خروج از حساب</span></a>
+            </div>
+        </aside>
+
+        <main id="mainContentArea">
+            <header class="p-4 border-b border-slate-200 bg-white flex justify-between items-center">
+                <h1 id="pageTitle" class="text-xl font-bold text-slate-800">داشبورد</h1>
+                <div class="flex items-center space-x-4 space-x-reverse">
+                    <button class="text-slate-500 hover:text-sky-600"><i class="fas fa-bell"></i></button>
+                    <button class="text-slate-500 hover:text-sky-600"><i class="fas fa-envelope"></i></button>
+                </div>
+            </header>
+            <div id="pageContent">
+                <div id="dashboard-view" class="content-view active">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                         <div class="stat-card">
+                            <div class="p-4 bg-sky-100 text-sky-600 rounded-full"><i class="fas fa-briefcase fa-2x"></i></div>
+                            <div class="mr-4"><p class="text-slate-500 text-sm">پروژه‌های فعال</p><p id="activeProjectsCount" class="text-2xl font-bold text-slate-800">0</p></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="p-4 bg-green-100 text-green-600 rounded-full"><i class="fas fa-check-circle fa-2x"></i></div>
+                            <div class="mr-4"><p class="text-slate-500 text-sm">پروژه‌های تکمیل شده</p><p id="completedProjectsCount" class="text-2xl font-bold text-slate-800">0</p></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="p-4 bg-amber-100 text-amber-600 rounded-full"><i class="fas fa-file-signature fa-2x"></i></div>
+                            <div class="mr-4"><p class="text-slate-500 text-sm">درخواست‌های جدید</p><p id="newRequestsCount" class="text-2xl font-bold text-slate-800">0</p></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="p-4 bg-red-100 text-red-600 rounded-full"><i class="fas fa-exclamation-triangle fa-2x"></i></div>
+                            <div class="mr-4"><p class="text-slate-500 text-sm">هشدارهای مهم</p><p id="alertsCount" class="text-2xl font-bold text-slate-800">0</p></div>
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-700 mb-4">خلاصه پروژه‌ها</h2>
+                        <div id="projectsContainer" class="space-y-4"></div>
+                    </div>
+                </div>
+                <div id="profile-view" class="content-view"></div>
+                <div id="settings-view" class="content-view">
+                    <h2 class="text-lg font-semibold text-slate-700 mb-4">تنظیمات حساب کاربری</h2>
+                    <p class="text-slate-500">این بخش برای تنظیمات اطلاع‌رسانی‌ها، تغییر رمز عبور و سایر موارد مربوط به حساب کاربری در آینده در نظر گرفته شده است.</p>
+                </div>
+            </div>
+        </main>
+
+        <aside id="advertisementSidebar" class="p-5 space-y-6">
+            <div class="text-center">
+                <img src="https://tandis.shahraavand.ir/images/new-TLogo_B.avif" alt="لوگوی نظام تندیس" class="w-20 h-20 mx-auto mb-2" onerror="this.onerror=null;this.src='https://placehold.co/80x80/1D4ED8/FFFFFF?text=T';">
+                <h3 class="text-lg font-bold text-slate-800">نظام تندیس</h3>
+                <p class="text-xs text-slate-500">پلتفرم ارتباطی مهندسان و کارفرمایان</p>
+            </div>
+            <div id="slideshowContainer"></div>
+            <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+                <h4 class="font-semibold text-slate-700 mb-2">فرصت‌های ویژه</h4>
+                <p class="text-sm text-slate-500">از آخرین آگهی‌ها و فرصت‌های شغلی در حوزه تخصصی خود مطلع شوید.</p>
+                <button class="mt-3 w-full bg-sky-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-sky-600 transition-colors">مشاهده آگهی‌ها</button>
+            </div>
+        </aside>
+    </div>
+
     <script>
-        // Generate QR Code
-        QRCode.toCanvas(document.getElementById('qrCode'), 'https://shahraavand.ir', {
-            width: 70,
-            color: {
-                dark: '#000000',
-                light: '#ffffff'
-            }
-        }, function (error) {
-            if (error) console.error(error)
-        });
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- CONFIGURATION ---
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyBE91RW4JJE22AqkfLUGRX3yYl1DKiq3eOVSkdg45skrubuDwMNjxKRQ0i65FaV0Yw/exec'; // <-- آدرس اسکریپت خود را اینجا قرار دهید
 
-        // Flip card on button click
-        document.getElementById('flipBtn').addEventListener('click', function() {
-            document.getElementById('cardContainer').classList.toggle('flipped');
-        });
+        // --- DOM Elements ---
+        const loadingModal = document.getElementById('loadingModal');
+        const loadingModalText = document.getElementById('loadingModalText');
+        const appContainer = document.getElementById('appContainer');
+        const pageTitle = document.getElementById('pageTitle');
+        const userProfileImage = document.getElementById('userProfileImage');
+        const userProfileName = document.getElementById('userProfileName');
+        const userProfileRole = document.getElementById('userProfileRole');
+        const mainNav = document.getElementById('mainNav');
+        const contentViews = document.querySelectorAll('.content-view');
+        const profileViewContainer = document.getElementById('profile-view');
+        const projectsContainer = document.getElementById('projectsContainer');
+        const activeProjectsCountEl = document.getElementById('activeProjectsCount');
+        const completedProjectsCountEl = document.getElementById('completedProjectsCount');
+        const newRequestsCountEl = document.getElementById('newRequestsCount');
+        const alertsCountEl = document.getElementById('alertsCount');
+        const slideshowContainer = document.getElementById('slideshowContainer');
 
-        // 3D tilt effect
-        const cardContainer = document.getElementById('cardContainer');
+        // --- State ---
+        let currentUserEmail = '';
+        let originalUserData = {}; // To store the initial data for reverting edits
         
-        cardContainer.addEventListener('mousemove', (e) => {
-            const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
-            const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
-            cardContainer.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
-        });
+        const slideshowImages = [
+            'https://images.unsplash.com/photo-1581092921462-6839b3b896fd?w=600&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=600&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1606744443904-431c4a07373f?w=600&auto=format&fit=crop'
+        ];
+        let currentSlideIndex = 0;
 
-        cardContainer.addEventListener('mouseenter', () => {
-            cardContainer.style.transition = 'none';
-        });
+        // --- MOCK PROJECT DATA (can be fetched separately later) ---
+        const mockProjects = [
+            { title: 'پروژه مسکونی برج باغ', location: 'زعفرانیه، تهران', status: 'active', progress: 75, client: 'شرکت ساختمانی آرمان' },
+            { title: 'مجتمع تجاری آرتمیس', location: 'فرمانیه، تهران', status: 'active', progress: 40, client: 'هلدینگ تجاری پاسارگاد' },
+            { title: 'ویلا لواسان', location: 'لواسان، تهران', status: 'completed', progress: 100, client: 'شخصی' },
+            { title: 'درخواست نظارت ساختمان', location: 'شهرک غرب، تهران', status: 'request', progress: 0, client: 'شخصی' }
+        ];
 
-        cardContainer.addEventListener('mouseleave', () => {
-            cardContainer.style.transition = 'transform 0.5s';
-            cardContainer.style.transform = 'rotateY(0) rotateX(0)';
-        });
+        // --- Functions ---
+
+        async function initializeWorkstation() {
+
+            const urlParams = new URLSearchParams(window.location.search);
+            currentUserEmail = urlParams.get('email');
+
+            if (!currentUserEmail) {
+                loadingModalText.textContent = 'خطا: ایمیل کاربر مشخص نشده است. لطفاً دوباره وارد شوید.';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${SCRIPT_URL}?func=getUserProfile&email=${encodeURIComponent(currentUserEmail)}`);
+                if (!response.ok) {
+                    throw new Error(`خطای شبکه: ${response.statusText}`);
+                }
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    originalUserData = JSON.parse(JSON.stringify(result.data)); // Deep copy for reverting edits
+                    populateUserProfile(originalUserData);
+                    populateDashboard(mockProjects); // Using mock data for now
+                    populateProfileView(originalUserData);
+                    initializeSlideshow();
+
+                    appContainer.classList.remove('hidden');
+                    loadingModal.style.display = 'none';
+                } else {
+                    throw new Error(result.message || 'خطا در دریافت اطلاعات پروفایل.');
+                }
+
+            } catch (error) {
+                loadingModalText.textContent = `خطا در بارگذاری اطلاعات: ${error.message}`;
+                console.error("Initialization failed:", error);
+            }
+        }
+
+        function populateUserProfile(data) {
+            userProfileImage.src = data.personal["عکس پروفایل"] || 'https://placehold.co/128x128/EBF4FF/2196F3?text=User';
+            userProfileName.textContent = `${data.personal["نام"] || ''} ${data.personal["نام خانوادگی"] || ''}`;
+            userProfileRole.textContent = data.role || '';
+        }
+
+        function populateDashboard(projects) {
+            let activeCount = 0, completedCount = 0, requestCount = 0;
+            projectsContainer.innerHTML = '';
+            projects.forEach(project => {
+                if (project.status === 'active') activeCount++;
+                else if (project.status === 'completed') completedCount++;
+                else if (project.status === 'request') requestCount++;
+                projectsContainer.appendChild(createProjectCard(project));
+            });
+            activeProjectsCountEl.textContent = activeCount;
+            completedProjectsCountEl.textContent = completedCount;
+            newRequestsCountEl.textContent = requestCount;
+            alertsCountEl.textContent = 1;
+        }
+
+        function createProjectCard(project) {
+            const card = document.createElement('div');
+            card.className = 'project-card flex items-center p-4';
+            let statusClass, statusText, iconClass;
+            switch(project.status) {
+                case 'active': statusClass = 'bg-sky-100 text-sky-700'; statusText = 'فعال'; iconClass = 'fas fa-tasks'; break;
+                case 'completed': statusClass = 'bg-green-100 text-green-700'; statusText = 'تکمیل شده'; iconClass = 'fas fa-check-double'; break;
+                case 'request': statusClass = 'bg-amber-100 text-amber-700'; statusText = 'درخواست جدید'; iconClass = 'fas fa-file-signature'; break;
+            }
+            card.innerHTML = `
+                <div class="p-3 rounded-lg ${statusClass} ml-4"><i class="${iconClass} fa-lg"></i></div>
+                <div class="flex-grow">
+                    <h3 class="font-bold text-slate-800">${project.title}</h3>
+                    <p class="text-sm text-slate-500">${project.client} - ${project.location}</p>
+                </div>
+                <div class="w-32 text-center mx-4">
+                    <div class="w-full bg-slate-200 rounded-full h-2.5"><div class="bg-sky-500 h-2.5 rounded-full" style="width: ${project.progress}%"></div></div>
+                    <p class="text-xs text-slate-500 mt-1">${project.progress}% پیشرفت</p>
+                </div>
+                <div class="text-xs font-semibold py-1 px-3 rounded-full ${statusClass}">${statusText}</div>
+                <button class="mr-4 text-slate-400 hover:text-slate-700"><i class="fas fa-ellipsis-v"></i></button>`;
+            return card;
+        }
+
+        function populateProfileView(userData) {
+            profileViewContainer.innerHTML = '';
+            const { role, ...profileSections } = userData;
+            for (const sectionKey in profileSections) {
+                const sectionTitle = getPersianSectionTitle(sectionKey);
+                const sectionData = profileSections[sectionKey];
+                if (sectionData && Object.keys(sectionData).length > 0) {
+                     profileViewContainer.appendChild(createAccordionItem(sectionTitle, sectionKey, sectionData));
+                }
+            }
+        }
+        
+        function getPersianSectionTitle(key) {
+            const titles = { personal: 'مشخصات فردی', contact: 'اطلاعات تماس', professional: 'اطلاعات حرفه‌ای', documents: 'مدارک بارگذاری شده' };
+            return titles[key] || key;
+        }
+
+        function createAccordionItem(title, key, data) {
+            const item = document.createElement('div');
+            item.className = 'accordion-item';
+            item.dataset.sectionKey = key;
+            const isEditable = key !== 'documents';
+
+            item.innerHTML = `
+                <div class="accordion-header">
+                    <div class="flex items-center"><i class="fas fa-chevron-down accordion-icon mr-3"></i><span class="font-bold text-slate-700">${title}</span></div>
+                    ${isEditable ? `<button data-action="edit" class="text-sm font-semibold text-sky-600 hover:text-sky-800"><i class="fas fa-pencil-alt ml-2"></i>ویرایش</button>` : ''}
+                </div>
+                <div class="accordion-content">
+                    <div class="data-container">${Object.entries(data).map(([label, value]) => createProfileRow(label, value)).join('')}</div>
+                    <div class="edit-buttons-container hidden mt-4 text-left">
+                        <button data-action="cancel" class="py-2 px-4 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors text-sm font-bold">انصراف</button>
+                        <button data-action="save" class="py-2 px-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-bold mr-2">ذخیره تغییرات</button>
+                    </div>
+                </div>`;
+            return item;
+        }
+
+        function createProfileRow(label, value) {
+            let displayValue = value || '---';
+            if (typeof value === 'string' && (value.includes('drive.google.com') || value.endsWith('.pdf'))) {
+                displayValue = `<a href="${value}" target="_blank" class="text-sky-600 hover:underline">مشاهده فایل</a>`;
+            }
+            return `<div class="profile-data-row" data-label="${label}"><span class="profile-data-label">${label}</span><span class="profile-data-value">${displayValue}</span></div>`;
+        }
+        
+        function handleProfileViewClick(e) {
+            const header = e.target.closest('.accordion-header');
+            const editButton = e.target.closest('button[data-action="edit"]');
+            const saveButton = e.target.closest('button[data-action="save"]');
+            const cancelButton = e.target.closest('button[data-action="cancel"]');
+
+            if (header && !editButton) toggleAccordion(header);
+            else if (editButton) toggleEditMode(editButton.closest('.accordion-item'), true);
+            else if (saveButton) saveProfileChanges(saveButton.closest('.accordion-item'));
+            else if (cancelButton) toggleEditMode(cancelButton.closest('.accordion-item'), false, true); // Revert changes
+        }
+
+        function toggleAccordion(header) {
+            const content = header.nextElementSibling;
+            header.classList.toggle('open');
+            content.classList.toggle('open');
+        }
+
+        function toggleEditMode(accordionItem, isEditing, shouldRevert = false) {
+            const dataContainer = accordionItem.querySelector('.data-container');
+            const buttonsContainer = accordionItem.querySelector('.edit-buttons-container');
+            const rows = dataContainer.querySelectorAll('.profile-data-row');
+            const sectionKey = accordionItem.dataset.sectionKey;
+
+            if (isEditing) {
+                rows.forEach(row => {
+                    const label = row.dataset.label;
+                    const valueSpan = row.querySelector('.profile-data-value');
+                    const currentValue = originalUserData[sectionKey][label] || '';
+                    if (label === "عکس پروفایل" || label === "کارت ملی" || label === "پروانه اشتغال" || label === "رزومه") {
+                         valueSpan.innerHTML = `<span class="text-slate-400 text-xs">قابل ویرایش نیست.</span>`;
+                    } else {
+                         valueSpan.innerHTML = `<input type="text" class="edit-mode-input" data-original-value="${currentValue}" value="${currentValue}">`;
+                    }
+                });
+                buttonsContainer.classList.remove('hidden');
+            } else { // Exiting edit mode
+                rows.forEach(row => {
+                    const valueSpan = row.querySelector('.profile-data-value');
+                    const input = valueSpan.querySelector('input');
+                    if (input) {
+                        valueSpan.textContent = shouldRevert ? input.dataset.originalValue : input.value;
+                    }
+                });
+                buttonsContainer.classList.add('hidden');
+            }
+        }
+        
+        async function saveProfileChanges(accordionItem) {
+            const sectionKey = accordionItem.dataset.sectionKey;
+            const rows = accordionItem.querySelectorAll('.profile-data-row');
+            const updatedSectionData = { ...originalUserData[sectionKey] }; // Start with original data
+
+            rows.forEach(row => {
+                const label = row.dataset.label;
+                const input = row.querySelector('input');
+                if (input) {
+                    updatedSectionData[label] = input.value;
+                }
+            });
+
+            const saveButton = accordionItem.querySelector('button[data-action="save"]');
+            saveButton.disabled = true;
+            saveButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ذخیره...';
+
+            try {
+                const payload = {
+                    action: 'updateSection',
+                    email: currentUserEmail,
+                    sectionKey: sectionKey,
+                    sectionData: updatedSectionData
+                };
+
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                if (result.status !== 'success') {
+                    throw new Error(result.message || 'خطا در ارتباط با سرور.');
+                }
+
+                originalUserData[sectionKey] = updatedSectionData; // Update state
+                toggleEditMode(accordionItem, false, false); // Exit edit mode
+                alert('اطلاعات با موفقیت ذخیره شد.');
+
+            } catch (error) {
+                alert(`خطا در ذخیره اطلاعات: ${error.message}`);
+                console.error('Save failed:', error);
+                toggleEditMode(accordionItem, false, true); // Revert UI on failure
+            } finally {
+                saveButton.disabled = false;
+                saveButton.innerHTML = 'ذخیره تغییرات';
+            }
+        }
+
+        profileViewContainer.addEventListener('click', handleProfileViewClick);
+
+        function handleNavClick(e) {
+            e.preventDefault();
+            const navLink = e.target.closest('.main-nav-link');
+            if (!navLink) return;
+            const viewName = navLink.dataset.view;
+            mainNav.querySelector('.active').classList.remove('active');
+            navLink.classList.add('active');
+            pageTitle.textContent = navLink.querySelector('span').textContent;
+            contentViews.forEach(view => view.classList.toggle('active', view.id === `${viewName}-view`));
+        }
+        mainNav.addEventListener('click', handleNavClick);
+
+        function initializeSlideshow() {
+            slideshowImages.forEach((src, index) => {
+                const img = document.createElement('img');
+                img.src = src;
+                img.alt = `تبلیغ ${index + 1}`;
+                if (index === 0) img.classList.add('active');
+                slideshowContainer.appendChild(img);
+            });
+            setInterval(() => {
+                const images = slideshowContainer.querySelectorAll('img');
+                if (images.length === 0) return;
+                images[currentSlideIndex].classList.remove('active');
+                currentSlideIndex = (currentSlideIndex + 1) % images.length;
+                images[currentSlideIndex].classList.add('active');
+            }, 5000);
+        }
+
+        initializeWorkstation();
+    });
     </script>
 </body>
 </html>
