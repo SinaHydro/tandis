@@ -262,7 +262,8 @@
                 const result = JSON.parse(rawResponseText);
                 console.log('Server response object:', result);
 
-                if (result.status === "success" && result.data && typeof result.data === 'object') {
+                // --- MODIFIED: More robust check for data integrity ---
+                if (result.status === "success" && result.data?.stepsData) {
                     originalUserData = result.data;
                     populateUserProfile(originalUserData);
                     populateDashboard(mockProjects);
@@ -411,12 +412,12 @@
             const prefix = role === 'engineer' ? 'engineer' : 'employer';
             return `
                 <div class="profile-view-grid">
-                    ${createFieldHtml('نام', data[`${prefix}FirstName`])}
-                    ${createFieldHtml('نام خانوادگی', data[`${prefix}LastName`])}
-                    ${createFieldHtml('کدملی', data[`${prefix}NationalId`])}
-                    ${createFieldHtml('تاریخ تولد', data[`${prefix}Dob`])}
-                    ${createFieldHtml('جنسیت', data[`${prefix}Gender`])}
-                    ${createFieldHtml('تلفن موبایل', data[`${prefix}Mobile`])}
+                    ${createFieldHtml('نام', data?.[`${prefix}FirstName`])}
+                    ${createFieldHtml('نام خانوادگی', data?.[`${prefix}LastName`])}
+                    ${createFieldHtml('کدملی', data?.[`${prefix}NationalId`])}
+                    ${createFieldHtml('تاریخ تولد', data?.[`${prefix}Dob`])}
+                    ${createFieldHtml('جنسیت', data?.[`${prefix}Gender`])}
+                    ${createFieldHtml('تلفن موبایل', data?.[`${prefix}Mobile`])}
                 </div>
             `;
         }
@@ -428,15 +429,15 @@
 
             return `
                 <div class="profile-view-grid">
-                    ${createFieldHtml('شماره تلفن ثابت', data[`${prefix}Phone`])}
-                    ${createFieldHtml('کدپستی', data[`${prefix}PostalCode`])}
-                    ${createFieldHtml('استان سکونت', data[`${prefix}Province`])}
-                    ${createFieldHtml('شهر سکونت', data[`${prefix}City`])}
+                    ${createFieldHtml('شماره تلفن ثابت', data?.[`${prefix}Phone`])}
+                    ${createFieldHtml('کدپستی', data?.[`${prefix}PostalCode`])}
+                    ${createFieldHtml('استان سکونت', data?.[`${prefix}Province`])}
+                    ${createFieldHtml('شهر سکونت', data?.[`${prefix}City`])}
                 </div>
                 <div class="mt-6">
                     <label class="profile-field-label">آدرس محل سکونت</label>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
-                        <textarea class="profile-field-value min-h-[220px]" readonly>${data[addressKey] || '---'}</textarea>
+                        <textarea class="profile-field-value min-h-[220px]" readonly>${data?.[addressKey] || '---'}</textarea>
                         <div id="${mapId}" class="map-container min-h-[220px]"></div>
                     </div>
                 </div>
@@ -445,7 +446,7 @@
 
         function createProfessionalProfileView(data, userRole) {
             if (userRole !== 'engineer') {
-                const companyData = originalUserData.stepsData?.step3 || {};
+                const companyData = data || {};
                 if (!companyData.employerCompanyName) {
                     return '<p class="text-slate-500">اطلاعات شرکتی ثبت نشده است.</p>';
                 }
