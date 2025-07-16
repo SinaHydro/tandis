@@ -230,6 +230,7 @@
             'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=500&auto=format&fit=crop&q=60',
             'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=500&auto=format&fit=crop&q=60'
         ];
+        const PROVINCES = ["آذربایجان شرقی", "آذربایجان غربی", "اردبیل", "اصفهان", "البرز", "ایلام", "بوشهر", "تهران", "چهارمحال و بختیاری", "خراسان جنوبی", "خراسان رضوی", "خراسان شمالی", "خوزستان", "زنجان", "سمنان", "سیستان و بلوچستان", "فارس", "قزوین", "قم", "کردستان", "کرمان", "کرمانشاه", "کهگیلویه و بویراحمد", "گلستان", "گیلان", "لرستان", "مازندران", "مرکزی", "هرمزگان", "همدان", "یزد"];
 
         // --- STATE ---
         let userData = null;
@@ -250,11 +251,6 @@
 
         // --- HELPER FUNCTIONS ---
         
-        /**
-         * Shows a message modal.
-         * @param {string} message The message to display.
-         * @param {'info'|'success'|'error'|'warning'} type The type of message.
-         */
         function showMessageModal(message, type = 'info') {
             const modal = document.getElementById('messageModal');
             const modalMessageText = document.getElementById('modalMessageText');
@@ -275,11 +271,6 @@
             window.onclick = (event) => { if (event.target == modal) modal.style.display = 'none'; };
         }
 
-        /**
-         * Fetches user profile data from the Google Script.
-         * @param {string} email The user's email.
-         * @returns {Promise<object|null>} The user data object or null on error.
-         */
         async function fetchUserProfile(email) {
             try {
                 const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getUserProfile&email=${encodeURIComponent(email)}`);
@@ -297,12 +288,6 @@
             }
         }
 
-        /**
-         * Updates a section of the user's profile.
-         * @param {string} sectionKey The key for the section ('personal', 'contact', 'professional').
-         * @param {object} sectionData The data object for the section.
-         * @returns {Promise<boolean>} True on success, false on failure.
-         */
         async function updateProfileSection(sectionKey, sectionData) {
             pageLoader.style.display = 'flex';
             try {
@@ -313,10 +298,6 @@
                     sectionData: sectionData
                 };
                 
-                // NOTE: File updates are not supported by the current Google Script.
-                // This part would need to be expanded if the script is updated.
-                // For now, we only send text data.
-
                 const response = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'cors',
@@ -330,7 +311,6 @@
                 const result = await response.json();
                 if (result.status === 'success') {
                     showMessageModal('اطلاعات با موفقیت ذخیره شد.', 'success');
-                    // Refetch data to ensure consistency
                     const updatedData = await fetchUserProfile(userData.email);
                     if (updatedData) {
                         userData = { ...updatedData, email: userData.email };
@@ -350,9 +330,6 @@
             }
         }
         
-        /**
-         * Initializes the sidebar slideshow.
-         */
         function initSlideshow() {
             const slideshowContainer = document.getElementById('slideshow');
             const dotsContainer = document.getElementById('slide-dots-container');
@@ -379,13 +356,9 @@
             setInterval(() => {
                 currentSlide = (currentSlide + 1) % SLIDESHOW_IMAGES.length;
                 showSlide(currentSlide);
-            }, 5000); // Change slide every 5 seconds
+            }, 5000);
         }
 
-        /**
-         * Displays a specific slide.
-         * @param {number} index The index of the slide to show.
-         */
         function showSlide(index) {
             const slides = document.querySelectorAll('.slide-image');
             const dots = document.querySelectorAll('.dot');
@@ -399,45 +372,32 @@
             currentSlide = index;
         }
 
-        /**
-         * Renders the entire profile based on userData.
-         */
         function renderProfile() {
             if (!userData) return;
 
-            // Update sidebar
             const name = `${userData.stepsData.step1.engineerFirstName || userData.stepsData.step1.employerFirstName || ''} ${userData.stepsData.step1.engineerLastName || userData.stepsData.step1.employerLastName || ''}`;
             sidebarProfileName.textContent = name.trim() ? name : 'کاربر';
             sidebarProfileRole.textContent = userData.role === 'engineer' ? 'مهندس' : 'کارفرما';
             sidebarProfileImage.src = userData.files.applicantImage.fileUrl || 'https://placehold.co/120x120/EBF4FF/7F9CF5?text=...&font=vazirmatn';
             sidebarProfileImage.onerror = () => { sidebarProfileImage.src = 'https://placehold.co/120x120/EBF4FF/7F9CF5?text=Error&font=vazirmatn'; };
 
-            // Render sections
-            profileContent.innerHTML = ''; // Clear previous content
+            profileContent.innerHTML = '';
             
-            // Personal Info Section
             const personalHTML = getSectionHTML('personal', 'مشخصات فردی', 'fa-user-circle', getPersonalFieldsHTML(userData.stepsData.step1, userData.role));
             profileContent.insertAdjacentHTML('beforeend', personalHTML);
 
-            // Contact Info Section
             const contactHTML = getSectionHTML('contact', 'اطلاعات تماس', 'fa-address-card', getContactFieldsHTML(userData.stepsData.step2, userData.role));
             profileContent.insertAdjacentHTML('beforeend', contactHTML);
 
-            // Professional Info Section
             const professionalHTML = getSectionHTML('professional', 'اطلاعات حرفه‌ای', 'fa-briefcase', getProfessionalFieldsHTML(userData.stepsData.step3, userData.role));
             profileContent.insertAdjacentHTML('beforeend', professionalHTML);
             
-            // Documents Section
             const docsHTML = getSectionHTML('documents', 'مدارک', 'fa-file-alt', getDocumentsHTML(userData.files, userData.role));
             profileContent.insertAdjacentHTML('beforeend', docsHTML);
 
-            // Add event listeners for the newly created elements
             attachSectionEventListeners();
         }
         
-        /**
-         * Creates the HTML for a collapsible section.
-         */
         function getSectionHTML(id, title, icon, content) {
             return `
                 <div id="section-${id}" class="profile-section">
@@ -459,8 +419,13 @@
             `;
         }
 
-        // --- HTML Generation for Section Content ---
-        // These functions replicate the structure from dashboard.html
+        function generateProvinceOptions(selectedValue) {
+            let options = '<option value="">انتخاب استان</option>';
+            PROVINCES.forEach(province => {
+                options += `<option value="${province}" ${province === selectedValue ? 'selected' : ''}>${province}</option>`;
+            });
+            return options;
+        }
         
         function getPersonalFieldsHTML(data, role) {
             const prefix = role === 'engineer' ? 'engineer' : 'employer';
@@ -503,7 +468,6 @@
             const address = data[`${prefix}ResidentialAddress`] || data[`${prefix}Address`] || '';
             const mapId = `${prefix}LocationMap`;
             
-            // Note: The map will be initialized when the section is opened.
             return `
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
                     <div>
@@ -516,7 +480,9 @@
                     </div>
                     <div>
                         <label for="${prefix}Province" class="block text-sm font-medium text-slate-700 mb-1">استان</label>
-                        <input type="text" id="${prefix}Province" name="${prefix}Province" value="${data[`${prefix}Province`] || ''}" disabled>
+                        <select id="${prefix}Province" name="${prefix}Province" disabled>
+                            ${generateProvinceOptions(data[`${prefix}Province`])}
+                        </select>
                     </div>
                      <div>
                         <label for="${prefix}City" class="block text-sm font-medium text-slate-700 mb-1">شهر</label>
@@ -534,31 +500,64 @@
                 </div>
             `;
         }
-
+        
         function getProfessionalFieldsHTML(data, role) {
             if (role === 'employer') {
                 return `
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-2">وضعیت شرکت</label>
-                            <input type="text" value="${data.employerHasCompany ? 'شرکت دارم' : 'شرکت ندارم (شخص حقیقی)'}" disabled>
+                             <div class="flex items-center mt-2">
+                                <input type="checkbox" id="employerHasCompany" name="employerHasCompany" class="h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500" ${data.employerHasCompany ? 'checked' : ''} disabled>
+                                <label for="employerHasCompany" id="employerHasCompanyLabel" class="ml-2 mr-2 block text-sm text-slate-700">شرکت دارم</label>
+                            </div>
                         </div>
-                        <div class="${data.employerHasCompany ? '' : 'hidden'}">
-                            <label for="employerCompanyName" class="block text-sm font-medium text-slate-700 mb-1">نام شرکت</label>
-                            <input type="text" id="employerCompanyName" name="employerCompanyName" value="${data.employerCompanyName || ''}" disabled>
+                    </div>
+                    <div id="employerCompanyFields" class="${data.employerHasCompany ? '' : 'hidden'} space-y-6 mt-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                            <div>
+                                <label for="employerCompanyName" class="block text-sm font-medium text-slate-700 mb-1">نام شرکت</label>
+                                <input type="text" id="employerCompanyName" name="employerCompanyName" value="${data.employerCompanyName || ''}" disabled>
+                            </div>
+                            <div>
+                                <label for="employerCompanyRegNumber" class="block text-sm font-medium text-slate-700 mb-1">شماره ثبت شرکت</label>
+                                <input type="text" id="employerCompanyRegNumber" name="employerCompanyRegNumber" value="${data.employerCompanyRegNumber || ''}" disabled>
+                            </div>
                         </div>
-                        <div class="${data.employerHasCompany ? '' : 'hidden'}">
-                            <label for="employerCompanyRegNumber" class="block text-sm font-medium text-slate-700 mb-1">شماره ثبت شرکت</label>
-                            <input type="text" id="employerCompanyRegNumber" name="employerCompanyRegNumber" value="${data.employerCompanyRegNumber || ''}" disabled>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">آدرس شرکت</label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                                <textarea id="employerCompanyAddress" name="employerCompanyAddress" rows="4" class="min-h-[220px]" disabled>${data.employerCompanyAddress || ''}</textarea>
+                                <div id="employerCompanyMap" class="map-container min-h-[220px]"></div>
+                                <input type="hidden" id="employerCompanyAddressLat" name="employerCompanyAddressLat" value="${data.employerCompanyAddressLat || ''}">
+                                <input type="hidden" id="employerCompanyAddressLng" name="employerCompanyAddressLng" value="${data.employerCompanyAddressLng || ''}">
+                            </div>
                         </div>
                     </div>
                 `;
             } else { // Engineer
-                 // This part needs the full complexity from dashboard.html.
-                 // For brevity in this example, we'll show a simplified version.
-                 // A full implementation would replicate all the license fields.
+                const licenseProvinceOptions = ['سراسری'].concat(PROVINCES);
+                let licenseProvinceSelect = '<option value="">انتخاب استان</option>';
+                licenseProvinceOptions.forEach(p => {
+                    licenseProvinceSelect += `<option value="${p}" ${p === data.licenseActivityProvince ? 'selected' : ''}>${p}</option>`;
+                });
+
                 return `
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6">
+                        <div>
+                            <label for="licenseFirstIssueDate" class="block text-sm font-medium text-slate-700 mb-1">تاریخ اولین صدور پروانه</label>
+                            <input type="text" id="licenseFirstIssueDate" value="${data.licenseFirstIssueDate || ''}" class="jalali-datepicker-display" readonly disabled>
+                            <input type="hidden" name="licenseFirstIssueDate" class="jalali-datepicker-value">
+                        </div>
+                        <div>
+                            <label for="licenseStartDate" class="block text-sm font-medium text-slate-700 mb-1">تاریخ شروع اعتبار پروانه</label>
+                            <input type="text" id="licenseStartDate" value="${data.licenseStartDate || ''}" class="jalali-datepicker-display" readonly disabled>
+                            <input type="hidden" name="licenseStartDate" class="jalali-datepicker-value">
+                        </div>
+                        <div>
+                            <label for="licenseValidity" class="block text-sm font-medium text-slate-700 mb-1">مدت اعتبار پروانه (سال)</label>
+                            <input type="number" id="licenseValidity" name="licenseValidity" min="1" value="${data.licenseValidity || ''}" disabled>
+                        </div>
                         <div>
                             <label for="licenseNumber" class="block text-sm font-medium text-slate-700 mb-1">شماره پروانه</label>
                             <input type="text" id="licenseNumber" name="licenseNumber" value="${data.licenseNumber || ''}" disabled>
@@ -568,14 +567,122 @@
                             <input type="text" id="membershipNumber" name="membershipNumber" value="${data.membershipNumber || ''}" disabled>
                         </div>
                         <div>
-                            <label for="licenseActivityProvince" class="block text-sm font-medium text-slate-700 mb-1">استان فعالیت</label>
-                            <input type="text" id="licenseActivityProvince" name="licenseActivityProvince" value="${data.licenseActivityProvince || ''}" disabled>
+                            <label for="licenseActivityProvince" class="block text-sm font-medium text-slate-700 mb-1">استان فعالیت پروانه</label>
+                            <select id="licenseActivityProvince" name="licenseActivityProvince" disabled>${licenseProvinceSelect}</select>
                         </div>
-                        <div class="md:col-span-3 mt-4 p-4 border-t">
-                            <h4 class="font-semibold mb-2">صلاحیت‌ها</h4>
-                            <p>پروانه طراحی: <span class="font-bold">${data.hasDesignLicense ? `دارد (پایه ${data.designLicenseGrade})` : 'ندارد'}</span></p>
-                            <p>پروانه نظارت: <span class="font-bold">${data.hasSupervisionLicense ? `دارد (پایه ${data.supervisionLicenseGrade})` : 'ندارد'}</span></p>
-                            <p>پروانه اجرا: <span class="font-bold">${data.hasExecutionLicense ? `دارد (پایه ${data.executionLicenseGrade})` : 'ندارد'}</span></p>
+                    </div>
+                    
+                    <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-5">
+                        <!-- Design License -->
+                        <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
+                            <div class="flex items-center space-x-2 space-x-reverse mb-1">
+                                <input type="checkbox" id="hasDesignLicense" name="hasDesignLicense" class="h-4 w-4" ${data.hasDesignLicense ? 'checked' : ''} disabled>
+                                <label for="hasDesignLicense" class="text-sm font-medium text-slate-700">پروانه طراحی</label>
+                            </div>
+                            <select id="designLicenseGrade" name="designLicenseGrade" class="block w-full sm:text-sm" disabled>
+                                <option value="">انتخاب پایه</option>
+                                <option value="3" ${data.designLicenseGrade === '3' ? 'selected' : ''}>پایه ۳</option>
+                                <option value="2" ${data.designLicenseGrade === '2' ? 'selected' : ''}>پایه ۲</option>
+                                <option value="1" ${data.designLicenseGrade === '1' ? 'selected' : ''}>پایه ۱</option>
+                                <option value="arshad" ${data.designLicenseGrade === 'arshad' ? 'selected' : ''}>پایه ارشد</option>
+                            </select>
+                            <div class="flex flex-col space-y-1 text-xs mt-2">
+                                <label class="inline-flex items-center"><input type="radio" name="designExecutorType" value="individual" class="form-radio" ${data.designExecutorType === 'individual' ? 'checked' : ''} disabled><span class="mr-1 ml-1">حقیقی</span></label>
+                                <label class="inline-flex items-center"><input type="radio" name="designExecutorType" value="legal" class="form-radio" ${data.designExecutorType === 'legal' ? 'checked' : ''} disabled><span class="mr-1 ml-1">حقوقی</span></label>
+                                <label class="inline-flex items-center"><input type="radio" name="designExecutorType" value="none" class="form-radio" ${!data.designExecutorType || data.designExecutorType === 'none' ? 'checked' : ''} disabled><span class="mr-1 ml-1">فعالیت ندارم</span></label>
+                            </div>
+                        </div>
+                        <!-- Supervision License -->
+                        <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
+                           <div class="flex items-center space-x-2 space-x-reverse mb-1">
+                                <input type="checkbox" id="hasSupervisionLicense" name="hasSupervisionLicense" class="h-4 w-4" ${data.hasSupervisionLicense ? 'checked' : ''} disabled>
+                                <label for="hasSupervisionLicense" class="text-sm font-medium text-slate-700">پروانه نظارت</label>
+                            </div>
+                            <select id="supervisionLicenseGrade" name="supervisionLicenseGrade" class="block w-full sm:text-sm" disabled>
+                                <option value="">انتخاب پایه</option>
+                                <option value="3" ${data.supervisionLicenseGrade === '3' ? 'selected' : ''}>پایه ۳</option>
+                                <option value="2" ${data.supervisionLicenseGrade === '2' ? 'selected' : ''}>پایه ۲</option>
+                                <option value="1" ${data.supervisionLicenseGrade === '1' ? 'selected' : ''}>پایه ۱</option>
+                                <option value="arshad" ${data.supervisionLicenseGrade === 'arshad' ? 'selected' : ''}>پایه ارشد</option>
+                            </select>
+                             <div class="flex flex-col space-y-1 text-xs mt-2">
+                                <label class="inline-flex items-center"><input type="radio" name="supervisionExecutorType" value="individual" class="form-radio" ${data.supervisionExecutorType === 'individual' ? 'checked' : ''} disabled><span class="mr-1 ml-1">حقیقی</span></label>
+                                <label class="inline-flex items-center"><input type="radio" name="supervisionExecutorType" value="legal" class="form-radio" ${data.supervisionExecutorType === 'legal' ? 'checked' : ''} disabled><span class="mr-1 ml-1">حقوقی</span></label>
+                                <label class="inline-flex items-center"><input type="radio" name="supervisionExecutorType" value="none" class="form-radio" ${!data.supervisionExecutorType || data.supervisionExecutorType === 'none' ? 'checked' : ''} disabled><span class="mr-1 ml-1">فعالیت ندارم</span></label>
+                            </div>
+                        </div>
+                        <!-- Execution License -->
+                         <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
+                           <div class="flex items-center space-x-2 space-x-reverse mb-1">
+                                <input type="checkbox" id="hasExecutionLicense" name="hasExecutionLicense" class="h-4 w-4" ${data.hasExecutionLicense ? 'checked' : ''} disabled>
+                                <label for="hasExecutionLicense" class="text-sm font-medium text-slate-700">پروانه اجرا</label>
+                            </div>
+                            <select id="executionLicenseGrade" name="executionLicenseGrade" class="block w-full sm:text-sm" disabled>
+                                <option value="">انتخاب پایه</option>
+                                <option value="3" ${data.executionLicenseGrade === '3' ? 'selected' : ''}>پایه ۳</option>
+                                <option value="2" ${data.executionLicenseGrade === '2' ? 'selected' : ''}>پایه ۲</option>
+                                <option value="1" ${data.executionLicenseGrade === '1' ? 'selected' : ''}>پایه ۱</option>
+                                <option value="arshad" ${data.executionLicenseGrade === 'arshad' ? 'selected' : ''}>پایه ارشد</option>
+                            </select>
+                             <div class="flex flex-col space-y-1 text-xs mt-2">
+                                <label class="inline-flex items-center"><input type="radio" name="executionExecutorType" value="individual" class="form-radio" ${data.executionExecutorType === 'individual' ? 'checked' : ''} disabled><span class="mr-1 ml-1">حقیقی</span></label>
+                                <label class="inline-flex items-center"><input type="radio" name="executionExecutorType" value="legal" class="form-radio" ${data.executionExecutorType === 'legal' ? 'checked' : ''} disabled><span class="mr-1 ml-1">حقوقی</span></label>
+                                <label class="inline-flex items-center"><input type="radio" name="executionExecutorType" value="none" class="form-radio" ${!data.executionExecutorType || data.executionExecutorType === 'none' ? 'checked' : ''} disabled><span class="mr-1 ml-1">فعالیت ندارم</span></label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="legalExecutorFields" class="mt-8 space-y-6 hidden bg-slate-100 p-5 rounded-lg border">
+                         <h3 class="text-md font-semibold">اطلاعات شرکت حقوقی</h3>
+                         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                            <div>
+                                <label for="companyName" class="block text-sm font-medium text-slate-700 mb-1">نام شرکت حقوقی</label>
+                                <input type="text" id="companyName" name="companyName" value="${data.companyName || ''}" disabled>
+                            </div>
+                            <div>
+                                <label for="companyRegNumber" class="block text-sm font-medium text-slate-700 mb-1">شماره ثبت شرکت</label>
+                                <input type="text" id="companyRegNumber" name="companyRegNumber" value="${data.companyRegNumber || ''}" disabled>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">آدرس دفتر شرکت</label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                                <textarea id="companyOfficeAddress" name="companyOfficeAddress" rows="4" class="min-h-[220px]" disabled>${data.companyOfficeAddress || ''}</textarea>
+                                <div id="companyOfficeMap" class="map-container min-h-[220px]"></div>
+                                <input type="hidden" id="companyOfficeMapLat" name="companyOfficeMapLat" value="${data.companyOfficeMapLat || ''}">
+                                <input type="hidden" id="companyOfficeMapLng" name="companyOfficeMapLng" value="${data.companyOfficeMapLng || ''}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="individualExecutorFieldsContainer" class="hidden mt-6">
+                        <div class="flex items-center p-3 bg-slate-100 rounded-lg border">
+                            <input type="checkbox" id="isAssistantExecutor" name="isAssistantExecutor" class="h-4 w-4" ${data.isAssistantExecutor ? 'checked' : ''} disabled>
+                            <label for="isAssistantExecutor" class="ml-2 mr-2 block text-sm text-slate-700">فقط کمک مجری هستم</label>
+                        </div>
+                        <div class="flex items-center mt-4">
+                            <input type="checkbox" id="engineerHasOfficeInfo" name="engineerHasOfficeInfo" class="h-4 w-4" ${data.engineerHasOfficeInfo ? 'checked' : ''} disabled>
+                            <label for="engineerHasOfficeInfo" class="ml-2 mr-2 block text-sm text-slate-700">دفتر کار دارم</label>
+                        </div>
+                        <div id="engineerOfficeInfoFields" class="hidden space-y-6 bg-slate-100 p-5 rounded-lg border mt-4">
+                             <h3 class="text-md font-semibold">اطلاعات دفتر کار</h3>
+                             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                                <div>
+                                    <label for="officeName" class="block text-sm font-medium text-slate-700 mb-1">نام دفتر کار</label>
+                                    <input type="text" id="officeName" name="officeName" value="${data.officeName || ''}" disabled>
+                                </div>
+                                <div>
+                                    <label for="officePhone" class="block text-sm font-medium text-slate-700 mb-1">تلفن دفتر کار</label>
+                                    <input type="tel" id="officePhone" name="officePhone" value="${data.officePhone || ''}" disabled>
+                                </div>
+                            </div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">آدرس دفتر کار</label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                                <textarea id="officeAddress" name="officeAddress" rows="4" class="min-h-[220px]" disabled>${data.officeAddress || ''}</textarea>
+                                <div id="officeMap" class="map-container min-h-[220px]"></div>
+                                <input type="hidden" id="officeMapLat" name="officeMapLat" value="${data.officeMapLat || ''}">
+                                <input type="hidden" id="officeMapLng" name="officeMapLng" value="${data.officeMapLng || ''}">
+                            </div>
                         </div>
                     </div>
                 `;
@@ -589,10 +696,9 @@
 
             let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">';
             
-            // National ID
             html += `<div>
                         <h4 class="font-semibold mb-2">تصویر کارت ملی</h4>
-                        <a href="${data[nationalIdKey].fileUrl}" target="_blank" class="file-preview-link">
+                        <a href="${data[nationalIdKey].fileUrl || '#'}" target="_blank" class="file-preview-link">
                             <div class="file-preview-container">
                                 <img src="${data[nationalIdKey].fileUrl}" onerror="this.parentElement.innerHTML = '<i class=\\'fas fa-image text-slate-400\\'></i><p>نمایش ممکن نیست</p>';">
                             </div>
@@ -602,7 +708,7 @@
             if (role === 'engineer') {
                 html += `<div>
                             <h4 class="font-semibold mb-2">پروانه اشتغال (PDF)</h4>
-                            <a href="${data[workPermitKey].fileUrl}" target="_blank" class="file-preview-link">
+                            <a href="${data[workPermitKey].fileUrl || '#'}" target="_blank" class="file-preview-link">
                                 <div class="file-preview-container">
                                     <i class="fas fa-file-pdf"></i>
                                     <p>مشاهده فایل</p>
@@ -614,7 +720,7 @@
             if (role === 'employer') {
                  html += `<div>
                             <h4 class="font-semibold mb-2">رزومه (اختیاری)</h4>
-                             <a href="${data[resumeKey].fileUrl}" target="_blank" class="file-preview-link">
+                             <a href="${data[resumeKey].fileUrl || '#'}" target="_blank" class="file-preview-link">
                                 <div class="file-preview-container">
                                     <i class="fas fa-file-alt"></i>
                                     <p>${data[resumeKey].fileUrl ? 'مشاهده فایل' : 'ارسال نشده'}</p>
@@ -627,55 +733,46 @@
             return html;
         }
 
-
-        /**
-         * Attaches event listeners to section headers and buttons.
-         */
         function attachSectionEventListeners() {
             document.querySelectorAll('.section-header').forEach(header => {
                 header.addEventListener('click', (e) => {
-                    // Don't toggle if the edit button was clicked
-                    if (e.target.closest('button[data-action="edit"]')) {
-                        return;
-                    }
+                    if (e.target.closest('button[data-action="edit"]')) return;
 
                     const content = header.nextElementSibling;
                     header.classList.toggle('open');
                     content.style.display = content.style.display === 'block' ? 'none' : 'block';
                     
-                    // Initialize map if section is opened and contains a map
                     if (content.style.display === 'block') {
-                        const mapDiv = content.querySelector('.map-container');
-                        if (mapDiv && !mapDiv._leaflet_id) {
-                            const latInput = content.querySelector('input[name*="Lat"]');
-                            const lngInput = content.querySelector('input[name*="Lng"]');
-                            const lat = parseFloat(latInput.value) || 35.7219; // Default to Tehran
-                            const lng = parseFloat(lngInput.value) || 51.3347;
-                            
-                            const map = L.map(mapDiv.id).setView([lat, lng], 13);
-                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-                            L.marker([lat, lng]).addTo(map);
-                        }
+                        content.querySelectorAll('.map-container').forEach(mapDiv => {
+                            if (mapDiv && !mapDiv._leaflet_id) {
+                                initializeMapForSection(mapDiv);
+                            }
+                        });
                     }
                 });
             });
 
-            document.querySelectorAll('button[data-action="edit"]').forEach(button => {
-                button.addEventListener('click', handleEditClick);
-            });
-            document.querySelectorAll('button[data-action="cancel"]').forEach(button => {
-                button.addEventListener('click', handleCancelClick);
-            });
-            document.querySelectorAll('button[data-action="save"]').forEach(button => {
-                button.addEventListener('click', handleSaveClick);
-            });
+            document.querySelectorAll('button[data-action="edit"]').forEach(button => button.addEventListener('click', handleEditClick));
+            document.querySelectorAll('button[data-action="cancel"]').forEach(button => button.addEventListener('click', handleCancelClick));
+            document.querySelectorAll('button[data-action="save"]').forEach(button => button.addEventListener('click', handleSaveClick));
+        }
+
+        function initializeMapForSection(mapDiv) {
+            const sectionContent = mapDiv.closest('.section-content');
+            const latInput = sectionContent.querySelector('input[name*="Lat"]');
+            const lngInput = sectionContent.querySelector('input[name*="Lng"]');
+            const lat = parseFloat(latInput.value) || 35.7219;
+            const lng = parseFloat(lngInput.value) || 51.3347;
+            
+            const map = L.map(mapDiv.id).setView([lat, lng], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            L.marker([lat, lng]).addTo(map);
         }
         
         function handleEditClick(e) {
             const sectionId = e.currentTarget.dataset.section;
             const sectionEl = document.getElementById(`section-${sectionId}`);
             
-            // Note: For 'documents', editing is not supported via this flow
             if (sectionId === 'documents') {
                 showMessageModal('برای ویرایش مدارک، لطفاً فایل جدید را از طریق دکمه‌های مربوطه بارگذاری کنید. (این قابلیت در نسخه بعدی اضافه خواهد شد)', 'info');
                 return;
@@ -685,21 +782,52 @@
             sectionEl.querySelector('.section-actions').classList.remove('hidden');
             e.currentTarget.classList.add('hidden');
             
-            // Initialize date pickers for this section if they exist
-            $(sectionEl).find(".jalali-datepicker-display").persianDatepicker({
-                 format: 'YYYY/MM/DD',
-                 altField: $(sectionEl).find('.jalali-datepicker-value'),
-                 altFormat: 'YYYY-MM-DD',
-                 observer: true,
-                 autoClose: true
+            $(sectionEl).find(".jalali-datepicker-display").each(function() {
+                if (!$(this).data('datepicker')) {
+                    $(this).persianDatepicker({
+                        format: 'YYYY/MM/DD',
+                        altField: $(this).next('.jalali-datepicker-value'),
+                        altFormat: 'YYYY-MM-DD',
+                        observer: true,
+                        autoClose: true
+                    });
+                }
             });
+
+            // Add dynamic visibility logic for professional section
+            if (sectionId === 'professional' && userData.role === 'engineer') {
+                updateProfessionalInfoVisibility(sectionEl); // Initial check
+                sectionEl.querySelectorAll('input[name$="ExecutorType"], input[name^="has"], #engineerHasOfficeInfo').forEach(el => {
+                    el.addEventListener('change', () => updateProfessionalInfoVisibility(sectionEl));
+                });
+            }
+            if (sectionId === 'professional' && userData.role === 'employer') {
+                 const checkbox = sectionEl.querySelector('#employerHasCompany');
+                 checkbox.addEventListener('change', () => {
+                     sectionEl.querySelector('#employerCompanyFields').classList.toggle('hidden', !checkbox.checked);
+                 });
+            }
+        }
+        
+        function updateProfessionalInfoVisibility(sectionEl) {
+            const designType = sectionEl.querySelector('input[name="designExecutorType"]:checked')?.value;
+            const supervisionType = sectionEl.querySelector('input[name="supervisionExecutorType"]:checked')?.value;
+            const executionType = sectionEl.querySelector('input[name="executionExecutorType"]:checked')?.value;
+        
+            const isAnyLegal = designType === 'legal' || supervisionType === 'legal' || executionType === 'legal';
+            const isAnyIndividual = designType === 'individual' || supervisionType === 'individual' || executionType === 'individual';
+            
+            sectionEl.querySelector('#legalExecutorFields')?.classList.toggle('hidden', !isAnyLegal);
+            sectionEl.querySelector('#individualExecutorFieldsContainer')?.classList.toggle('hidden', !isAnyIndividual);
+            
+            if (isAnyIndividual) {
+                const hasOffice = sectionEl.querySelector('#engineerHasOfficeInfo')?.checked;
+                sectionEl.querySelector('#engineerOfficeInfoFields')?.classList.toggle('hidden', !hasOffice);
+            }
         }
 
+
         function handleCancelClick(e) {
-            const sectionId = e.currentTarget.dataset.section;
-            const sectionEl = document.getElementById(`section-${sectionId}`);
-            
-            // Re-render the entire profile to reset changes
             renderProfile();
         }
 
@@ -710,21 +838,28 @@
             const dataToSave = {};
             sectionEl.querySelectorAll('input, select, textarea').forEach(el => {
                 if (el.name) {
-                    dataToSave[el.name] = el.value;
+                    if (el.type === 'checkbox') {
+                        dataToSave[el.name] = el.checked;
+                    } else if (el.type === 'radio') {
+                        if (el.checked) {
+                            dataToSave[el.name] = el.value;
+                        }
+                    } else {
+                        dataToSave[el.name] = el.value;
+                    }
                 }
             });
 
             await updateProfileSection(sectionId, dataToSave);
         }
         
-        // --- Cropper.js Logic ---
         profileImageInput.addEventListener('change', (e) => {
             const files = e.target.files;
             if (files && files.length > 0) {
                 const reader = new FileReader();
                 reader.onload = () => {
                     imageToCrop.src = reader.result;
-                    cropperModal.style.display = 'block';
+                    cropperModal.style.display = 'flex';
                     if (cropper) cropper.destroy();
                     cropper = new Cropper(imageToCrop, { aspectRatio: 1, viewMode: 1 });
                 };
@@ -742,8 +877,6 @@
             if (cropper) {
                 const canvas = cropper.getCroppedCanvas({ width: 512, height: 512 });
                 canvas.toBlob((blob) => {
-                    // NOTE: This part only updates the UI.
-                    // The actual file upload needs Google Script modification.
                     const imageUrl = URL.createObjectURL(blob);
                     sidebarProfileImage.src = imageUrl;
                     showMessageModal('عکس پروفایل در پیش‌نمایش به‌روز شد. برای ذخیره نهایی، قابلیت آپلود فایل باید در سرور (Google Script) فعال شود.', 'info');
@@ -753,7 +886,6 @@
             }
         });
 
-        // --- INITIALIZATION ---
         async function main() {
             const params = new URLSearchParams(window.location.search);
             const email = params.get('email');
@@ -765,7 +897,7 @@
 
             userData = await fetchUserProfile(email);
             if (userData) {
-                userData.email = email; // Make sure email is part of the state
+                userData.email = email;
                 renderProfile();
             }
             
