@@ -266,7 +266,8 @@
                 const result = JSON.parse(rawResponseText);
                 console.log('Server response object:', result); // For debugging
 
-                if (result.status === "success" && result.data && result.data.stepsData) {
+                // --- MODIFIED: Made the data check more robust ---
+                if (result.status === "success" && result.data && typeof result.data === 'object') {
                     originalUserData = result.data;
                     populateUserProfile(originalUserData);
                     populateDashboard(mockProjects);
@@ -345,19 +346,20 @@
             return card;
         }
 
+        // --- MODIFIED: Made data access safer with optional chaining ---
         function populateProfileView(userData) {
             profileViewContainer.innerHTML = '';
             const sections = {
-                personal: { title: 'مشخصات فردی', icon: 'fa-user', data: userData.stepsData.step1 },
-                contact: { title: 'اطلاعات تماس', icon: 'fa-address-card', data: userData.stepsData.step2 },
-                professional: { title: 'اطلاعات حرفه‌ای', icon: 'fa-briefcase', data: userData.stepsData.step3 },
-                documents: { title: 'مدارک بارگذاری شده', icon: 'fa-file-alt', data: userData.stepsData.step4 }
+                personal: { title: 'مشخصات فردی', icon: 'fa-user', data: userData.stepsData?.step1 },
+                contact: { title: 'اطلاعات تماس', icon: 'fa-address-card', data: userData.stepsData?.step2 },
+                professional: { title: 'اطلاعات حرفه‌ای', icon: 'fa-briefcase', data: userData.stepsData?.step3 },
+                documents: { title: 'مدارک بارگذاری شده', icon: 'fa-file-alt', data: userData.stepsData?.step4 }
             };
 
             for (const sectionKey in sections) {
                 const section = sections[sectionKey];
                 if (section.data && Object.keys(section.data).length > 0) {
-                     if (sectionKey === 'professional' && !userData.stepsData.step3?.licenseNumber && !userData.stepsData.step3?.employerCompanyName) continue;
+                     if (sectionKey === 'professional' && !userData.stepsData?.step3?.licenseNumber && !userData.stepsData?.step3?.employerCompanyName) continue;
                      profileViewContainer.appendChild(createAccordionItem(section, sectionKey, userData.role));
                 }
             }
@@ -602,9 +604,10 @@
             }, 5000);
         }
         
+        // --- MODIFIED: Made data access safer with optional chaining ---
         function initializeProfileMap() {
             const role = originalUserData.role;
-            const contactData = originalUserData.stepsData.step2;
+            const contactData = originalUserData.stepsData?.step2;
             if (!contactData) return;
 
             const prefix = role === 'engineer' ? 'engineer' : 'employer';
