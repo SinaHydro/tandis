@@ -85,8 +85,8 @@
             display: block;
         }
         .view-mode .form-input, .view-mode .form-select, .view-mode .form-textarea, .view-mode .form-radio, .view-mode .form-checkbox {
-            background-color: #f1f5f9;
-            border-color: transparent;
+            background-color: #f1f5f9 !important;
+            border-color: transparent !important;
             color: #475569;
             pointer-events: none;
         }
@@ -266,72 +266,46 @@
                 <div id="profileContent" class="hidden">
                     <!-- Engineer Profile View -->
                     <div id="engineerProfileView" class="hidden">
-                        <!-- Accordion 1: Personal and Contact Info -->
-                        <div class="accordion-item" data-section="personal">
+                        <!-- Step 1 Accordion -->
+                        <div class="accordion-item">
                             <div class="accordion-header">
-                                <div class="flex items-center gap-3"><i class="fas fa-user-circle text-sky-600 text-xl"></i><span>اطلاعات فردی و تماس</span></div>
+                                <div class="flex items-center gap-3"><i class="fas fa-user text-sky-600 text-xl"></i><span>مرحله ۱: مشخصات فردی</span></div>
                                 <div class="flex items-center gap-4">
                                    <button class="btn btn-secondary btn-sm edit-button"><i class="fas fa-pencil-alt"></i> ویرایش</button>
-                                   <div class="edit-mode-controls space-x-2 space-x-reverse">
-                                       <button class="btn btn-secondary btn-sm cancel-button">انصراف</button>
-                                       <button class="btn btn-success btn-sm save-button">ذخیره</button>
-                                   </div>
+                                   <div class="edit-mode-controls"><button class="btn btn-secondary btn-sm cancel-button">انصراف</button><button class="btn btn-success btn-sm save-button ml-2 mr-2">ذخیره</button></div>
                                    <i class="fas fa-chevron-down accordion-icon"></i>
                                 </div>
                             </div>
                             <div class="accordion-content">
-                                <form id="engineerPersonalForm" class="view-mode">
-                                    <!-- Step 1 Fields -->
-                                    <h3 class="font-bold text-lg mb-4 text-slate-700 border-b pb-2">مشخصات فردی</h3>
+                                <form id="engineerStep1Form" class="view-mode">
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
-                                        <div>
-                                            <label for="engineerFirstName" class="block text-sm font-medium text-slate-700 mb-1 required">نام</label>
-                                            <input type="text" id="engineerFirstName" name="engineerFirstName" required class="form-input mt-1 block w-full sm:text-sm">
-                                        </div>
-                                        <div>
-                                            <label for="engineerLastName" class="block text-sm font-medium text-slate-700 mb-1 required">نام خانوادگی</label>
-                                            <input type="text" id="engineerLastName" name="engineerLastName" required class="form-input mt-1 block w-full sm:text-sm">
-                                        </div>
-                                        <div>
-                                            <label for="engineerNationalId" class="block text-sm font-medium text-slate-700 mb-1 required">کدملی</label>
-                                            <input type="text" id="engineerNationalId" name="engineerNationalId" required class="form-input mt-1 block w-full sm:text-sm">
-                                        </div>
-                                        <div>
-                                            <label for="engineerDob" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ تولد</label>
-                                            <input type="text" id="engineerDob" required class="form-input mt-1 block w-full sm:text-sm jalali-datepicker-display" readonly>
-                                            <input type="hidden" name="engineerDob" class="jalali-datepicker-value">
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-slate-700 mb-1 required">جنسیت</label>
-                                            <select id="engineerGender" name="engineerGender" required class="form-select mt-1 block w-full sm:text-sm">
-                                                <option value="مرد">مرد</option>
-                                                <option value="زن">زن</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label for="engineerMobile" class="block text-sm font-medium text-slate-700 mb-1 required">تلفن موبایل</label>
-                                            <input type="tel" id="engineerMobile" name="engineerMobile" required class="form-input mt-1 block w-full sm:text-sm">
-                                        </div>
+                                        <div><label for="engineerFirstName" class="block text-sm font-medium text-slate-700 mb-1 required">نام</label><input type="text" id="engineerFirstName" name="engineerFirstName" required class="form-input mt-1 block w-full sm:text-sm"></div>
+                                        <div><label for="engineerLastName" class="block text-sm font-medium text-slate-700 mb-1 required">نام خانوادگی</label><input type="text" id="engineerLastName" name="engineerLastName" required class="form-input mt-1 block w-full sm:text-sm"></div>
+                                        <div><label for="engineerNationalId" class="block text-sm font-medium text-slate-700 mb-1 required">کدملی</label><input type="text" id="engineerNationalId" name="engineerNationalId" required class="form-input mt-1 block w-full sm:text-sm"></div>
+                                        <div><label for="engineerDob" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ تولد</label><input type="text" id="engineerDob" required class="form-input mt-1 block w-full sm:text-sm jalali-datepicker-display" readonly><input type="hidden" name="engineerDob" class="jalali-datepicker-value"></div>
+                                        <div><label class="block text-sm font-medium text-slate-700 mb-1 required">جنسیت</label><select id="engineerGender" name="engineerGender" required class="form-select mt-1 block w-full sm:text-sm"><option value="مرد">مرد</option><option value="زن">زن</option></select></div>
+                                        <div><label for="engineerMobile" class="block text-sm font-medium text-slate-700 mb-1 required">تلفن موبایل</label><input type="tel" id="engineerMobile" name="engineerMobile" required class="form-input mt-1 block w-full sm:text-sm"></div>
                                     </div>
-                                    <!-- Step 2 Fields -->
-                                    <h3 class="font-bold text-lg mt-10 mb-4 text-slate-700 border-b pb-2">اطلاعات تماس و سکونت</h3>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- Step 2 Accordion -->
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <div class="flex items-center gap-3"><i class="fas fa-map-marker-alt text-sky-600 text-xl"></i><span>مرحله ۲: اطلاعات تماس و سکونت</span></div>
+                                <div class="flex items-center gap-4">
+                                   <button class="btn btn-secondary btn-sm edit-button"><i class="fas fa-pencil-alt"></i> ویرایش</button>
+                                   <div class="edit-mode-controls"><button class="btn btn-secondary btn-sm cancel-button">انصراف</button><button class="btn btn-success btn-sm save-button ml-2 mr-2">ذخیره</button></div>
+                                   <i class="fas fa-chevron-down accordion-icon"></i>
+                                </div>
+                            </div>
+                            <div class="accordion-content">
+                                <form id="engineerStep2Form" class="view-mode">
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
-                                        <div>
-                                            <label for="engineerPhone" class="block text-sm font-medium text-slate-700 mb-1 required">شماره تلفن ثابت</label>
-                                            <input type="tel" id="engineerPhone" name="engineerPhone" required class="form-input mt-1 block w-full sm:text-sm">
-                                        </div>
-                                        <div>
-                                            <label for="engineerPostalCode" class="block text-sm font-medium text-slate-700 mb-1 required">کدپستی</label>
-                                            <input type="text" id="engineerPostalCode" name="engineerPostalCode" required class="form-input mt-1 block w-full sm:text-sm">
-                                        </div>
-                                        <div>
-                                            <label for="engineerProvince" class="block text-sm font-medium text-slate-700 mb-1 required">استان سکونت</label>
-                                            <select id="engineerProvince" name="engineerProvince" required class="form-select mt-1 block w-full sm:text-sm"></select>
-                                        </div>
-                                        <div>
-                                            <label for="engineerCity" class="block text-sm font-medium text-slate-700 mb-1">شهر سکونت</label>
-                                            <input type="text" id="engineerCity" name="engineerCity" class="form-input mt-1 block w-full sm:text-sm">
-                                        </div>
+                                        <div><label for="engineerPhone" class="block text-sm font-medium text-slate-700 mb-1 required">شماره تلفن ثابت</label><input type="tel" id="engineerPhone" name="engineerPhone" required class="form-input mt-1 block w-full sm:text-sm"></div>
+                                        <div><label for="engineerPostalCode" class="block text-sm font-medium text-slate-700 mb-1 required">کدپستی</label><input type="text" id="engineerPostalCode" name="engineerPostalCode" required class="form-input mt-1 block w-full sm:text-sm"></div>
+                                        <div><label for="engineerProvince" class="block text-sm font-medium text-slate-700 mb-1 required">استان سکونت</label><select id="engineerProvince" name="engineerProvince" required class="form-select mt-1 block w-full sm:text-sm"></select></div>
+                                        <div><label for="engineerCity" class="block text-sm font-medium text-slate-700 mb-1">شهر سکونت</label><input type="text" id="engineerCity" name="engineerCity" class="form-input mt-1 block w-full sm:text-sm"></div>
                                     </div>
                                     <div class="mt-8">
                                         <label class="block text-sm font-medium text-slate-700 mb-1">آدرس محل سکونت</label>
@@ -340,28 +314,23 @@
                                             <div id="engineerResidentialMap" class="map-container min-h-[220px]"></div>
                                         </div>
                                         <div id="engineerResidentialMapInfo" class="mt-2 p-3 text-xs map-info-display rounded-md"></div>
-                                        <input type="hidden" id="engineerResidentialLat" name="engineerResidentialLat">
-                                        <input type="hidden" id="engineerResidentialLng" name="engineerResidentialLng">
+                                        <input type="hidden" id="engineerResidentialLat" name="engineerResidentialLat"><input type="hidden" id="engineerResidentialLng" name="engineerResidentialLng">
                                     </div>
                                 </form>
                             </div>
                         </div>
-                        <!-- Accordion 2: Professional Info -->
-                        <div class="accordion-item" data-section="professional">
+                        <!-- Step 3 Accordion -->
+                        <div class="accordion-item">
                              <div class="accordion-header">
-                                <div class="flex items-center gap-3"><i class="fas fa-id-card text-sky-600 text-xl"></i><span>اطلاعات حرفه‌ای</span></div>
+                                <div class="flex items-center gap-3"><i class="fas fa-id-card text-sky-600 text-xl"></i><span>مرحله ۳: اطلاعات حرفه‌ای</span></div>
                                  <div class="flex items-center gap-4">
                                    <button class="btn btn-secondary btn-sm edit-button"><i class="fas fa-pencil-alt"></i> ویرایش</button>
-                                   <div class="edit-mode-controls space-x-2 space-x-reverse">
-                                       <button class="btn btn-secondary btn-sm cancel-button">انصراف</button>
-                                       <button class="btn btn-success btn-sm save-button">ذخیره</button>
-                                   </div>
+                                   <div class="edit-mode-controls"><button class="btn btn-secondary btn-sm cancel-button">انصراف</button><button class="btn btn-success btn-sm save-button ml-2 mr-2">ذخیره</button></div>
                                    <i class="fas fa-chevron-down accordion-icon"></i>
                                 </div>
                             </div>
                             <div class="accordion-content">
-                                <form id="engineerProfessionalForm" class="view-mode">
-                                    <!-- Step 3 Fields -->
+                                <form id="engineerStep3Form" class="view-mode">
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6">
                                         <div><label for="licenseFirstIssueDate" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ اولین صدور پروانه</label><input type="text" id="licenseFirstIssueDate" required class="form-input mt-1 block w-full sm:text-sm jalali-datepicker-display" readonly><input type="hidden" name="licenseFirstIssueDate" class="jalali-datepicker-value"></div>
                                         <div><label for="licenseStartDate" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ شروع اعتبار پروانه</label><input type="text" id="licenseStartDate" required class="form-input mt-1 block w-full sm:text-sm jalali-datepicker-display" readonly><input type="hidden" name="licenseStartDate" class="jalali-datepicker-value"></div>
@@ -404,22 +373,18 @@
                                 </form>
                             </div>
                         </div>
-                        <!-- Accordion 3: Documents -->
-                        <div class="accordion-item" data-section="documents">
+                        <!-- Step 4 Accordion -->
+                        <div class="accordion-item">
                              <div class="accordion-header">
-                                <div class="flex items-center gap-3"><i class="fas fa-file-alt text-sky-600 text-xl"></i><span>مدارک</span></div>
+                                <div class="flex items-center gap-3"><i class="fas fa-cloud-upload-alt text-sky-600 text-xl"></i><span>مرحله ۴: مدارک</span></div>
                                 <div class="flex items-center gap-4">
                                    <button class="btn btn-secondary btn-sm edit-button"><i class="fas fa-pencil-alt"></i> ویرایش</button>
-                                   <div class="edit-mode-controls space-x-2 space-x-reverse">
-                                       <button class="btn btn-secondary btn-sm cancel-button">انصراف</button>
-                                       <button class="btn btn-success btn-sm save-button">ذخیره</button>
-                                   </div>
+                                   <div class="edit-mode-controls"><button class="btn btn-secondary btn-sm cancel-button">انصراف</button><button class="btn btn-success btn-sm save-button ml-2 mr-2">ذخیره</button></div>
                                    <i class="fas fa-chevron-down accordion-icon"></i>
                                 </div>
                             </div>
                             <div class="accordion-content">
-                                 <form id="engineerDocumentsForm" class="view-mode">
-                                    <!-- Step 4 Fields -->
+                                 <form id="engineerStep4Form" class="view-mode">
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
                                         <div>
                                             <label for="workPermitPdf" class="block text-sm font-medium text-slate-700 mb-1 required">پی دی اف پروانه اشتغال بکار</label>
@@ -438,23 +403,18 @@
                     </div>
                     <!-- Employer Profile View -->
                     <div id="employerProfileView" class="hidden">
-                        <!-- Accordion 1: Personal and Contact Info -->
-                        <div class="accordion-item" data-section="personal">
+                        <!-- Step 1 Accordion -->
+                        <div class="accordion-item">
                             <div class="accordion-header">
-                                <div class="flex items-center gap-3"><i class="fas fa-user-tie text-sky-600 text-xl"></i><span>اطلاعات فردی و تماس</span></div>
+                                <div class="flex items-center gap-3"><i class="fas fa-user-tie text-sky-600 text-xl"></i><span>مرحله ۱: مشخصات فردی</span></div>
                                 <div class="flex items-center gap-4">
                                    <button class="btn btn-secondary btn-sm edit-button"><i class="fas fa-pencil-alt"></i> ویرایش</button>
-                                   <div class="edit-mode-controls space-x-2 space-x-reverse">
-                                       <button class="btn btn-secondary btn-sm cancel-button">انصراف</button>
-                                       <button class="btn btn-success btn-sm save-button">ذخیره</button>
-                                   </div>
+                                   <div class="edit-mode-controls"><button class="btn btn-secondary btn-sm cancel-button">انصراف</button><button class="btn btn-success btn-sm save-button ml-2 mr-2">ذخیره</button></div>
                                    <i class="fas fa-chevron-down accordion-icon"></i>
                                 </div>
                             </div>
                             <div class="accordion-content">
-                                <form id="employerPersonalForm" class="view-mode">
-                                    <!-- Step 1 Fields -->
-                                    <h3 class="font-bold text-lg mb-4 text-slate-700 border-b pb-2">مشخصات فردی</h3>
+                                <form id="employerStep1Form" class="view-mode">
                                      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
                                         <div><label for="employerFirstName" class="block text-sm font-medium text-slate-700 mb-1 required">نام</label><input type="text" id="employerFirstName" name="employerFirstName" required class="form-input mt-1 block w-full sm:text-sm"></div>
                                         <div><label for="employerLastName" class="block text-sm font-medium text-slate-700 mb-1 required">نام خانوادگی</label><input type="text" id="employerLastName" name="employerLastName" required class="form-input mt-1 block w-full sm:text-sm"></div>
@@ -463,8 +423,21 @@
                                         <div><label class="block text-sm font-medium text-slate-700 mb-1 required">جنسیت</label><select id="employerGender" name="employerGender" required class="form-select mt-1 block w-full sm:text-sm"><option value="مرد">مرد</option><option value="زن">زن</option></select></div>
                                         <div><label for="employerMobile" class="block text-sm font-medium text-slate-700 mb-1 required">تلفن موبایل</label><input type="tel" id="employerMobile" name="employerMobile" required class="form-input mt-1 block w-full sm:text-sm"></div>
                                     </div>
-                                    <!-- Step 2 Fields -->
-                                    <h3 class="font-bold text-lg mt-10 mb-4 text-slate-700 border-b pb-2">اطلاعات تماس و سکونت</h3>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- Step 2 Accordion -->
+                        <div class="accordion-item">
+                             <div class="accordion-header">
+                                <div class="flex items-center gap-3"><i class="fas fa-address-book text-sky-600 text-xl"></i><span>مرحله ۲: اطلاعات تماس و سکونت</span></div>
+                                <div class="flex items-center gap-4">
+                                   <button class="btn btn-secondary btn-sm edit-button"><i class="fas fa-pencil-alt"></i> ویرایش</button>
+                                   <div class="edit-mode-controls"><button class="btn btn-secondary btn-sm cancel-button">انصراف</button><button class="btn btn-success btn-sm save-button ml-2 mr-2">ذخیره</button></div>
+                                   <i class="fas fa-chevron-down accordion-icon"></i>
+                                </div>
+                            </div>
+                            <div class="accordion-content">
+                                <form id="employerStep2Form" class="view-mode">
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
                                         <div><label for="employerPhone" class="block text-sm font-medium text-slate-700 mb-1 required">شماره تماس</label><input type="tel" id="employerPhone" name="employerPhone" required class="form-input mt-1 block w-full sm:text-sm"></div>
                                         <div><label for="employerPostalCode" class="block text-sm font-medium text-slate-700 mb-1 required">کدپستی</label><input type="text" id="employerPostalCode" name="employerPostalCode" required class="form-input mt-1 block w-full sm:text-sm"></div>
@@ -483,22 +456,18 @@
                                 </form>
                             </div>
                         </div>
-                        <!-- Accordion 2: Company Info -->
-                        <div class="accordion-item" data-section="company">
+                        <!-- Step 3 Accordion -->
+                        <div class="accordion-item">
                             <div class="accordion-header">
-                                <div class="flex items-center gap-3"><i class="fas fa-building text-sky-600 text-xl"></i><span>اطلاعات شرکت</span></div>
+                                <div class="flex items-center gap-3"><i class="fas fa-building text-sky-600 text-xl"></i><span>مرحله ۳: اطلاعات شرکت</span></div>
                                 <div class="flex items-center gap-4">
                                    <button class="btn btn-secondary btn-sm edit-button"><i class="fas fa-pencil-alt"></i> ویرایش</button>
-                                   <div class="edit-mode-controls space-x-2 space-x-reverse">
-                                       <button class="btn btn-secondary btn-sm cancel-button">انصراف</button>
-                                       <button class="btn btn-success btn-sm save-button">ذخیره</button>
-                                   </div>
+                                   <div class="edit-mode-controls"><button class="btn btn-secondary btn-sm cancel-button">انصراف</button><button class="btn btn-success btn-sm save-button ml-2 mr-2">ذخیره</button></div>
                                    <i class="fas fa-chevron-down accordion-icon"></i>
                                 </div>
                             </div>
                             <div class="accordion-content">
-                                <form id="employerCompanyForm" class="view-mode">
-                                    <!-- Step 3 Fields -->
+                                <form id="employerStep3Form" class="view-mode">
                                      <div class="flex items-center mb-4"><input type="checkbox" id="employerHasCompany" name="employerHasCompany" class="form-checkbox h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500"><label for="employerHasCompany" class="ml-2 mr-2 block text-sm text-slate-700">شرکت دارم</label></div>
                                     <div id="employerCompanyFields" class="hidden space-y-6">
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
@@ -518,22 +487,18 @@
                                 </form>
                             </div>
                         </div>
-                        <!-- Accordion 3: Documents -->
-                        <div class="accordion-item" data-section="documents">
+                        <!-- Step 4 Accordion -->
+                        <div class="accordion-item">
                             <div class="accordion-header">
-                                <div class="flex items-center gap-3"><i class="fas fa-id-badge text-sky-600 text-xl"></i><span>مدارک</span></div>
+                                <div class="flex items-center gap-3"><i class="fas fa-id-badge text-sky-600 text-xl"></i><span>مرحله ۴: مدارک</span></div>
                                <div class="flex items-center gap-4">
                                    <button class="btn btn-secondary btn-sm edit-button"><i class="fas fa-pencil-alt"></i> ویرایش</button>
-                                   <div class="edit-mode-controls space-x-2 space-x-reverse">
-                                       <button class="btn btn-secondary btn-sm cancel-button">انصراف</button>
-                                       <button class="btn btn-success btn-sm save-button">ذخیره</button>
-                                   </div>
+                                   <div class="edit-mode-controls"><button class="btn btn-secondary btn-sm cancel-button">انصراف</button><button class="btn btn-success btn-sm save-button ml-2 mr-2">ذخیره</button></div>
                                    <i class="fas fa-chevron-down accordion-icon"></i>
                                 </div>
                             </div>
                             <div class="accordion-content">
-                                 <form id="employerDocumentsForm" class="view-mode">
-                                    <!-- Step 4 Fields -->
+                                 <form id="employerStep4Form" class="view-mode">
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
                                         <div>
                                             <label for="employerNationalIdCardImage" class="block text-sm font-medium text-slate-700 mb-1 required">تصویر کارت ملی</label>
@@ -707,6 +672,18 @@
             }
 
             profileContent.classList.remove('hidden');
+            
+            // Open the first accordion by default
+            const firstAccordionHeader = document.querySelector('.accordion-header');
+            if (firstAccordionHeader) {
+                firstAccordionHeader.classList.add('active');
+                const content = firstAccordionHeader.nextElementSibling;
+                content.style.display = 'block';
+                const mapContainer = content.querySelector('.map-container');
+                if (mapContainer && maps[mapContainer.id]) {
+                    setTimeout(() => maps[mapContainer.id].invalidateSize(), 10);
+                }
+            }
         }
         
         function populateEngineerForm(steps, files) {
@@ -770,13 +747,15 @@
             const s3 = steps.step3 || {};
             const s4 = steps.step4 || {};
 
-            // Step 1 & 2
+            // Step 1
             setInputValue('employerFirstName', s1.employerFirstName);
             setInputValue('employerLastName', s1.employerLastName);
             setInputValue('employerNationalId', s1.employerNationalId);
             setInputValue('employerDob', s1.employerDob, true);
             setInputValue('employerGender', s1.employerGender);
             setInputValue('employerMobile', s1.employerMobile);
+            
+            // Step 2
             setInputValue('employerPhone', s2.employerPhone);
             setInputValue('employerPostalCode', s2.employerPostalCode);
             setInputValue('employerProvince', s2.employerProvince);
@@ -927,11 +906,22 @@
                 header.addEventListener('click', event => {
                     if (event.target.closest('button')) return;
                     const content = header.nextElementSibling;
-                    header.classList.toggle('active');
-                    content.style.display = content.style.display === 'block' ? 'none' : 'block';
-                    const mapContainer = content.querySelector('.map-container');
-                    if (mapContainer && maps[mapContainer.id]) {
-                        setTimeout(() => maps[mapContainer.id].invalidateSize(), 10);
+                    const isActive = header.classList.contains('active');
+                    
+                    // Close all accordions
+                    document.querySelectorAll('.accordion-header').forEach(h => {
+                        h.classList.remove('active');
+                        h.nextElementSibling.style.display = 'none';
+                    });
+
+                    // Open the clicked one if it wasn't active
+                    if (!isActive) {
+                        header.classList.add('active');
+                        content.style.display = 'block';
+                        const mapContainer = content.querySelector('.map-container');
+                        if (mapContainer && maps[mapContainer.id]) {
+                            setTimeout(() => maps[mapContainer.id].invalidateSize(), 10);
+                        }
                     }
                 });
             });
