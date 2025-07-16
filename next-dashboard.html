@@ -44,15 +44,20 @@
         #slideshowContainer { position: relative; width: 100%; height: 200px; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         #slideshowContainer img { width: 100%; height: 100%; object-fit: cover; position: absolute; opacity: 0; transition: opacity 1s ease-in-out; }
         #slideshowContainer img.active { opacity: 1; }
-        #slideshowNav { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
-        .slide-nav-dot { width: 10px; height: 10px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.5); cursor: pointer; transition: background-color 0.3s ease; }
+        #slideshowNav { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 10; }
+        .slide-nav-dot { width: 10px; height: 10px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.5); cursor: pointer; transition: background-color 0.3s ease; border: 1px solid rgba(0,0,0,0.2); }
         .slide-nav-dot.active { background-color: white; }
-        .profile-field-group { margin-bottom: 1rem; }
+        
+        /* --- New Styles from Registration Form for Profile View --- */
+        .profile-view-grid { display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 1.5rem; gap-x: 1.5rem; }
+        @media (min-width: 768px) { .profile-view-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        .profile-field-group { margin-bottom: 0; }
         .profile-field-label { display: block; font-size: 0.875rem; font-weight: 500; color: #475569; margin-bottom: 0.25rem; }
-        .profile-field-value { display: block; width: 100%; background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 0.375rem; padding: 0.625rem 0.875rem; color: #1e293b; font-weight: 500; }
-        .edit-mode-input { width: 100%; background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.625rem 0.875rem; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
-        .edit-mode-input:focus { border-color: #0ea5e9; background-color: white; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2); outline: none; }
-        .map-container { height: 220px; border-radius: 0.5rem; border: 1px solid #cbd5e1; }
+        .profile-field-value { display: block; width: 100%; background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 0.375rem; padding: 0.625rem 0.875rem; color: #1e293b; font-weight: 500; min-height: 42px; line-height: 1.5; }
+        .profile-field-value a { color: #0ea5e9; hover:underline; }
+        .map-container { height: 220px; border-radius: 0.5rem; border: 1px solid #cbd5e1; z-index: 1; }
+        .map-info-display { background-color: #e0f2fe; border: 1px solid #bae6fd; color: #0c4a6e; padding: 0.75rem; border-radius: 0.375rem; margin-top: 0.5rem; font-size: 0.875rem; }
+        
         .content-view { display: none; }
         .content-view.active { display: block; }
         .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 48px; height: 48px; border-radius: 50%; border-left-color: #0ea5e9; animation: spin 1s ease infinite; }
@@ -87,7 +92,7 @@
         <aside id="mainNavSidebar" class="p-5">
             <div class="text-center mb-8">
                 <div id="profileImageContainer" class="relative w-32 h-32 mx-auto mb-3 group cursor-pointer">
-                    <img id="userProfileImage" src="" alt="عکس پروفایل" class="w-full h-full object-cover rounded-full border-4 border-white shadow-lg">
+                    <img id="userProfileImage" src="https://placehold.co/128x128/EBF4FF/2196F3?text=User" alt="عکس پروفایل" class="w-full h-full object-cover rounded-full border-4 border-white shadow-lg" onerror="this.onerror=null;this.src='https://placehold.co/128x128/EBF4FF/2196F3?text=Error';">
                     <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full">
                         <i class="fas fa-camera fa-lg"></i>
                         <span class="mr-2">تغییر عکس</span>
@@ -154,7 +159,10 @@
                 <p class="text-xs text-slate-500">پلتفرم ارتباطی مهندسان و کارفرمایان</p>
             </div>
             <div id="slideshowContainer">
-                 <div id="slideshowNav"></div>
+                 <!-- Images will be populated by JS -->
+            </div>
+            <div id="slideshowNav">
+                 <!-- Dots will be populated by JS -->
             </div>
             <div class="text-center p-4 bg-white rounded-lg shadow-sm">
                 <h4 class="font-semibold text-slate-700 mb-2">فرصت‌های ویژه</h4>
@@ -214,6 +222,7 @@
         let originalUserData = {}; 
         let slideshowInterval;
         let cropper;
+        let maps = {}; // To store initialized map instances
         
         const slideshowImages = [
             'https://images.unsplash.com/photo-1581092921462-6839b3b896fd?w=600&auto=format&fit=crop',
@@ -245,12 +254,13 @@
             }
 
             try {
+                // Fetching data with a 'func' parameter to specify the action on the server side
                 const response = await fetch(`${SCRIPT_URL}?func=getUserProfile&email=${encodeURIComponent(currentUserEmail)}`);
                 if (!response.ok) throw new Error(`خطای شبکه: ${response.statusText}`);
                 const result = await response.json();
 
-                if (result.success && result.data) {
-                    originalUserData = JSON.parse(JSON.stringify(result.data));
+                if (result.status === "success" && result.data) {
+                    originalUserData = result.data;
                     populateUserProfile(originalUserData);
                     populateDashboard(mockProjects);
                     populateProfileView(originalUserData);
@@ -266,21 +276,29 @@
                 console.error("Initialization failed:", error);
             }
         }
-
+        
+        // --- NEW: Improved Google Drive URL converter ---
         function convertGoogleDriveUrl(url) {
-            if (!url || !url.includes('drive.google.com')) return url;
-            const fileId = url.match(/d\/(.+?)\//);
-            if (fileId && fileId[1]) {
-                return `https://drive.google.com/uc?export=view&id=${fileId[1]}`;
+            if (!url || typeof url !== 'string' || !url.includes('drive.google.com')) return url;
+            // Regex to capture the file ID from various Google Drive URL formats
+            const fileIdMatch = url.match(/(?:d\/|id=)([-\w]{25,})/);
+            if (fileIdMatch && fileIdMatch[1]) {
+                // Returns a direct link for viewing the image
+                return `https://drive.google.com/uc?export=view&id=${fileIdMatch[1]}`;
             }
+            // Return original URL if no ID is found
             return url;
         }
 
         function populateUserProfile(data) {
-            const profilePicUrl = data.personal["عکس پروفایل"];
+            // Assuming the profile picture URL is in step1 data
+            const profilePicUrl = data.stepsData?.step1?.applicantImage?.fileUrl;
             userProfileImage.src = convertGoogleDriveUrl(profilePicUrl) || 'https://placehold.co/128x128/EBF4FF/2196F3?text=User';
-            userProfileName.textContent = `${data.personal["نام"] || ''} ${data.personal["نام خانوادگی"] || ''}`;
-            userProfileRole.textContent = data.role || '';
+            
+            const firstName = data.stepsData?.step1?.engineerFirstName || data.stepsData?.step1?.employerFirstName || '';
+            const lastName = data.stepsData?.step1?.engineerLastName || data.stepsData?.step1?.employerLastName || '';
+            userProfileName.textContent = `${firstName} ${lastName}`;
+            userProfileRole.textContent = data.role === 'engineer' ? 'مهندس' : 'کارفرما';
         }
 
         function populateDashboard(projects) {
@@ -324,35 +342,26 @@
 
         function populateProfileView(userData) {
             profileViewContainer.innerHTML = '';
-            const { role, ...profileSections } = userData;
-            for (const sectionKey in profileSections) {
-                const sectionInfo = getPersianSectionInfo(sectionKey);
-                const sectionData = profileSections[sectionKey];
-                if (sectionData && Object.keys(sectionData).length > 0) {
-                     profileViewContainer.appendChild(createAccordionItem(sectionInfo, sectionKey, sectionData, userData.role));
+            const sections = {
+                personal: { title: 'مشخصات فردی', icon: 'fa-user', data: userData.stepsData.step1 },
+                contact: { title: 'اطلاعات تماس', icon: 'fa-address-card', data: userData.stepsData.step2 },
+                professional: { title: 'اطلاعات حرفه‌ای', icon: 'fa-briefcase', data: userData.stepsData.step3 },
+                documents: { title: 'مدارک بارگذاری شده', icon: 'fa-file-alt', data: userData.stepsData.step4 }
+            };
+
+            for (const sectionKey in sections) {
+                const section = sections[sectionKey];
+                if (section.data && Object.keys(section.data).length > 0) {
+                     if (sectionKey === 'professional' && !userData.stepsData.step3?.licenseNumber && !userData.stepsData.step3?.employerCompanyName) continue;
+                     profileViewContainer.appendChild(createAccordionItem(section, sectionKey, userData.role));
                 }
             }
         }
         
-        function getPersianSectionInfo(key) {
-            const titles = { 
-                personal: { title: 'مشخصات فردی', icon: 'fa-user' },
-                contact: { title: 'اطلاعات تماس', icon: 'fa-address-card' },
-                professional: { title: 'اطلاعات حرفه‌ای', icon: 'fa-briefcase' },
-                documents: { title: 'مدارک بارگذاری شده', icon: 'fa-file-alt' }
-            };
-            return titles[key] || { title: key, icon: 'fa-info-circle' };
-        }
-
-        function createAccordionItem(sectionInfo, key, data, userRole) {
+        function createAccordionItem(sectionInfo, key, userRole) {
             const item = document.createElement('div');
             item.className = 'accordion-item';
             item.dataset.sectionKey = key;
-            const isEditable = key !== 'documents';
-
-            const editButtonHtml = isEditable 
-                ? `<button data-action="edit" class="text-sm font-semibold text-sky-600 hover:text-sky-800 mr-4"><i class="fas fa-pencil-alt ml-2"></i>ویرایش</button>` 
-                : '';
 
             item.innerHTML = `
                 <div class="accordion-header">
@@ -361,7 +370,6 @@
                         <span class="font-bold text-slate-700">${sectionInfo.title}</span>
                     </div>
                     <div class="flex items-center">
-                        ${editButtonHtml}
                         <i class="fas fa-chevron-down accordion-icon"></i>
                     </div>
                 </div>
@@ -369,205 +377,173 @@
                     <div class="data-container">
                         <!-- Content is generated dynamically -->
                     </div>
-                    ${isEditable ? `
-                    <div class="edit-buttons-container hidden mt-4 text-left">
-                        <button data-action="cancel" class="py-2 px-4 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors text-sm font-bold">انصراف</button>
-                        <button data-action="save" class="py-2 px-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-bold mr-2">ذخیره تغییرات</button>
-                    </div>` : ''}
                 </div>`;
             
             const dataContainer = item.querySelector('.data-container');
-            if (key === 'professional') {
-                dataContainer.innerHTML = createProfessionalProfileView(data, userRole);
-            } else {
-                dataContainer.classList.add('grid', 'grid-cols-1', 'md:grid-cols-2', 'gap-x-6');
-                dataContainer.innerHTML = Object.entries(data)
-                    .filter(([label]) => label !== "عکس پروفایل")
-                    .map(([label, value]) => createProfileField(label, value, data)).join('');
+            
+            // --- REVISED: Generate profile view based on role and section ---
+            switch(key) {
+                case 'personal':
+                    dataContainer.innerHTML = createPersonalProfileView(sectionInfo.data, userRole);
+                    break;
+                case 'contact':
+                    dataContainer.innerHTML = createContactProfileView(sectionInfo.data, userRole);
+                    break;
+                case 'professional':
+                    dataContainer.innerHTML = createProfessionalProfileView(sectionInfo.data, userRole);
+                    break;
+                case 'documents':
+                    dataContainer.innerHTML = createDocumentsProfileView(sectionInfo.data, userRole);
+                    break;
             }
 
             return item;
         }
+        
+        // --- NEW: Functions to create specific profile views ---
+        function createFieldHtml(label, value) {
+            return `
+                <div>
+                    <label class="profile-field-label">${label}</label>
+                    <div class="profile-field-value">${value || '---'}</div>
+                </div>
+            `;
+        }
+        
+        function createPersonalProfileView(data, role) {
+            const prefix = role === 'engineer' ? 'engineer' : 'employer';
+            return `
+                <div class="profile-view-grid">
+                    ${createFieldHtml('نام', data[`${prefix}FirstName`])}
+                    ${createFieldHtml('نام خانوادگی', data[`${prefix}LastName`])}
+                    ${createFieldHtml('کدملی', data[`${prefix}NationalId`])}
+                    ${createFieldHtml('تاریخ تولد', data[`${prefix}Dob`])}
+                    ${createFieldHtml('جنسیت', data[`${prefix}Gender`])}
+                    ${createFieldHtml('تلفن موبایل', data[`${prefix}Mobile`])}
+                </div>
+            `;
+        }
+        
+        function createContactProfileView(data, role) {
+            const prefix = role === 'engineer' ? 'engineer' : 'employer';
+            const addressKey = prefix === 'engineer' ? 'engineerResidentialAddress' : 'employerAddress';
+            const mapId = `map-${addressKey}`;
 
-        function createProfileField(label, value, sectionData) {
-            let fieldHtml = '';
-            const isAddressField = label.toLowerCase().includes('آدرس');
-            
-            if (isAddressField) {
-                 const mapId = `map-${label.replace(/[\s/()]/g, '-')}`;
-                 const latKey = Object.keys(sectionData).find(k => k.toLowerCase().includes('lat')) || '';
-                 const lngKey = Object.keys(sectionData).find(k => k.toLowerCase().includes('lng')) || '';
-                 fieldHtml = `
-                    <div class="profile-field-group md:col-span-2">
-                        <label class="profile-field-label">${label}</label>
-                        <div class="profile-field-value">${value || '---'}</div>
-                        <div id="${mapId}" class="map-container mt-2" data-lat-key="${latKey}" data-lng-key="${lngKey}"></div>
+            return `
+                <div class="profile-view-grid">
+                    ${createFieldHtml('شماره تلفن ثابت', data[`${prefix}Phone`])}
+                    ${createFieldHtml('کدپستی', data[`${prefix}PostalCode`])}
+                    ${createFieldHtml('استان سکونت', data[`${prefix}Province`])}
+                    ${createFieldHtml('شهر سکونت', data[`${prefix}City`])}
+                </div>
+                <div class="mt-6">
+                    <label class="profile-field-label">آدرس محل سکونت</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                        <textarea class="profile-field-value min-h-[220px]" readonly>${data[addressKey] || '---'}</textarea>
+                        <div id="${mapId}" class="map-container min-h-[220px]"></div>
                     </div>
-                 `;
-            } else if (label.toLowerCase().includes('پروانه') || label.toLowerCase().includes('کارت ملی') || label.toLowerCase().includes('رزومه')) {
-                 fieldHtml = `
-                    <div class="profile-field-group">
-                        <label class="profile-field-label">${label}</label>
-                        <div class="profile-field-value">
-                            ${value ? `<a href="${value}" target="_blank" class="text-sky-600 hover:underline">مشاهده فایل</a>` : '---'}
-                        </div>
-                    </div>`;
-            } else {
-                fieldHtml = `
-                    <div class="profile-field-group" data-label="${label}">
-                        <label class="profile-field-label">${label}</label>
-                        <div class="profile-field-value">${value || '---'}</div>
-                    </div>`;
-            }
-            return fieldHtml;
+                    <div id="${mapId}-info" class="mt-2 p-3 text-xs map-info-display rounded-md leading-relaxed shadow-sm hidden"></div>
+                </div>
+            `;
         }
 
         function createProfessionalProfileView(data, userRole) {
-            if (userRole === 'مهندس') {
-                return `
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6 pt-4">
-                        <div class="profile-field-group" data-label="licenseFirstIssueDate"><label class="profile-field-label">تاریخ اولین صدور پروانه</label><div class="profile-field-value">${data.licenseFirstIssueDate || '---'}</div></div>
-                        <div class="profile-field-group" data-label="licenseStartDate"><label class="profile-field-label">تاریخ شروع اعتبار پروانه</label><div class="profile-field-value">${data.licenseStartDate || '---'}</div></div>
-                        <div class="profile-field-group" data-label="licenseValidity"><label class="profile-field-label">مدت اعتبار پروانه (سال)</label><div class="profile-field-value">${data.licenseValidity || '---'}</div></div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6 pt-6">
-                        <div class="profile-field-group" data-label="licenseNumber"><label class="profile-field-label">شماره پروانه</label><div class="profile-field-value">${data.licenseNumber || '---'}</div></div>
-                        <div class="profile-field-group" data-label="membershipNumber"><label class="profile-field-label">شماره عضویت</label><div class="profile-field-value">${data.membershipNumber || '---'}</div></div>
-                        <div class="profile-field-group" data-label="licenseActivityProvince"><label class="profile-field-label">استان فعالیت پروانه</label><div class="profile-field-value">${data.licenseActivityProvince || '---'}</div></div>
-                    </div>
-                    <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-5">
-                        <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
-                            <label class="text-sm font-medium text-slate-700">پروانه طراحی</label>
-                            <div class="profile-field-group" data-label="designLicenseGrade"><label class="profile-field-label text-xs">پایه</label><div class="profile-field-value">${data.designLicenseGrade || 'ندارد'}</div></div>
-                            <div class="profile-field-group" data-label="designExecutorType"><label class="profile-field-label text-xs">نوع صلاحیت</label><div class="profile-field-value">${data.designExecutorType || '---'}</div></div>
-                        </div>
-                        <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
-                            <label class="text-sm font-medium text-slate-700">پروانه نظارت</label>
-                            <div class="profile-field-group" data-label="supervisionLicenseGrade"><label class="profile-field-label text-xs">پایه</label><div class="profile-field-value">${data.supervisionLicenseGrade || 'ندارد'}</div></div>
-                            <div class="profile-field-group" data-label="supervisionExecutorType"><label class="profile-field-label text-xs">نوع صلاحیت</label><div class="profile-field-value">${data.supervisionExecutorType || '---'}</div></div>
-                        </div>
-                        <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
-                            <label class="text-sm font-medium text-slate-700">پروانه اجرا</label>
-                            <div class="profile-field-group" data-label="executionLicenseGrade"><label class="profile-field-label text-xs">پایه</label><div class="profile-field-value">${data.executionLicenseGrade || 'ندارد'}</div></div>
-                            <div class="profile-field-group" data-label="executionExecutorType"><label class="profile-field-label text-xs">نوع صلاحیت</label><div class="profile-field-value">${data.executionExecutorType || '---'}</div></div>
-                        </div>
-                    </div>
-                `;
-            } else { // Employer view
-                return `
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 pt-4">
-                        <div class="profile-field-group" data-label="employerCompanyName"><label class="profile-field-label">نام شرکت</label><div class="profile-field-value">${data.employerCompanyName || '---'}</div></div>
-                        <div class="profile-field-group" data-label="employerCompanyRegNumber"><label class="profile-field-label">شماره ثبت شرکت</label><div class="profile-field-value">${data.employerCompanyRegNumber || '---'}</div></div>
-                    </div>
-                    <div class="profile-field-group md:col-span-2 mt-4" data-label="employerCompanyAddress">
-                        <label class="profile-field-label">آدرس شرکت</label>
-                        <div class="profile-field-value">${data.employerCompanyAddress || '---'}</div>
-                        <div id="map-employerCompanyAddress" class="map-container mt-2"></div>
-                    </div>
-                `;
+            if (userRole !== 'engineer') {
+                // Employer professional view can be added here if needed
+                return '<p class="text-slate-500">کارفرمایان اطلاعات حرفه‌ای مجزا ندارند.</p>';
             }
+
+            const gradeMap = { '3': 'پایه ۳', '2': 'پایه ۲', '1': 'پایه ۱', 'arshad': 'پایه ارشد'};
+            const executorMap = { 'individual': 'حقیقی', 'legal': 'حقوقی', 'none': 'فعالیت ندارم' };
+
+            return `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6">
+                    ${createFieldHtml('تاریخ اولین صدور پروانه', data.licenseFirstIssueDate)}
+                    ${createFieldHtml('تاریخ شروع اعتبار پروانه', data.licenseStartDate)}
+                    ${createFieldHtml('مدت اعتبار پروانه (سال)', data.licenseValidity)}
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6 pt-6">
+                    ${createFieldHtml('شماره پروانه', data.licenseNumber)}
+                    ${createFieldHtml('شماره عضویت', data.membershipNumber)}
+                    ${createFieldHtml('استان فعالیت پروانه', data.licenseActivityProvince)}
+                </div>
+                <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-5">
+                    <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
+                        <label class="text-sm font-medium text-slate-700 mb-2">پروانه طراحی</label>
+                        ${createFieldHtml('پایه', gradeMap[data.designLicenseGrade] || 'ندارد')}
+                        ${createFieldHtml('نوع صلاحیت', executorMap[data.designExecutorType] || '---')}
+                    </div>
+                    <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
+                        <label class="text-sm font-medium text-slate-700 mb-2">پروانه نظارت</label>
+                        ${createFieldHtml('پایه', gradeMap[data.supervisionLicenseGrade] || 'ندارد')}
+                        ${createFieldHtml('نوع صلاحیت', executorMap[data.supervisionExecutorType] || '---')}
+                    </div>
+                    <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
+                        <label class="text-sm font-medium text-slate-700 mb-2">پروانه اجرا</label>
+                        ${createFieldHtml('پایه', gradeMap[data.executionLicenseGrade] || 'ندارد')}
+                        ${createFieldHtml('نوع صلاحیت', executorMap[data.executionExecutorType] || '---')}
+                    </div>
+                </div>
+            `;
         }
-        
+
+        function createDocumentsProfileView(data, role) {
+            const prefix = role === 'engineer' ? 'engineer' : 'employer';
+            let fields = {};
+            if (role === 'engineer') {
+                fields = {
+                    'پروانه اشتغال بکار': data.workPermitPdf?.fileUrl,
+                    'تصویر کارت ملی': data.nationalIdCardImageEngineer?.fileUrl
+                };
+            } else {
+                fields = {
+                    'تصویر کارت ملی': data.employerNationalIdCardImage?.fileUrl,
+                    'رزومه کاری': data.employerOtherDocs?.fileUrl
+                };
+            }
+
+            let html = '<div class="profile-view-grid">';
+            for(const label in fields) {
+                const url = fields[label];
+                const value = url ? `<a href="${url}" target="_blank" class="text-sky-600 hover:underline">مشاهده فایل</a>` : 'بارگذاری نشده';
+                html += createFieldHtml(label, value);
+            }
+            html += '</div>';
+            return html;
+        }
+
         function handleProfileViewClick(e) {
             const header = e.target.closest('.accordion-header');
-            const editButton = e.target.closest('button[data-action="edit"]');
-            const saveButton = e.target.closest('button[data-action="save"]');
-            const cancelButton = e.target.closest('button[data-action="cancel"]');
-
-            if (header && !editButton) toggleAccordion(header);
-            else if (editButton) toggleEditMode(editButton.closest('.accordion-item'), true);
-            else if (saveButton) saveProfileChanges(saveButton.closest('.accordion-item'));
-            else if (cancelButton) toggleEditMode(cancelButton.closest('.accordion-item'), false, true);
+            if (header) toggleAccordion(header);
         }
 
         function toggleAccordion(header) {
             const content = header.nextElementSibling;
-            header.classList.toggle('open');
-            content.classList.toggle('open');
-            if (header.classList.contains('open')) {
-                const sectionKey = header.closest('.accordion-item').dataset.sectionKey;
-                initializeProfileMaps(originalUserData, sectionKey);
-            }
-        }
-
-        function toggleEditMode(accordionItem, isEditing, shouldRevert = false) {
-            const dataContainer = accordionItem.querySelector('.data-container');
-            const buttonsContainer = accordionItem.querySelector('.edit-buttons-container');
-            const fieldGroups = dataContainer.querySelectorAll('.profile-field-group');
-            const sectionKey = accordionItem.dataset.sectionKey;
-
-            if (isEditing) {
-                fieldGroups.forEach(group => {
-                    const label = group.dataset.label;
-                    if (!label) return;
-                    const valueDiv = group.querySelector('.profile-field-value');
-                    const currentValue = originalUserData[sectionKey][label] || '';
-                    valueDiv.innerHTML = `<input type="text" class="edit-mode-input" data-original-value="${currentValue}" value="${currentValue}">`;
-                });
-                if(buttonsContainer) buttonsContainer.classList.remove('hidden');
-            } else { 
-                fieldGroups.forEach(group => {
-                    const label = group.dataset.label;
-                    if (!label) return;
-                    const valueDiv = group.querySelector('.profile-field-value');
-                    const input = valueDiv.querySelector('input');
-                    if (input) {
-                        valueDiv.textContent = shouldRevert ? input.dataset.originalValue : input.value;
-                    }
-                });
-                if(buttonsContainer) buttonsContainer.classList.add('hidden');
-            }
-        }
-        
-        async function saveProfileChanges(accordionItem) {
-            const sectionKey = accordionItem.dataset.sectionKey;
-            const fieldGroups = accordionItem.querySelectorAll('.profile-field-group');
-            const updatedSectionData = { ...originalUserData[sectionKey] };
-
-            fieldGroups.forEach(group => {
-                const label = group.dataset.label;
-                const input = group.querySelector('input');
-                if (input && label) {
-                    updatedSectionData[label] = input.value;
+            const isOpen = header.classList.contains('open');
+            
+            // Close all other accordions
+            document.querySelectorAll('.accordion-header.open').forEach(openHeader => {
+                if (openHeader !== header) {
+                    openHeader.classList.remove('open');
+                    openHeader.nextElementSibling.classList.remove('open');
                 }
             });
 
-            const saveButton = accordionItem.querySelector('button[data-action="save"]');
-            saveButton.disabled = true;
-            saveButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ذخیره...';
+            // Toggle current accordion
+            header.classList.toggle('open', !isOpen);
+            content.classList.toggle('open', !isOpen);
 
-            try {
-                const payload = {
-                    action: 'updateSection',
-                    email: currentUserEmail,
-                    sectionKey: sectionKey,
-                    sectionData: updatedSectionData
-                };
-
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    cache: 'no-cache',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-                if (result.status !== 'success') throw new Error(result.message);
-
-                originalUserData[sectionKey] = updatedSectionData;
-                toggleEditMode(accordionItem, false, false);
-                alert('اطلاعات با موفقیت ذخیره شد.');
-
-            } catch (error) {
-                alert(`خطا در ذخیره اطلاعات: ${error.message}`);
-                toggleEditMode(accordionItem, false, true);
-            } finally {
-                saveButton.disabled = false;
-                saveButton.innerHTML = 'ذخیره تغییرات';
+            // --- REVISED: Initialize map only when its accordion is opened ---
+            if (!isOpen) {
+                const sectionKey = header.closest('.accordion-item').dataset.sectionKey;
+                if (sectionKey === 'contact') {
+                    setTimeout(() => {
+                        initializeProfileMap();
+                    }, 100); // Small delay to allow CSS transition
+                }
             }
         }
-
+        
         profileViewContainer.addEventListener('click', handleProfileViewClick);
 
         function handleNavClick(e) {
@@ -582,6 +558,7 @@
         }
         mainNav.parentElement.addEventListener('click', handleNavClick);
 
+        // --- REVISED: Slideshow with navigation dots ---
         function initializeSlideshow() {
             slideshowContainer.innerHTML = ''; 
             slideshowNav.innerHTML = '';
@@ -595,8 +572,9 @@
                 const dot = document.createElement('div');
                 dot.className = 'slide-nav-dot';
                 dot.dataset.index = index;
-                dot.addEventListener('click', () => {
-                    showSlide(index);
+                dot.addEventListener('click', (e) => {
+                    const clickedIndex = parseInt(e.target.dataset.index);
+                    showSlide(clickedIndex);
                     resetSlideshowInterval();
                 });
                 slideshowNav.appendChild(dot);
@@ -609,6 +587,8 @@
             const images = slideshowContainer.querySelectorAll('img');
             const dots = slideshowNav.querySelectorAll('.slide-nav-dot');
             
+            if (!images.length || !dots.length) return;
+
             images.forEach(img => img.classList.remove('active'));
             dots.forEach(dot => dot.classList.remove('active'));
 
@@ -625,33 +605,52 @@
             }, 5000);
         }
         
-        function initializeProfileMaps(userData, sectionToInit) {
-            const addressFields = [
-                { key: 'contact', label: 'آدرس', latKey: 'engineerResidentialLat', lngKey: 'engineerResidentialLng'},
-                { key: 'professional', label: 'آدرس دفتر', latKey: 'officeMapLat', lngKey: 'officeMapLng'},
-                { key: 'professional', label: 'آدرس دفتر شرکت', latKey: 'companyOfficeMapLat', lngKey: 'companyOfficeMapLng'}
-            ];
+        // --- REVISED AND SIMPLIFIED: Map Initialization ---
+        function initializeProfileMap() {
+            const role = originalUserData.role;
+            const contactData = originalUserData.stepsData.step2;
+            if (!contactData) return;
 
-            addressFields.forEach(field => {
-                if (sectionToInit && field.key !== sectionToInit) return;
+            const prefix = role === 'engineer' ? 'engineer' : 'employer';
+            const latKey = `${prefix}ResidentialLat`;
+            const lngKey = `${prefix}ResidentialLng`;
+            const mapId = `map-${prefix === 'engineer' ? 'engineerResidentialAddress' : 'employerAddress'}`;
+            
+            const lat = parseFloat(contactData[latKey]);
+            const lng = parseFloat(contactData[lngKey]);
+            const mapContainer = document.getElementById(mapId);
+            
+            if (mapContainer && !maps[mapId] && !isNaN(lat) && !isNaN(lng)) {
+                try {
+                    const map = L.map(mapId).setView([lat, lng], 15);
+                    maps[mapId] = map; // Store instance
 
-                const sectionData = userData[field.key];
-                if (sectionData && sectionData[field.label]) {
-                    const lat = parseFloat(sectionData[field.latKey]);
-                    const lng = parseFloat(sectionData[field.lngKey]);
-                    const mapId = `map-${field.label.replace(/[\s/()]/g, '-')}`;
-                    const mapContainer = document.getElementById(mapId);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; OpenStreetMap contributors'
+                    }).addTo(map);
+
+                    L.marker([lat, lng], {
+                        icon: L.icon({
+                            iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+                            iconSize: [25, 41],
+                            iconAnchor: [12, 41]
+                        })
+                    }).addTo(map).bindPopup("موقعیت ذخیره شده شما").openPopup();
                     
-                    if (mapContainer && !mapContainer._leaflet_id && !isNaN(lat) && !isNaN(lng)) {
-                         const map = L.map(mapId).setView([lat, lng], 15);
-                         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-                         L.marker([lat, lng]).addTo(map);
-                    }
+                    // Invalidate size to fix rendering issues
+                    setTimeout(() => map.invalidateSize(), 10);
+
+                } catch(e) {
+                    console.error("Could not initialize map:", e);
+                    mapContainer.innerHTML = `<p class="text-red-500 p-4">خطا در بارگذاری نقشه.</p>`;
                 }
-            });
+            } else if (maps[mapId]) {
+                 maps[mapId].invalidateSize();
+            }
         }
         
-        // --- Cropper Logic ---
+        // --- Cropper Logic (unchanged) ---
         profileImageContainer.addEventListener('click', () => {
             profileImageInput.click();
         });
@@ -687,19 +686,14 @@
                 cropButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> در حال پردازش...';
                 const canvas = cropper.getCroppedCanvas({ width: 512, height: 512, imageSmoothingQuality: 'high' });
                 canvas.toBlob((blob) => {
-                    // Here you would upload the blob to your server/Google Script
-                    // For now, we'll just display it locally
                     const imageUrl = URL.createObjectURL(blob);
                     userProfileImage.src = imageUrl;
-                    
-                    // Reset UI
                     cropperModal.style.display = 'none';
                     if(cropper) cropper.destroy();
                     profileImageInput.value = '';
                     cropButton.disabled = false;
                     cropButton.innerHTML = 'برش و ذخیره';
                     alert("عکس پروفایل به صورت محلی تغییر کرد. برای ذخیره دائمی، باید این عکس به سرور ارسال شود.");
-
                 }, 'image/png');
             }
         });
