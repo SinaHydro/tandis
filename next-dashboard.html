@@ -641,9 +641,13 @@
         }
 
         function displayUserProfile() {
+            if (!currentUserData || !currentUserData.stepsData) {
+                showError("اطلاعات پروفایل ناقص است یا دریافت نشد.");
+                return;
+            }
             const role = currentUserData.role;
             const stepsData = currentUserData.stepsData;
-            const files = currentUserData.files;
+            const files = currentUserData.files || {};
 
             const engineerView = document.getElementById('engineerProfileView');
             const employerView = document.getElementById('employerProfileView');
@@ -779,11 +783,16 @@
             const el = document.getElementById(id);
             if (el && value !== undefined && value !== null) {
                 if (isDate && value) {
-                    const date = new persianDate(new Date(value));
-                    el.value = date.format('YYYY/MM/DD');
-                    const hiddenEl = el.nextElementSibling;
-                    if(hiddenEl && hiddenEl.classList.contains('jalali-datepicker-value')) {
-                        hiddenEl.value = value;
+                    try {
+                        const date = new persianDate(new Date(value));
+                        el.value = date.format('YYYY/MM/DD');
+                        const hiddenEl = el.nextElementSibling;
+                        if(hiddenEl && hiddenEl.classList.contains('jalali-datepicker-value')) {
+                            hiddenEl.value = value;
+                        }
+                    } catch(e) {
+                        console.error(`Error parsing date for element #${id}:`, value, e);
+                        el.value = ''; // Clear if invalid
                     }
                 } else {
                     el.value = value;
@@ -811,16 +820,14 @@
         }
 
         function setRadioValue(name, value) {
-            if (value) {
-                const radio = document.querySelector(`input[name="${name}"][value="${value}"]`);
-                if (radio) radio.checked = true;
-                else {
-                    const defaultRadio = document.querySelector(`input[name="${name}"][value="none"]`);
-                    if(defaultRadio) defaultRadio.checked = true;
-                }
+            const defaultValue = 'none';
+            const targetValue = value || defaultValue;
+            const radio = document.querySelector(`input[name="${name}"][value="${targetValue}"]`);
+            if (radio) {
+                radio.checked = true;
             } else {
-                 const defaultRadio = document.querySelector(`input[name="${name}"][value="none"]`);
-                 if(defaultRadio) defaultRadio.checked = true;
+                const defaultRadio = document.querySelector(`input[name="${name}"][value="${defaultValue}"]`);
+                if(defaultRadio) defaultRadio.checked = true;
             }
         }
 
@@ -850,26 +857,33 @@
             const mapDiv = document.getElementById(mapId);
             if (!mapDiv) return;
 
-            const initialCoords = (lat && lng) ? [parseFloat(lat), parseFloat(lng)] : [35.7219, 51.3347]; // Default to Tehran
+            const fLat = parseFloat(lat);
+            const fLng = parseFloat(lng);
+            const initialCoords = (!isNaN(fLat) && !isNaN(fLng)) ? [fLat, fLng] : [35.7219, 51.3347]; // Default to Tehran
             
             if (maps[mapId]) {
                 maps[mapId].setView(initialCoords, 15);
                 maps[mapId + '_marker'].setLatLng(initialCoords);
             } else {
-                const map = L.map(mapId).setView(initialCoords, 15);
-                maps[mapId] = map;
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-                const marker = L.marker(initialCoords, { draggable: true }).addTo(map);
-                maps[mapId + '_marker'] = marker;
-                
-                marker.on('dragend', () => {
-                    const ll = marker.getLatLng();
-                    document.getElementById(latId).value = ll.lat;
-                    document.getElementById(lngId).value = ll.lng;
-                });
+                try {
+                    const map = L.map(mapId).setView(initialCoords, 15);
+                    maps[mapId] = map;
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                    const marker = L.marker(initialCoords, { draggable: true }).addTo(map);
+                    maps[mapId + '_marker'] = marker;
+                    
+                    marker.on('dragend', () => {
+                        const ll = marker.getLatLng();
+                        document.getElementById(latId).value = ll.lat;
+                        document.getElementById(lngId).value = ll.lng;
+                    });
+                } catch(e) {
+                    console.error("Leaflet map initialization failed for mapId:", mapId, e);
+                    mapDiv.innerHTML = `<p class="text-red-500 p-4">خطا در بارگذاری نقشه.</p>`;
+                }
             }
-             document.getElementById(latId).value = initialCoords[0];
-             document.getElementById(lngId).value = initialCoords[1];
+            if (document.getElementById(latId)) document.getElementById(latId).value = initialCoords[0];
+            if (document.getElementById(lngId)) document.getElementById(lngId).value = initialCoords[1];
         }
 
         function updateProfessionalInfoVisibility() {
@@ -908,13 +922,11 @@
                     const content = header.nextElementSibling;
                     const isActive = header.classList.contains('active');
                     
-                    // Close all accordions
                     document.querySelectorAll('.accordion-header').forEach(h => {
                         h.classList.remove('active');
                         h.nextElementSibling.style.display = 'none';
                     });
 
-                    // Open the clicked one if it wasn't active
                     if (!isActive) {
                         header.classList.add('active');
                         content.style.display = 'block';
@@ -1016,7 +1028,7 @@
             for (i = 0; i < dots.length; i++) {
                 dots[i].className = dots[i].className.replace(" active", "");
             }
-            if(slides.length > 0) {
+            if(slides.length > 0 && dots.length > 0) {
                 slides[slideIndex-1].style.display = "block";
                 dots[slideIndex-1].className += " active";
             }
