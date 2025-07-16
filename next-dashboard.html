@@ -7,6 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <!-- Leaflet (for maps) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <style>
         body {
             font-family: 'Vazirmatn', 'Tahoma', sans-serif;
@@ -15,7 +18,7 @@
         .workstation-wrapper { display: flex; height: 100vh; max-height: 100vh; background-color: #ffffff; }
         #mainNavSidebar { width: 288px; background-color: #f1f5f9; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; transition: width 0.3s ease; }
         #mainContentArea { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
-        #pageContent { flex-grow: 1; overflow-y: auto; padding: 2rem; }
+        #pageContent { flex-grow: 1; overflow-y: auto; padding: 1.5rem 2rem; }
         #pageContent::-webkit-scrollbar { width: 8px; }
         #pageContent::-webkit-scrollbar-track { background: #f1f5f9; }
         #pageContent::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 8px; }
@@ -35,15 +38,18 @@
         .accordion-content.open { padding: 1.5rem; max-height: 2000px; transition: max-height 0.5s ease-in, padding 0.5s ease-in; }
         .accordion-icon { transition: transform 0.3s ease; }
         .accordion-header.open .accordion-icon { transform: rotate(180deg); }
-        .profile-data-row { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #f1f5f9; }
-        .profile-data-row:last-child { border-bottom: none; }
-        .profile-data-label { font-weight: 500; color: #64748b; }
-        .profile-data-value { color: #1e293b; font-weight: 500; }
         #slideshowContainer { position: relative; width: 100%; height: 200px; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         #slideshowContainer img { width: 100%; height: 100%; object-fit: cover; position: absolute; opacity: 0; transition: opacity 1s ease-in-out; }
         #slideshowContainer img.active { opacity: 1; }
-        .edit-mode-input { width: 100%; background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.5rem 0.75rem; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+        #slideshowNav { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
+        .slide-nav-dot { width: 10px; height: 10px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.5); cursor: pointer; transition: background-color 0.3s ease; }
+        .slide-nav-dot.active { background-color: white; }
+        .profile-field-group { margin-bottom: 1rem; }
+        .profile-field-label { display: block; font-size: 0.875rem; font-weight: 500; color: #475569; margin-bottom: 0.25rem; }
+        .profile-field-value { display: block; width: 100%; background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 0.375rem; padding: 0.625rem 0.875rem; color: #1e293b; font-weight: 500; }
+        .edit-mode-input { width: 100%; background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.625rem 0.875rem; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
         .edit-mode-input:focus { border-color: #0ea5e9; background-color: white; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2); outline: none; }
+        .map-container { height: 220px; border-radius: 0.5rem; border: 1px solid #cbd5e1; }
         .content-view { display: none; }
         .content-view.active { display: block; }
         .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 48px; height: 48px; border-radius: 50%; border-left-color: #0ea5e9; animation: spin 1s ease infinite; }
@@ -76,12 +82,12 @@
                 <h2 id="userProfileName" class="text-lg font-bold text-slate-800"></h2>
                 <p id="userProfileRole" class="text-sm font-medium text-sky-600"></p>
             </div>
-            <nav id="mainNav" class="flex flex-col space-y-2">
+            <nav id="mainNav" class="flex flex-col space-y-2 flex-grow">
                 <a href="#dashboard" data-view="dashboard" class="main-nav-link active"><i class="fas fa-tachometer-alt"></i><span>داشبورد</span></a>
                 <a href="#profile" data-view="profile" class="main-nav-link"><i class="fas fa-user-circle"></i><span>پروفایل من</span></a>
-                <a href="#settings" data-view="settings" class="main-nav-link"><i class="fas fa-cog"></i><span>تنظیمات</span></a>
             </nav>
-            <div class="mt-auto">
+            <div class="mt-auto border-t border-slate-300 pt-4 space-y-2">
+                <a href="#settings" data-view="settings" class="main-nav-link"><i class="fas fa-cog"></i><span>تنظیمات</span></a>
                 <a href="#" id="logoutButton" class="main-nav-link hover:bg-red-100 hover:text-red-700"><i class="fas fa-sign-out-alt"></i><span>خروج از حساب</span></a>
             </div>
         </aside>
@@ -133,7 +139,9 @@
                 <h3 class="text-lg font-bold text-slate-800">نظام تندیس</h3>
                 <p class="text-xs text-slate-500">پلتفرم ارتباطی مهندسان و کارفرمایان</p>
             </div>
-            <div id="slideshowContainer"></div>
+            <div id="slideshowContainer">
+                 <div id="slideshowNav"></div>
+            </div>
             <div class="text-center p-4 bg-white rounded-lg shadow-sm">
                 <h4 class="font-semibold text-slate-700 mb-2">فرصت‌های ویژه</h4>
                 <p class="text-sm text-slate-500">از آخرین آگهی‌ها و فرصت‌های شغلی در حوزه تخصصی خود مطلع شوید.</p>
@@ -164,10 +172,12 @@
         const newRequestsCountEl = document.getElementById('newRequestsCount');
         const alertsCountEl = document.getElementById('alertsCount');
         const slideshowContainer = document.getElementById('slideshowContainer');
+        const slideshowNav = document.getElementById('slideshowNav');
 
         // --- State ---
         let currentUserEmail = '';
-        let originalUserData = {}; // To store the initial data for reverting edits
+        let originalUserData = {}; 
+        let slideshowInterval;
         
         const slideshowImages = [
             'https://images.unsplash.com/photo-1581092921462-6839b3b896fd?w=600&auto=format&fit=crop',
@@ -177,7 +187,6 @@
         ];
         let currentSlideIndex = 0;
 
-        // --- MOCK PROJECT DATA (can be fetched separately later) ---
         const mockProjects = [
             { title: 'پروژه مسکونی برج باغ', location: 'زعفرانیه، تهران', status: 'active', progress: 75, client: 'شرکت ساختمانی آرمان' },
             { title: 'مجتمع تجاری آرتمیس', location: 'فرمانیه، تهران', status: 'active', progress: 40, client: 'هلدینگ تجاری پاسارگاد' },
@@ -188,10 +197,12 @@
         // --- Functions ---
 
         async function initializeWorkstation() {
-
+            if (SCRIPT_URL === 'YOUR_GOOGLE_SCRIPT_URL_HERE') {
+                loadingModalText.innerHTML = 'خطا: آدرس گوگل اسکریپت تنظیم نشده است.';
+                return;
+            }
             const urlParams = new URLSearchParams(window.location.search);
             currentUserEmail = urlParams.get('email');
-
             if (!currentUserEmail) {
                 loadingModalText.textContent = 'خطا: ایمیل کاربر مشخص نشده است. لطفاً دوباره وارد شوید.';
                 return;
@@ -199,15 +210,13 @@
 
             try {
                 const response = await fetch(`${SCRIPT_URL}?func=getUserProfile&email=${encodeURIComponent(currentUserEmail)}`);
-                if (!response.ok) {
-                    throw new Error(`خطای شبکه: ${response.statusText}`);
-                }
+                if (!response.ok) throw new Error(`خطای شبکه: ${response.statusText}`);
                 const result = await response.json();
 
                 if (result.success && result.data) {
-                    originalUserData = JSON.parse(JSON.stringify(result.data)); // Deep copy for reverting edits
+                    originalUserData = JSON.parse(JSON.stringify(result.data));
                     populateUserProfile(originalUserData);
-                    populateDashboard(mockProjects); // Using mock data for now
+                    populateDashboard(mockProjects);
                     populateProfileView(originalUserData);
                     initializeSlideshow();
 
@@ -216,7 +225,6 @@
                 } else {
                     throw new Error(result.message || 'خطا در دریافت اطلاعات پروفایل.');
                 }
-
             } catch (error) {
                 loadingModalText.textContent = `خطا در بارگذاری اطلاعات: ${error.message}`;
                 console.error("Initialization failed:", error);
@@ -272,20 +280,26 @@
             profileViewContainer.innerHTML = '';
             const { role, ...profileSections } = userData;
             for (const sectionKey in profileSections) {
-                const sectionTitle = getPersianSectionTitle(sectionKey);
+                const sectionInfo = getPersianSectionInfo(sectionKey);
                 const sectionData = profileSections[sectionKey];
                 if (sectionData && Object.keys(sectionData).length > 0) {
-                     profileViewContainer.appendChild(createAccordionItem(sectionTitle, sectionKey, sectionData));
+                     profileViewContainer.appendChild(createAccordionItem(sectionInfo, sectionKey, sectionData));
                 }
             }
+            initializeProfileMaps(userData);
         }
         
-        function getPersianSectionTitle(key) {
-            const titles = { personal: 'مشخصات فردی', contact: 'اطلاعات تماس', professional: 'اطلاعات حرفه‌ای', documents: 'مدارک بارگذاری شده' };
-            return titles[key] || key;
+        function getPersianSectionInfo(key) {
+            const titles = { 
+                personal: { title: 'مشخصات فردی', icon: 'fa-user' },
+                contact: { title: 'اطلاعات تماس', icon: 'fa-address-card' },
+                professional: { title: 'اطلاعات حرفه‌ای', icon: 'fa-briefcase' },
+                documents: { title: 'مدارک بارگذاری شده', icon: 'fa-file-alt' }
+            };
+            return titles[key] || { title: key, icon: 'fa-info-circle' };
         }
 
-        function createAccordionItem(title, key, data) {
+        function createAccordionItem(sectionInfo, key, data) {
             const item = document.createElement('div');
             item.className = 'accordion-item';
             item.dataset.sectionKey = key;
@@ -293,25 +307,66 @@
 
             item.innerHTML = `
                 <div class="accordion-header">
-                    <div class="flex items-center"><i class="fas fa-chevron-down accordion-icon mr-3"></i><span class="font-bold text-slate-700">${title}</span></div>
-                    ${isEditable ? `<button data-action="edit" class="text-sm font-semibold text-sky-600 hover:text-sky-800"><i class="fas fa-pencil-alt ml-2"></i>ویرایش</button>` : ''}
+                    <div class="flex items-center">
+                        <i class="fas ${sectionInfo.icon} text-slate-500 ml-3"></i>
+                        <span class="font-bold text-slate-700">${sectionInfo.title}</span>
+                        <i class="fas fa-chevron-down accordion-icon mr-auto"></i>
+                    </div>
                 </div>
                 <div class="accordion-content">
-                    <div class="data-container">${Object.entries(data).map(([label, value]) => createProfileRow(label, value)).join('')}</div>
+                    <div class="data-container grid grid-cols-1 md:grid-cols-2 gap-x-6">
+                        ${Object.entries(data)
+                            .filter(([label]) => label !== "عکس پروفایل") // Filter out the profile picture link
+                            .map(([label, value]) => createProfileField(label, value, data)).join('')}
+                    </div>
+                    ${isEditable ? `
                     <div class="edit-buttons-container hidden mt-4 text-left">
                         <button data-action="cancel" class="py-2 px-4 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors text-sm font-bold">انصراف</button>
                         <button data-action="save" class="py-2 px-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-bold mr-2">ذخیره تغییرات</button>
-                    </div>
+                    </div>` : ''}
                 </div>`;
+            
+            const header = item.querySelector('.accordion-header');
+            const editButton = document.createElement('button');
+            if(isEditable) {
+                editButton.dataset.action = "edit";
+                editButton.className = "text-sm font-semibold text-sky-600 hover:text-sky-800 mr-4";
+                editButton.innerHTML = `<i class="fas fa-pencil-alt ml-2"></i>ویرایش`;
+                header.insertBefore(editButton, header.querySelector('.accordion-icon'));
+            }
+
             return item;
         }
 
-        function createProfileRow(label, value) {
-            let displayValue = value || '---';
-            if (typeof value === 'string' && (value.includes('drive.google.com') || value.endsWith('.pdf'))) {
-                displayValue = `<a href="${value}" target="_blank" class="text-sky-600 hover:underline">مشاهده فایل</a>`;
+        function createProfileField(label, value, sectionData) {
+            let fieldHtml = '';
+            const isAddressField = label.toLowerCase().includes('آدرس');
+            
+            if (isAddressField) {
+                 const mapId = `map-${label.replace(/\s/g, '-')}`;
+                 fieldHtml = `
+                    <div class="profile-field-group md:col-span-2">
+                        <label class="profile-field-label">${label}</label>
+                        <div class="profile-field-value">${value || '---'}</div>
+                        <div id="${mapId}" class="map-container mt-2"></div>
+                    </div>
+                 `;
+            } else if (label.toLowerCase().includes('پروانه') || label.toLowerCase().includes('کارت ملی') || label.toLowerCase().includes('رزومه')) {
+                 fieldHtml = `
+                    <div class="profile-field-group">
+                        <label class="profile-field-label">${label}</label>
+                        <div class="profile-field-value">
+                            ${value ? `<a href="${value}" target="_blank" class="text-sky-600 hover:underline">مشاهده فایل</a>` : '---'}
+                        </div>
+                    </div>`;
+            } else {
+                fieldHtml = `
+                    <div class="profile-field-group" data-label="${label}">
+                        <label class="profile-field-label">${label}</label>
+                        <div class="profile-field-value">${value || '---'}</div>
+                    </div>`;
             }
-            return `<div class="profile-data-row" data-label="${label}"><span class="profile-data-label">${label}</span><span class="profile-data-value">${displayValue}</span></div>`;
+            return fieldHtml;
         }
         
         function handleProfileViewClick(e) {
@@ -323,7 +378,7 @@
             if (header && !editButton) toggleAccordion(header);
             else if (editButton) toggleEditMode(editButton.closest('.accordion-item'), true);
             else if (saveButton) saveProfileChanges(saveButton.closest('.accordion-item'));
-            else if (cancelButton) toggleEditMode(cancelButton.closest('.accordion-item'), false, true); // Revert changes
+            else if (cancelButton) toggleEditMode(cancelButton.closest('.accordion-item'), false, true);
         }
 
         function toggleAccordion(header) {
@@ -335,42 +390,41 @@
         function toggleEditMode(accordionItem, isEditing, shouldRevert = false) {
             const dataContainer = accordionItem.querySelector('.data-container');
             const buttonsContainer = accordionItem.querySelector('.edit-buttons-container');
-            const rows = dataContainer.querySelectorAll('.profile-data-row');
+            const fieldGroups = dataContainer.querySelectorAll('.profile-field-group');
             const sectionKey = accordionItem.dataset.sectionKey;
 
             if (isEditing) {
-                rows.forEach(row => {
-                    const label = row.dataset.label;
-                    const valueSpan = row.querySelector('.profile-data-value');
+                fieldGroups.forEach(group => {
+                    const label = group.dataset.label;
+                    if (!label) return; // Skip map containers or non-data fields
+                    const valueDiv = group.querySelector('.profile-field-value');
                     const currentValue = originalUserData[sectionKey][label] || '';
-                    if (label === "عکس پروفایل" || label === "کارت ملی" || label === "پروانه اشتغال" || label === "رزومه") {
-                         valueSpan.innerHTML = `<span class="text-slate-400 text-xs">قابل ویرایش نیست.</span>`;
-                    } else {
-                         valueSpan.innerHTML = `<input type="text" class="edit-mode-input" data-original-value="${currentValue}" value="${currentValue}">`;
-                    }
+                    valueDiv.innerHTML = `<input type="text" class="edit-mode-input" data-original-value="${currentValue}" value="${currentValue}">`;
                 });
-                buttonsContainer.classList.remove('hidden');
-            } else { // Exiting edit mode
-                rows.forEach(row => {
-                    const valueSpan = row.querySelector('.profile-data-value');
-                    const input = valueSpan.querySelector('input');
+                if(buttonsContainer) buttonsContainer.classList.remove('hidden');
+            } else { 
+                fieldGroups.forEach(group => {
+                    const label = group.dataset.label;
+                    if (!label) return;
+                    const valueDiv = group.querySelector('.profile-field-value');
+                    const input = valueDiv.querySelector('input');
                     if (input) {
-                        valueSpan.textContent = shouldRevert ? input.dataset.originalValue : input.value;
+                        valueDiv.textContent = shouldRevert ? input.dataset.originalValue : input.value;
                     }
                 });
-                buttonsContainer.classList.add('hidden');
+                if(buttonsContainer) buttonsContainer.classList.add('hidden');
             }
         }
         
         async function saveProfileChanges(accordionItem) {
             const sectionKey = accordionItem.dataset.sectionKey;
-            const rows = accordionItem.querySelectorAll('.profile-data-row');
-            const updatedSectionData = { ...originalUserData[sectionKey] }; // Start with original data
+            const fieldGroups = accordionItem.querySelectorAll('.profile-field-group');
+            const updatedSectionData = { ...originalUserData[sectionKey] };
 
-            rows.forEach(row => {
-                const label = row.dataset.label;
-                const input = row.querySelector('input');
-                if (input) {
+            fieldGroups.forEach(group => {
+                const label = group.dataset.label;
+                const input = group.querySelector('input');
+                if (input && label) {
                     updatedSectionData[label] = input.value;
                 }
             });
@@ -396,18 +450,15 @@
                 });
 
                 const result = await response.json();
-                if (result.status !== 'success') {
-                    throw new Error(result.message || 'خطا در ارتباط با سرور.');
-                }
+                if (result.status !== 'success') throw new Error(result.message);
 
-                originalUserData[sectionKey] = updatedSectionData; // Update state
-                toggleEditMode(accordionItem, false, false); // Exit edit mode
+                originalUserData[sectionKey] = updatedSectionData;
+                toggleEditMode(accordionItem, false, false);
                 alert('اطلاعات با موفقیت ذخیره شد.');
 
             } catch (error) {
                 alert(`خطا در ذخیره اطلاعات: ${error.message}`);
-                console.error('Save failed:', error);
-                toggleEditMode(accordionItem, false, true); // Revert UI on failure
+                toggleEditMode(accordionItem, false, true);
             } finally {
                 saveButton.disabled = false;
                 saveButton.innerHTML = 'ذخیره تغییرات';
@@ -421,28 +472,79 @@
             const navLink = e.target.closest('.main-nav-link');
             if (!navLink) return;
             const viewName = navLink.dataset.view;
-            mainNav.querySelector('.active').classList.remove('active');
+            document.querySelector('#mainNav .active, .mt-auto .active')?.classList.remove('active');
             navLink.classList.add('active');
             pageTitle.textContent = navLink.querySelector('span').textContent;
             contentViews.forEach(view => view.classList.toggle('active', view.id === `${viewName}-view`));
         }
-        mainNav.addEventListener('click', handleNavClick);
+        mainNav.parentElement.addEventListener('click', handleNavClick);
 
         function initializeSlideshow() {
+            slideshowContainer.innerHTML = ''; // Clear previous
+            slideshowNav.innerHTML = '';
+            
             slideshowImages.forEach((src, index) => {
                 const img = document.createElement('img');
                 img.src = src;
                 img.alt = `تبلیغ ${index + 1}`;
-                if (index === 0) img.classList.add('active');
                 slideshowContainer.appendChild(img);
+
+                const dot = document.createElement('div');
+                dot.className = 'slide-nav-dot';
+                dot.dataset.index = index;
+                dot.addEventListener('click', () => {
+                    showSlide(index);
+                    resetSlideshowInterval();
+                });
+                slideshowNav.appendChild(dot);
             });
-            setInterval(() => {
-                const images = slideshowContainer.querySelectorAll('img');
-                if (images.length === 0) return;
-                images[currentSlideIndex].classList.remove('active');
-                currentSlideIndex = (currentSlideIndex + 1) % images.length;
-                images[currentSlideIndex].classList.add('active');
+            showSlide(0);
+            resetSlideshowInterval();
+        }
+
+        function showSlide(index) {
+            const images = slideshowContainer.querySelectorAll('img');
+            const dots = slideshowNav.querySelectorAll('.slide-nav-dot');
+            
+            images.forEach(img => img.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+
+            currentSlideIndex = index;
+            if(images[currentSlideIndex]) images[currentSlideIndex].classList.add('active');
+            if(dots[currentSlideIndex]) dots[currentSlideIndex].classList.add('active');
+        }
+
+        function resetSlideshowInterval() {
+            clearInterval(slideshowInterval);
+            slideshowInterval = setInterval(() => {
+                const nextIndex = (currentSlideIndex + 1) % slideshowImages.length;
+                showSlide(nextIndex);
             }, 5000);
+        }
+        
+        function initializeProfileMaps(userData) {
+            const addressFields = [
+                { key: 'contact', label: 'آدرس', latKey: 'engineerResidentialLat', lngKey: 'engineerResidentialLng'},
+                { key: 'professional', label: 'آدرس دفتر', latKey: 'officeMapLat', lngKey: 'officeMapLng'},
+                { key: 'professional', label: 'آدرس دفتر شرکت', latKey: 'companyOfficeMapLat', lngKey: 'companyOfficeMapLng'}
+            ];
+
+            addressFields.forEach(field => {
+                const sectionData = userData[field.key];
+                if (sectionData && sectionData[field.label]) {
+                    const lat = parseFloat(sectionData[field.latKey]);
+                    const lng = parseFloat(sectionData[field.lngKey]);
+                    const mapId = `map-${field.label.replace(/\s/g, '-')}`;
+                    const mapContainer = document.getElementById(mapId);
+                    if (mapContainer && !isNaN(lat) && !isNaN(lng)) {
+                         setTimeout(() => {
+                            const map = L.map(mapId).setView([lat, lng], 15);
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                            L.marker([lat, lng]).addTo(map);
+                         }, 100);
+                    }
+                }
+            });
         }
 
         initializeWorkstation();
