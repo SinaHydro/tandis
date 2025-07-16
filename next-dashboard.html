@@ -48,15 +48,13 @@
         .slide-nav-dot { width: 10px; height: 10px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.5); cursor: pointer; transition: background-color 0.3s ease; border: 1px solid rgba(0,0,0,0.2); }
         .slide-nav-dot.active { background-color: white; }
         
-        /* --- New Styles from Registration Form for Profile View --- */
+        /* --- Styles from Registration Form for Profile View --- */
         .profile-view-grid { display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 1.5rem; gap-x: 1.5rem; }
         @media (min-width: 768px) { .profile-view-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        .profile-field-group { margin-bottom: 0; }
         .profile-field-label { display: block; font-size: 0.875rem; font-weight: 500; color: #475569; margin-bottom: 0.25rem; }
         .profile-field-value { display: block; width: 100%; background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 0.375rem; padding: 0.625rem 0.875rem; color: #1e293b; font-weight: 500; min-height: 42px; line-height: 1.5; }
         .profile-field-value a { color: #0ea5e9; hover:underline; }
         .map-container { height: 220px; border-radius: 0.5rem; border: 1px solid #cbd5e1; z-index: 1; }
-        .map-info-display { background-color: #e0f2fe; border: 1px solid #bae6fd; color: #0c4a6e; padding: 0.75rem; border-radius: 0.375rem; margin-top: 0.5rem; font-size: 0.875rem; }
         
         .content-view { display: none; }
         .content-view.active { display: block; }
@@ -190,7 +188,7 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         // --- CONFIGURATION ---
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwURZkNTH6OZ78JqPWXqOBeAdWsgrj2lhPn16Yn0jdJ537qCioVAsofUJrbV6qvvG0N/exec'; // <-- آدرس اسکریپت خود را اینجا قرار دهید
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwURZkNTH6OZ78JqPWXqOBeAdWsgrj2lhPn16Yn0jdJ537qCioVAsofUJrbV6qvvG0N/exec'; 
 
         // --- DOM Elements ---
         const loadingModal = document.getElementById('loadingModal');
@@ -222,7 +220,7 @@
         let originalUserData = {}; 
         let slideshowInterval;
         let cropper;
-        let maps = {}; // To store initialized map instances
+        let maps = {}; 
         
         const slideshowImages = [
             'https://images.unsplash.com/photo-1581092921462-6839b3b896fd?w=600&auto=format&fit=crop',
@@ -240,10 +238,8 @@
         ];
 
         // --- Functions ---
-
-        // --- REVISED: Improved error handling and debugging ---
         async function initializeWorkstation() {
-            if (SCRIPT_URL === 'YOUR_GOOGLE_SCRIPT_URL_HERE') {
+            if (SCRIPT_URL.includes('YOUR_GOOGLE_SCRIPT_URL_HERE')) {
                 loadingModalText.innerHTML = 'خطا: آدرس گوگل اسکریپت تنظیم نشده است.';
                 return;
             }
@@ -264,9 +260,8 @@
                 }
 
                 const result = JSON.parse(rawResponseText);
-                console.log('Server response object:', result); // For debugging
+                console.log('Server response object:', result);
 
-                // --- MODIFIED: Made the data check more robust ---
                 if (result.status === "success" && result.data && typeof result.data === 'object') {
                     originalUserData = result.data;
                     populateUserProfile(originalUserData);
@@ -282,7 +277,7 @@
             } catch (error) {
                 loadingModalText.textContent = `خطا در بارگذاری اطلاعات: ${error.message}`;
                 console.error("Initialization failed:", error);
-                console.error("Raw server response text:", rawResponseText); // Log raw response for debugging
+                console.error("Raw server response text:", rawResponseText);
             }
         }
         
@@ -295,9 +290,7 @@
             return url;
         }
 
-        // --- REVISED: Correct path for profile picture ---
         function populateUserProfile(data) {
-            // The profile picture URL is stored in the 'files' object from the saved data
             const profilePicUrl = data.files?.applicantImage?.fileUrl;
             userProfileImage.src = convertGoogleDriveUrl(profilePicUrl) || 'https://placehold.co/128x128/EBF4FF/2196F3?text=User';
             
@@ -346,7 +339,6 @@
             return card;
         }
 
-        // --- MODIFIED: Made data access safer with optional chaining ---
         function populateProfileView(userData) {
             profileViewContainer.innerHTML = '';
             const sections = {
@@ -447,14 +439,29 @@
                         <textarea class="profile-field-value min-h-[220px]" readonly>${data[addressKey] || '---'}</textarea>
                         <div id="${mapId}" class="map-container min-h-[220px]"></div>
                     </div>
-                    <div id="${mapId}-info" class="mt-2 p-3 text-xs map-info-display rounded-md leading-relaxed shadow-sm hidden"></div>
                 </div>
             `;
         }
 
         function createProfessionalProfileView(data, userRole) {
             if (userRole !== 'engineer') {
-                return '<p class="text-slate-500">کارفرمایان اطلاعات حرفه‌ای مجزا ندارند.</p>';
+                const companyData = originalUserData.stepsData?.step3 || {};
+                if (!companyData.employerCompanyName) {
+                    return '<p class="text-slate-500">اطلاعات شرکتی ثبت نشده است.</p>';
+                }
+                return `
+                    <div class="profile-view-grid">
+                        ${createFieldHtml('نام شرکت', companyData.employerCompanyName)}
+                        ${createFieldHtml('شماره ثبت شرکت', companyData.employerCompanyRegNumber)}
+                    </div>
+                     <div class="mt-6">
+                        <label class="profile-field-label">آدرس شرکت</label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                            <textarea class="profile-field-value min-h-[220px]" readonly>${companyData.employerCompanyAddress || '---'}</textarea>
+                            <div id="map-employerCompanyAddress" class="map-container min-h-[220px]"></div>
+                        </div>
+                    </div>
+                `;
             }
 
             const gradeMap = { '3': 'پایه ۳', '2': 'پایه ۲', '1': 'پایه ۱', 'arshad': 'پایه ارشد'};
@@ -495,13 +502,13 @@
             let fields = {};
             if (role === 'engineer') {
                 fields = {
-                    'پروانه اشتغال بکار': data.workPermitPdf?.fileUrl,
-                    'تصویر کارت ملی': data.nationalIdCardImageEngineer?.fileUrl
+                    'پروانه اشتغال بکار': originalUserData.files?.workPermitPdf?.fileUrl,
+                    'تصویر کارت ملی': originalUserData.files?.nationalIdCardImageEngineer?.fileUrl
                 };
             } else {
                 fields = {
-                    'تصویر کارت ملی': data.employerNationalIdCardImage?.fileUrl,
-                    'رزومه کاری': data.employerOtherDocs?.fileUrl
+                    'تصویر کارت ملی': originalUserData.files?.employerNationalIdCardImage?.fileUrl,
+                    'رزومه کاری': originalUserData.files?.employerOtherDocs?.fileUrl
                 };
             }
 
@@ -536,11 +543,9 @@
 
             if (!isOpen) {
                 const sectionKey = header.closest('.accordion-item').dataset.sectionKey;
-                if (sectionKey === 'contact') {
-                    setTimeout(() => {
-                        initializeProfileMap();
-                    }, 100); 
-                }
+                setTimeout(() => {
+                    initializeMapsForSection(sectionKey);
+                }, 100); 
             }
         }
         
@@ -604,21 +609,29 @@
             }, 5000);
         }
         
-        // --- MODIFIED: Made data access safer with optional chaining ---
-        function initializeProfileMap() {
-            const role = originalUserData.role;
-            const contactData = originalUserData.stepsData?.step2;
-            if (!contactData) return;
+        function initializeMapsForSection(sectionKey) {
+            if (sectionKey === 'contact') {
+                const role = originalUserData.role;
+                const contactData = originalUserData.stepsData?.step2;
+                if (!contactData) return;
+                const prefix = role === 'engineer' ? 'engineer' : 'employer';
+                const lat = parseFloat(contactData[`${prefix}ResidentialLat`]);
+                const lng = parseFloat(contactData[`${prefix}ResidentialLng`]);
+                const mapId = `map-${prefix}ResidentialAddress`;
+                initMap(mapId, lat, lng);
+            }
+             if (sectionKey === 'professional' && originalUserData.role === 'employer') {
+                const profData = originalUserData.stepsData?.step3;
+                if (!profData) return;
+                const lat = parseFloat(profData.employerCompanyAddressLat);
+                const lng = parseFloat(profData.employerCompanyAddressLng);
+                const mapId = 'map-employerCompanyAddress';
+                initMap(mapId, lat, lng);
+            }
+        }
 
-            const prefix = role === 'engineer' ? 'engineer' : 'employer';
-            const latKey = `${prefix}ResidentialLat`;
-            const lngKey = `${prefix}ResidentialLng`;
-            const mapId = `map-${prefix === 'engineer' ? 'engineerResidentialAddress' : 'employerAddress'}`;
-            
-            const lat = parseFloat(contactData[latKey]);
-            const lng = parseFloat(contactData[lngKey]);
+        function initMap(mapId, lat, lng) {
             const mapContainer = document.getElementById(mapId);
-            
             if (mapContainer && !maps[mapId] && !isNaN(lat) && !isNaN(lng)) {
                 try {
                     const map = L.map(mapId).setView([lat, lng], 15);
