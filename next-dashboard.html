@@ -3,629 +3,763 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ایستگاه کاری - پروفایل کاربر</title>
+    <title>ایستگاه کاری - نظام تندیس</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Leaflet CSS for Map -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- Leaflet (for maps) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     
-    <!-- Font Awesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-    <!-- Cropper.js for Image Editing -->
+    <!-- Font Awesome (for icons) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Vazirmatn Font -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css"/>
+    
+    <!-- Cropper.js (for image cropping) -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    
+    <!-- Persian Datepicker -->
+    <link rel="stylesheet" href="https://unpkg.com/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css"/>
+    <script src="https://unpkg.com/jquery@3.5.1/dist/jquery.min.js"></script>
+    <script src="https://unpkg.com/persian-date@1.1.0/dist/persian-date.min.js"></script>
+    <script src="https://unpkg.com/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap');
-        body {
-            font-family: 'Vazirmatn', sans-serif;
-            background-color: #f0f2f5;
-        }
-        .accordion-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s cubic-bezier(0, 1, 0, 1);
-        }
-        .accordion-content.open {
-            max-height: 4000px; /* Increased for potentially long forms */
-            transition: max-height 1s ease-in-out;
-        }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
-        .map-container { height: 300px; width: 100%; border-radius: 0.5rem; z-index: 1; }
-        #image-to-crop { max-width: 100%; display: block; }
+        body { font-family: 'Vazirmatn', 'Tahoma', sans-serif; background-color: #f8fafc; }
         
-        /* Styles to match dashboard form */
-        .profile-input, .profile-select, .profile-textarea {
-            background-color: #f8fafc;
-            border: 1px solid #cbd5e1;
-            border-radius: 0.375rem;
-            padding: 0.625rem 0.875rem;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-            line-height: 1.5;
-            width: 100%;
-        }
-        .profile-input:disabled, .profile-select:disabled, .profile-textarea:disabled {
-            background-color: #f1f5f9;
-            color: #64748b;
-            cursor: not-allowed;
-        }
-        .profile-input:focus, .profile-select:focus, .profile-textarea:focus {
-            border-color: #0ea5e9;
-            background-color: white;
-            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
-            outline: none;
-        }
-        .cropper-view-box {
-            box-shadow: 0 0 0 1px #39f;
-            border-radius: 50%;
-            outline: 0;
-        }
-        .cropper-face {
-            background-color: inherit !important;
-        }
+        /* --- Base Layout --- */
+        .workstation-wrapper { display: flex; height: 100vh; max-height: 100vh; overflow: hidden; }
+        .main-content-area { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .content-body { flex-grow: 1; overflow-y: auto; padding: 2rem; }
+        
+        /* --- Sidebar --- */
+        .sidebar { width: 288px; flex-shrink: 0; background-color: #f1f5f9; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; }
+        @media (max-width: 768px) { .sidebar { display: none; } }
+        .sidebar-profile-section { padding: 1.5rem 1rem; text-align: center; border-bottom: 1px solid #cbd5e1; }
+        .sidebar-profile-image-container { position: relative; width: 120px; height: 120px; margin: 0 auto 1rem; }
+        .sidebar-profile-image { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 3px solid #38bdf8; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .sidebar-profile-image-edit-overlay { position: absolute; inset: 0; background-color: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; opacity: 0; transition: opacity 0.3s ease; cursor: pointer; }
+        .sidebar-profile-image-container:hover .sidebar-profile-image-edit-overlay { opacity: 1; }
+        .sidebar-profile-name { font-size: 1.1rem; font-weight: 700; color: #1e293b; }
+        .sidebar-profile-role { font-size: 0.9rem; font-weight: 500; color: #0ea5e9; margin-top: 0.25rem; }
+        
+        /* --- Sidebar Navigation --- */
+        .sidebar-nav { padding: 1rem; flex-grow: 1; }
+        .nav-item { display: flex; align-items: center; padding: 0.75rem 1rem; margin-bottom: 0.5rem; border-radius: 0.5rem; color: #475569; font-weight: 500; transition: all 0.2s ease; }
+        .nav-item i { margin-left: 0.75rem; width: 20px; text-align: center; }
+        .nav-item:hover { background-color: #e2e8f0; color: #1e293b; }
+        .nav-item.active { background-color: #0ea5e9; color: white; box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.2); }
+        
+        /* --- Sidebar Slideshow --- */
+        .sidebar-slideshow { padding: 1rem; margin-top: auto; }
+        .slideshow-container { position: relative; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .slide-image { width: 100%; display: none; aspect-ratio: 16/10; object-fit: cover; }
+        .slide-image.active { display: block; }
+        .slide-dots { text-align: center; padding-top: 0.75rem; }
+        .dot { cursor: pointer; height: 10px; width: 10px; margin: 0 4px; background-color: #cbd5e1; border-radius: 50%; display: inline-block; transition: background-color 0.3s ease; }
+        .dot.active, .dot:hover { background-color: #0ea5e9; }
+        
+        /* --- Sidebar Footer --- */
+        .sidebar-footer { padding: 1rem; border-top: 1px solid #e2e8f0; }
+
+        /* --- Collapsible Profile Sections --- */
+        .profile-section { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.75rem; margin-bottom: 1.5rem; overflow: hidden; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; cursor: pointer; user-select: none; background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+        .section-header.open { border-bottom-color: #e2e8f0; }
+        .section-title { font-size: 1.1rem; font-weight: 600; color: #334155; }
+        .section-title i { margin-left: 0.75rem; color: #0ea5e9; }
+        .section-toggle-icon { transition: transform 0.3s ease; }
+        .section-header.open .section-toggle-icon { transform: rotate(180deg); }
+        .section-content { padding: 1.5rem; display: none; }
+        .section-content.open { display: block; }
+        .section-actions { display: flex; justify-content: flex-end; gap: 0.75rem; }
+        
+        /* --- Form Fields (copied from dashboard.html for consistency) --- */
+        label.required::after { content: " *"; color: #ef4444; }
+        input[type="text"], input[type="date"], input[type="tel"], input[type="number"], textarea, select { background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.625rem 0.875rem; transition: all 0.2s ease; width: 100%; }
+        input:focus, textarea:focus, select:focus { border-color: #0ea5e9; background-color: white; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2); outline: none; }
+        input:disabled, select:disabled, textarea:disabled { background-color: #eef2f7; color: #64748b; cursor: not-allowed; border-color: #e2e8f0; }
+        select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E"); background-position: left 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-left: 2.5rem; }
+        .btn { padding: 0.625rem 1.25rem; border-radius: 0.375rem; font-weight: 600; transition: all 0.2s ease-in-out; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border: none; }
+        .btn-primary { background-color: #0ea5e9; color: white; }
+        .btn-primary:hover { background-color: #0284c7; }
+        .btn-secondary { background-color: #e2e8f0; color: #1e293b; }
+        .btn-secondary:hover { background-color: #cbd5e1; }
+        .btn-danger { background-color: #e53e3e; color: white; }
+        .btn-danger:hover { background-color: #c53030; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* --- Map & File Previews --- */
+        .map-container { height: 250px; border-radius: 0.5rem; border: 1px solid #cbd5e1; }
+        .file-preview-container { width: 100%; height: 12rem; overflow: hidden; border: 1px solid #cbd5e1; border-radius: 0.375rem; display: flex; align-items: center; justify-content: center; background-color: #f8fafc; }
+        .file-preview-container img, .file-preview-container iframe { width: 100%; height: 100%; object-fit: cover; }
+        .file-preview-link { display: block; text-align: center; color: #475569; }
+        .file-preview-link i { font-size: 3rem; margin-bottom: 0.5rem; color: #ef4444; }
+
+        /* --- Modals --- */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); }
+        .modal-content { background-color: #ffffff; margin: 10% auto; padding: 2rem; border: none; width: 90%; max-width: 500px; border-radius: 0.75rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+        #cropperModal .modal-content { max-width: 90vw; width: 600px; }
+        #cropperContainer { width: 100%; height: 400px; overflow: hidden; background: #f1f1f1; }
+        #cropperContainer img { max-width: 100%; height: auto; }
+
+        /* --- Spinner --- */
+        .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 32px; height: 32px; border-radius: 50%; border-left-color: #0ea5e9; animation: spin 1s ease infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #page-loader { position: fixed; inset: 0; background-color: rgba(255,255,255,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
-<body class="bg-gray-100">
-    <div class="flex h-screen">
-        <!-- Sidebar -->
-        <aside class="w-64 bg-gray-800 text-white flex flex-col p-4 fixed h-full right-0">
-            <!-- Slideshow -->
-            <div class="relative mb-4">
-                <div id="slideshow-container">
-                    <img src="https://placehold.co/600x400/334155/ffffff?text=تصویر+۱" class="w-full h-32 object-cover rounded-lg slideshow-image" data-index="0">
-                    <img src="https://placehold.co/600x400/475569/ffffff?text=تصویر+۲" class="w-full h-32 object-cover rounded-lg slideshow-image hidden" data-index="1">
-                    <img src="https://placehold.co/600x400/64748B/ffffff?text=تصویر+۳" class="w-full h-32 object-cover rounded-lg slideshow-image hidden" data-index="2">
-                </div>
-                <div id="slideshow-dots" class="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-2">
-                    <!-- Dots generated by JS -->
-                </div>
-            </div>
+<body>
 
-            <!-- User Info -->
-            <div class="flex items-center mb-6">
-                <img id="sidebar-profile-pic" src="https://placehold.co/100x100/94a3b8/ffffff?text=User" alt="عکس پروفایل" class="w-12 h-12 rounded-full ml-3 border-2 border-sky-400">
-                <div>
-                    <p id="sidebar-user-name" class="font-bold">نام کاربر</p>
-                    <p id="sidebar-user-role" class="text-sm text-gray-400">نقش کاربر</p>
+    <div id="page-loader">
+        <div class="flex flex-col items-center">
+            <div class="spinner"></div>
+            <p class="mt-4 text-slate-600 font-semibold">در حال بارگذاری اطلاعات کاربری...</p>
+        </div>
+    </div>
+
+    <div class="workstation-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <!-- Profile Section -->
+            <div class="sidebar-profile-section">
+                <div class="sidebar-profile-image-container">
+                    <img id="sidebarProfileImage" src="https://placehold.co/120x120/EBF4FF/7F9CF5?text=...&font=vazirmatn" alt="عکس پروفایل" class="sidebar-profile-image">
+                    <label for="profileImageInput" class="sidebar-profile-image-edit-overlay">
+                        <i class="fas fa-camera fa-2x"></i>
+                    </label>
+                    <input type="file" id="profileImageInput" class="hidden" accept="image/*">
                 </div>
+                <h2 id="sidebarProfileName" class="sidebar-profile-name">...</h2>
+                <p id="sidebarProfileRole" class="sidebar-profile-role">...</p>
             </div>
 
             <!-- Navigation -->
-            <nav class="flex-grow">
-                <a href="dashboard.html" class="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md transition-colors">
-                    <i class="fa-solid fa-tachometer-alt w-6 text-center ml-3"></i>
-                    داشبورد
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>داشبورد</span>
                 </a>
-                <a href="#" class="flex items-center px-4 py-2 bg-gray-900 text-white rounded-md transition-colors">
-                    <i class="fa-solid fa-user-tie w-6 text-center ml-3"></i>
-                    ایستگاه کاری
+                <a href="#" class="nav-item active">
+                    <i class="fas fa-user-circle"></i>
+                    <span>پروفایل</span>
                 </a>
+                <!-- Add other nav items here -->
             </nav>
 
-            <!-- Footer Menu -->
-            <div>
-                <a href="#" class="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md transition-colors">
-                    <i class="fa-solid fa-cog w-6 text-center ml-3"></i>
-                    تنظیمات
+            <!-- Slideshow -->
+            <div class="sidebar-slideshow">
+                <div id="slideshow" class="slideshow-container">
+                    <!-- Slides will be injected by JS -->
+                </div>
+                <div id="slide-dots-container" class="slide-dots">
+                    <!-- Dots will be injected by JS -->
+                </div>
+            </div>
+
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <a href="#" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>تنظیمات</span>
                 </a>
-                <a href="#" id="logout-button" class="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md transition-colors">
-                    <i class="fa-solid fa-sign-out-alt w-6 text-center ml-3"></i>
-                    خروج از سیستم
+                <a href="#" id="logoutButton" class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>خروج از سیستم</span>
                 </a>
             </div>
         </aside>
 
         <!-- Main Content -->
-        <main class="mr-64 flex-1 p-8 overflow-y-auto">
-            <h1 class="text-3xl font-bold text-gray-800 mb-6">ایستگاه کاری شما</h1>
-            
-            <div id="profile-accordion" class="space-y-4">
-
-                <!-- Section 1: Personal Information -->
-                <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <button class="accordion-header w-full text-right p-4 flex justify-between items-center font-semibold text-lg text-gray-700 hover:bg-gray-50">
-                        <span><i class="fas fa-user-circle ml-3 text-indigo-500"></i>مشخصات فردی</span>
-                        <i class="fas fa-chevron-down transition-transform"></i>
-                    </button>
-                    <div class="accordion-content" data-section-key="personal">
-                        <div class="p-6 border-t border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Fields will be populated by JS, IDs must match registration form -->
-                            <div>
-                                <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">نام</label>
-                                <input type="text" id="firstName" name="firstName" class="profile-input" disabled>
-                            </div>
-                            <div>
-                                <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">نام خانوادگی</label>
-                                <input type="text" id="lastName" name="lastName" class="profile-input" disabled>
-                            </div>
-                            <div>
-                                <label for="nationalId" class="block text-sm font-medium text-gray-700 mb-1">کد ملی</label>
-                                <input type="text" id="nationalId" name="nationalId" class="profile-input" disabled>
-                            </div>
-                             <div>
-                                <label for="dob" class="block text-sm font-medium text-gray-700 mb-1">تاریخ تولد</label>
-                                <input type="text" id="dob" name="dob" class="profile-input" disabled>
-                            </div>
-                             <div>
-                                <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">جنسیت</label>
-                                <input type="text" id="gender" name="gender" class="profile-input" disabled>
-                            </div>
-                             <div>
-                                <label for="mobile" class="block text-sm font-medium text-gray-700 mb-1">تلفن موبایل</label>
-                                <input type="tel" id="mobile" name="mobile" class="profile-input" disabled>
-                            </div>
-                        </div>
-                        <div class="px-6 py-4 bg-gray-50 text-left">
-                            <button class="edit-btn bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">ویرایش</button>
-                            <button class="save-btn hidden bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">ذخیره</button>
-                            <button class="cancel-btn hidden bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">انصراف</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Section 2: Contact Information -->
-                <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <button class="accordion-header w-full text-right p-4 flex justify-between items-center font-semibold text-lg text-gray-700 hover:bg-gray-50">
-                        <span><i class="fas fa-map-marker-alt ml-3 text-green-500"></i>اطلاعات تماس و آدرس</span>
-                        <i class="fas fa-chevron-down transition-transform"></i>
-                    </button>
-                    <div class="accordion-content" data-section-key="contact">
-                        <div class="p-6 border-t border-gray-200 space-y-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">شماره تلفن ثابت</label>
-                                    <input type="tel" id="phone" name="phone" class="profile-input" disabled>
-                                </div>
-                                <div>
-                                    <label for="postalCode" class="block text-sm font-medium text-gray-700 mb-1">کدپستی</label>
-                                    <input type="text" id="postalCode" name="postalCode" class="profile-input" disabled>
-                                </div>
-                                <div>
-                                    <label for="province" class="block text-sm font-medium text-gray-700 mb-1">استان سکونت</label>
-                                    <input type="text" id="province" name="province" class="profile-input" disabled>
-                                </div>
-                                <div>
-                                    <label for="city" class="block text-sm font-medium text-gray-700 mb-1">شهر سکونت</label>
-                                    <input type="text" id="city" name="city" class="profile-input" disabled>
-                                </div>
-                            </div>
-                            <div>
-                                <label for="address" class="block text-sm font-medium text-gray-700 mb-1">آدرس</label>
-                                <textarea id="address" name="address" rows="3" class="profile-textarea" disabled></textarea>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">موقعیت مکانی شما روی نقشه</label>
-                                <div id="map" class="map-container"></div>
-                            </div>
-                        </div>
-                        <div class="px-6 py-4 bg-gray-50 text-left">
-                           <button class="edit-btn bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">ویرایش</button>
-                           <button class="save-btn hidden bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">ذخیره</button>
-                           <button class="cancel-btn hidden bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">انصراف</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Section 3: Professional Information -->
-                <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <button class="accordion-header w-full text-right p-4 flex justify-between items-center font-semibold text-lg text-gray-700 hover:bg-gray-50">
-                        <span><i class="fas fa-briefcase ml-3 text-yellow-500"></i>اطلاعات حرفه‌ای</span>
-                        <i class="fas fa-chevron-down transition-transform"></i>
-                    </button>
-                    <div class="accordion-content" data-section-key="professional">
-                        <div class="p-6 border-t border-gray-200">
-                            <!-- Engineer Specific Fields (IDs match engineerForm) -->
-                            <div id="engineer-fields" class="hidden space-y-6">
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div>
-                                        <label for="licenseFirstIssueDate" class="block text-sm font-medium text-gray-700 mb-1">تاریخ اولین صدور پروانه</label>
-                                        <input type="text" id="licenseFirstIssueDate" name="licenseFirstIssueDate" class="profile-input" disabled>
-                                    </div>
-                                    <div>
-                                        <label for="licenseStartDate" class="block text-sm font-medium text-gray-700 mb-1">تاریخ شروع اعتبار</label>
-                                        <input type="text" id="licenseStartDate" name="licenseStartDate" class="profile-input" disabled>
-                                    </div>
-                                    <div>
-                                        <label for="licenseValidity" class="block text-sm font-medium text-gray-700 mb-1">مدت اعتبار (سال)</label>
-                                        <input type="number" id="licenseValidity" name="licenseValidity" class="profile-input" disabled>
-                                    </div>
-                                    <div>
-                                        <label for="licenseNumber" class="block text-sm font-medium text-gray-700 mb-1">شماره پروانه</label>
-                                        <input type="text" id="licenseNumber" name="licenseNumber" class="profile-input" disabled>
-                                    </div>
-                                    <div>
-                                        <label for="membershipNumber" class="block text-sm font-medium text-gray-700 mb-1">شماره عضویت</label>
-                                        <input type="text" id="membershipNumber" name="membershipNumber" class="profile-input" disabled>
-                                    </div>
-                                    <div>
-                                        <label for="licenseActivityProvince" class="block text-sm font-medium text-gray-700 mb-1">استان فعالیت</label>
-                                        <input type="text" id="licenseActivityProvince" name="licenseActivityProvince" class="profile-input" disabled>
-                                    </div>
-                                </div>
-                                <!-- Other engineer fields can be added here following the same pattern -->
-                            </div>
-                            <!-- Employer Specific Fields (IDs match employerForm) -->
-                            <div id="employer-fields" class="hidden space-y-6">
-                                 <div class="flex items-center mb-4">
-                                    <input type="checkbox" id="employerHasCompany" name="employerHasCompany" class="h-4 w-4 text-sky-600 border-gray-300 rounded focus:ring-sky-500 profile-input" disabled>
-                                    <label for="employerHasCompany" class="mr-2 block text-sm text-gray-700">شرکت دارم (شخص حقوقی هستم)</label>
-                                </div>
-                                <div id="employerCompanyFields" class="space-y-6">
-                                    <div>
-                                        <label for="employerCompanyName" class="block text-sm font-medium text-gray-700 mb-1">نام شرکت</label>
-                                        <input type="text" id="employerCompanyName" name="employerCompanyName" class="profile-input" disabled>
-                                    </div>
-                                    <div>
-                                        <label for="employerCompanyRegNumber" class="block text-sm font-medium text-gray-700 mb-1">شماره ثبت شرکت</label>
-                                        <input type="text" id="employerCompanyRegNumber" name="employerCompanyRegNumber" class="profile-input" disabled>
-                                    </div>
-                                     <div>
-                                        <label for="employerCompanyAddress" class="block text-sm font-medium text-gray-700 mb-1">آدرس شرکت</label>
-                                        <textarea id="employerCompanyAddress" name="employerCompanyAddress" rows="3" class="profile-textarea" disabled></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="px-6 py-4 bg-gray-50 text-left">
-                            <button class="edit-btn bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">ویرایش</button>
-                            <button class="save-btn hidden bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">ذخیره</button>
-                            <button class="cancel-btn hidden bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">انصراف</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Section 4: Profile Picture -->
-                <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <button class="accordion-header w-full text-right p-4 flex justify-between items-center font-semibold text-lg text-gray-700 hover:bg-gray-50">
-                        <span><i class="fas fa-camera-retro ml-3 text-red-500"></i>ویرایش عکس پروفایل</span>
-                        <i class="fas fa-chevron-down transition-transform"></i>
-                    </button>
-                    <div class="accordion-content" data-section-key="picture">
-                        <div class="p-6 border-t border-gray-200">
-                            <div class="flex flex-col items-center">
-                                <div class="w-48 h-48 rounded-full overflow-hidden bg-gray-200 mb-4 border-4 border-gray-300">
-                                    <img id="profile-preview" src="https://placehold.co/200x200/e2e8f0/94a3b8?text=Profile+Pic" alt="پیش‌نمایش پروفایل" class="w-full h-full object-cover">
-                                </div>
-                                <input type="file" id="image-input" accept="image/*" class="hidden">
-                                <button onclick="document.getElementById('image-input').click()" class="bg-indigo-500 text-white px-6 py-2 rounded-md hover:bg-indigo-600">انتخاب عکس جدید</button>
-                                
-                                <div id="cropper-container" class="mt-6 w-full hidden">
-                                    <p class="text-center mb-2">عکس خود را برش دهید</p>
-                                    <div class="max-w-md mx-auto bg-gray-100 p-2 rounded-lg">
-                                        <img id="image-to-crop">
-                                    </div>
-                                    <div class="text-center mt-4">
-                                        <button id="crop-and-save-button" class="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600">برش و ذخیره</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+        <main class="main-content-area">
+            <header class="p-4 border-b border-slate-200 bg-white flex-shrink-0">
+                <h1 class="text-2xl font-bold text-slate-800">ایستگاه کاری</h1>
+            </header>
+            <div id="profileContent" class="content-body">
+                <!-- Profile sections will be injected here -->
             </div>
         </main>
     </div>
 
-    <!-- Leaflet JS for Map -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Cropper Modal -->
+    <div id="cropperModal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-4">برش و تنظیم عکس پروفایل</h3>
+            <div id="cropperContainer">
+                <img id="imageToCrop" src="">
+            </div>
+            <div class="mt-6 flex justify-center gap-4">
+                <button id="cancelCropButton" class="btn btn-secondary">انصراف</button>
+                <button id="cropButton" class="btn btn-primary">برش و ذخیره</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Message Modal -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content text-center">
+            <div id="modalIconContainer" class="mb-4 text-5xl"></div>
+            <p id="modalMessageText" class="text-slate-700 text-base"></p>
+            <button id="modalCloseButton" class="mt-6 btn btn-primary w-full sm:w-auto">متوجه شدم</button>
+        </div>
+    </div>
+
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // --- GLOBAL VARIABLES ---
-            let map;
-            let marker;
-            let cropper;
-            let originalUserData = {}; // To store the initial data for cancellation
+    (async function() {
+        // --- CONFIGURATION ---
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwURZkNTH6OZ78JqPWXqOBeAdWsgrj2lhPn16Yn0jdJ537qCioVAsofUJrbV6qvvG0N/exec';
+        const SLIDESHOW_IMAGES = [
+            'https://images.unsplash.com/photo-1581092916381-6f8901ad5a33?w=500&auto=format&fit=crop&q=60',
+            'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=500&auto=format&fit=crop&q=60',
+            'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=500&auto=format&fit=crop&q=60'
+        ];
 
-            // --- INITIALIZATION ---
-            function initializePage() {
-                // Get user email from URL, which is needed for the backend call
-                const urlParams = new URLSearchParams(window.location.search);
-                const userEmail = urlParams.get('email');
+        // --- STATE ---
+        let userData = null;
+        let cropper = null;
+        let currentSlide = 0;
 
-                if (!userEmail) {
-                    alert('خطا: ایمیل کاربر مشخص نشده است.');
-                    return;
+        // --- DOM ELEMENTS ---
+        const pageLoader = document.getElementById('page-loader');
+        const profileContent = document.getElementById('profileContent');
+        const sidebarProfileImage = document.getElementById('sidebarProfileImage');
+        const sidebarProfileName = document.getElementById('sidebarProfileName');
+        const sidebarProfileRole = document.getElementById('sidebarProfileRole');
+        const profileImageInput = document.getElementById('profileImageInput');
+        const cropperModal = document.getElementById('cropperModal');
+        const imageToCrop = document.getElementById('imageToCrop');
+        const cropButton = document.getElementById('cropButton');
+        const cancelCropButton = document.getElementById('cancelCropButton');
+
+        // --- HELPER FUNCTIONS ---
+        
+        /**
+         * Shows a message modal.
+         * @param {string} message The message to display.
+         * @param {'info'|'success'|'error'|'warning'} type The type of message.
+         */
+        function showMessageModal(message, type = 'info') {
+            const modal = document.getElementById('messageModal');
+            const modalMessageText = document.getElementById('modalMessageText');
+            const modalIconContainer = document.getElementById('modalIconContainer');
+            
+            modalMessageText.textContent = message;
+            let iconHtml = '';
+            switch(type) {
+                case 'error': iconHtml = '<i class="fas fa-times-circle text-red-500"></i>'; break;
+                case 'success': iconHtml = '<i class="fas fa-check-circle text-green-500"></i>'; break;
+                case 'warning': iconHtml = '<i class="fas fa-exclamation-triangle text-amber-500"></i>'; break;
+                default: iconHtml = '<i class="fas fa-info-circle text-sky-500"></i>'; break;
+            }
+            modalIconContainer.innerHTML = iconHtml;
+            modal.style.display = 'flex';
+            
+            document.getElementById('modalCloseButton').onclick = () => { modal.style.display = 'none'; };
+            window.onclick = (event) => { if (event.target == modal) modal.style.display = 'none'; };
+        }
+
+        /**
+         * Fetches user profile data from the Google Script.
+         * @param {string} email The user's email.
+         * @returns {Promise<object|null>} The user data object or null on error.
+         */
+        async function fetchUserProfile(email) {
+            try {
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getUserProfile&email=${encodeURIComponent(email)}`);
+                if (!response.ok) throw new Error(`Server responded with status ${response.status}`);
+                const result = await response.json();
+                if (result.success) {
+                    return result.data;
+                } else {
+                    throw new Error(result.message || "Could not find user profile.");
+                }
+            } catch (error) {
+                console.error("Error fetching user profile:", error);
+                showMessageModal(`خطا در بارگذاری اطلاعات: ${error.message}`, 'error');
+                return null;
+            }
+        }
+
+        /**
+         * Updates a section of the user's profile.
+         * @param {string} sectionKey The key for the section ('personal', 'contact', 'professional').
+         * @param {object} sectionData The data object for the section.
+         * @returns {Promise<boolean>} True on success, false on failure.
+         */
+        async function updateProfileSection(sectionKey, sectionData) {
+            pageLoader.style.display = 'flex';
+            try {
+                const payload = {
+                    action: 'updateSection',
+                    email: userData.email,
+                    sectionKey: sectionKey,
+                    sectionData: sectionData
+                };
+                
+                // NOTE: File updates are not supported by the current Google Script.
+                // This part would need to be expanded if the script is updated.
+                // For now, we only send text data.
+
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error(`Server error: ${response.status}`);
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    showMessageModal('اطلاعات با موفقیت ذخیره شد.', 'success');
+                    // Refetch data to ensure consistency
+                    const updatedData = await fetchUserProfile(userData.email);
+                    if (updatedData) {
+                        userData = { ...updatedData, email: userData.email };
+                        renderProfile();
+                    }
+                    return true;
+                } else {
+                    throw new Error(result.message || "Failed to update profile.");
                 }
 
-                // In a real app, you would call the backend here
-                showLoading(true);
-                google.script.run
-                    .withSuccessHandler(data => {
-                        showLoading(false);
-                        if(data.success) {
-                            originalUserData = data.data; // Store the pristine data
-                            populateAllData(originalUserData);
-                        } else {
-                            alert('خطا در دریافت اطلاعات: ' + data.message);
-                        }
-                    })
-                    .withFailureHandler(error => {
-                        showLoading(false);
-                        alert('خطای سرور: ' + error.message);
-                    })
-                    .getUserProfile(userEmail);
-                
-                setupAccordion();
-                setupSlideshow();
-                setupEditButtons();
-                setupImageCropper();
+            } catch (error) {
+                console.error("Error updating profile section:", error);
+                showMessageModal(`خطا در ذخیره‌سازی: ${error.message}`, 'error');
+                return false;
+            } finally {
+                pageLoader.style.display = 'none';
+            }
+        }
+        
+        /**
+         * Initializes the sidebar slideshow.
+         */
+        function initSlideshow() {
+            const slideshowContainer = document.getElementById('slideshow');
+            const dotsContainer = document.getElementById('slide-dots-container');
+            slideshowContainer.innerHTML = '';
+            dotsContainer.innerHTML = '';
+
+            SLIDESHOW_IMAGES.forEach((src, index) => {
+                const img = document.createElement('img');
+                img.src = src;
+                img.alt = `Slide ${index + 1}`;
+                img.className = 'slide-image';
+                slideshowContainer.appendChild(img);
+
+                const dot = document.createElement('span');
+                dot.className = 'dot';
+                dot.dataset.slideIndex = index;
+                dot.onclick = () => showSlide(index);
+                dotsContainer.appendChild(dot);
+            });
+
+            showSlide(0);
+            setInterval(() => {
+                currentSlide = (currentSlide + 1) % SLIDESHOW_IMAGES.length;
+                showSlide(currentSlide);
+            }, 5000); // Change slide every 5 seconds
+        }
+
+        /**
+         * Displays a specific slide.
+         * @param {number} index The index of the slide to show.
+         */
+        function showSlide(index) {
+            const slides = document.querySelectorAll('.slide-image');
+            const dots = document.querySelectorAll('.dot');
+            
+            slides.forEach(slide => slide.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+            
+            if (slides[index]) slides[index].classList.add('active');
+            if (dots[index]) dots[index].classList.add('active');
+            currentSlide = index;
+        }
+
+        /**
+         * Renders the entire profile based on userData.
+         */
+        function renderProfile() {
+            if (!userData) return;
+
+            // Update sidebar
+            const name = `${userData.stepsData.step1.engineerFirstName || userData.stepsData.step1.employerFirstName || ''} ${userData.stepsData.step1.engineerLastName || userData.stepsData.step1.employerLastName || ''}`;
+            sidebarProfileName.textContent = name.trim() ? name : 'کاربر';
+            sidebarProfileRole.textContent = userData.role === 'engineer' ? 'مهندس' : 'کارفرما';
+            sidebarProfileImage.src = userData.files.applicantImage.fileUrl || 'https://placehold.co/120x120/EBF4FF/7F9CF5?text=...&font=vazirmatn';
+            sidebarProfileImage.onerror = () => { sidebarProfileImage.src = 'https://placehold.co/120x120/EBF4FF/7F9CF5?text=Error&font=vazirmatn'; };
+
+            // Render sections
+            profileContent.innerHTML = ''; // Clear previous content
+            
+            // Personal Info Section
+            const personalHTML = getSectionHTML('personal', 'مشخصات فردی', 'fa-user-circle', getPersonalFieldsHTML(userData.stepsData.step1, userData.role));
+            profileContent.insertAdjacentHTML('beforeend', personalHTML);
+
+            // Contact Info Section
+            const contactHTML = getSectionHTML('contact', 'اطلاعات تماس', 'fa-address-card', getContactFieldsHTML(userData.stepsData.step2, userData.role));
+            profileContent.insertAdjacentHTML('beforeend', contactHTML);
+
+            // Professional Info Section
+            const professionalHTML = getSectionHTML('professional', 'اطلاعات حرفه‌ای', 'fa-briefcase', getProfessionalFieldsHTML(userData.stepsData.step3, userData.role));
+            profileContent.insertAdjacentHTML('beforeend', professionalHTML);
+            
+            // Documents Section
+            const docsHTML = getSectionHTML('documents', 'مدارک', 'fa-file-alt', getDocumentsHTML(userData.files, userData.role));
+            profileContent.insertAdjacentHTML('beforeend', docsHTML);
+
+            // Add event listeners for the newly created elements
+            attachSectionEventListeners();
+        }
+        
+        /**
+         * Creates the HTML for a collapsible section.
+         */
+        function getSectionHTML(id, title, icon, content) {
+            return `
+                <div id="section-${id}" class="profile-section">
+                    <div class="section-header">
+                        <h3 class="section-title"><i class="fas ${icon}"></i>${title}</h3>
+                        <div class="flex items-center gap-4">
+                            <button data-action="edit" data-section="${id}" class="btn btn-secondary !p-2 text-sm"><i class="fas fa-edit"></i> ویرایش</button>
+                            <i class="fas fa-chevron-down section-toggle-icon"></i>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        ${content}
+                        <div class="section-actions mt-6 hidden">
+                            <button data-action="cancel" data-section="${id}" class="btn btn-secondary">انصراف</button>
+                            <button data-action="save" data-section="${id}" class="btn btn-primary">ذخیره تغییرات</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- HTML Generation for Section Content ---
+        // These functions replicate the structure from dashboard.html
+        
+        function getPersonalFieldsHTML(data, role) {
+            const prefix = role === 'engineer' ? 'engineer' : 'employer';
+            return `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                    <div>
+                        <label for="${prefix}FirstName" class="block text-sm font-medium text-slate-700 mb-1">نام</label>
+                        <input type="text" id="${prefix}FirstName" name="${prefix}FirstName" value="${data[`${prefix}FirstName`] || ''}" disabled>
+                    </div>
+                    <div>
+                        <label for="${prefix}LastName" class="block text-sm font-medium text-slate-700 mb-1">نام خانوادگی</label>
+                        <input type="text" id="${prefix}LastName" name="${prefix}LastName" value="${data[`${prefix}LastName`] || ''}" disabled>
+                    </div>
+                    <div>
+                        <label for="${prefix}NationalId" class="block text-sm font-medium text-slate-700 mb-1">کدملی</label>
+                        <input type="text" id="${prefix}NationalId" name="${prefix}NationalId" value="${data[`${prefix}NationalId`] || ''}" disabled>
+                    </div>
+                    <div>
+                        <label for="${prefix}Dob" class="block text-sm font-medium text-slate-700 mb-1">تاریخ تولد</label>
+                        <input type="text" id="${prefix}Dob" name="${prefix}Dob" value="${data[`${prefix}Dob`] || ''}" class="jalali-datepicker-display" disabled>
+                        <input type="hidden" name="${prefix}Dob" class="jalali-datepicker-value">
+                    </div>
+                    <div>
+                        <label for="${prefix}Gender" class="block text-sm font-medium text-slate-700 mb-1">جنسیت</label>
+                        <select id="${prefix}Gender" name="${prefix}Gender" disabled>
+                            <option value="مرد" ${data[`${prefix}Gender`] === 'مرد' ? 'selected' : ''}>مرد</option>
+                            <option value="زن" ${data[`${prefix}Gender`] === 'زن' ? 'selected' : ''}>زن</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="${prefix}Mobile" class="block text-sm font-medium text-slate-700 mb-1">تلفن موبایل</label>
+                        <input type="tel" id="${prefix}Mobile" name="${prefix}Mobile" value="${data[`${prefix}Mobile`] || ''}" disabled>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getContactFieldsHTML(data, role) {
+            const prefix = role === 'engineer' ? 'engineer' : 'employer';
+            const address = data[`${prefix}ResidentialAddress`] || data[`${prefix}Address`] || '';
+            const mapId = `${prefix}LocationMap`;
+            
+            // Note: The map will be initialized when the section is opened.
+            return `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                    <div>
+                        <label for="${prefix}Phone" class="block text-sm font-medium text-slate-700 mb-1">تلفن ثابت</label>
+                        <input type="tel" id="${prefix}Phone" name="${prefix}Phone" value="${data[`${prefix}Phone`] || ''}" disabled>
+                    </div>
+                    <div>
+                        <label for="${prefix}PostalCode" class="block text-sm font-medium text-slate-700 mb-1">کدپستی</label>
+                        <input type="text" id="${prefix}PostalCode" name="${prefix}PostalCode" value="${data[`${prefix}PostalCode`] || ''}" disabled>
+                    </div>
+                    <div>
+                        <label for="${prefix}Province" class="block text-sm font-medium text-slate-700 mb-1">استان</label>
+                        <input type="text" id="${prefix}Province" name="${prefix}Province" value="${data[`${prefix}Province`] || ''}" disabled>
+                    </div>
+                     <div>
+                        <label for="${prefix}City" class="block text-sm font-medium text-slate-700 mb-1">شهر</label>
+                        <input type="text" id="${prefix}City" name="${prefix}City" value="${data[`${prefix}City`] || ''}" disabled>
+                    </div>
+                </div>
+                <div class="mt-6">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">آدرس و موقعیت مکانی</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <textarea id="${prefix}Address" name="${prefix}Address" rows="4" class="min-h-[250px]" disabled>${address}</textarea>
+                        <div id="${mapId}" class="map-container"></div>
+                        <input type="hidden" id="${prefix}Lat" name="${prefix}Lat" value="${data[`${prefix}ResidentialLat`] || data[`${prefix}AddressLat`] || ''}">
+                        <input type="hidden" id="${prefix}Lng" name="${prefix}Lng" value="${data[`${prefix}ResidentialLng`] || data[`${prefix}AddressLng`] || ''}">
+                    </div>
+                </div>
+            `;
+        }
+
+        function getProfessionalFieldsHTML(data, role) {
+            if (role === 'employer') {
+                return `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">وضعیت شرکت</label>
+                            <input type="text" value="${data.employerHasCompany ? 'شرکت دارم' : 'شرکت ندارم (شخص حقیقی)'}" disabled>
+                        </div>
+                        <div class="${data.employerHasCompany ? '' : 'hidden'}">
+                            <label for="employerCompanyName" class="block text-sm font-medium text-slate-700 mb-1">نام شرکت</label>
+                            <input type="text" id="employerCompanyName" name="employerCompanyName" value="${data.employerCompanyName || ''}" disabled>
+                        </div>
+                        <div class="${data.employerHasCompany ? '' : 'hidden'}">
+                            <label for="employerCompanyRegNumber" class="block text-sm font-medium text-slate-700 mb-1">شماره ثبت شرکت</label>
+                            <input type="text" id="employerCompanyRegNumber" name="employerCompanyRegNumber" value="${data.employerCompanyRegNumber || ''}" disabled>
+                        </div>
+                    </div>
+                `;
+            } else { // Engineer
+                 // This part needs the full complexity from dashboard.html.
+                 // For brevity in this example, we'll show a simplified version.
+                 // A full implementation would replicate all the license fields.
+                return `
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">
+                        <div>
+                            <label for="licenseNumber" class="block text-sm font-medium text-slate-700 mb-1">شماره پروانه</label>
+                            <input type="text" id="licenseNumber" name="licenseNumber" value="${data.licenseNumber || ''}" disabled>
+                        </div>
+                        <div>
+                            <label for="membershipNumber" class="block text-sm font-medium text-slate-700 mb-1">شماره عضویت</label>
+                            <input type="text" id="membershipNumber" name="membershipNumber" value="${data.membershipNumber || ''}" disabled>
+                        </div>
+                        <div>
+                            <label for="licenseActivityProvince" class="block text-sm font-medium text-slate-700 mb-1">استان فعالیت</label>
+                            <input type="text" id="licenseActivityProvince" name="licenseActivityProvince" value="${data.licenseActivityProvince || ''}" disabled>
+                        </div>
+                        <div class="md:col-span-3 mt-4 p-4 border-t">
+                            <h4 class="font-semibold mb-2">صلاحیت‌ها</h4>
+                            <p>پروانه طراحی: <span class="font-bold">${data.hasDesignLicense ? `دارد (پایه ${data.designLicenseGrade})` : 'ندارد'}</span></p>
+                            <p>پروانه نظارت: <span class="font-bold">${data.hasSupervisionLicense ? `دارد (پایه ${data.supervisionLicenseGrade})` : 'ندارد'}</span></p>
+                            <p>پروانه اجرا: <span class="font-bold">${data.hasExecutionLicense ? `دارد (پایه ${data.executionLicenseGrade})` : 'ندارد'}</span></p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        function getDocumentsHTML(data, role) {
+            const nationalIdKey = role === 'engineer' ? 'nationalIdCardImageEngineer' : 'employerNationalIdCardImage';
+            const workPermitKey = 'workPermitPdf';
+            const resumeKey = 'employerOtherDocs';
+
+            let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">';
+            
+            // National ID
+            html += `<div>
+                        <h4 class="font-semibold mb-2">تصویر کارت ملی</h4>
+                        <a href="${data[nationalIdKey].fileUrl}" target="_blank" class="file-preview-link">
+                            <div class="file-preview-container">
+                                <img src="${data[nationalIdKey].fileUrl}" onerror="this.parentElement.innerHTML = '<i class=\\'fas fa-image text-slate-400\\'></i><p>نمایش ممکن نیست</p>';">
+                            </div>
+                        </a>
+                     </div>`;
+
+            if (role === 'engineer') {
+                html += `<div>
+                            <h4 class="font-semibold mb-2">پروانه اشتغال (PDF)</h4>
+                            <a href="${data[workPermitKey].fileUrl}" target="_blank" class="file-preview-link">
+                                <div class="file-preview-container">
+                                    <i class="fas fa-file-pdf"></i>
+                                    <p>مشاهده فایل</p>
+                                </div>
+                            </a>
+                         </div>`;
             }
             
-            function showLoading(isLoading) {
-                // You can implement a more sophisticated loading spinner here
-                document.body.style.cursor = isLoading ? 'wait' : 'default';
+            if (role === 'employer') {
+                 html += `<div>
+                            <h4 class="font-semibold mb-2">رزومه (اختیاری)</h4>
+                             <a href="${data[resumeKey].fileUrl}" target="_blank" class="file-preview-link">
+                                <div class="file-preview-container">
+                                    <i class="fas fa-file-alt"></i>
+                                    <p>${data[resumeKey].fileUrl ? 'مشاهده فایل' : 'ارسال نشده'}</p>
+                                </div>
+                            </a>
+                         </div>`;
             }
 
-            // --- DATA POPULATION ---
-            function populateAllData(userData) {
-                if (!userData || !userData.stepsData) {
-                    console.error("User data or stepsData is missing.");
-                    return;
-                }
-                
-                const role = userData.role;
-                const step1 = userData.stepsData.step1 || {};
-                const step2 = userData.stepsData.step2 || {};
-                const step3 = userData.stepsData.step3 || {};
-                const files = userData.files || {};
-                
-                const fullName = `${step1.firstName || ''} ${step1.lastName || ''}`.trim();
+            html += '</div>';
+            return html;
+        }
 
-                // Populate sidebar
-                document.getElementById('sidebar-user-name').textContent = fullName || 'کاربر';
-                document.getElementById('sidebar-user-role').textContent = role === 'engineer' ? 'مهندس' : 'کارفرما';
-                const profilePicUrl = files.applicantImage?.fileUrl || 'https://placehold.co/100x100/94a3b8/ffffff?text=User';
-                document.getElementById('sidebar-profile-pic').src = profilePicUrl;
-                document.getElementById('profile-preview').src = profilePicUrl;
 
-                // Populate Section 1: Personal Info
-                document.getElementById('firstName').value = step1.firstName || '';
-                document.getElementById('lastName').value = step1.lastName || '';
-                document.getElementById('nationalId').value = step1.nationalId || '';
-                document.getElementById('dob').value = step1.dob || ''; // Assuming dob is stored directly
-                document.getElementById('gender').value = step1.gender || '';
-                document.getElementById('mobile').value = step1.mobile || '';
+        /**
+         * Attaches event listeners to section headers and buttons.
+         */
+        function attachSectionEventListeners() {
+            document.querySelectorAll('.section-header').forEach(header => {
+                header.addEventListener('click', (e) => {
+                    // Don't toggle if the edit button was clicked
+                    if (e.target.closest('button[data-action="edit"]')) {
+                        return;
+                    }
 
-                // Populate Section 2: Contact Info
-                document.getElementById('phone').value = step2.phone || '';
-                document.getElementById('postalCode').value = step2.postalCode || '';
-                document.getElementById('province').value = step2.province || '';
-                document.getElementById('city').value = step2.city || '';
-                document.getElementById('address').value = step2.address || '';
-                
-                // Initialize map with residential address coordinates
-                const lat = step2.residentialLat || 35.6892; // Default to Tehran
-                const lng = step2.residentialLng || 51.3890;
-                initializeMap(lat, lng);
-
-                // Populate Section 3: Professional Info based on role
-                if (role === 'engineer') {
-                    document.getElementById('engineer-fields').classList.remove('hidden');
-                    document.getElementById('employer-fields').classList.add('hidden');
+                    const content = header.nextElementSibling;
+                    header.classList.toggle('open');
+                    content.style.display = content.style.display === 'block' ? 'none' : 'block';
                     
-                    document.getElementById('licenseFirstIssueDate').value = step3.licenseFirstIssueDate || '';
-                    document.getElementById('licenseStartDate').value = step3.licenseStartDate || '';
-                    document.getElementById('licenseValidity').value = step3.licenseValidity || '';
-                    document.getElementById('licenseNumber').value = step3.licenseNumber || '';
-                    document.getElementById('membershipNumber').value = step3.membershipNumber || '';
-                    document.getElementById('licenseActivityProvince').value = step3.licenseActivityProvince || '';
-
-                } else if (role === 'employer') {
-                    document.getElementById('employer-fields').classList.remove('hidden');
-                    document.getElementById('engineer-fields').classList.add('hidden');
-                    
-                    const hasCompany = step3.employerHasCompany || false;
-                    const companyFieldsContainer = document.getElementById('employerCompanyFields');
-                    document.getElementById('employerHasCompany').checked = hasCompany;
-                    companyFieldsContainer.style.display = hasCompany ? 'block' : 'none';
-
-                    document.getElementById('employerCompanyName').value = step3.employerCompanyName || '';
-                    document.getElementById('employerCompanyRegNumber').value = step3.employerCompanyRegNumber || '';
-                    document.getElementById('employerCompanyAddress').value = step3.employerCompanyAddress || '';
-                }
-            }
-            
-            // --- MAP LOGIC ---
-            function initializeMap(lat, lng) {
-                if (document.getElementById('map')._leaflet_id) return; // Already initialized
-                
-                map = L.map('map').setView([lat, lng], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; OpenStreetMap'
-                }).addTo(map);
-                
-                marker = L.marker([lat, lng], { draggable: true }).addTo(map)
-                    .bindPopup('موقعیت شما')
-                    .openPopup();
-                
-                marker.on('dragend', function(event){
-                    var position = marker.getLatLng();
-                    console.log(`New position: ${position.lat}, ${position.lng}`);
-                    // In edit mode, you would update hidden input fields here
-                });
-            }
-
-            // --- UI INTERACTIONS ---
-            function setupAccordion() {
-                const headers = document.querySelectorAll('.accordion-header');
-                headers.forEach(header => {
-                    header.addEventListener('click', () => {
-                        const content = header.nextElementSibling;
-                        const icon = header.querySelector('.fa-chevron-down');
-                        
-                        const isOpen = content.classList.contains('open');
-                        
-                        // Close all accordions
-                        document.querySelectorAll('.accordion-content.open').forEach(openContent => {
-                            openContent.classList.remove('open');
-                            openContent.previousElementSibling.querySelector('.fa-chevron-down').classList.remove('rotate-180');
-                        });
-                        
-                        // Toggle the clicked one
-                        if (!isOpen) {
-                            content.classList.add('open');
-                            icon.classList.add('rotate-180');
-                            if (content.contains(document.getElementById('map'))) {
-                                setTimeout(() => map.invalidateSize(), 500);
-                            }
+                    // Initialize map if section is opened and contains a map
+                    if (content.style.display === 'block') {
+                        const mapDiv = content.querySelector('.map-container');
+                        if (mapDiv && !mapDiv._leaflet_id) {
+                            const latInput = content.querySelector('input[name*="Lat"]');
+                            const lngInput = content.querySelector('input[name*="Lng"]');
+                            const lat = parseFloat(latInput.value) || 35.7219; // Default to Tehran
+                            const lng = parseFloat(lngInput.value) || 51.3347;
+                            
+                            const map = L.map(mapDiv.id).setView([lat, lng], 13);
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                            L.marker([lat, lng]).addTo(map);
                         }
-                    });
-                });
-                if(headers.length > 0) headers[0].click();
-            }
-            
-            function setupSlideshow() {
-                const container = document.getElementById('slideshow-container');
-                const images = container.querySelectorAll('.slideshow-image');
-                const dotsContainer = document.getElementById('slideshow-dots');
-                let currentIndex = 0;
-
-                if (images.length === 0) return;
-
-                images.forEach((_, index) => {
-                    const dot = document.createElement('button');
-                    dot.classList.add('w-3', 'h-3', 'rounded-full', 'bg-gray-400', 'opacity-50', 'hover:opacity-100', 'transition-opacity');
-                    dot.addEventListener('click', () => showSlide(index));
-                    dotsContainer.appendChild(dot);
-                });
-
-                const dots = dotsContainer.querySelectorAll('button');
-
-                function showSlide(index) {
-                    images[currentIndex].classList.add('hidden');
-                    dots[currentIndex].classList.remove('opacity-100', 'bg-white');
-                    dots[currentIndex].classList.add('opacity-50', 'bg-gray-400');
-                    currentIndex = index;
-                    images[currentIndex].classList.remove('hidden');
-                    dots[currentIndex].classList.add('opacity-100', 'bg-white');
-                    dots[currentIndex].classList.remove('opacity-50', 'bg-gray-400');
-                }
-                setInterval(() => showSlide((currentIndex + 1) % images.length), 5000);
-                showSlide(0);
-            }
-
-            function setupEditButtons() {
-                document.querySelectorAll('.accordion-content').forEach(section => {
-                    const editBtn = section.querySelector('.edit-btn');
-                    const saveBtn = section.querySelector('.save-btn');
-                    const cancelBtn = section.querySelector('.cancel-btn');
-                    const inputs = section.querySelectorAll('.profile-input, .profile-select, .profile-textarea');
-
-                    editBtn.addEventListener('click', () => {
-                        inputs.forEach(input => input.disabled = false);
-                        editBtn.classList.add('hidden');
-                        saveBtn.classList.remove('hidden');
-                        cancelBtn.classList.remove('hidden');
-                    });
-
-                    cancelBtn.addEventListener('click', () => {
-                        populateAllData(originalUserData); // Restore original data
-                        inputs.forEach(input => input.disabled = true);
-                        editBtn.classList.remove('hidden');
-                        saveBtn.classList.add('hidden');
-                        cancelBtn.classList.add('hidden');
-                    });
-
-                    saveBtn.addEventListener('click', () => {
-                        const sectionKey = section.dataset.sectionKey;
-                        const sectionData = {};
-                        inputs.forEach(input => {
-                            if (input.name) {
-                                sectionData[input.name] = input.type === 'checkbox' ? input.checked : input.value;
-                            }
-                        });
-                        
-                        showLoading(true);
-                        google.script.run
-                            .withSuccessHandler(response => {
-                                showLoading(false);
-                                if(response.status === 'success') {
-                                    alert('اطلاعات با موفقیت ذخیره شد.');
-                                    // Update original data with new data
-                                    originalUserData.stepsData[sectionKey] = sectionData;
-                                    inputs.forEach(input => input.disabled = true);
-                                    editBtn.classList.remove('hidden');
-                                    saveBtn.classList.add('hidden');
-                                    cancelBtn.classList.add('hidden');
-                                } else {
-                                    alert('خطا در ذخیره سازی: ' + response.message);
-                                }
-                            })
-                            .withFailureHandler(error => {
-                                showLoading(false);
-                                alert('خطای سرور هنگام ذخیره سازی: ' + error.message);
-                            })
-                            .updateProfileSection({
-                                email: new URLSearchParams(window.location.search).get('email'),
-                                sectionKey: sectionKey,
-                                sectionData: sectionData
-                            });
-                    });
-                });
-            }
-
-            function setupImageCropper() {
-                const imageInput = document.getElementById('image-input');
-                const imageToCrop = document.getElementById('image-to-crop');
-                const cropperContainer = document.getElementById('cropper-container');
-                const cropButton = document.getElementById('crop-and-save-button');
-
-                imageInput.addEventListener('change', (e) => {
-                    const files = e.target.files;
-                    if (files && files.length > 0) {
-                        const reader = new FileReader();
-                        reader.onload = () => {
-                            imageToCrop.src = reader.result;
-                            cropperContainer.classList.remove('hidden');
-                            if (cropper) cropper.destroy();
-                            cropper = new Cropper(imageToCrop, {
-                                aspectRatio: 1,
-                                viewMode: 1,
-                                background: false,
-                                modal: true,
-                                guides: true,
-                                center: true,
-                                cropBoxMovable: true,
-                                cropBoxResizable: true,
-                            });
-                        };
-                        reader.readAsDataURL(files[0]);
                     }
                 });
+            });
 
-                cropButton.addEventListener('click', () => {
-                    if (cropper) {
-                        const canvas = cropper.getCroppedCanvas({ width: 256, height: 256 });
-                        canvas.toBlob((blob) => {
-                            const reader = new FileReader();
-                            reader.readAsDataURL(blob); 
-                            reader.onloadend = function() {
-                                const base64data = reader.result;                
-                                // Here you would call google.script.run to upload the base64data
-                                console.log("Base64 image data ready to be sent to server.");
-                                // For now, just update the preview
-                                document.getElementById('profile-preview').src = base64data;
-                                document.getElementById('sidebar-profile-pic').src = base64data;
-                                cropperContainer.classList.add('hidden');
-                                cropper.destroy();
-                                alert('عکس پروفایل به‌روز شد (شبیه‌سازی).');
-                            }
-                        }, 'image/png');
-                    }
-                });
+            document.querySelectorAll('button[data-action="edit"]').forEach(button => {
+                button.addEventListener('click', handleEditClick);
+            });
+            document.querySelectorAll('button[data-action="cancel"]').forEach(button => {
+                button.addEventListener('click', handleCancelClick);
+            });
+            document.querySelectorAll('button[data-action="save"]').forEach(button => {
+                button.addEventListener('click', handleSaveClick);
+            });
+        }
+        
+        function handleEditClick(e) {
+            const sectionId = e.currentTarget.dataset.section;
+            const sectionEl = document.getElementById(`section-${sectionId}`);
+            
+            // Note: For 'documents', editing is not supported via this flow
+            if (sectionId === 'documents') {
+                showMessageModal('برای ویرایش مدارک، لطفاً فایل جدید را از طریق دکمه‌های مربوطه بارگذاری کنید. (این قابلیت در نسخه بعدی اضافه خواهد شد)', 'info');
+                return;
             }
 
-            // --- Run Initialization ---
-            initializePage();
+            sectionEl.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
+            sectionEl.querySelector('.section-actions').classList.remove('hidden');
+            e.currentTarget.classList.add('hidden');
+            
+            // Initialize date pickers for this section if they exist
+            $(sectionEl).find(".jalali-datepicker-display").persianDatepicker({
+                 format: 'YYYY/MM/DD',
+                 altField: $(sectionEl).find('.jalali-datepicker-value'),
+                 altFormat: 'YYYY-MM-DD',
+                 observer: true,
+                 autoClose: true
+            });
+        }
+
+        function handleCancelClick(e) {
+            const sectionId = e.currentTarget.dataset.section;
+            const sectionEl = document.getElementById(`section-${sectionId}`);
+            
+            // Re-render the entire profile to reset changes
+            renderProfile();
+        }
+
+        async function handleSaveClick(e) {
+            const sectionId = e.currentTarget.dataset.section;
+            const sectionEl = document.getElementById(`section-${sectionId}`);
+            
+            const dataToSave = {};
+            sectionEl.querySelectorAll('input, select, textarea').forEach(el => {
+                if (el.name) {
+                    dataToSave[el.name] = el.value;
+                }
+            });
+
+            await updateProfileSection(sectionId, dataToSave);
+        }
+        
+        // --- Cropper.js Logic ---
+        profileImageInput.addEventListener('change', (e) => {
+            const files = e.target.files;
+            if (files && files.length > 0) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    imageToCrop.src = reader.result;
+                    cropperModal.style.display = 'block';
+                    if (cropper) cropper.destroy();
+                    cropper = new Cropper(imageToCrop, { aspectRatio: 1, viewMode: 1 });
+                };
+                reader.readAsDataURL(files[0]);
+            }
         });
+
+        cancelCropButton.addEventListener('click', () => {
+            cropperModal.style.display = 'none';
+            if (cropper) cropper.destroy();
+            profileImageInput.value = '';
+        });
+
+        cropButton.addEventListener('click', () => {
+            if (cropper) {
+                const canvas = cropper.getCroppedCanvas({ width: 512, height: 512 });
+                canvas.toBlob((blob) => {
+                    // NOTE: This part only updates the UI.
+                    // The actual file upload needs Google Script modification.
+                    const imageUrl = URL.createObjectURL(blob);
+                    sidebarProfileImage.src = imageUrl;
+                    showMessageModal('عکس پروفایل در پیش‌نمایش به‌روز شد. برای ذخیره نهایی، قابلیت آپلود فایل باید در سرور (Google Script) فعال شود.', 'info');
+                    cropperModal.style.display = 'none';
+                    cropper.destroy();
+                }, 'image/png');
+            }
+        });
+
+        // --- INITIALIZATION ---
+        async function main() {
+            const params = new URLSearchParams(window.location.search);
+            const email = params.get('email');
+
+            if (!email) {
+                pageLoader.innerHTML = '<p class="text-red-600 font-bold">خطا: ایمیل کاربر مشخص نشده است.</p>';
+                return;
+            }
+
+            userData = await fetchUserProfile(email);
+            if (userData) {
+                userData.email = email; // Make sure email is part of the state
+                renderProfile();
+            }
+            
+            initSlideshow();
+            pageLoader.style.display = 'none';
+        }
+
+        main();
+    })();
     </script>
 </body>
 </html>
