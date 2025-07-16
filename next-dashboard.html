@@ -329,7 +329,7 @@
                 const sectionInfo = getPersianSectionInfo(sectionKey);
                 const sectionData = profileSections[sectionKey];
                 if (sectionData && Object.keys(sectionData).length > 0) {
-                     profileViewContainer.appendChild(createAccordionItem(sectionInfo, sectionKey, sectionData));
+                     profileViewContainer.appendChild(createAccordionItem(sectionInfo, sectionKey, sectionData, userData.role));
                 }
             }
         }
@@ -344,7 +344,7 @@
             return titles[key] || { title: key, icon: 'fa-info-circle' };
         }
 
-        function createAccordionItem(sectionInfo, key, data) {
+        function createAccordionItem(sectionInfo, key, data, userRole) {
             const item = document.createElement('div');
             item.className = 'accordion-item';
             item.dataset.sectionKey = key;
@@ -378,7 +378,7 @@
             
             const dataContainer = item.querySelector('.data-container');
             if (key === 'professional') {
-                dataContainer.innerHTML = createProfessionalProfileView(data);
+                dataContainer.innerHTML = createProfessionalProfileView(data, userRole);
             } else {
                 dataContainer.classList.add('grid', 'grid-cols-1', 'md:grid-cols-2', 'gap-x-6');
                 dataContainer.innerHTML = Object.entries(data)
@@ -395,11 +395,13 @@
             
             if (isAddressField) {
                  const mapId = `map-${label.replace(/[\s/()]/g, '-')}`;
+                 const latKey = Object.keys(sectionData).find(k => k.toLowerCase().includes('lat')) || '';
+                 const lngKey = Object.keys(sectionData).find(k => k.toLowerCase().includes('lng')) || '';
                  fieldHtml = `
                     <div class="profile-field-group md:col-span-2">
                         <label class="profile-field-label">${label}</label>
                         <div class="profile-field-value">${value || '---'}</div>
-                        <div id="${mapId}" class="map-container mt-2" data-lat-key="${sectionData.latKey}" data-lng-key="${sectionData.lngKey}"></div>
+                        <div id="${mapId}" class="map-container mt-2" data-lat-key="${latKey}" data-lng-key="${lngKey}"></div>
                     </div>
                  `;
             } else if (label.toLowerCase().includes('پروانه') || label.toLowerCase().includes('کارت ملی') || label.toLowerCase().includes('رزومه')) {
@@ -420,76 +422,50 @@
             return fieldHtml;
         }
 
-        function createProfessionalProfileView(data) {
-            // This function replicates the structure from dashboard.html for the professional section
-            return `
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6 pt-4">
-                    <div class="profile-field-group" data-label="licenseFirstIssueDate">
-                        <label class="profile-field-label">تاریخ اولین صدور پروانه</label>
-                        <div class="profile-field-value">${data.licenseFirstIssueDate || '---'}</div>
+        function createProfessionalProfileView(data, userRole) {
+            if (userRole === 'مهندس') {
+                return `
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6 pt-4">
+                        <div class="profile-field-group" data-label="licenseFirstIssueDate"><label class="profile-field-label">تاریخ اولین صدور پروانه</label><div class="profile-field-value">${data.licenseFirstIssueDate || '---'}</div></div>
+                        <div class="profile-field-group" data-label="licenseStartDate"><label class="profile-field-label">تاریخ شروع اعتبار پروانه</label><div class="profile-field-value">${data.licenseStartDate || '---'}</div></div>
+                        <div class="profile-field-group" data-label="licenseValidity"><label class="profile-field-label">مدت اعتبار پروانه (سال)</label><div class="profile-field-value">${data.licenseValidity || '---'}</div></div>
                     </div>
-                    <div class="profile-field-group" data-label="licenseStartDate">
-                        <label class="profile-field-label">تاریخ شروع اعتبار پروانه</label>
-                        <div class="profile-field-value">${data.licenseStartDate || '---'}</div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6 pt-6">
+                        <div class="profile-field-group" data-label="licenseNumber"><label class="profile-field-label">شماره پروانه</label><div class="profile-field-value">${data.licenseNumber || '---'}</div></div>
+                        <div class="profile-field-group" data-label="membershipNumber"><label class="profile-field-label">شماره عضویت</label><div class="profile-field-value">${data.membershipNumber || '---'}</div></div>
+                        <div class="profile-field-group" data-label="licenseActivityProvince"><label class="profile-field-label">استان فعالیت پروانه</label><div class="profile-field-value">${data.licenseActivityProvince || '---'}</div></div>
                     </div>
-                    <div class="profile-field-group" data-label="licenseValidity">
-                        <label class="profile-field-label">مدت اعتبار پروانه (سال)</label>
-                        <div class="profile-field-value">${data.licenseValidity || '---'}</div>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6 pt-6">
-                    <div class="profile-field-group" data-label="licenseNumber">
-                        <label class="profile-field-label">شماره پروانه</label>
-                        <div class="profile-field-value">${data.licenseNumber || '---'}</div>
-                    </div>
-                    <div class="profile-field-group" data-label="membershipNumber">
-                        <label class="profile-field-label">شماره عضویت</label>
-                        <div class="profile-field-value">${data.membershipNumber || '---'}</div>
-                    </div>
-                    <div class="profile-field-group" data-label="licenseActivityProvince">
-                        <label class="profile-field-label">استان فعالیت پروانه</label>
-                        <div class="profile-field-value">${data.licenseActivityProvince || '---'}</div>
-                    </div>
-                </div>
-                <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-5">
-                    <!-- Design License -->
-                    <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
-                        <label class="text-sm font-medium text-slate-700">پروانه طراحی</label>
-                        <div class="profile-field-group" data-label="designLicenseGrade">
-                            <label class="profile-field-label text-xs">پایه</label>
-                            <div class="profile-field-value">${data.designLicenseGrade || 'ندارد'}</div>
+                    <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-5">
+                        <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
+                            <label class="text-sm font-medium text-slate-700">پروانه طراحی</label>
+                            <div class="profile-field-group" data-label="designLicenseGrade"><label class="profile-field-label text-xs">پایه</label><div class="profile-field-value">${data.designLicenseGrade || 'ندارد'}</div></div>
+                            <div class="profile-field-group" data-label="designExecutorType"><label class="profile-field-label text-xs">نوع صلاحیت</label><div class="profile-field-value">${data.designExecutorType || '---'}</div></div>
                         </div>
-                        <div class="profile-field-group" data-label="designExecutorType">
-                            <label class="profile-field-label text-xs">نوع صلاحیت</label>
-                            <div class="profile-field-value">${data.designExecutorType || '---'}</div>
+                        <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
+                            <label class="text-sm font-medium text-slate-700">پروانه نظارت</label>
+                            <div class="profile-field-group" data-label="supervisionLicenseGrade"><label class="profile-field-label text-xs">پایه</label><div class="profile-field-value">${data.supervisionLicenseGrade || 'ندارد'}</div></div>
+                            <div class="profile-field-group" data-label="supervisionExecutorType"><label class="profile-field-label text-xs">نوع صلاحیت</label><div class="profile-field-value">${data.supervisionExecutorType || '---'}</div></div>
+                        </div>
+                        <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
+                            <label class="text-sm font-medium text-slate-700">پروانه اجرا</label>
+                            <div class="profile-field-group" data-label="executionLicenseGrade"><label class="profile-field-label text-xs">پایه</label><div class="profile-field-value">${data.executionLicenseGrade || 'ندارد'}</div></div>
+                            <div class="profile-field-group" data-label="executionExecutorType"><label class="profile-field-label text-xs">نوع صلاحیت</label><div class="profile-field-value">${data.executionExecutorType || '---'}</div></div>
                         </div>
                     </div>
-                    <!-- Supervision License -->
-                    <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
-                        <label class="text-sm font-medium text-slate-700">پروانه نظارت</label>
-                        <div class="profile-field-group" data-label="supervisionLicenseGrade">
-                            <label class="profile-field-label text-xs">پایه</label>
-                            <div class="profile-field-value">${data.supervisionLicenseGrade || 'ندارد'}</div>
-                        </div>
-                        <div class="profile-field-group" data-label="supervisionExecutorType">
-                            <label class="profile-field-label text-xs">نوع صلاحیت</label>
-                            <div class="profile-field-value">${data.supervisionExecutorType || '---'}</div>
-                        </div>
+                `;
+            } else { // Employer view
+                return `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 pt-4">
+                        <div class="profile-field-group" data-label="employerCompanyName"><label class="profile-field-label">نام شرکت</label><div class="profile-field-value">${data.employerCompanyName || '---'}</div></div>
+                        <div class="profile-field-group" data-label="employerCompanyRegNumber"><label class="profile-field-label">شماره ثبت شرکت</label><div class="profile-field-value">${data.employerCompanyRegNumber || '---'}</div></div>
                     </div>
-                    <!-- Execution License -->
-                    <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
-                        <label class="text-sm font-medium text-slate-700">پروانه اجرا</label>
-                        <div class="profile-field-group" data-label="executionLicenseGrade">
-                            <label class="profile-field-label text-xs">پایه</label>
-                            <div class="profile-field-value">${data.executionLicenseGrade || 'ندارد'}</div>
-                        </div>
-                        <div class="profile-field-group" data-label="executionExecutorType">
-                            <label class="profile-field-label text-xs">نوع صلاحیت</label>
-                            <div class="profile-field-value">${data.executionExecutorType || '---'}</div>
-                        </div>
+                    <div class="profile-field-group md:col-span-2 mt-4" data-label="employerCompanyAddress">
+                        <label class="profile-field-label">آدرس شرکت</label>
+                        <div class="profile-field-value">${data.employerCompanyAddress || '---'}</div>
+                        <div id="map-employerCompanyAddress" class="map-container mt-2"></div>
                     </div>
-                </div>
-            `;
+                `;
+            }
         }
         
         function handleProfileViewClick(e) {
@@ -508,15 +484,9 @@
             const content = header.nextElementSibling;
             header.classList.toggle('open');
             content.classList.toggle('open');
-            // If opening, check for maps to initialize
             if (header.classList.contains('open')) {
-                const maps = content.querySelectorAll('.map-container');
-                maps.forEach(mapContainer => {
-                    if (!mapContainer._leaflet_id) { // Check if map is not already initialized
-                        const sectionKey = mapContainer.closest('.accordion-item').dataset.sectionKey;
-                        initializeProfileMaps(originalUserData, sectionKey);
-                    }
-                });
+                const sectionKey = header.closest('.accordion-item').dataset.sectionKey;
+                initializeProfileMaps(originalUserData, sectionKey);
             }
         }
 
