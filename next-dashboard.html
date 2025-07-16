@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ایستگاه کار - نظام تندیس</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
     <!-- Leaflet (for maps) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Font Awesome (for icons) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Vazirmatn Font -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css"/>
     <!-- Cropper.js (for image cropping) -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
@@ -18,519 +21,1123 @@
     <script src="https://unpkg.com/jquery@3.5.1/dist/jquery.min.js"></script>
     <script src="https://unpkg.com/persian-date@1.1.0/dist/persian-date.min.js"></script>
     <script src="https://unpkg.com/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+
     <style>
         body {
             font-family: 'Vazirmatn', 'Tahoma', sans-serif;
             background-color: #f8fafc;
         }
-        .workstation-wrapper { display: flex; height: 100vh; max-height: 100vh; background-color: #ffffff; }
-        #mainNavSidebar { width: 288px; background-color: #f1f5f9; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; transition: width 0.3s ease; }
-        #mainContentArea { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
-        #pageContent { flex-grow: 1; overflow-y: auto; padding: 1.5rem 2rem; }
-        #pageContent::-webkit-scrollbar { width: 8px; }
-        #pageContent::-webkit-scrollbar-track { background: #f1f5f9; }
-        #pageContent::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 8px; }
-        #pageContent::-webkit-scrollbar-thumb:hover { background: #64748b; }
-        #advertisementSidebar { width: 288px; background-color: #f1f5f9; border-right: 1px solid #e2e8f0; transition: width 0.3s ease; }
-        .main-nav-link { display: flex; align-items: center; padding: 0.875rem 1.25rem; border-radius: 0.5rem; color: #475569; font-weight: 600; transition: all 0.2s ease-in-out; border-right: 4px solid transparent; }
-        .main-nav-link:hover { background-color: #e2e8f0; color: #1e293b; }
-        .main-nav-link.active { background-color: #e0f2fe; color: #0c4a6e; border-right-color: #0ea5e9; }
-        .main-nav-link i { margin-left: 0.75rem; width: 20px; text-align: center; }
-        #slideshowContainer { position: relative; width: 100%; height: 200px; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        #slideshowContainer img { width: 100%; height: 100%; object-fit: cover; position: absolute; opacity: 0; transition: opacity 1s ease-in-out; }
-        #slideshowContainer img.active { opacity: 1; }
-        #slideshowNav { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 10; }
-        .slide-nav-dot { width: 10px; height: 10px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.5); cursor: pointer; transition: background-color 0.3s ease; border: 1px solid rgba(0,0,0,0.2); }
-        .slide-nav-dot.active { background-color: white; }
-        
-        .content-view { display: none; }
-        .content-view.active { display: block; }
-        .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 48px; height: 48px; border-radius: 50%; border-left-color: #0ea5e9; animation: spin 1s ease infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(15, 23, 42, 0.6); }
-        .modal-content { background-color: #ffffff; margin: 10% auto; padding: 2rem 2.5rem; border: none; width: 90%; max-width: 600px; border-radius: 0.75rem; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
-        #cropperContainer { width: 100%; height: 400px; overflow: hidden; background: #f1f1f1; }
-        #cropperContainer img { max-width: 100%; height: auto; }
-        
-        /* --- Profile Form Styles --- */
-        .profile-form-step { display: none; }
-        .profile-form-step.active { display: block; }
-        .profile-step-indicator { display: flex; align-items: center; padding: 0.5rem; border-radius: 0.5rem; margin-bottom: 0.5rem; cursor: pointer; transition: background-color 0.2s ease; }
-        .profile-step-indicator:hover { background-color: #e2e8f0; }
-        .profile-step-indicator.active { background-color: #e0f2fe; color: #0c4a6e; font-weight: 600; }
-        .profile-step-indicator .step-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background-color: #cbd5e1; color: #475569; margin-left: 0.75rem; }
-        .profile-step-indicator.active .step-icon { background-color: #0ea5e9; color: white; }
-        .btn { padding: 0.625rem 1.25rem; border-radius: 0.375rem; font-weight: 600; transition: all 0.2s ease-in-out; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;}
+        .main-container {
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 288px; /* 72 * 4 */
+            background-color: #f1f5f9;
+            border-left: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            padding: 1.25rem;
+            transition: width 0.3s ease;
+        }
+        .content-area {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                right: -300px;
+                top: 0;
+                height: 100%;
+                z-index: 1000;
+                box-shadow: -4px 0 15px rgba(0,0,0,0.1);
+            }
+            .sidebar.open {
+                right: 0;
+            }
+            .content-area {
+                padding: 1rem;
+            }
+        }
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+        .sidebar-overlay.open {
+            display: block;
+        }
+
+        /* Accordion Styles */
+        .accordion-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+        .accordion-header {
+            background-color: #f8fafc;
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: #334155;
+            transition: background-color 0.2s ease;
+        }
+        .accordion-header:hover {
+            background-color: #f1f5f9;
+        }
+        .accordion-header .accordion-icon {
+            transition: transform 0.3s ease;
+        }
+        .accordion-header.active .accordion-icon {
+            transform: rotate(180deg);
+        }
+        .accordion-content {
+            display: none;
+            padding: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            background-color: #ffffff;
+        }
+        .accordion-content.active {
+            display: block;
+        }
+        .view-mode .form-input, .view-mode .form-select, .view-mode .form-textarea {
+            background-color: #f1f5f9;
+            border-color: transparent;
+            color: #475569;
+            pointer-events: none;
+        }
+        .view-mode .map-container {
+            pointer-events: none;
+        }
+        .view-mode .file-input-label {
+             display: none;
+        }
+        .edit-mode-controls {
+            display: none;
+        }
+        .edit-mode .edit-mode-controls {
+            display: flex;
+        }
+        .edit-mode .edit-button {
+            display: none;
+        }
+
+        /* Sidebar Slideshow */
+        .slideshow-container {
+            position: relative;
+            margin-top: 1.5rem;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+        }
+        .slide {
+            display: none;
+        }
+        .slide img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+        .slideshow-dots {
+            text-align: center;
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .dot {
+            cursor: pointer;
+            height: 10px;
+            width: 10px;
+            margin: 0 4px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(0,0,0,0.2);
+            border-radius: 50%;
+            display: inline-block;
+            transition: background-color 0.6s ease;
+        }
+        .dot.active, .dot:hover {
+            background-color: #ffffff;
+        }
+
+        /* General form styles from dashboard */
+        label.required::after { content: " *"; color: #ef4444; }
+        input[type="text"], input[type="date"], input[type="tel"], input[type="number"], textarea, select { background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.625rem 0.875rem; transition: border-color 0.2s ease, box-shadow 0.2s ease; line-height: 1.5; height: calc(1.5em + 0.75rem + 2px + 0.5rem); }
+        select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E"); background-position: left 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-left: 2.5rem; padding-right: 0.875rem; }
+        input:focus, textarea:focus, select:focus { border-color: #0ea5e9; background-color: white; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2); outline: none; }
+        .btn { padding: 0.625rem 1.25rem; border-radius: 0.375rem; font-weight: 600; transition: all 0.2s ease-in-out; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;}
         .btn-primary { background-color: #0ea5e9; color: white; }
-        .btn-primary:hover:not(:disabled) { background-color: #0284c7; }
-        .btn-success { background-color: #10b981; color: white; }
-        .btn-success:hover:not(:disabled) { background-color: #059669; }
+        .btn-primary:hover { background-color: #0284c7; }
         .btn-secondary { background-color: #e2e8f0; color: #1e293b; }
         .btn-secondary:hover { background-color: #cbd5e1; }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        #profileForm input, #profileForm select, #profileForm textarea { background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.625rem 0.875rem; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
-        #profileForm input:focus, #profileForm select:focus, #profileForm textarea:focus { border-color: #0ea5e9; background-color: white; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2); outline: none; }
-        #profileForm input:disabled, #profileForm select:disabled, #profileForm textarea:disabled { background-color: #e2e8f0; cursor: not-allowed; color: #64748b; border-color: #e2e8f0; }
-        .map-container { height: 220px; border-radius: 0.5rem; border: 1px solid #cbd5e1; z-index: 1; }
-        @media (max-width: 1023px) { #mainNavSidebar, #advertisementSidebar { display: none; } }
+        .btn-success { background-color: #10b981; color: white; }
+        .btn-success:hover { background-color: #059669; }
+        .map-container { height: 220px; border-radius: 0.5rem; border: 1px solid #cbd5e1; }
+        .map-info-display { background-color: #e0f2fe; border: 1px solid #bae6fd; color: #0c4a6e; }
+        .file-preview-container { width: 100%; height: 12rem; overflow: hidden; border: 1px solid #cbd5e1; border-radius: 0.375rem; display: flex; align-items: center; justify-content: center; background-color: #f8fafc; }
+        .file-preview-container img, .file-preview-container iframe { width: 100%; height: 100%; object-fit: cover; }
+        .file-preview-container .pdf-icon-text { text-align: center; color: #475569; }
+        .file-preview-container .pdf-icon-text i { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 48px; height: 48px; border-radius: 50%; border-left-color: #0ea5e9; animation: spin 1s ease infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Cropper Modal Styles */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(15, 23, 42, 0.6); }
+        .modal-content { background-color: #ffffff; margin: 12% auto; padding: 2rem 2.5rem; border: none; width: 90%; max-width: 480px; border-radius: 0.75rem; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+        #cropperModal .modal-content { max-width: 90vw; width: 600px; }
+        #cropperContainer { width: 100%; height: 400px; overflow: hidden; background: #f1f1f1; }
+        #cropperContainer img { max-width: 100%; height: auto; }
     </style>
 </head>
 <body class="bg-slate-50">
 
-    <div id="loadingModal" class="fixed inset-0 z-50 flex items-center justify-center" style="background-color: rgba(255, 255, 255, 0.9);">
-        <div class="flex flex-col items-center">
-            <div class="spinner"></div>
-            <p id="loadingModalText" class="text-lg font-semibold text-gray-700 mt-4">در حال بارگذاری اطلاعات...</p>
-        </div>
-    </div>
-
-    <div id="appContainer" class="workstation-wrapper hidden">
-        <aside id="mainNavSidebar" class="p-5">
-            <div class="text-center mb-8">
-                <div id="profileImageContainer" class="relative w-32 h-32 mx-auto mb-3 group cursor-pointer">
-                    <img id="userProfileImage" src="https://placehold.co/128x128/EBF4FF/2196F3?text=User" alt="عکس پروفایل" class="w-full h-full object-cover rounded-full border-4 border-white shadow-lg" onerror="this.onerror=null;this.src='https://placehold.co/128x128/EBF4FF/2196F3?text=Error';">
-                    <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full">
-                        <i class="fas fa-camera fa-lg"></i>
-                        <span class="mr-2">تغییر عکس</span>
-                    </div>
+    <div id="app" class="main-container">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <!-- Profile Section -->
+            <div class="text-center border-b border-slate-300 pb-4">
+                <div class="relative w-28 h-28 mx-auto mb-3 rounded-full overflow-hidden border-2 border-sky-400 shadow-lg">
+                    <img id="sidebarProfileImage" src="https://placehold.co/112x112/EBF4FF/3B82F6?text=Profile" alt="عکس پروفایل" class="w-full h-full object-cover">
+                    <label for="profileImageInput" class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center text-white text-xs opacity-0 hover:opacity-100 transition-opacity duration-300 cursor-pointer">
+                        <i class="fas fa-camera fa-md"></i> <span class="mr-1 text-xs">ویرایش</span>
+                    </label>
                 </div>
-                <h2 id="userProfileName" class="text-lg font-bold text-slate-800"></h2>
-                <p id="userProfileRole" class="text-sm font-medium text-sky-600"></p>
+                <input type="file" id="profileImageInput" accept="image/*" class="hidden">
+                <h3 id="sidebarProfileName" class="text-lg font-bold text-slate-800">در حال بارگذاری...</h3>
+                <p id="sidebarProfileRole" class="text-sm text-sky-600 font-semibold">...</p>
             </div>
-            <nav id="mainNav" class="flex flex-col space-y-2 flex-grow">
-                <a href="#dashboard" data-view="dashboard" class="main-nav-link active"><i class="fas fa-tachometer-alt"></i><span>داشبورد</span></a>
-                <a href="#profile" data-view="profile" class="main-nav-link"><i class="fas fa-user-circle"></i><span>پروفایل من</span></a>
+
+            <!-- Navigation Menu -->
+            <nav class="mt-6 flex-grow">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="#" class="flex items-center p-3 rounded-lg text-slate-700 hover:bg-slate-200 transition-colors">
+                            <i class="fas fa-tachometer-alt w-6 text-center text-slate-500"></i>
+                            <span class="mr-3 font-semibold">داشبورد</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center p-3 rounded-lg bg-sky-100 text-sky-700 transition-colors">
+                            <i class="fas fa-user-edit w-6 text-center"></i>
+                            <span class="mr-3 font-bold">پروفایل</span>
+                        </a>
+                    </li>
+                    <!-- Add other menu items here later -->
+                </ul>
             </nav>
-            <div class="mt-auto border-t border-slate-300 pt-4 space-y-2">
-                <a href="#settings" data-view="settings" class="main-nav-link"><i class="fas fa-cog"></i><span>تنظیمات</span></a>
-                <a href="#" id="logoutButton" class="main-nav-link hover:bg-red-100 hover:text-red-700"><i class="fas fa-sign-out-alt"></i><span>خروج از حساب</span></a>
+
+            <!-- Slideshow -->
+            <div class="slideshow-container">
+                <div class="slide">
+                    <img src="https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=2069&auto=format&fit=crop" alt="تصویر ۱">
+                </div>
+                <div class="slide">
+                    <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=1932&auto=format&fit=crop" alt="تصویر ۲">
+                </div>
+                <div class="slide">
+                    <img src="https://images.unsplash.com/photo-1573496774435-64ac2b53b558?q=80&w=2070&auto=format&fit=crop" alt="تصویر ۳">
+                </div>
+                <div class="slideshow-dots">
+                    <span class="dot active" onclick="currentSlide(1)"></span>
+                    <span class="dot" onclick="currentSlide(2)"></span>
+                    <span class="dot" onclick="currentSlide(3)"></span>
+                </div>
+            </div>
+
+            <!-- Settings & Logout -->
+            <div class="mt-auto pt-4 border-t border-slate-300 space-y-2">
+                 <a href="#" class="flex items-center p-3 rounded-lg text-slate-700 hover:bg-slate-200 transition-colors">
+                    <i class="fas fa-cog w-6 text-center text-slate-500"></i>
+                    <span class="mr-3 font-semibold">تنظیمات</span>
+                </a>
+                <a href="#" id="logoutButton" class="flex items-center p-3 rounded-lg text-red-600 hover:bg-red-100 transition-colors">
+                    <i class="fas fa-sign-out-alt w-6 text-center"></i>
+                    <span class="mr-3 font-semibold">خروج از سیستم</span>
+                </a>
             </div>
         </aside>
 
-        <main id="mainContentArea">
-            <header class="p-4 border-b border-slate-200 bg-white flex justify-between items-center">
-                <h1 id="pageTitle" class="text-xl font-bold text-slate-800">داشبورد</h1>
-            </header>
-            <div id="pageContent">
-                <div id="dashboard-view" class="content-view active">
-                    <!-- Dashboard content will be here -->
-                </div>
-                
-                <div id="profile-view" class="content-view">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-slate-800">پروفایل کاربری</h2>
-                        <div>
-                            <button id="editProfileButton" class="btn btn-primary"><i class="fas fa-edit"></i> ویرایش اطلاعات</button>
-                            <button id="saveProfileButton" class="btn btn-success hidden"><i class="fas fa-save"></i> ذخیره تغییرات</button>
-                            <button id="cancelEditButton" class="btn btn-secondary hidden ml-2"><i class="fas fa-times"></i> انصراف</button>
-                        </div>
-                    </div>
+        <!-- Mobile Menu Toggle -->
+        <button id="mobileMenuButton" class="md:hidden fixed top-4 right-4 z-[1001] bg-white p-2 rounded-full shadow-lg">
+            <i class="fas fa-bars text-xl text-slate-600"></i>
+        </button>
+        <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
-                    <div class="flex flex-col lg:flex-row gap-8">
-                        <div id="profileStepsNav" class="w-full lg:w-1/4">
-                            <!-- Step indicators will be populated by JS -->
+
+        <!-- Main Content Area -->
+        <main id="mainContent" class="content-area">
+            <h1 class="text-3xl font-extrabold text-slate-800 mb-2">ایستگاه کاری شما</h1>
+            <p class="text-slate-500 mb-8">اطلاعات پروفایل خود را مشاهده و ویرایش کنید.</p>
+
+            <div id="loadingSpinner" class="text-center py-20">
+                <div class="spinner mx-auto"></div>
+                <p class="mt-4 text-slate-600">در حال بارگذاری اطلاعات پروفایل...</p>
+            </div>
+
+            <div id="profileContent" class="hidden">
+                 <!-- Engineer Profile View -->
+                <div id="engineerProfileView" class="hidden">
+                    <!-- Personal Info -->
+                    <div class="accordion-item" data-section="personal">
+                        <div class="accordion-header">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-user-circle text-sky-600 text-xl"></i>
+                                <span>اطلاعات فردی و تماس</span>
+                            </div>
+                            <div class="flex items-center gap-4">
+                               <button class="btn btn-secondary btn-sm edit-button">
+                                   <i class="fas fa-pencil-alt"></i> ویرایش
+                               </button>
+                               <div class="edit-mode-controls space-x-2 space-x-reverse">
+                                   <button class="btn btn-secondary btn-sm cancel-button">انصراف</button>
+                                   <button class="btn btn-success btn-sm save-button">ذخیره</button>
+                               </div>
+                               <i class="fas fa-chevron-down accordion-icon"></i>
+                            </div>
                         </div>
-                        
-                        <div class="flex-grow">
-                            <form id="profileForm">
-                                <!-- Form steps will be populated by JS -->
+                        <div class="accordion-content">
+                            <form id="engineerPersonalForm" class="view-mode">
+                                <!-- Step 1 & 2 fields from dashboard.html -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+                                    <div>
+                                        <label for="engineerFirstName" class="block text-sm font-medium text-slate-700 mb-1 required">نام</label>
+                                        <input type="text" id="engineerFirstName" name="engineerFirstName" required class="form-input mt-1 block w-full sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label for="engineerLastName" class="block text-sm font-medium text-slate-700 mb-1 required">نام خانوادگی</label>
+                                        <input type="text" id="engineerLastName" name="engineerLastName" required class="form-input mt-1 block w-full sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label for="engineerNationalId" class="block text-sm font-medium text-slate-700 mb-1 required">کدملی</label>
+                                        <input type="text" id="engineerNationalId" name="engineerNationalId" required class="form-input mt-1 block w-full sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label for="engineerDob" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ تولد</label>
+                                        <input type="text" id="engineerDob" required class="form-input mt-1 block w-full sm:text-sm jalali-datepicker-display" readonly>
+                                        <input type="hidden" name="engineerDob" class="jalali-datepicker-value">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-1 required">جنسیت</label>
+                                        <select id="engineerGender" name="engineerGender" required class="form-select mt-1 block w-full sm:text-sm">
+                                            <option value="مرد">مرد</option>
+                                            <option value="زن">زن</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="engineerMobile" class="block text-sm font-medium text-slate-700 mb-1 required">تلفن موبایل</label>
+                                        <input type="tel" id="engineerMobile" name="engineerMobile" required class="form-input mt-1 block w-full sm:text-sm">
+                                    </div>
+                                     <div>
+                                        <label for="engineerPhone" class="block text-sm font-medium text-slate-700 mb-1 required">شماره تلفن ثابت</label>
+                                        <input type="tel" id="engineerPhone" name="engineerPhone" required class="form-input mt-1 block w-full sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label for="engineerPostalCode" class="block text-sm font-medium text-slate-700 mb-1 required">کدپستی</label>
+                                        <input type="text" id="engineerPostalCode" name="engineerPostalCode" required class="form-input mt-1 block w-full sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label for="engineerProvince" class="block text-sm font-medium text-slate-700 mb-1 required">استان سکونت</label>
+                                        <select id="engineerProvince" name="engineerProvince" required class="form-select mt-1 block w-full sm:text-sm">
+                                            <!-- Options will be populated by JS -->
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="engineerCity" class="block text-sm font-medium text-slate-700 mb-1">شهر سکونت</label>
+                                        <input type="text" id="engineerCity" name="engineerCity" class="form-input mt-1 block w-full sm:text-sm">
+                                    </div>
+                                </div>
+                                <div class="mt-8">
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">آدرس محل سکونت</label>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                                        <textarea id="engineerResidentialAddress" name="engineerResidentialAddress" rows="4" class="form-textarea mt-1 block w-full sm:text-sm min-h-[220px]"></textarea>
+                                        <div id="engineerResidentialMap" class="map-container min-h-[220px]"></div>
+                                    </div>
+                                    <div id="engineerResidentialMapInfo" class="mt-2 p-3 text-xs map-info-display rounded-md"></div>
+                                    <input type="hidden" id="engineerResidentialLat" name="engineerResidentialLat">
+                                    <input type="hidden" id="engineerResidentialLng" name="engineerResidentialLng">
+                                </div>
                             </form>
                         </div>
                     </div>
+
+                    <!-- Professional Info -->
+                    <div class="accordion-item" data-section="professional">
+                        <div class="accordion-header">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-id-card text-sky-600 text-xl"></i>
+                                <span>اطلاعات حرفه‌ای</span>
+                            </div>
+                             <div class="flex items-center gap-4">
+                               <button class="btn btn-secondary btn-sm edit-button">
+                                   <i class="fas fa-pencil-alt"></i> ویرایش
+                               </button>
+                               <div class="edit-mode-controls space-x-2 space-x-reverse">
+                                   <button class="btn btn-secondary btn-sm cancel-button">انصراف</button>
+                                   <button class="btn btn-success btn-sm save-button">ذخیره</button>
+                               </div>
+                               <i class="fas fa-chevron-down accordion-icon"></i>
+                            </div>
+                        </div>
+                        <div class="accordion-content">
+                            <form id="engineerProfessionalForm" class="view-mode">
+                                <!-- Step 3 fields from dashboard.html -->
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6">
+                                    <div>
+                                        <label for="licenseFirstIssueDate" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ اولین صدور پروانه</label>
+                                        <input type="text" id="licenseFirstIssueDate" required class="form-input mt-1 block w-full sm:text-sm jalali-datepicker-display" readonly>
+                                        <input type="hidden" name="licenseFirstIssueDate" class="jalali-datepicker-value">
+                                    </div>
+                                    <div>
+                                        <label for="licenseStartDate" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ شروع اعتبار پروانه</label>
+                                        <input type="text" id="licenseStartDate" required class="form-input mt-1 block w-full sm:text-sm jalali-datepicker-display" readonly>
+                                        <input type="hidden" name="licenseStartDate" class="jalali-datepicker-value">
+                                    </div>
+                                    <div>
+                                        <label for="licenseValidity" class="block text-sm font-medium text-slate-700 mb-1 required">مدت اعتبار پروانه (سال)</label>
+                                        <input type="number" id="licenseValidity" name="licenseValidity" min="1" required class="form-input mt-1 block w-full sm:text-sm">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6 pt-6">
+                                    <div>
+                                        <label for="licenseNumber" class="block text-sm font-medium text-slate-700 mb-1 required">شماره پروانه</label>
+                                        <input type="text" id="licenseNumber" name="licenseNumber" required class="form-input mt-1 block w-full sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label for="membershipNumber" class="block text-sm font-medium text-slate-700 mb-1 required">شماره عضویت</label>
+                                        <input type="text" id="membershipNumber" name="membershipNumber" required class="form-input mt-1 block w-full sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label for="licenseActivityProvince" class="block text-sm font-medium text-slate-700 mb-1 required">استان فعالیت پروانه</label>
+                                        <select id="licenseActivityProvince" name="licenseActivityProvince" required class="form-select mt-1 block w-full sm:text-sm">
+                                            <!-- Options will be populated by JS -->
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-5">
+                                    <!-- Design License -->
+                                    <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
+                                        <div class="flex items-center space-x-2 space-x-reverse mb-1">
+                                            <input type="checkbox" id="hasDesignLicense" name="hasDesignLicense" class="h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500">
+                                            <label for="hasDesignLicense" class="text-sm font-medium text-slate-700">پروانه طراحی</label>
+                                        </div>
+                                        <select id="designLicenseGrade" name="designLicenseGrade" class="form-select block w-full sm:text-sm mb-2">
+                                            <option value="">انتخاب پایه</option>
+                                            <option value="3">پایه ۳</option><option value="2">پایه ۲</option><option value="1">پایه ۱</option><option value="arshad">پایه ارشد</option>
+                                        </select>
+                                        <div class="flex flex-col space-y-1 text-xs">
+                                            <label><input type="radio" name="designExecutorType" value="individual" class="form-radio h-3 w-3 text-sky-600"><span class="mr-1 ml-1">حقیقی</span></label>
+                                            <label><input type="radio" name="designExecutorType" value="legal" class="form-radio h-3 w-3 text-sky-600"><span class="mr-1 ml-1">حقوقی</span></label>
+                                            <label><input type="radio" name="designExecutorType" value="none" class="form-radio h-3 w-3 text-sky-600"><span class="mr-1 ml-1">فعالیت ندارم</span></label>
+                                        </div>
+                                    </div>
+                                    <!-- Supervision License -->
+                                    <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
+                                        <div class="flex items-center space-x-2 space-x-reverse mb-1">
+                                            <input type="checkbox" id="hasSupervisionLicense" name="hasSupervisionLicense" class="h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500">
+                                            <label for="hasSupervisionLicense" class="text-sm font-medium text-slate-700">پروانه نظارت</label>
+                                        </div>
+                                        <select id="supervisionLicenseGrade" name="supervisionLicenseGrade" class="form-select block w-full sm:text-sm mb-2">
+                                            <option value="">انتخاب پایه</option>
+                                            <option value="3">پایه ۳</option><option value="2">پایه ۲</option><option value="1">پایه ۱</option><option value="arshad">پایه ارشد</option>
+                                        </select>
+                                        <div class="flex flex-col space-y-1 text-xs">
+                                            <label><input type="radio" name="supervisionExecutorType" value="individual" class="form-radio h-3 w-3 text-sky-600"><span class="mr-1 ml-1">حقیقی</span></label>
+                                            <label><input type="radio" name="supervisionExecutorType" value="legal" class="form-radio h-3 w-3 text-sky-600"><span class="mr-1 ml-1">حقوقی</span></label>
+                                            <label><input type="radio" name="supervisionExecutorType" value="none" class="form-radio h-3 w-3 text-sky-600"><span class="mr-1 ml-1">فعالیت ندارم</span></label>
+                                        </div>
+                                    </div>
+                                    <!-- Execution License -->
+                                    <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
+                                        <div class="flex items-center space-x-2 space-x-reverse mb-1">
+                                            <input type="checkbox" id="hasExecutionLicense" name="hasExecutionLicense" class="h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500">
+                                            <label for="hasExecutionLicense" class="text-sm font-medium text-slate-700">پروانه اجرا</label>
+                                        </div>
+                                        <select id="executionLicenseGrade" name="executionLicenseGrade" class="form-select block w-full sm:text-sm mb-2">
+                                            <option value="">انتخاب پایه</option>
+                                            <option value="3">پایه ۳</option><option value="2">پایه ۲</option><option value="1">پایه ۱</option><option value="arshad">پایه ارشد</option>
+                                        </select>
+                                        <div class="flex flex-col space-y-1 text-xs">
+                                            <label><input type="radio" name="executionExecutorType" value="individual" class="form-radio h-3 w-3 text-sky-600"><span class="mr-1 ml-1">حقیقی</span></label>
+                                            <label><input type="radio" name="executionExecutorType" value="legal" class="form-radio h-3 w-3 text-sky-600"><span class="mr-1 ml-1">حقوقی</span></label>
+                                            <label><input type="radio" name="executionExecutorType" value="none" class="form-radio h-3 w-3 text-sky-600"><span class="mr-1 ml-1">فعالیت ندارم</span></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Company / Office Info -->
+                                <div id="legalExecutorFields" class="mt-8 space-y-6 hidden bg-slate-100 p-5 rounded-lg border">
+                                    <!-- Company fields -->
+                                </div>
+                                <div id="individualExecutorFieldsContainer" class="hidden mt-8">
+                                    <!-- Office fields -->
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Documents -->
+                    <div class="accordion-item" data-section="documents">
+                        <div class="accordion-header">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-file-alt text-sky-600 text-xl"></i>
+                                <span>مدارک</span>
+                            </div>
+                            <div class="flex items-center gap-4">
+                               <button class="btn btn-secondary btn-sm edit-button">
+                                   <i class="fas fa-pencil-alt"></i> ویرایش
+                               </button>
+                               <div class="edit-mode-controls space-x-2 space-x-reverse">
+                                   <button class="btn btn-secondary btn-sm cancel-button">انصراف</button>
+                                   <button class="btn btn-success btn-sm save-button">ذخیره</button>
+                               </div>
+                               <i class="fas fa-chevron-down accordion-icon"></i>
+                            </div>
+                        </div>
+                        <div class="accordion-content">
+                             <form id="engineerDocumentsForm" class="view-mode">
+                                <!-- Step 4 fields from dashboard.html -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+                                    <div>
+                                        <label for="workPermitPdf" class="block text-sm font-medium text-slate-700 mb-1 required">پی دی اف پروانه اشتغال بکار</label>
+                                        <input type="file" id="workPermitPdf" name="workPermitPdf" accept="application/pdf" class="mt-1 block w-full text-sm">
+                                        <div id="workPermitPdfPreviewContainer" class="mt-2 file-preview-container"></div>
+                                    </div>
+                                    <div>
+                                        <label for="nationalIdCardImageEngineer" class="block text-sm font-medium text-slate-700 mb-1 required">تصویر کارت ملی</label>
+                                        <input type="file" id="nationalIdCardImageEngineer" name="nationalIdCardImageEngineer" accept="image/*" class="mt-1 block w-full text-sm">
+                                        <div id="nationalIdCardImageEngineerPreviewContainer" class="mt-2 file-preview-container"></div>
+                                    </div>
+                                </div>
+                             </form>
+                        </div>
+                    </div>
                 </div>
 
-                <div id="settings-view" class="content-view">
-                    <h2 class="text-lg font-semibold text-slate-700 mb-4">تنظیمات</h2>
+                <!-- Employer Profile View -->
+                <div id="employerProfileView" class="hidden">
+                    <!-- Personal Info -->
+                    <div class="accordion-item" data-section="personal">
+                        <div class="accordion-header">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-user-tie text-sky-600 text-xl"></i>
+                                <span>اطلاعات فردی و تماس</span>
+                            </div>
+                            <div class="flex items-center gap-4">
+                               <button class="btn btn-secondary btn-sm edit-button">
+                                   <i class="fas fa-pencil-alt"></i> ویرایش
+                               </button>
+                               <div class="edit-mode-controls space-x-2 space-x-reverse">
+                                   <button class="btn btn-secondary btn-sm cancel-button">انصراف</button>
+                                   <button class="btn btn-success btn-sm save-button">ذخیره</button>
+                               </div>
+                               <i class="fas fa-chevron-down accordion-icon"></i>
+                            </div>
+                        </div>
+                        <div class="accordion-content">
+                            <form id="employerPersonalForm" class="view-mode">
+                                <!-- Step 1 & 2 fields from dashboard.html -->
+                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+                                    <div>
+                                        <label for="employerFirstName" class="block text-sm font-medium text-slate-700 mb-1 required">نام</label>
+                                        <input type="text" id="employerFirstName" name="employerFirstName" required class="form-input mt-1 block w-full sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label for="employerLastName" class="block text-sm font-medium text-slate-700 mb-1 required">نام خانوادگی</label>
+                                        <input type="text" id="employerLastName" name="employerLastName" required class="form-input mt-1 block w-full sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label for="employerNationalId" class="block text-sm font-medium text-slate-700 mb-1 required">کدملی</label>
+                                        <input type="text" id="employerNationalId" name="employerNationalId" required class="form-input mt-1 block w-full sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label for="employerDob" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ تولد</label>
+                                        <input type="text" id="employerDob" required class="form-input mt-1 block w-full sm:text-sm jalali-datepicker-display" readonly>
+                                        <input type="hidden" name="employerDob" class="jalali-datepicker-value">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-1 required">جنسیت</label>
+                                        <select id="employerGender" name="employerGender" required class="form-select mt-1 block w-full sm:text-sm">
+                                            <option value="مرد">مرد</option>
+                                            <option value="زن">زن</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="employerMobile" class="block text-sm font-medium text-slate-700 mb-1 required">تلفن موبایل</label>
+                                        <input type="tel" id="employerMobile" name="employerMobile" required class="form-input mt-1 block w-full sm:text-sm">
+                                    </div>
+                                     <div>
+                                        <label for="employerPhone" class="block text-sm font-medium text-slate-700 mb-1 required">شماره تماس</label>
+                                        <input type="tel" id="employerPhone" name="employerPhone" required class="form-input mt-1 block w-full sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label for="employerPostalCode" class="block text-sm font-medium text-slate-700 mb-1 required">کدپستی</label>
+                                        <input type="text" id="employerPostalCode" name="employerPostalCode" required class="form-input mt-1 block w-full sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label for="employerProvince" class="block text-sm font-medium text-slate-700 mb-1 required">استان سکونت</label>
+                                        <select id="employerProvince" name="employerProvince" required class="form-select mt-1 block w-full sm:text-sm">
+                                            <!-- Options will be populated by JS -->
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="employerCity" class="block text-sm font-medium text-slate-700 mb-1">شهر سکونت</label>
+                                        <input type="text" id="employerCity" name="employerCity" class="form-input mt-1 block w-full sm:text-sm">
+                                    </div>
+                                </div>
+                                <div class="mt-8">
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">آدرس</label>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                                        <textarea id="employerAddress" name="employerAddress" rows="4" class="form-textarea mt-1 block w-full sm:text-sm min-h-[220px]"></textarea>
+                                        <div id="employerAddressMap" class="map-container min-h-[220px]"></div>
+                                    </div>
+                                    <div id="employerAddressMapInfo" class="mt-2 p-3 text-xs map-info-display rounded-md"></div>
+                                    <input type="hidden" id="employerAddressLat" name="employerAddressLat">
+                                    <input type="hidden" id="employerAddressLng" name="employerAddressLng">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Company Info -->
+                    <div class="accordion-item" data-section="company">
+                        <div class="accordion-header">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-building text-sky-600 text-xl"></i>
+                                <span>اطلاعات شرکت</span>
+                            </div>
+                            <div class="flex items-center gap-4">
+                               <button class="btn btn-secondary btn-sm edit-button">
+                                   <i class="fas fa-pencil-alt"></i> ویرایش
+                               </button>
+                               <div class="edit-mode-controls space-x-2 space-x-reverse">
+                                   <button class="btn btn-secondary btn-sm cancel-button">انصراف</button>
+                                   <button class="btn btn-success btn-sm save-button">ذخیره</button>
+                               </div>
+                               <i class="fas fa-chevron-down accordion-icon"></i>
+                            </div>
+                        </div>
+                        <div class="accordion-content">
+                            <form id="employerCompanyForm" class="view-mode">
+                                <!-- Step 3 fields from dashboard.html -->
+                                 <div class="flex items-center mb-4">
+                                    <input type="checkbox" id="employerHasCompany" name="employerHasCompany" class="h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500">
+                                    <label for="employerHasCompany" class="ml-2 mr-2 block text-sm text-slate-700">شرکت دارم</label>
+                                </div>
+                                <div id="employerCompanyFields" class="hidden space-y-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                                        <div>
+                                            <label for="employerCompanyName" class="block text-sm font-medium text-slate-700 mb-1 required">نام شرکت</label>
+                                            <input type="text" id="employerCompanyName" name="employerCompanyName" class="form-input mt-1 block w-full sm:text-sm">
+                                        </div>
+                                        <div>
+                                            <label for="employerCompanyRegNumber" class="block text-sm font-medium text-slate-700 mb-1 required">شماره ثبت شرکت</label>
+                                            <input type="text" id="employerCompanyRegNumber" name="employerCompanyRegNumber" class="form-input mt-1 block w-full sm:text-sm">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-1">آدرس شرکت</label>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                                            <textarea id="employerCompanyAddress" name="employerCompanyAddress" rows="4" class="form-textarea mt-1 block w-full sm:text-sm min-h-[220px]"></textarea>
+                                            <div id="employerCompanyMap" class="map-container min-h-[220px]"></div>
+                                        </div>
+                                        <div id="employerCompanyMapInfo" class="mt-2 p-3 text-xs map-info-display rounded-md"></div>
+                                        <input type="hidden" id="employerCompanyAddressLat" name="employerCompanyAddressLat">
+                                        <input type="hidden" id="employerCompanyAddressLng" name="employerCompanyAddressLng">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Documents -->
+                    <div class="accordion-item" data-section="documents">
+                        <div class="accordion-header">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-id-badge text-sky-600 text-xl"></i>
+                                <span>مدارک</span>
+                            </div>
+                           <div class="flex items-center gap-4">
+                               <button class="btn btn-secondary btn-sm edit-button">
+                                   <i class="fas fa-pencil-alt"></i> ویرایش
+                               </button>
+                               <div class="edit-mode-controls space-x-2 space-x-reverse">
+                                   <button class="btn btn-secondary btn-sm cancel-button">انصراف</button>
+                                   <button class="btn btn-success btn-sm save-button">ذخیره</button>
+                               </div>
+                               <i class="fas fa-chevron-down accordion-icon"></i>
+                            </div>
+                        </div>
+                        <div class="accordion-content">
+                             <form id="employerDocumentsForm" class="view-mode">
+                                <!-- Step 4 fields from dashboard.html -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+                                    <div>
+                                        <label for="employerNationalIdCardImage" class="block text-sm font-medium text-slate-700 mb-1 required">تصویر کارت ملی</label>
+                                        <input type="file" id="employerNationalIdCardImage" name="employerNationalIdCardImage" accept="image/*" class="mt-1 block w-full text-sm">
+                                        <div id="employerNationalIdCardImagePreviewContainer" class="mt-2 file-preview-container"></div>
+                                    </div>
+                                    <div>
+                                        <label for="employerOtherDocs" class="block text-sm font-medium text-slate-700 mb-1">رزومه کاری (اختیاری)</label>
+                                        <input type="file" id="employerOtherDocs" name="employerOtherDocs" accept="image/*,application/pdf" class="mt-1 block w-full text-sm">
+                                        <div id="employerOtherDocsPreviewContainer" class="mt-2 file-preview-container"></div>
+                                    </div>
+                                </div>
+                             </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
-
-        <aside id="advertisementSidebar" class="p-5 space-y-6">
-            <!-- Ads sidebar content -->
-        </aside>
     </div>
 
+    <!-- Message Modal -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <p id="modalMessageText" class="text-slate-700 text-base"></p>
+            <button id="modalCloseButton" class="mt-6 btn btn-primary w-full sm:w-auto">متوجه شدم</button>
+        </div>
+    </div>
+
+    <!-- Cropper Modal -->
     <div id="cropperModal" class="modal">
-        <!-- Cropper modal content -->
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-4">برش و تنظیم عکس پروفایل</h3>
+            <div id="cropperContainer">
+                <img id="imageToCrop" src="">
+            </div>
+            <div class="mt-6 flex justify-center gap-4">
+                <button id="cancelCropButton" class="btn btn-secondary">انصراف</button>
+                <button id="cropButton" class="btn btn-primary">برش و ذخیره</button>
+            </div>
+        </div>
     </div>
-    <input type="file" id="profileImageInput" class="hidden" accept="image/*">
 
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // --- CONFIGURATION ---
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwURZkNTH6OZ78JqPWXqOBeAdWsgrj2lhPn16Yn0jdJ537qCioVAsofUJrbV6qvvG0N/exec';
-
-        // --- DOM Elements ---
-        const loadingModal = document.getElementById('loadingModal');
-        const appContainer = document.getElementById('appContainer');
-        const userProfileImage = document.getElementById('userProfileImage');
-        const userProfileName = document.getElementById('userProfileName');
-        const userProfileRole = document.getElementById('userProfileRole');
-        const mainNav = document.getElementById('mainNav');
-        const contentViews = document.querySelectorAll('.content-view');
-        const editProfileButton = document.getElementById('editProfileButton');
-        const saveProfileButton = document.getElementById('saveProfileButton');
-        const cancelEditButton = document.getElementById('cancelEditButton');
-        const profileForm = document.getElementById('profileForm');
-        const profileStepsNav = document.getElementById('profileStepsNav');
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwURZkNTH6OZ78JqPWXqOBeAdWsgrj2lhPn16Yn0jdJ537qCioVAsofUJrbV6qvvG0N/exec';
         
-        // --- State ---
+        // --- STATE ---
         let currentUserEmail = '';
-        let originalUserData = {};
-        let isEditMode = false;
-        let currentProfileStep = 1;
+        let currentUserData = null;
+        let cropper = null;
         let maps = {};
+        
+        // --- DOM ELEMENTS ---
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const profileContent = document.getElementById('profileContent');
+        const sidebarProfileName = document.getElementById('sidebarProfileName');
+        const sidebarProfileRole = document.getElementById('sidebarProfileRole');
+        const sidebarProfileImage = document.getElementById('sidebarProfileImage');
+        const profileImageInput = document.getElementById('profileImageInput');
+        const cropperModal = document.getElementById('cropperModal');
+        const imageToCrop = document.getElementById('imageToCrop');
+
+        const provinceOptions = [
+            "آذربایجان شرقی", "آذربایجان غربی", "اردبیل", "اصفهان", "البرز", "ایلام", "بوشهر", "تهران", "چهارمحال و بختیاری", "خراسان جنوبی", "خراسان رضوی", "خراسان شمالی", "خوزستان", "زنجان", "سمنان", "سیستان و بلوچستان", "فارس", "قزوین", "قم", "کردستان", "کرمان", "کرمانشاه", "کهگیلویه و بویراحمد", "گلستان", "گیلان", "لرستان", "مازندران", "مرکزی", "هرمزگان", "همدان", "یزد"
+        ];
+        const licenseProvinceOptions = ["سراسری (کشوری)", ...provinceOptions];
 
         // --- INITIALIZATION ---
-        async function initializeWorkstation() {
-            loadingModal.style.display = 'flex';
-            const urlParams = new URLSearchParams(window.location.search);
-            currentUserEmail = urlParams.get('email');
+        function init() {
+            const params = new URLSearchParams(window.location.search);
+            currentUserEmail = params.get('email');
             if (!currentUserEmail) {
-                loadingModal.innerHTML = '<p>خطا: ایمیل کاربر مشخص نشده است.</p>';
+                showError("ایمیل کاربر مشخص نشده است. لطفاً دوباره وارد شوید.");
                 return;
             }
+            
+            setupEventListeners();
+            fetchUserProfile();
+            initSlideshow();
+            initializeDatePickers();
+            populateSelects();
+        }
+
+        function populateSelects() {
+            const selectsToPopulate = [
+                { id: 'engineerProvince', options: provinceOptions },
+                { id: 'employerProvince', options: provinceOptions },
+                { id: 'licenseActivityProvince', options: licenseProvinceOptions }
+            ];
+            selectsToPopulate.forEach(item => {
+                const selectElement = document.getElementById(item.id);
+                if(selectElement) {
+                    item.options.forEach(opt => {
+                        const option = document.createElement('option');
+                        option.value = opt;
+                        option.textContent = opt;
+                        selectElement.appendChild(option);
+                    });
+                }
+            });
+        }
+
+        async function fetchUserProfile() {
+            loadingSpinner.style.display = 'block';
+            profileContent.style.display = 'none';
 
             try {
-                const response = await fetch(`${SCRIPT_URL}?func=getUserProfile&email=${encodeURIComponent(currentUserEmail)}`);
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getUserProfile&email=${encodeURIComponent(currentUserEmail)}`);
+                if (!response.ok) throw new Error('خطا در ارتباط با سرور');
+                
                 const result = await response.json();
-
-                if (result.status === "success" && result.data?.stepsData?.step1) {
-                    originalUserData = result.data;
-                    populateStaticInfo(originalUserData);
-                    buildProfileForm(originalUserData);
-                    populateProfileForm(originalUserData);
-                    setFormEditState(false);
-                    appContainer.classList.remove('hidden');
+                if (result.success && result.data) {
+                    currentUserData = result.data;
+                    displayUserProfile();
                 } else {
-                    throw new Error(result.message || 'پاسخ سرور معتبر نیست یا اطلاعات پروفایل یافت نشد.');
+                    throw new Error(result.message || 'خطا در دریافت اطلاعات پروفایل');
                 }
             } catch (error) {
-                console.error("Initialization failed:", error);
-                loadingModal.innerHTML = `<p>خطا در بارگذاری اطلاعات: ${error.message}</p>`;
+                showError(error.message);
             } finally {
-                loadingModal.style.display = 'none';
+                loadingSpinner.style.display = 'none';
             }
         }
 
-        function populateStaticInfo(data) {
-            const profilePicUrl = data.files?.applicantImage?.fileUrl;
-            userProfileImage.src = convertGoogleDriveUrl(profilePicUrl) || 'https://placehold.co/128x128/EBF4FF/2196F3?text=User';
-            const firstName = data.stepsData?.step1?.engineerFirstName || data.stepsData?.step1?.employerFirstName || '';
-            const lastName = data.stepsData?.step1?.engineerLastName || data.stepsData?.step1?.employerLastName || '';
-            userProfileName.textContent = `${firstName} ${lastName}`;
-            userProfileRole.textContent = data.role === 'engineer' ? 'مهندس' : 'کارفرما';
-        }
+        function displayUserProfile() {
+            const role = currentUserData.role;
+            const stepsData = currentUserData.stepsData;
+            const files = currentUserData.files;
 
-        // --- PROFILE FORM BUILDING & MANAGEMENT ---
-        function buildProfileForm(data) {
-            const role = data.role;
-            const stepDefs = getStepDefinitions(role);
-
-            profileStepsNav.innerHTML = '';
-            profileForm.innerHTML = '';
-
-            stepDefs.forEach(step => {
-                const indicator = document.createElement('div');
-                indicator.className = 'profile-step-indicator';
-                indicator.dataset.step = step.id;
-                indicator.innerHTML = `<div class="step-icon"><i class="fas ${step.icon}"></i></div><span>${step.label}</span>`;
-                indicator.addEventListener('click', () => showProfileStep(step.id));
-                profileStepsNav.appendChild(indicator);
-
-                const stepContainer = document.createElement('div');
-                stepContainer.id = `profile-step-${step.id}`;
-                stepContainer.className = 'profile-form-step';
-                stepContainer.innerHTML = step.contentHtml;
-                profileForm.appendChild(stepContainer);
-            });
-            
-            initializeDatePickers('#profileForm');
-            showProfileStep(1);
-        }
-
-        function showProfileStep(stepId) {
-            currentProfileStep = stepId;
-            document.querySelectorAll('.profile-form-step').forEach(s => s.classList.remove('active'));
-            document.getElementById(`profile-step-${stepId}`).classList.add('active');
-
-            document.querySelectorAll('.profile-step-indicator').forEach(ind => {
-                ind.classList.toggle('active', parseInt(ind.dataset.step) === stepId);
-            });
-            
-            initializeMapsForSection(stepId, originalUserData.role);
-        }
-
-        function populateProfileForm(data) {
-            const role = data.role;
-            const prefix = role === 'engineer' ? 'engineer' : 'employer';
-            
-            // Populate all fields based on originalUserData
-            // Step 1
-            const step1 = data.stepsData?.step1 || {};
-            setInputValue(`profile-${prefix}FirstName`, step1.engineerFirstName || step1.employerFirstName);
-            setInputValue(`profile-${prefix}LastName`, step1.engineerLastName || step1.employerLastName);
-            setInputValue(`profile-${prefix}NationalId`, step1.engineerNationalId || step1.employerNationalId);
-            setInputValue(`profile-${prefix}Dob`, step1.engineerDob || step1.employerDob, true);
-            setInputValue(`profile-${prefix}Gender`, step1.engineerGender || step1.employerGender);
-            setInputValue(`profile-${prefix}Mobile`, step1.engineerMobile || step1.employerMobile);
-
-            // Step 2
-            const step2 = data.stepsData?.step2 || {};
-            setInputValue(`profile-${prefix}Phone`, step2.engineerPhone || step2.employerPhone);
-            setInputValue(`profile-${prefix}PostalCode`, step2.engineerPostalCode || step2.employerPostalCode);
-            setInputValue(`profile-${prefix}Province`, step2.engineerProvince || step2.employerProvince);
-            setInputValue(`profile-${prefix}City`, step2.engineerCity || step2.employerCity);
-            setInputValue(`profile-${prefix}ResidentialAddress`, step2.engineerResidentialAddress || step2.employerAddress);
-            setInputValue(`profile-${prefix}ResidentialLat`, step2.engineerResidentialLat || step2.employerAddressLat);
-            setInputValue(`profile-${prefix}ResidentialLng`, step2.engineerResidentialLng || step2.employerAddressLng);
-
-            // Step 3
-            const step3 = data.stepsData?.step3 || {};
+            // Show correct view based on role
+            const engineerView = document.getElementById('engineerProfileView');
+            const employerView = document.getElementById('employerView');
             if (role === 'engineer') {
-                setInputValue('profile-licenseFirstIssueDate', step3.licenseFirstIssueDate, true);
-                setInputValue('profile-licenseStartDate', step3.licenseStartDate, true);
-                setInputValue('profile-licenseValidity', step3.licenseValidity);
-                setInputValue('profile-licenseNumber', step3.licenseNumber);
-                setInputValue('profile-membershipNumber', step3.membershipNumber);
-                setInputValue('profile-licenseActivityProvince', step3.licenseActivityProvince);
-                setInputValue('profile-hasDesignLicense', step3.hasDesignLicense);
-                setInputValue('profile-designLicenseGrade', step3.designLicenseGrade);
-                setInputValue('profile-designExecutorType', step3.designExecutorType);
-                // ... and so on for all engineer fields
+                document.getElementById('engineerProfileView').classList.remove('hidden');
+                document.getElementById('employerProfileView').classList.add('hidden');
+                populateEngineerForm(stepsData, files);
+            } else if (role === 'employer') {
+                document.getElementById('employerProfileView').classList.remove('hidden');
+                document.getElementById('engineerProfileView').classList.add('hidden');
+                populateEmployerForm(stepsData, files);
             } else {
-                setInputValue('profile-employerHasCompany', step3.employerHasCompany);
-                setInputValue('profile-employerCompanyName', step3.employerCompanyName);
-                setInputValue('profile-employerCompanyRegNumber', step3.employerCompanyRegNumber);
-                setInputValue('profile-employerCompanyAddress', step3.employerCompanyAddress);
-                setInputValue('profile-employerCompanyAddressLat', step3.employerCompanyAddressLat);
-                setInputValue('profile-employerCompanyAddressLng', step3.employerCompanyAddressLng);
+                 showError("نقش کاربر نامشخص است.");
+                 return;
             }
-            
-            // Step 4
-            const docContainer = document.getElementById('profile-step-4')?.querySelector('.document-links');
-            if (docContainer) {
-                docContainer.innerHTML = '';
-                const files = data.files || {};
-                const fileKeys = role === 'engineer' 
-                    ? { workPermitPdf: 'پروانه اشتغال', nationalIdCardImageEngineer: 'کارت ملی' }
-                    : { employerNationalIdCardImage: 'کارت ملی', employerOtherDocs: 'رزومه' };
-                
-                for (const key in fileKeys) {
-                    if (files[key]?.fileUrl) {
-                        const link = document.createElement('a');
-                        link.href = files[key].fileUrl;
-                        link.target = '_blank';
-                        link.className = 'text-sky-600 hover:underline block mb-2';
-                        link.textContent = `مشاهده ${fileKeys[key]}`;
-                        docContainer.appendChild(link);
-                    }
-                }
+
+            // Populate sidebar
+            const personalInfo = stepsData.step1 || {};
+            const firstName = personalInfo.engineerFirstName || personalInfo.employerFirstName || '';
+            const lastName = personalInfo.engineerLastName || personalInfo.employerLastName || '';
+            sidebarProfileName.textContent = `${firstName} ${lastName}`;
+            sidebarProfileRole.textContent = role === 'engineer' ? 'مهندس' : 'کارفرما';
+            if (files.applicantImage && files.applicantImage.fileUrl) {
+                sidebarProfileImage.src = files.applicantImage.fileUrl;
             }
+
+            profileContent.classList.remove('hidden');
         }
         
-        function setFormEditState(isEditing) {
-            isEditMode = isEditing;
-            profileForm.querySelectorAll('input, select, textarea').forEach(el => {
-                el.disabled = !isEditing;
-            });
-            editProfileButton.classList.toggle('hidden', isEditing);
-            saveProfileButton.classList.toggle('hidden', !isEditing);
-            cancelEditButton.classList.toggle('hidden', !isEditing);
+        function populateEngineerForm(steps, files) {
+            const s1 = steps.step1 || {};
+            const s2 = steps.step2 || {};
+            const s3 = steps.step3 || {};
+            
+            // Personal & Contact
+            setInputValue('engineerFirstName', s1.engineerFirstName);
+            setInputValue('engineerLastName', s1.engineerLastName);
+            setInputValue('engineerNationalId', s1.engineerNationalId);
+            setInputValue('engineerDob', s1.engineerDob, true);
+            setInputValue('engineerGender', s1.engineerGender);
+            setInputValue('engineerMobile', s1.engineerMobile);
+            setInputValue('engineerPhone', s2.engineerPhone);
+            setInputValue('engineerPostalCode', s2.engineerPostalCode);
+            setInputValue('engineerProvince', s2.engineerProvince);
+            setInputValue('engineerCity', s2.engineerCity);
+            setInputValue('engineerResidentialAddress', s2.engineerResidentialAddress);
+            initMapWithData('engineerResidentialMap', 'engineerResidentialLat', 'engineerResidentialLng', s2.engineerResidentialLat, s2.engineerResidentialLng);
+            
+            // Professional
+            setInputValue('licenseFirstIssueDate', s3.licenseFirstIssueDate, true);
+            setInputValue('licenseStartDate', s3.licenseStartDate, true);
+            setInputValue('licenseValidity', s3.licenseValidity);
+            setInputValue('licenseNumber', s3.licenseNumber);
+            setInputValue('membershipNumber', s3.membershipNumber);
+            setInputValue('licenseActivityProvince', s3.licenseActivityProvince);
+            
+            // Licenses
+            setCheckboxAndSelect('hasDesignLicense', 'designLicenseGrade', s3.hasDesignLicense, s3.designLicenseGrade);
+            setRadioValue('designExecutorType', s3.designExecutorType);
+            setCheckboxAndSelect('hasSupervisionLicense', 'supervisionLicenseGrade', s3.hasSupervisionLicense, s3.supervisionLicenseGrade);
+            setRadioValue('supervisionExecutorType', s3.supervisionExecutorType);
+            setCheckboxAndSelect('hasExecutionLicense', 'executionLicenseGrade', s3.hasExecutionLicense, s3.executionLicenseGrade);
+            setRadioValue('executionExecutorType', s3.executionExecutorType);
+            
+            // Documents
+            setFilePreview('workPermitPdfPreviewContainer', files.workPermitPdf?.fileUrl);
+            setFilePreview('nationalIdCardImageEngineerPreviewContainer', files.nationalIdCardImageEngineer?.fileUrl);
         }
 
-        editProfileButton.addEventListener('click', () => setFormEditState(true));
-        cancelEditButton.addEventListener('click', () => {
-            populateProfileForm(originalUserData);
-            setFormEditState(false);
-        });
-        saveProfileButton.addEventListener('click', saveProfileChanges);
-        
-        async function saveProfileChanges() {
-            const updatedStepsData = collectFormData();
-            
-            const payload = {
-                action: 'updateFullProfile',
-                email: currentUserEmail,
-                stepsData: updatedStepsData
-            };
-            
-            saveProfileButton.disabled = true;
-            saveProfileButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ذخیره سازی...';
+        function populateEmployerForm(steps, files) {
+            const s1 = steps.step1 || {};
+            const s2 = steps.step2 || {};
+            const s3 = steps.step3 || {};
 
-            try {
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    body: JSON.stringify(payload)
-                });
-                const result = await response.json();
-                if (result.status !== 'success') throw new Error(result.message || 'خطا در سرور');
-                
-                originalUserData.stepsData = updatedStepsData;
-                setFormEditState(false);
-                alert('تغییرات با موفقیت ذخیره شد.');
+            // Personal & Contact
+            setInputValue('employerFirstName', s1.employerFirstName);
+            setInputValue('employerLastName', s1.employerLastName);
+            setInputValue('employerNationalId', s1.employerNationalId);
+            setInputValue('employerDob', s1.employerDob, true);
+            setInputValue('employerGender', s1.employerGender);
+            setInputValue('employerMobile', s1.employerMobile);
+            setInputValue('employerPhone', s2.employerPhone);
+            setInputValue('employerPostalCode', s2.employerPostalCode);
+            setInputValue('employerProvince', s2.employerProvince);
+            setInputValue('employerCity', s2.employerCity);
+            setInputValue('employerAddress', s2.employerAddress);
+            initMapWithData('employerAddressMap', 'employerAddressLat', 'employerAddressLng', s2.employerAddressLat, s2.employerAddressLng);
 
-            } catch (error) {
-                alert(`خطا در ذخیره سازی: ${error.message}`);
-            } finally {
-                saveProfileButton.disabled = false;
-                saveProfileButton.innerHTML = '<i class="fas fa-save"></i> ذخیره تغییرات';
+            // Company
+            const hasCompanyCheckbox = document.getElementById('employerHasCompany');
+            if (s3.employerHasCompany) {
+                hasCompanyCheckbox.checked = true;
+                document.getElementById('employerCompanyFields').classList.remove('hidden');
+                setInputValue('employerCompanyName', s3.employerCompanyName);
+                setInputValue('employerCompanyRegNumber', s3.employerCompanyRegNumber);
+                setInputValue('employerCompanyAddress', s3.employerCompanyAddress);
+                initMapWithData('employerCompanyMap', 'employerCompanyAddressLat', 'employerCompanyAddressLng', s3.employerCompanyAddressLat, s3.employerCompanyAddressLng);
+            } else {
+                 hasCompanyCheckbox.checked = false;
+                 document.getElementById('employerCompanyFields').classList.add('hidden');
             }
-        }
-        
-        function collectFormData() {
-            const data = { step1: {}, step2: {}, step3: {}, step4: {} };
-            const role = originalUserData.role;
-            const prefix = role === 'engineer' ? 'engineer' : 'employer';
-
-            // Step 1
-            data.step1[`${prefix}FirstName`] = getInputValue(`profile-${prefix}FirstName`);
-            data.step1[`${prefix}LastName`] = getInputValue(`profile-${prefix}LastName`);
-            // ... collect all other fields for all steps
             
-            return data;
+            // Documents
+            setFilePreview('employerNationalIdCardImagePreviewContainer', files.employerNationalIdCardImage?.fileUrl);
+            setFilePreview('employerOtherDocsPreviewContainer', files.employerOtherDocs?.fileUrl);
         }
 
-        // --- HELPERS ---
+        // --- HELPERS for populating form ---
         function setInputValue(id, value, isDate = false) {
             const el = document.getElementById(id);
-            if (el) {
-                if (el.type === 'checkbox') {
-                    el.checked = !!value;
-                } else if (el.type === 'radio') {
-                    const radioGroup = document.querySelectorAll(`input[name="${el.name}"]`);
-                    radioGroup.forEach(r => r.checked = (r.value === value));
-                } else if (isDate && value) {
-                    // For date pickers, set both display and hidden value
-                    const displayInput = $(`#${id}`);
-                    const valueInput = displayInput.next('.jalali-datepicker-value');
-                    displayInput.val(new persianDate(new Date(value)).format('YYYY/MM/DD'));
-                    valueInput.val(value);
-                }
-                else {
-                    el.value = value || '';
+            if (el && value) {
+                if (isDate) {
+                    // Assuming value is YYYY-MM-DD from sheets
+                    const date = new persianDate(new Date(value));
+                    el.value = date.format('YYYY/MM/DD');
+                    const hiddenEl = el.nextElementSibling;
+                    if(hiddenEl && hiddenEl.classList.contains('jalali-datepicker-value')) {
+                        hiddenEl.value = value;
+                    }
+                } else {
+                    el.value = value;
                 }
             }
         }
-        function getInputValue(id, isDate = false) {
-            const el = document.getElementById(id);
-            if (el) {
-                if (el.type === 'checkbox') return el.checked;
-                if (isDate) return $(el).next('.jalali-datepicker-value').val();
-                return el.value;
-            }
-            return null;
-        }
-        function convertGoogleDriveUrl(url) {
-            if (!url || typeof url !== 'string' || !url.includes('drive.google.com')) return url;
-            const fileIdMatch = url.match(/(?:d\/|id=)([-\w]{25,})/);
-            if (fileIdMatch && fileIdMatch[1]) return `https://drive.google.com/uc?export=view&id=${fileIdMatch[1]}`;
-            return url;
-        }
         
-        function getStepDefinitions(role) {
-            const prefix = role === 'engineer' ? 'engineer' : 'employer';
-            // This function will return the full HTML for each step, mirroring dashboard.html
-            // For brevity, this is a simplified version. The actual implementation needs the full fieldset.
-            const commonStep1 = `<h3 class="font-bold text-lg mb-4">مشخصات فردی</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div><label class="block text-sm font-medium text-slate-700 mb-1">نام</label><input type="text" id="profile-${prefix}FirstName" name="engineerFirstName"></div>
-                <div><label class="block text-sm font-medium text-slate-700 mb-1">نام خانوادگی</label><input type="text" id="profile-${prefix}LastName" name="engineerLastName"></div>
-                <!-- ... other step 1 fields ... -->
-            </div>`;
-            const commonStep2 = `<h3 class="font-bold text-lg mb-4">اطلاعات تماس</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                 <div><label class="block text-sm font-medium text-slate-700 mb-1">تلفن ثابت</label><input type="tel" id="profile-${prefix}Phone" name="engineerPhone"></div>
-                 <div class="md:col-span-2"><div id="map-profile-residential" class="map-container"></div></div>
-            </div>`;
-            const engineerStep3 = `<h3 class="font-bold text-lg mb-4">اطلاعات حرفه‌ای</h3><!-- ... engineer fields ... -->`;
-            const employerStep3 = `<h3 class="font-bold text-lg mb-4">اطلاعات شرکت</h3><!-- ... employer fields ... -->`;
-            const step4 = `<h3 class="font-bold text-lg mb-4">مدارک</h3><div class="document-links"></div><div class="mt-4">
-                <label class="block text-sm font-medium text-slate-700 mb-1">آپلود فایل جدید (در صورت نیاز)</label>
-                <input type="file" id="profile-new-doc" class="w-full"></div>`;
-
-            if (role === 'engineer') {
-                return [
-                    { id: 1, icon: 'fa-user', label: 'مشخصات فردی', contentHtml: commonStep1 },
-                    { id: 2, icon: 'fa-map-marker-alt', label: 'اطلاعات تماس', contentHtml: commonStep2 },
-                    { id: 3, icon: 'fa-id-card', label: 'اطلاعات حرفه‌ای', contentHtml: engineerStep3 },
-                    { id: 4, icon: 'fa-cloud-upload-alt', label: 'مدارک', contentHtml: step4 }
-                ];
-            } else {
-                 return [
-                    { id: 1, icon: 'fa-user-tie', label: 'مشخصات فردی', contentHtml: commonStep1 },
-                    { id: 2, icon: 'fa-address-book', label: 'اطلاعات تماس', contentHtml: commonStep2 },
-                    { id: 3, icon: 'fa-building', label: 'اطلاعات شرکت', contentHtml: employerStep3 },
-                    { id: 4, icon: 'fa-id-badge', label: 'مدارک', contentHtml: step4 }
-                ];
-            }
-        }
-        
-        function initializeMapsForSection(stepId, role) {
-            const prefix = role === 'engineer' ? 'engineer' : 'employer';
-            if (stepId === 2) {
-                const lat = getInputValue(`profile-${prefix}ResidentialLat`);
-                const lng = getInputValue(`profile-${prefix}ResidentialLng`);
-                initMap('map-profile-residential', parseFloat(lat), parseFloat(lng), `profile-${prefix}ResidentialLat`, `profile-${prefix}ResidentialLng`);
-            }
-            if (stepId === 3 && role === 'employer') {
-                 const lat = getInputValue('profile-employerCompanyAddressLat');
-                 const lng = getInputValue('profile-employerCompanyAddressLng');
-                 initMap('map-profile-company', parseFloat(lat), parseFloat(lng), 'profile-employerCompanyAddressLat', 'profile-employerCompanyAddressLng');
-            }
-        }
-        
-        function initMap(mapId, lat, lng, latInputId, lngInputId) {
-            const mapContainer = document.getElementById(mapId);
-            if (!mapContainer) return;
-            if (maps[mapId]) maps[mapId].remove();
-            
-            const validLat = !isNaN(lat) && lat ? lat : 35.7219;
-            const validLng = !isNaN(lng) && lng ? lng : 51.3347;
-
-            const map = L.map(mapId).setView([validLat, validLng], 13);
-            maps[mapId] = map;
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-            const marker = L.marker([validLat, validLng], { draggable: true }).addTo(map);
-
-            marker.on('dragend', function(e) {
-                if (!isEditMode) {
-                    marker.setLatLng([validLat, validLng]);
-                    return;
+        function setCheckboxAndSelect(checkId, selectId, checkValue, selectValue) {
+            const checkbox = document.getElementById(checkId);
+            const select = document.getElementById(selectId);
+            if (checkbox && select) {
+                checkbox.checked = !!checkValue;
+                if (checkValue) {
+                    select.value = selectValue || '';
                 }
-                const newLatLng = e.target.getLatLng();
-                setInputValue(latInputId, newLatLng.lat);
-                setInputValue(lngInputId, newLatLng.lng);
-            });
-            
-             setTimeout(() => map.invalidateSize(), 100);
+            }
         }
 
-        function initializeDatePickers(containerSelector) {
-            $(`${containerSelector} .jalali-datepicker-display`).each(function() {
-                var $displayInput = $(this);
-                var $valueInput = $displayInput.next('.jalali-datepicker-value');
-                $displayInput.persianDatepicker({
-                    format: 'YYYY/MM/DD',
-                    altField: $valueInput,
-                    altFormat: 'YYYY-MM-DD',
-                    observer: true,
-                    autoClose: true
+        function setRadioValue(name, value) {
+            if (value) {
+                const radio = document.querySelector(`input[name="${name}"][value="${value}"]`);
+                if (radio) radio.checked = true;
+            }
+        }
+
+        function setFilePreview(containerId, url) {
+            const container = document.getElementById(containerId);
+            if (container && url) {
+                container.innerHTML = '';
+                const fileType = url.toLowerCase().split('?')[0].split('.').pop();
+                if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileType)) {
+                    const img = document.createElement('img');
+                    img.src = url;
+                    container.appendChild(img);
+                } else if (fileType === 'pdf') {
+                    const iframe = document.createElement('iframe');
+                    iframe.src = url;
+                    container.appendChild(iframe);
+                } else {
+                    container.innerHTML = `<a href="${url}" target="_blank" class="text-sky-600 hover:underline">مشاهده فایل</a>`;
+                }
+            } else if (container) {
+                container.innerHTML = `<div class="pdf-icon-text"><i class="fas fa-file-excel text-slate-400"></i><br>فایلی آپلود نشده</div>`;
+            }
+        }
+
+        function initMapWithData(mapId, latId, lngId, lat, lng) {
+            if (lat && lng) {
+                const mapDiv = document.getElementById(mapId);
+                if (!mapDiv) return;
+                
+                if (maps[mapId]) {
+                    maps[mapId].setView([lat, lng], 15);
+                    maps[mapId + '_marker'].setLatLng([lat, lng]);
+                } else {
+                    const map = L.map(mapId).setView([lat, lng], 15);
+                    maps[mapId] = map;
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                    const marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                    maps[mapId + '_marker'] = marker;
+                    
+                    marker.on('dragend', () => {
+                        const ll = marker.getLatLng();
+                        document.getElementById(latId).value = ll.lat;
+                        document.getElementById(lngId).value = ll.lng;
+                    });
+                }
+                 document.getElementById(latId).value = lat;
+                 document.getElementById(lngId).value = lng;
+            }
+        }
+
+        // --- EVENT LISTENERS ---
+        function setupEventListeners() {
+            // Accordion toggle
+            document.querySelectorAll('.accordion-header').forEach(header => {
+                header.addEventListener('click', event => {
+                    // Prevent toggling when clicking on buttons
+                    if (event.target.closest('button')) return;
+                    
+                    const content = header.nextElementSibling;
+                    header.classList.toggle('active');
+                    content.style.display = content.style.display === 'block' ? 'none' : 'block';
+                    
+                    // Invalidate map size if it exists in the content
+                    const mapContainer = content.querySelector('.map-container');
+                    if (mapContainer && maps[mapContainer.id]) {
+                        setTimeout(() => maps[mapContainer.id].invalidateSize(), 10);
+                    }
                 });
             });
+
+            // Edit/Save/Cancel buttons
+            document.querySelectorAll('.accordion-item').forEach(item => {
+                const editButton = item.querySelector('.edit-button');
+                const saveButton = item.querySelector('.save-button');
+                const cancelButton = item.querySelector('.cancel-button');
+                const form = item.querySelector('form');
+
+                editButton.addEventListener('click', () => {
+                    form.classList.remove('view-mode');
+                    form.classList.add('edit-mode');
+                });
+
+                cancelButton.addEventListener('click', () => {
+                    form.classList.add('view-mode');
+                    form.classList.remove('edit-mode');
+                    // Here you should ideally reset the form to its original state
+                    // For simplicity, we'll just re-populate it
+                    displayUserProfile(); 
+                });
+
+                saveButton.addEventListener('click', () => {
+                    // TODO: Implement save logic
+                    alert('قابلیت ذخیره‌سازی در حال توسعه است.');
+                    // Example of what to do:
+                    // const sectionKey = item.dataset.section;
+                    // const formData = new FormData(form);
+                    // const sectionData = Object.fromEntries(formData.entries());
+                    // saveSectionData(sectionKey, sectionData);
+                    form.classList.add('view-mode');
+                    form.classList.remove('edit-mode');
+                });
+            });
+
+            // Mobile menu
+            const mobileMenuButton = document.getElementById('mobileMenuButton');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            mobileMenuButton.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('open');
+            });
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('open');
+            });
+            
+            // Profile image cropper
+            profileImageInput.addEventListener('change', (e) => {
+                const files = e.target.files;
+                if (files && files.length > 0) {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        imageToCrop.src = reader.result;
+                        cropperModal.style.display = 'block';
+                        if(cropper) cropper.destroy();
+                        cropper = new Cropper(imageToCrop, { aspectRatio: 1, viewMode: 1 });
+                    };
+                    reader.readAsDataURL(files[0]);
+                }
+            });
+            document.getElementById('cancelCropButton').addEventListener('click', () => {
+                cropperModal.style.display = 'none';
+                if(cropper) cropper.destroy();
+            });
+            document.getElementById('cropButton').addEventListener('click', () => {
+                if (cropper) {
+                    const canvas = cropper.getCroppedCanvas({ width: 256, height: 256 });
+                    sidebarProfileImage.src = canvas.toDataURL();
+                    // TODO: Implement image upload logic here
+                    alert('قابلیت آپلود عکس پروفایل در حال توسعه است.');
+                    cropperModal.style.display = 'none';
+                    if(cropper) cropper.destroy();
+                }
+            });
         }
 
-        // --- Event Listeners & Initial Call ---
-        mainNav.addEventListener('click', (e) => {
-            const navLink = e.target.closest('.main-nav-link');
-            if (!navLink) return;
-            e.preventDefault();
-            const viewName = navLink.dataset.view;
-            document.querySelector('#mainNav .active')?.classList.remove('active');
-            navLink.classList.add('active');
-            contentViews.forEach(view => view.classList.toggle('active', view.id === `${viewName}-view`));
-        });
+        // --- SLIDESHOW LOGIC ---
+        let slideIndex = 1;
+        function initSlideshow() {
+            showSlides(slideIndex);
+        }
+        window.currentSlide = function(n) {
+            showSlides(slideIndex = n);
+        }
+        function showSlides(n) {
+            let i;
+            let slides = document.getElementsByClassName("slide");
+            let dots = document.getElementsByClassName("dot");
+            if (n > slides.length) {slideIndex = 1}
+            if (n < 1) {slideIndex = slides.length}
+            for (i = 0; i < slides.length; i++) {
+                slides[i].style.display = "none";
+            }
+            for (i = 0; i < dots.length; i++) {
+                dots[i].className = dots[i].className.replace(" active", "");
+            }
+            slides[slideIndex-1].style.display = "block";
+            dots[slideIndex-1].className += " active";
+        }
 
-        initializeWorkstation();
+        // --- UTILITY FUNCTIONS ---
+        function showError(message) {
+            loadingSpinner.style.display = 'block';
+            loadingSpinner.innerHTML = `<p class="text-red-500 font-semibold">${message}</p>`;
+            profileContent.style.display = 'none';
+        }
+
+        function initializeDatePickers() {
+            $(".jalali-datepicker-display").persianDatepicker({
+                format: 'YYYY/MM/DD',
+                altField: $(this).next('.jalali-datepicker-value'),
+                altFormat: 'YYYY-MM-DD',
+                observer: true,
+                autoClose: true
+            });
+        }
+
+        // --- START THE APP ---
+        init();
     });
     </script>
 </body>
