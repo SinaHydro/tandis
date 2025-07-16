@@ -305,18 +305,25 @@
             item.dataset.sectionKey = key;
             const isEditable = key !== 'documents';
 
+            const editButtonHtml = isEditable 
+                ? `<button data-action="edit" class="text-sm font-semibold text-sky-600 hover:text-sky-800 mr-4"><i class="fas fa-pencil-alt ml-2"></i>ویرایش</button>` 
+                : '';
+
             item.innerHTML = `
                 <div class="accordion-header">
                     <div class="flex items-center">
                         <i class="fas ${sectionInfo.icon} text-slate-500 ml-3"></i>
                         <span class="font-bold text-slate-700">${sectionInfo.title}</span>
-                        <i class="fas fa-chevron-down accordion-icon mr-auto"></i>
+                    </div>
+                    <div class="flex items-center">
+                        ${editButtonHtml}
+                        <i class="fas fa-chevron-down accordion-icon"></i>
                     </div>
                 </div>
                 <div class="accordion-content">
                     <div class="data-container grid grid-cols-1 md:grid-cols-2 gap-x-6">
                         ${Object.entries(data)
-                            .filter(([label]) => label !== "عکس پروفایل") // Filter out the profile picture link
+                            .filter(([label]) => label !== "عکس پروفایل")
                             .map(([label, value]) => createProfileField(label, value, data)).join('')}
                     </div>
                     ${isEditable ? `
@@ -325,16 +332,6 @@
                         <button data-action="save" class="py-2 px-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-bold mr-2">ذخیره تغییرات</button>
                     </div>` : ''}
                 </div>`;
-            
-            const header = item.querySelector('.accordion-header');
-            const editButton = document.createElement('button');
-            if(isEditable) {
-                editButton.dataset.action = "edit";
-                editButton.className = "text-sm font-semibold text-sky-600 hover:text-sky-800 mr-4";
-                editButton.innerHTML = `<i class="fas fa-pencil-alt ml-2"></i>ویرایش`;
-                header.insertBefore(editButton, header.querySelector('.accordion-icon'));
-            }
-
             return item;
         }
 
@@ -343,7 +340,7 @@
             const isAddressField = label.toLowerCase().includes('آدرس');
             
             if (isAddressField) {
-                 const mapId = `map-${label.replace(/\s/g, '-')}`;
+                 const mapId = `map-${label.replace(/[\s/()]/g, '-')}`;
                  fieldHtml = `
                     <div class="profile-field-group md:col-span-2">
                         <label class="profile-field-label">${label}</label>
@@ -396,7 +393,7 @@
             if (isEditing) {
                 fieldGroups.forEach(group => {
                     const label = group.dataset.label;
-                    if (!label) return; // Skip map containers or non-data fields
+                    if (!label) return;
                     const valueDiv = group.querySelector('.profile-field-value');
                     const currentValue = originalUserData[sectionKey][label] || '';
                     valueDiv.innerHTML = `<input type="text" class="edit-mode-input" data-original-value="${currentValue}" value="${currentValue}">`;
@@ -480,7 +477,7 @@
         mainNav.parentElement.addEventListener('click', handleNavClick);
 
         function initializeSlideshow() {
-            slideshowContainer.innerHTML = ''; // Clear previous
+            slideshowContainer.innerHTML = ''; 
             slideshowNav.innerHTML = '';
             
             slideshowImages.forEach((src, index) => {
@@ -534,7 +531,7 @@
                 if (sectionData && sectionData[field.label]) {
                     const lat = parseFloat(sectionData[field.latKey]);
                     const lng = parseFloat(sectionData[field.lngKey]);
-                    const mapId = `map-${field.label.replace(/\s/g, '-')}`;
+                    const mapId = `map-${field.label.replace(/[\s/()]/g, '-')}`;
                     const mapContainer = document.getElementById(mapId);
                     if (mapContainer && !isNaN(lat) && !isNaN(lng)) {
                          setTimeout(() => {
