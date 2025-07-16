@@ -241,6 +241,7 @@
 
         // --- Functions ---
 
+        // --- REVISED: Improved error handling and debugging ---
         async function initializeWorkstation() {
             if (SCRIPT_URL === 'YOUR_GOOGLE_SCRIPT_URL_HERE') {
                 loadingModalText.innerHTML = 'خطا: آدرس گوگل اسکریپت تنظیم نشده است.';
@@ -253,13 +254,19 @@
                 return;
             }
 
+            let rawResponseText = '';
             try {
-                // Fetching data with a 'func' parameter to specify the action on the server side
                 const response = await fetch(`${SCRIPT_URL}?func=getUserProfile&email=${encodeURIComponent(currentUserEmail)}`);
-                if (!response.ok) throw new Error(`خطای شبکه: ${response.statusText}`);
-                const result = await response.json();
+                rawResponseText = await response.text();
 
-                if (result.status === "success" && result.data) {
+                if (!response.ok) {
+                    throw new Error(`خطای شبکه: ${response.status} ${response.statusText}.`);
+                }
+
+                const result = JSON.parse(rawResponseText);
+                console.log('Server response object:', result); // For debugging
+
+                if (result.status === "success" && result.data && result.data.stepsData) {
                     originalUserData = result.data;
                     populateUserProfile(originalUserData);
                     populateDashboard(mockProjects);
@@ -269,30 +276,28 @@
                     appContainer.classList.remove('hidden');
                     loadingModal.style.display = 'none';
                 } else {
-                    throw new Error(result.message || 'خطا در دریافت اطلاعات پروفایل.');
+                    throw new Error(result.message || 'پاسخ سرور معتبر نیست یا اطلاعات پروفایل یافت نشد.');
                 }
             } catch (error) {
                 loadingModalText.textContent = `خطا در بارگذاری اطلاعات: ${error.message}`;
                 console.error("Initialization failed:", error);
+                console.error("Raw server response text:", rawResponseText); // Log raw response for debugging
             }
         }
         
-        // --- NEW: Improved Google Drive URL converter ---
         function convertGoogleDriveUrl(url) {
             if (!url || typeof url !== 'string' || !url.includes('drive.google.com')) return url;
-            // Regex to capture the file ID from various Google Drive URL formats
             const fileIdMatch = url.match(/(?:d\/|id=)([-\w]{25,})/);
             if (fileIdMatch && fileIdMatch[1]) {
-                // Returns a direct link for viewing the image
                 return `https://drive.google.com/uc?export=view&id=${fileIdMatch[1]}`;
             }
-            // Return original URL if no ID is found
             return url;
         }
 
+        // --- REVISED: Correct path for profile picture ---
         function populateUserProfile(data) {
-            // Assuming the profile picture URL is in step1 data
-            const profilePicUrl = data.stepsData?.step1?.applicantImage?.fileUrl;
+            // The profile picture URL is stored in the 'files' object from the saved data
+            const profilePicUrl = data.files?.applicantImage?.fileUrl;
             userProfileImage.src = convertGoogleDriveUrl(profilePicUrl) || 'https://placehold.co/128x128/EBF4FF/2196F3?text=User';
             
             const firstName = data.stepsData?.step1?.engineerFirstName || data.stepsData?.step1?.employerFirstName || '';
@@ -381,7 +386,6 @@
             
             const dataContainer = item.querySelector('.data-container');
             
-            // --- REVISED: Generate profile view based on role and section ---
             switch(key) {
                 case 'personal':
                     dataContainer.innerHTML = createPersonalProfileView(sectionInfo.data, userRole);
@@ -400,7 +404,6 @@
             return item;
         }
         
-        // --- NEW: Functions to create specific profile views ---
         function createFieldHtml(label, value) {
             return `
                 <div>
@@ -449,7 +452,6 @@
 
         function createProfessionalProfileView(data, userRole) {
             if (userRole !== 'engineer') {
-                // Employer professional view can be added here if needed
                 return '<p class="text-slate-500">کارفرمایان اطلاعات حرفه‌ای مجزا ندارند.</p>';
             }
 
@@ -488,7 +490,6 @@
         }
 
         function createDocumentsProfileView(data, role) {
-            const prefix = role === 'engineer' ? 'engineer' : 'employer';
             let fields = {};
             if (role === 'engineer') {
                 fields = {
@@ -521,7 +522,6 @@
             const content = header.nextElementSibling;
             const isOpen = header.classList.contains('open');
             
-            // Close all other accordions
             document.querySelectorAll('.accordion-header.open').forEach(openHeader => {
                 if (openHeader !== header) {
                     openHeader.classList.remove('open');
@@ -529,17 +529,15 @@
                 }
             });
 
-            // Toggle current accordion
             header.classList.toggle('open', !isOpen);
             content.classList.toggle('open', !isOpen);
 
-            // --- REVISED: Initialize map only when its accordion is opened ---
             if (!isOpen) {
                 const sectionKey = header.closest('.accordion-item').dataset.sectionKey;
                 if (sectionKey === 'contact') {
                     setTimeout(() => {
                         initializeProfileMap();
-                    }, 100); // Small delay to allow CSS transition
+                    }, 100); 
                 }
             }
         }
@@ -558,7 +556,6 @@
         }
         mainNav.parentElement.addEventListener('click', handleNavClick);
 
-        // --- REVISED: Slideshow with navigation dots ---
         function initializeSlideshow() {
             slideshowContainer.innerHTML = ''; 
             slideshowNav.innerHTML = '';
@@ -605,7 +602,6 @@
             }, 5000);
         }
         
-        // --- REVISED AND SIMPLIFIED: Map Initialization ---
         function initializeProfileMap() {
             const role = originalUserData.role;
             const contactData = originalUserData.stepsData.step2;
@@ -623,7 +619,7 @@
             if (mapContainer && !maps[mapId] && !isNaN(lat) && !isNaN(lng)) {
                 try {
                     const map = L.map(mapId).setView([lat, lng], 15);
-                    maps[mapId] = map; // Store instance
+                    maps[mapId] = map;
 
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         attribution: '&copy; OpenStreetMap contributors'
@@ -638,7 +634,6 @@
                         })
                     }).addTo(map).bindPopup("موقعیت ذخیره شده شما").openPopup();
                     
-                    // Invalidate size to fix rendering issues
                     setTimeout(() => map.invalidateSize(), 10);
 
                 } catch(e) {
@@ -650,7 +645,6 @@
             }
         }
         
-        // --- Cropper Logic (unchanged) ---
         profileImageContainer.addEventListener('click', () => {
             profileImageInput.click();
         });
