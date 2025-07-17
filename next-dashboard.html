@@ -681,7 +681,7 @@
         }
         function initializeProjectMap() {
             if (projectMap) projectMap.remove();
-            const initialCoords = [35.7219, 51.3347]; // Tehran
+            const initialCoords = [38.0766, 46.2970]; // Tehran
             projectMap = L.map('project-map').setView(initialCoords, 13);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(projectMap);
             projectMarker = L.marker(initialCoords, { draggable: true }).addTo(projectMap);
