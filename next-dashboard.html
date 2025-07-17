@@ -172,7 +172,7 @@
             
             <div id="profileContent" class="content-body"></div>
             <div id="projectsContent" class="content-body" style="display: none;">
-                <p>لیست پروژه‌های ثبت شده شما در اینجا نمایش داده خواهد شد.</p>
+                <!-- Project cards for engineers will be rendered here -->
             </div>
             <div id="settingsContent" class="content-body" style="display: none;">
                 <div class="profile-section">
@@ -247,7 +247,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzmJuBSHWEciP5NdugXD-_Bo0fl7vubjVgnabARO_GC9a_Qt1gMC1kcp4TM62zdKM5H/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyKNHMfX0uZ-UMoxpKrk4UYw6Qd8_6uIPqNljEjR8ELm3x_fJ38epqIGYNu5JFJy881/exec';
         const SLIDESHOW_IMAGES = [
             'https://images.unsplash.com/photo-1581092916381-6f8901ad5a33?w=500&auto=format&fit=crop&q=60',
             'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=500&auto=format&fit=crop&q=60',
@@ -412,9 +412,15 @@
             sidebarProfileImage.src = directImageUrl || 'https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740';
             sidebarProfileImage.onerror = () => { sidebarProfileImage.src = 'https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740'; };
 
+            const projectsNavItem = document.getElementById('projects-nav-item');
             if (userData.role === 'employer') {
-                document.getElementById('projects-nav-item').style.display = 'flex';
+                projectsNavItem.style.display = 'flex';
+                projectsNavItem.querySelector('span').textContent = 'پروژه‌های من';
                 document.getElementById('create-project-nav-item').style.display = 'flex';
+            } else if (userData.role === 'engineer') {
+                projectsNavItem.style.display = 'flex';
+                projectsNavItem.querySelector('span').textContent = 'بازار کار پروژه‌ها';
+                document.getElementById('create-project-nav-item').style.display = 'none';
             }
 
             profileContent.innerHTML = '';
@@ -614,7 +620,7 @@
                             </div>
                             <div class="space-y-2">
                                 <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">مشخصات مهندس مورد نیاز پروژه</h3>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                                     <div><label for="engineerRank" class="block text-gray-700 font-medium mb-1 required-field">پایه مهندس</label><select id="engineerRank" name="engineerRank" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required><option value="پایه 3">پایه 3</option><option value="پایه 2">پایه 2</option><option value="پایه 1">پایه 1</option><option value="پایه ارشد">پایه ارشد</option></select></div>
                                     <div><label for="engineerField" class="block text-gray-700 font-medium mb-1 required-field">رشته مهندس</label><select id="engineerField" name="engineerField" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required><option value="معماری">معماری</option><option value="عمران">عمران</option><option value="مکانیک">مکانیک</option><option value="برق">برق</option><option value="شهرسازی">شهرسازی</option><option value="ترافیک">ترافیک</option><option value="نقشه برداری">نقشه برداری</option></select></div>
                                 </div>
@@ -626,13 +632,13 @@
                             <div class="space-y-4">
                                 <h3 id="tariff-title" class="text-lg font-semibold text-gray-800 border-b pb-2">تعرفه پیشنهادی</h3>
                                 <div class="space-y-2">
-                                    <div class="flex justify-between items-center"><label for="priceOption1" class="flex-1">ساختمان ۱ تا ۲ طبقه:</label><span>۱۰۷,۰۰۰ تومان</span><input type="radio" id="priceOption1" name="priceOption" value="107000" class="mr-2" checked></div>
-                                    <div class="flex justify-between items-center"><label for="priceOption2" class="flex-1">ساختمان ۳ تا ۵ طبقه:</label><span>۱۲۵,۰۰۰ تومان</span><input type="radio" id="priceOption2" name="priceOption" value="125000" class="mr-2"></div>
-                                    <div class="flex justify-between items-center"><label for="priceOption3" class="flex-1">ساختمان ۶ تا ۷ طبقه:</label><span>۱۲۷,۸۰۰ تومان</span><input type="radio" id="priceOption3" name="priceOption" value="127800" class="mr-2"></div>
-                                    <div class="flex justify-between items-center"><label for="priceOption4" class="flex-1">ساختمان ۸ تا ۱۰ طبقه:</label><span>۱۳۹,۵۰۰ تومان</span><input type="radio" id="priceOption4" name="priceOption" value="139500" class="mr-2"></div>
-                                    <div class="flex justify-between items-center"><label for="priceOption5" class="flex-1">ساختمان ۱۱ تا ۱۲ طبقه:</label><span>۱۴۲,۸۰۰ تومان</span><input type="radio" id="priceOption5" name="priceOption" value="142800" class="mr-2"></div>
-                                    <div class="flex justify-between items-center"><label for="priceOption6" class="flex-1">ساختمان ۱۳ تا ۱۵ طبقه:</label><span>۱۴۸,۸۰۰ تومان</span><input type="radio" id="priceOption6" name="priceOption" value="148800" class="mr-2"></div>
-                                    <div class="flex justify-between items-center"><label for="priceOption7" class="flex-1">ساختمان بالای ۱۶ طبقه:</label><span>۱۵۹,۲۰۰ تومان</span><input type="radio" id="priceOption7" name="priceOption" value="159200" class="mr-2"></div>
+                                    <div class="flex justify-between items-center"><label for="priceOption1" class="flex-1">ساختمان ۱ تا ۲ طبقه:</label><span>۱۰۷,۰۰۰ تومان</span><input type="radio" id="priceOption1" name="priceOption" value="107000" class="ml-2" checked></div>
+                                    <div class="flex justify-between items-center"><label for="priceOption2" class="flex-1">ساختمان ۳ تا ۵ طبقه:</label><span>۱۲۵,۰۰۰ تومان</span><input type="radio" id="priceOption2" name="priceOption" value="125000" class="ml-2"></div>
+                                    <div class="flex justify-between items-center"><label for="priceOption3" class="flex-1">ساختمان ۶ تا ۷ طبقه:</label><span>۱۲۷,۸۰۰ تومان</span><input type="radio" id="priceOption3" name="priceOption" value="127800" class="ml-2"></div>
+                                    <div class="flex justify-between items-center"><label for="priceOption4" class="flex-1">ساختمان ۸ تا ۱۰ طبقه:</label><span>۱۳۹,۵۰۰ تومان</span><input type="radio" id="priceOption4" name="priceOption" value="139500" class="ml-2"></div>
+                                    <div class="flex justify-between items-center"><label for="priceOption5" class="flex-1">ساختمان ۱۱ تا ۱۲ طبقه:</label><span>۱۴۲,۸۰۰ تومان</span><input type="radio" id="priceOption5" name="priceOption" value="142800" class="ml-2"></div>
+                                    <div class="flex justify-between items-center"><label for="priceOption6" class="flex-1">ساختمان ۱۳ تا ۱۵ طبقه:</label><span>۱۴۸,۸۰۰ تومان</span><input type="radio" id="priceOption6" name="priceOption" value="148800" class="ml-2"></div>
+                                    <div class="flex justify-between items-center"><label for="priceOption7" class="flex-1">ساختمان بالای ۱۶ طبقه:</label><span>۱۵۹,۲۰۰ تومان</span><input type="radio" id="priceOption7" name="priceOption" value="159200" class="ml-2"></div>
                                     <div class="flex items-center mt-2"><label for="priceOptionCustom" class="mr-2">سایر:</label><input type="radio" id="priceOptionCustom" name="priceOption" value="custom" class="mr-2"><input type="number" id="customPrice" name="customPrice" min="0" class="px-3 py-1 border border-gray-300 rounded-lg w-32" disabled><span class="mr-2">تومان</span></div>
                                 </div>
                                 <div class="price-highlight p-3 rounded-lg mt-4"><div class="flex items-center"><i class="fas fa-tag text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت واحد:</span><span id="unitPricePreview" class="mr-2 font-semibold"></span></div><div class="flex items-center mt-2"><i class="fas fa-calculator text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت کل:</span><span id="totalPricePreview" class="mr-2 font-bold text-green-600"></span></div><div class="flex items-center mt-2"><i class="fas fa-hand-holding-usd text-blue-500 ml-2"></i><span class="text-gray-700 font-medium">کمیسیون (۱۵٪):</span><span id="commissionPreview" class="mr-2 font-bold text-blue-600"></span></div></div>
