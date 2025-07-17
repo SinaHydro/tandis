@@ -617,7 +617,64 @@
                                 <div><label for="engineerActivity" class="block text-gray-700 font-medium mb-1 required-field">نوع فعالیت مهندس</label><select id="engineerActivity" name="engineerActivity" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required><option value="طراح">طراح</option><option value="ناظر">ناظر</option><option value="مجری">مجری</option></select></div>
                             </div>
                             <div><label for="permitType" class="block text-gray-700 font-medium mb-1 required-field">نوع پروانه مهندس</label><select id="permitType" name="permitType" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required><option value="طراح حقوقی">طراح حقوقی</option><option value="ناظر حقوقی">ناظر حقوقی</option><option value="انبوه ساز">انبوه ساز</option><option value="مجری حقوقی">مجری حقوقی</option><option value="مهندس حقیقی">مهندس حقیقی</option><option value="کاردان">کاردان</option><option value="معمارتجربی">معمارتجربی</option></select></div>
-                            <div class="space-y-4"><h3 class="text-lg font-semibold text-gray-800 border-b pb-2">تعرفه پیشنهادی</h3><div class="space-y-2">...</div></div>
+                        <!-- Price Section -->
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">تعرفه پیشنهادی</h3>
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <input type="radio" id="priceOption1" name="priceOption" value="107000" class="mr-2" checked>
+                                    <label for="priceOption1" class="flex-1">ساختمان 1 تا 2 طبقه: 107,000 تومان</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" id="priceOption2" name="priceOption" value="125000" class="mr-2">
+                                    <label for="priceOption2" class="flex-1">ساختمان 3 تا 5 طبقه: 125,000 تومان</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" id="priceOption3" name="priceOption" value="127800" class="mr-2">
+                                    <label for="priceOption3" class="flex-1">ساختمان 6 تا 7 طبقه: 127,800 تومان</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" id="priceOption4" name="priceOption" value="139500" class="mr-2">
+                                    <label for="priceOption4" class="flex-1">ساختمان 8 تا 10 طبقه: 139,500 تومان</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" id="priceOption5" name="priceOption" value="142800" class="mr-2">
+                                    <label for="priceOption5" class="flex-1">ساختمان 11 تا 12 طبقه: 142,800 تومان</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" id="priceOption6" name="priceOption" value="148800" class="mr-2">
+                                    <label for="priceOption6" class="flex-1">ساختمان 13 تا 15 طبقه: 148,800 تومان</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" id="priceOption7" name="priceOption" value="159200" class="mr-2">
+                                    <label for="priceOption7" class="flex-1">ساختمان بالای 16 طبقه: 159,200 تومان</label>
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <input type="radio" id="priceOptionCustom" name="priceOption" class="mr-2">
+                                    <label for="priceOptionCustom" class="mr-2">سایر:</label>
+                                    <input type="number" id="customPrice" name="customPrice" min="0" class="px-3 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 w-32" disabled>
+                                    <span class="mr-2">تومان</span>
+                                </div>
+                            </div>
+                            <!-- Price Calculation -->
+                            <div class="price-highlight p-3 rounded-lg mt-4">
+                                <div class="flex items-center">
+                                    <i class="fas fa-tag text-green-500 ml-2"></i>
+                                    <span class="text-gray-700 font-medium">قیمت واحد:</span>
+                                    <span id="unitPricePreview" class="mr-2 font-semibold">125,000 تومان بر مترمربع</span>
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <i class="fas fa-calculator text-green-500 ml-2"></i>
+                                    <span class="text-gray-700 font-medium">قیمت کل:</span>
+                                    <span id="totalPricePreview" class="mr-2 font-bold text-green-600">15,000,000 تومان</span>
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <i class="fas fa-hand-holding-usd text-blue-500 ml-2"></i>
+                                    <span class="text-gray-700 font-medium">کمیسیون (15%):</span>
+                                    <span id="commissionPreview" class="mr-2 font-bold text-blue-600">2,250,000 تومان</span>
+                                </div>
+                            </div>
+                        </div>
                             <div><label for="description" class="block text-gray-700 font-medium mb-1">توضیحات</label><textarea id="description" name="description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea></div>
                         </div>
                         <div class="border-t border-gray-200 p-4 flex justify-end">
