@@ -581,9 +581,10 @@
                 <div id="projectEditCard" class="project-card bg-white rounded-lg overflow-hidden">
                     <form id="projectForm">
                         <div class="p-6 space-y-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div><label for="ownerName" class="block text-gray-700 font-medium mb-1 required-field">نام مالک</label><input type="text" id="ownerName" name="ownerName" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required></div>
                                 <div><label for="permitNumber" class="block text-gray-700 font-medium mb-1 required-field">شماره پروانه</label><input type="text" id="permitNumber" name="permitNumber" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required></div>
+                                <div><label for="permitValidity" class="block text-gray-700 font-medium mb-1 required-field">اعتبار پروانه (ماه)</label><input type="number" id="permitValidity" name="permitValidity" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required></div>
                             </div>
                             <div>
                                 <label class="block text-gray-700 font-medium mb-1 required-field">آدرس ملک</label>
@@ -607,7 +608,6 @@
                                 <div><label for="basementFloors" class="block text-gray-700 font-medium mb-1 required-field">تعداد طبقات زیرزمین</label><input type="number" id="basementFloors" name="basementFloors" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required></div>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div><label for="permitValidity" class="block text-gray-700 font-medium mb-1 required-field">اعتبار پروانه (ماه)</label><input type="number" id="permitValidity" name="permitValidity" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required></div>
                                 <div><label for="structureType" class="block text-gray-700 font-medium mb-1 required-field">نوع سازه</label><select id="structureType" name="structureType" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required><option value="فلزی">فلزی</option><option value="بتنی">بتنی</option></select></div>
                                 <div><label for="fileType" class="block text-gray-700 font-medium mb-1 required-field">نوع پرونده</label><select id="fileType" name="fileType" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required><option value="عادی">عادی</option><option value="فرسوده">فرسوده</option></select></div>
                                 <div><label for="contractMonths" class="block text-gray-700 font-medium mb-1 required-field">مدت قرارداد (ماه)</label><input type="number" id="contractMonths" name="contractMonths" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required></div>
@@ -617,20 +617,22 @@
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
                                     <div><label for="engineerRank" class="block text-gray-700 font-medium mb-1 required-field">پایه مهندس</label><select id="engineerRank" name="engineerRank" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required><option value="پایه 3">پایه 3</option><option value="پایه 2">پایه 2</option><option value="پایه 1">پایه 1</option><option value="پایه ارشد">پایه ارشد</option></select></div>
                                     <div><label for="engineerField" class="block text-gray-700 font-medium mb-1 required-field">رشته مهندس</label><select id="engineerField" name="engineerField" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required><option value="معماری">معماری</option><option value="عمران">عمران</option><option value="مکانیک">مکانیک</option><option value="برق">برق</option><option value="شهرسازی">شهرسازی</option><option value="ترافیک">ترافیک</option><option value="نقشه برداری">نقشه برداری</option></select></div>
-                                    <div><label for="engineerActivity" class="block text-gray-700 font-medium mb-1 required-field">نوع فعالیت مهندس</label><select id="engineerActivity" name="engineerActivity" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required><option value="طراح">طراح</option><option value="ناظر">ناظر</option><option value="مجری">مجری</option></select></div>
                                 </div>
-                                <div><label for="permitType" class="block text-gray-700 font-medium mb-1 required-field">نوع پروانه مهندس</label><select id="permitType" name="permitType" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required><option value="طراح حقوقی">طراح حقوقی</option><option value="ناظر حقوقی">ناظر حقوقی</option><option value="انبوه ساز">انبوه ساز</option><option value="مجری حقوقی">مجری حقوقی</option><option value="مهندس حقیقی">مهندس حقیقی</option><option value="کاردان">کاردان</option><option value="معمارتجربی">معمارتجربی</option></select></div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div><label for="engineerActivity" class="block text-gray-700 font-medium mb-1 required-field">نوع فعالیت مهندس</label><select id="engineerActivity" name="engineerActivity" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required><option value="طراح">طراح</option><option value="ناظر">ناظر</option><option value="مجری">مجری</option></select></div>
+                                    <div><label for="permitType" class="block text-gray-700 font-medium mb-1 required-field">نوع پروانه مهندس</label><select id="permitType" name="permitType" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required><option value="طراح حقوقی">طراح حقوقی</option><option value="ناظر حقوقی">ناظر حقوقی</option><option value="انبوه ساز">انبوه ساز</option><option value="مجری حقوقی">مجری حقوقی</option><option value="مهندس حقیقی">مهندس حقیقی</option><option value="کاردان">کاردان</option><option value="معمارتجربی">معمارتجربی</option></select></div>
+                                </div>
                             </div>
                             <div class="space-y-4">
                                 <h3 id="tariff-title" class="text-lg font-semibold text-gray-800 border-b pb-2">تعرفه پیشنهادی</h3>
                                 <div class="space-y-2">
-                                    <div class="flex justify-between items-center"><label for="priceOption1" class="flex-1">ساختمان ۱ تا ۲ طبقه:</label><input type="radio" id="priceOption1" name="priceOption" value="107000" class="ml-2" checked></div>
-                                    <div class="flex justify-between items-center"><label for="priceOption2" class="flex-1">ساختمان ۳ تا ۵ طبقه:</label><input type="radio" id="priceOption2" name="priceOption" value="125000" class="ml-2"></div>
-                                    <div class="flex justify-between items-center"><label for="priceOption3" class="flex-1">ساختمان ۶ تا ۷ طبقه:</label><input type="radio" id="priceOption3" name="priceOption" value="127800" class="ml-2"></div>
-                                    <div class="flex justify-between items-center"><label for="priceOption4" class="flex-1">ساختمان ۸ تا ۱۰ طبقه:</label><input type="radio" id="priceOption4" name="priceOption" value="139500" class="ml-2"></div>
-                                    <div class="flex justify-between items-center"><label for="priceOption5" class="flex-1">ساختمان ۱۱ تا ۱۲ طبقه:</label><input type="radio" id="priceOption5" name="priceOption" value="142800" class="ml-2"></div>
-                                    <div class="flex justify-between items-center"><label for="priceOption6" class="flex-1">ساختمان ۱۳ تا ۱۵ طبقه:</label><input type="radio" id="priceOption6" name="priceOption" value="148800" class="ml-2"></div>
-                                    <div class="flex justify-between items-center"><label for="priceOption7" class="flex-1">ساختمان بالای ۱۶ طبقه:</label><input type="radio" id="priceOption7" name="priceOption" value="159200" class="ml-2"></div>
+                                    <div class="flex justify-between items-center"><label for="priceOption1" class="flex-1">ساختمان ۱ تا ۲ طبقه:</label><span>۱۰۷,۰۰۰ تومان</span><input type="radio" id="priceOption1" name="priceOption" value="107000" class="mr-2" checked></div>
+                                    <div class="flex justify-between items-center"><label for="priceOption2" class="flex-1">ساختمان ۳ تا ۵ طبقه:</label><span>۱۲۵,۰۰۰ تومان</span><input type="radio" id="priceOption2" name="priceOption" value="125000" class="mr-2"></div>
+                                    <div class="flex justify-between items-center"><label for="priceOption3" class="flex-1">ساختمان ۶ تا ۷ طبقه:</label><span>۱۲۷,۸۰۰ تومان</span><input type="radio" id="priceOption3" name="priceOption" value="127800" class="mr-2"></div>
+                                    <div class="flex justify-between items-center"><label for="priceOption4" class="flex-1">ساختمان ۸ تا ۱۰ طبقه:</label><span>۱۳۹,۵۰۰ تومان</span><input type="radio" id="priceOption4" name="priceOption" value="139500" class="mr-2"></div>
+                                    <div class="flex justify-between items-center"><label for="priceOption5" class="flex-1">ساختمان ۱۱ تا ۱۲ طبقه:</label><span>۱۴۲,۸۰۰ تومان</span><input type="radio" id="priceOption5" name="priceOption" value="142800" class="mr-2"></div>
+                                    <div class="flex justify-between items-center"><label for="priceOption6" class="flex-1">ساختمان ۱۳ تا ۱۵ طبقه:</label><span>۱۴۸,۸۰۰ تومان</span><input type="radio" id="priceOption6" name="priceOption" value="148800" class="mr-2"></div>
+                                    <div class="flex justify-between items-center"><label for="priceOption7" class="flex-1">ساختمان بالای ۱۶ طبقه:</label><span>۱۵۹,۲۰۰ تومان</span><input type="radio" id="priceOption7" name="priceOption" value="159200" class="mr-2"></div>
                                     <div class="flex items-center mt-2"><label for="priceOptionCustom" class="mr-2">سایر:</label><input type="radio" id="priceOptionCustom" name="priceOption" value="custom" class="mr-2"><input type="number" id="customPrice" name="customPrice" min="0" class="px-3 py-1 border border-gray-300 rounded-lg w-32" disabled><span class="mr-2">تومان</span></div>
                                 </div>
                                 <div class="price-highlight p-3 rounded-lg mt-4"><div class="flex items-center"><i class="fas fa-tag text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت واحد:</span><span id="unitPricePreview" class="mr-2 font-semibold"></span></div><div class="flex items-center mt-2"><i class="fas fa-calculator text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت کل:</span><span id="totalPricePreview" class="mr-2 font-bold text-green-600"></span></div><div class="flex items-center mt-2"><i class="fas fa-hand-holding-usd text-blue-500 ml-2"></i><span class="text-gray-700 font-medium">کمیسیون (۱۵٪):</span><span id="commissionPreview" class="mr-2 font-bold text-blue-600"></span></div></div>
@@ -802,7 +804,6 @@
             const form = document.getElementById('projectForm');
             const projectData = Object.fromEntries(new FormData(form).entries());
             
-            // Add unitPrice to the data
             const priceRadio = form.querySelector('input[name="priceOption"]:checked');
             projectData.unitPrice = priceRadio.id === 'priceOptionCustom' ? projectData.customPrice : priceRadio.value;
 
