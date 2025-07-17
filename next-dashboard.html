@@ -57,7 +57,7 @@
         
         /* --- Sidebar Navigation --- */
         .sidebar-nav { padding: 1rem; flex-grow: 1; }
-        .nav-item { display: flex; align-items: center; padding: 0.75rem 1rem; margin-bottom: 0.5rem; border-radius: 0.5rem; color: #475569; font-weight: 500; transition: all 0.2s ease; }
+        .nav-item { display: flex; align-items: center; padding: 0.75rem 1rem; margin-bottom: 0.5rem; border-radius: 0.5rem; color: #475569; font-weight: 500; transition: all 0.2s ease; cursor: pointer; }
         .nav-item i { margin-left: 0.75rem; width: 20px; text-align: center; }
         .nav-item:hover { background-color: #e2e8f0; color: #1e293b; }
         .nav-item.active { background-color: #0ea5e9; color: white; box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.2); }
@@ -92,8 +92,8 @@
         
         /* --- Form Fields (copied from dashboard.html for consistency) --- */
         label.required::after { content: " *"; color: #ef4444; }
-        input[type="text"], input[type="date"], input[type="tel"], input[type="number"], textarea, select { background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.625rem 0.875rem; transition: all 0.2s ease; width: 100%; }
-        input:focus, textarea:focus, select:focus { border-color: #0ea5e9; background-color: white; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2); outline: none; }
+        input[type="text"], input[type="date"], input[type="tel"], input[type="number"], input[type="password"], textarea, select { background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.625rem 0.875rem; transition: all 0.2s ease; width: 100%; }
+        input:focus, textarea:focus, select:focus, input[type="password"]:focus { border-color: #0ea5e9; background-color: white; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2); outline: none; }
         input:disabled, select:disabled, textarea:disabled { background-color: #eef2f7; color: #64748b; cursor: not-allowed; border-color: #e2e8f0; }
         select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E"); background-position: left 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-left: 2.5rem; }
         .btn { padding: 0.625rem 1.25rem; border-radius: 0.375rem; font-weight: 600; transition: all 0.2s ease-in-out; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border: none; }
@@ -164,16 +164,15 @@
                     <i class="fas fa-tachometer-alt"></i>
                     <span>داشبورد</span>
                 </a>
-                <a href="#" class="nav-item active">
+                <a data-view="profile" class="nav-item active">
                     <i class="fas fa-user-circle"></i>
                     <span>پروفایل</span>
                 </a>
-                <!-- Add other nav items here -->
             </nav>
 
             <!-- Sidebar Footer -->
             <div class="sidebar-footer">
-                <a href="#" class="nav-item">
+                <a data-view="settings" class="nav-item">
                     <i class="fas fa-cog"></i>
                     <span>تنظیمات</span>
                 </a>
@@ -187,11 +186,47 @@
         <!-- Main Content -->
         <main class="main-content-area">
             <header class="p-4 border-b border-slate-200 bg-white flex-shrink-0">
-                <h1 class="text-2xl font-bold text-slate-800">ایستگاه کاری</h1>
+                <h1 id="main-header-title" class="text-2xl font-bold text-slate-800">پروفایل کاربری</h1>
             </header>
+            
+            <!-- Profile View -->
             <div id="profileContent" class="content-body">
                 <!-- Profile sections will be injected here -->
             </div>
+
+            <!-- Settings View -->
+            <div id="settingsContent" class="content-body" style="display: none;">
+                <div class="profile-section">
+                    <div class="section-header !cursor-default">
+                        <h3 class="section-title"><i class="fas fa-key"></i>تغییر رمز عبور</h3>
+                    </div>
+                    <div class="section-content open">
+                        <form id="changePasswordForm">
+                            <div class="space-y-4 max-w-lg mx-auto p-4">
+                                <div>
+                                    <label for="currentPassword" class="block text-sm font-medium text-slate-700 mb-1 required">رمز عبور فعلی</label>
+                                    <input type="password" id="currentPassword" name="currentPassword" required class="mt-1">
+                                </div>
+                                <div>
+                                    <label for="newPassword" class="block text-sm font-medium text-slate-700 mb-1 required">رمز عبور جدید</label>
+                                    <input type="password" id="newPassword" name="newPassword" required class="mt-1">
+                                </div>
+                                <div>
+                                    <label for="confirmNewPassword" class="block text-sm font-medium text-slate-700 mb-1 required">تکرار رمز عبور جدید</label>
+                                    <input type="password" id="confirmNewPassword" name="confirmNewPassword" required class="mt-1">
+                                </div>
+                                <div class="pt-4">
+                                     <button type="submit" class="btn btn-primary w-full justify-center">
+                                        <span id="savePasswordBtnText">ذخیره تغییرات</span>
+                                        <div id="savePasswordSpinner" class="spinner !w-5 !h-5 !border-2 hidden"></div>
+                                     </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
         </main>
         
         <!-- Advertisement Sidebar (Left) -->
@@ -240,7 +275,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwURZkNTH6OZ78JqPWXqOBeAdWsgrj2lhPn16Yn0jdJ537qCioVAsofUJrbV6qvvG0N/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwqdEyzQvCMirArXZ4hpB5K1OZzPfM1poa1kiX-Adg1FsTP7kdD7FVtUiTuEy36KF0f/exec';
         const SLIDESHOW_IMAGES = [
             'https://images.unsplash.com/photo-1581092916381-6f8901ad5a33?w=500&auto=format&fit=crop&q=60',
             'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=500&auto=format&fit=crop&q=60',
@@ -256,6 +291,9 @@
         // --- DOM ELEMENTS ---
         const pageLoader = document.getElementById('page-loader');
         const profileContent = document.getElementById('profileContent');
+        const settingsContent = document.getElementById('settingsContent');
+        const mainHeaderTitle = document.getElementById('main-header-title');
+
         const sidebarProfileImage = document.getElementById('sidebarProfileImage');
         const sidebarProfileName = document.getElementById('sidebarProfileName');
         const sidebarProfileRole = document.getElementById('sidebarProfileRole');
@@ -264,6 +302,8 @@
         const imageToCrop = document.getElementById('imageToCrop');
         const cropButton = document.getElementById('cropButton');
         const cancelCropButton = document.getElementById('cancelCropButton');
+        const changePasswordForm = document.getElementById('changePasswordForm');
+
 
         // --- HELPER FUNCTIONS ---
         
@@ -925,6 +965,97 @@
             }
         });
 
+        // --- NEW: View Switching and Password Change Logic ---
+        function setupViewSwitcher() {
+            const navItems = document.querySelectorAll('.nav-item[data-view]');
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const targetView = item.dataset.view;
+
+                    // Hide all main content views
+                    profileContent.style.display = 'none';
+                    settingsContent.style.display = 'none';
+
+                    // Deactivate all nav items
+                    navItems.forEach(nav => nav.classList.remove('active'));
+
+                    // Activate the selected view and nav item
+                    if (targetView === 'profile') {
+                        profileContent.style.display = 'block';
+                        mainHeaderTitle.textContent = 'پروفایل کاربری';
+                    } else if (targetView === 'settings') {
+                        settingsContent.style.display = 'block';
+                        mainHeaderTitle.textContent = 'تنظیمات';
+                    }
+                    item.classList.add('active');
+                });
+            });
+        }
+
+        async function handleChangePassword(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const btnText = btn.querySelector('span');
+            const spinner = btn.querySelector('.spinner');
+
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+            if (!currentPassword || !newPassword || !confirmNewPassword) {
+                showMessageModal('لطفاً تمام فیلدها را پر کنید.', 'error');
+                return;
+            }
+            if (newPassword !== confirmNewPassword) {
+                showMessageModal('رمز عبور جدید و تکرار آن یکسان نیستند.', 'error');
+                return;
+            }
+            if (newPassword.length < 6) {
+                showMessageModal('رمز عبور جدید باید حداقل ۶ کاراکتر باشد.', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btnText.classList.add('hidden');
+            spinner.classList.remove('hidden');
+
+            try {
+                const payload = {
+                    action: 'changePassword',
+                    email: userData.email,
+                    currentPassword: currentPassword,
+                    newPassword: newPassword
+                };
+
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error(`خطای سرور: ${response.status}`);
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    showMessageModal(result.message, 'success');
+                    changePasswordForm.reset();
+                } else {
+                    throw new Error(result.message || 'خطای ناشناخته در تغییر رمز عبور.');
+                }
+
+            } catch (error) {
+                showMessageModal(error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btnText.classList.remove('hidden');
+                spinner.classList.add('hidden');
+            }
+        }
+
+        // --- INITIALIZATION ---
         async function main() {
             const params = new URLSearchParams(window.location.search);
             const email = params.get('email');
@@ -941,6 +1072,8 @@
             }
             
             initSlideshow();
+            setupViewSwitcher();
+            changePasswordForm.addEventListener('submit', handleChangePassword);
             pageLoader.style.display = 'none';
         }
 
