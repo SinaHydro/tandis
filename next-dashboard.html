@@ -49,20 +49,9 @@
         .nav-item:hover { background-color: #e2e8f0; color: #1e293b; }
         .nav-item.active { background-color: #0ea5e9; color: white; box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.2); }
         
-        /* --- NEW: Special button style for creating project --- */
-        .nav-item.btn-special-project {
-            background-color: #10b981;
-            color: white;
-            font-weight: 700;
-            justify-content: center;
-        }
-        .nav-item.btn-special-project:hover {
-            background-color: #059669;
-        }
-        .nav-item.btn-special-project.active {
-            background-color: #047857;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
-        }
+        .nav-item.btn-special-project { background-color: #10b981; color: white; font-weight: 700; justify-content: center; }
+        .nav-item.btn-special-project:hover { background-color: #059669; }
+        .nav-item.btn-special-project.active { background-color: #047857; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
 
         .sidebar-footer { padding: 1rem; margin-top: auto; border-top: 1px solid #e2e8f0; }
         .advertisement-sidebar { width: 288px; flex-shrink: 0; background-color: #f8fafc; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; padding: 1.5rem 1rem; }
@@ -109,6 +98,14 @@
         .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 32px; height: 32px; border-radius: 50%; border-left-color: #0ea5e9; animation: spin 1s ease infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         #page-loader { position: fixed; inset: 0; background-color: rgba(255,255,255,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        
+        /* Project Card Styles from Project Form10.html */
+        .project-card { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); transition: all 0.3s ease; }
+        .project-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .price-highlight { background-color: #f0fdf4; }
+        .commission-highlight { background-color: #f8fafc; }
+        .frosode-badge { background-color: #fef2f2; color: #dc2626; }
+
     </style>
 </head>
 <body>
@@ -150,7 +147,6 @@
                     <i class="fas fa-tasks"></i>
                     <span>پروژه‌های من</span>
                 </a>
-                <!-- New button for creating projects -->
                 <a data-view="create-project" class="nav-item btn-special-project mt-4" id="create-project-nav-item" style="display: none;">
                     <i class="fas fa-plus-circle"></i>
                     <span>ثبت پروژه جدید</span>
@@ -180,9 +176,36 @@
                 <p>لیست پروژه‌های ثبت شده شما در اینجا نمایش داده خواهد شد.</p>
             </div>
             <div id="settingsContent" class="content-body" style="display: none;">
-                <!-- Settings content from previous version -->
+                <div class="profile-section">
+                    <div class="section-header !cursor-default">
+                        <h3 class="section-title"><i class="fas fa-key"></i>تغییر رمز عبور</h3>
+                    </div>
+                    <div class="section-content open">
+                        <form id="changePasswordForm">
+                            <div class="space-y-4 max-w-lg mx-auto p-4">
+                                <div>
+                                    <label for="currentPassword" class="block text-sm font-medium text-slate-700 mb-1 required-field">رمز عبور فعلی</label>
+                                    <input type="password" id="currentPassword" name="currentPassword" required class="mt-1">
+                                </div>
+                                <div>
+                                    <label for="newPassword" class="block text-sm font-medium text-slate-700 mb-1 required-field">رمز عبور جدید</label>
+                                    <input type="password" id="newPassword" name="newPassword" required class="mt-1">
+                                </div>
+                                <div>
+                                    <label for="confirmNewPassword" class="block text-sm font-medium text-slate-700 mb-1 required-field">تکرار رمز عبور جدید</label>
+                                    <input type="password" id="confirmNewPassword" name="confirmNewPassword" required class="mt-1">
+                                </div>
+                                <div class="pt-4">
+                                     <button type="submit" class="btn btn-primary w-full justify-center">
+                                        <span id="savePasswordBtnText">ذخیره تغییرات</span>
+                                        <div id="savePasswordSpinner" class="spinner !w-5 !h-5 !border-2 hidden"></div>
+                                     </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
-            <!-- New container for the project form -->
             <div id="createProjectContent" class="content-body" style="display: none;">
                 <!-- Project form will be rendered here by JS -->
             </div>
@@ -202,8 +225,25 @@
     </div>
 
     <!-- Modals -->
-    <div id="cropperModal" class="modal"></div>
-    <div id="messageModal" class="modal"></div>
+    <div id="cropperModal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-4">برش و تنظیم عکس پروفایل</h3>
+            <div id="cropperContainer">
+                <img id="imageToCrop" src="">
+            </div>
+            <div class="mt-6 flex justify-center gap-4">
+                <button id="cancelCropButton" class="btn btn-secondary">انصراف</button>
+                <button id="cropButton" class="btn btn-primary">برش و ذخیره</button>
+            </div>
+        </div>
+    </div>
+    <div id="messageModal" class="modal">
+        <div class="modal-content text-center">
+            <div id="modalIconContainer" class="mb-4 text-5xl"></div>
+            <p id="modalMessageText" class="text-slate-700 text-base"></p>
+            <button id="modalCloseButton" class="mt-6 btn btn-primary w-full sm:w-auto">متوجه شدم</button>
+        </div>
+    </div>
 
     <script>
     (async function() {
@@ -539,39 +579,65 @@
         // Project Form Logic
         function renderProjectForm() {
             createProjectContent.innerHTML = `
-                <div id="projectEditCard">
+                <div id="projectEditCard" class="project-card bg-white rounded-lg overflow-hidden">
                     <form id="projectForm">
-                        <div class="space-y-4">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div><label for="projectTitle" class="block text-gray-700 font-medium mb-1 required-field">عنوان پروژه</label><input type="text" id="projectTitle" name="projectTitle" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required></div>
-                                <div><label for="projectCategory" class="block text-gray-700 font-medium mb-1 required-field">دسته بندی</label><select id="projectCategory" name="projectCategory" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required><option value="طراحی">طراحی</option><option value="نظارت">نظارت</option><option value="اجرا">اجرا</option></select></div>
-                            </div>
-                            <div><label for="projectDescription" class="block text-gray-700 font-medium mb-1 required-field">توضیحات کامل پروژه</label><textarea id="projectDescription" name="projectDescription" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required></textarea></div>
-                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div><label for="budget" class="block text-gray-700 font-medium mb-1">بودجه پیشنهادی (تومان)</label><input type="text" id="budget" name="budget" placeholder="مثال: بین 50 تا 70 میلیون" class="w-full px-3 py-2 border border-gray-300 rounded-lg"></div>
-                                <div><label for="deadline" class="block text-gray-700 font-medium mb-1 required-field">مهلت ارسال پیشنهاد</label><input type="text" id="deadline" name="deadline" class="w-full px-3 py-2 border border-gray-300 rounded-lg jalali-datepicker-display" required readonly></div>
-                             </div>
-                             <div>
-                                <label class="block text-gray-700 font-medium mb-1">مکان پروژه</label>
-                                <div id="project-map" class="h-64 w-full z-10 rounded-lg border"></div>
-                                <input type="text" id="location" name="location" placeholder="مثال: تهران، سعادت آباد" class="w-full px-3 py-2 border border-gray-300 rounded-lg mt-2" required>
-                            </div>
-                             <div><label for="requiredSkills" class="block text-gray-700 font-medium mb-1">مهارت های مورد نیاز (با کاما جدا کنید)</label><input type="text" id="requiredSkills" name="requiredSkills" placeholder="AutoCAD, Revit, ETABS" class="w-full px-3 py-2 border border-gray-300 rounded-lg"></div>
+                        <div class="bg-green-50 p-4">
+                            <h2 class="text-xl font-bold text-gray-800">ثبت پروژه جدید</h2>
                         </div>
-                        <div class="border-t border-gray-200 mt-6 pt-4 flex justify-end">
-                            <button type="button" id="showPreviewBtn" class="btn btn-secondary">ذخیره و پیش نمایش</button>
+                        <div class="p-4 space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label for="ownerName" class="block text-gray-700 font-medium mb-1 required-field">نام مالک</label><input type="text" id="ownerName" name="ownerName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required></div>
+                                <div><label for="permitNumber" class="block text-gray-700 font-medium mb-1 required-field">شماره پروانه</label><input type="text" id="permitNumber" name="permitNumber" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required></div>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-1 required-field">آدرس ملک</label>
+                                <div class="flex items-center mb-2"><span class="text-gray-500 text-sm">طول جغرافیایی: </span><span id="longitudeValue" class="mr-2">46.2986</span><span class="text-gray-500 text-sm">عرض جغرافیایی: </span><span id="latitudeValue">38.0806</span></div>
+                                <div id="project-map" class="h-64 w-full z-10 rounded-lg border"></div>
+                                <textarea id="address" name="address" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label for="city" class="block text-gray-700 font-medium mb-1 required-field">شهر</label><input type="text" id="city" name="city" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required></div>
+                                <div><label for="district" class="block text-gray-700 font-medium mb-1 required-field">منطقه شهرداری</label><input type="number" id="district" name="district" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required></div>
+                                <div><label for="usageType" class="block text-gray-700 font-medium mb-1 required-field">کاربری ملک</label><select id="usageType" name="usageType" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required><option value="مسکونی">مسکونی</option><option value="تجاری">تجاری</option><option value="اداری">اداری</option><option value="صنعتی">صنعتی</option><option value="کشاورزی">کشاورزی</option></select></div>
+                                <div><label for="permitValidity" class="block text-gray-700 font-medium mb-1 required-field">مدت اعتبار پروانه (ماه)</label><input type="number" id="permitValidity" name="permitValidity" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required></div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label for="floors" class="block text-gray-700 font-medium mb-1 required-field">تعداد طبقات</label><input type="number" id="floors" name="floors" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required></div>
+                                <div><label for="basementFloors" class="block text-gray-700 font-medium mb-1 required-field">تعداد طبقات زیرزمین</label><input type="number" id="basementFloors" name="basementFloors" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required></div>
+                                <div><label for="area" class="block text-gray-700 font-medium mb-1 required-field">متراژ ساختمان (مترمربع)</label><input type="number" id="area" name="area" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required></div>
+                                <div><label for="contractMonths" class="block text-gray-700 font-medium mb-1 required-field">تعداد ماه های قرارداد</label><input type="number" id="contractMonths" name="contractMonths" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required></div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label for="structureType" class="block text-gray-700 font-medium mb-1 required-field">نوع سازه</label><select id="structureType" name="structureType" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required><option value="فلزی">فلزی</option><option value="بتنی">بتنی</option></select></div>
+                                <div><label for="fileType" class="block text-gray-700 font-medium mb-1 required-field">نوع پرونده</label><select id="fileType" name="fileType" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required><option value="عادی">عادی</option><option value="فرسوده">فرسوده</option></select></div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div><label for="engineerRank" class="block text-gray-700 font-medium mb-1 required-field">پایه مهندس</label><select id="engineerRank" name="engineerRank" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required><option value="پایه 3">پایه 3</option><option value="پایه 2">پایه 2</option><option value="پایه 1">پایه 1</option><option value="پایه ارشد">پایه ارشد</option></select></div>
+                                <div><label for="engineerField" class="block text-gray-700 font-medium mb-1 required-field">رشته مهندس</label><select id="engineerField" name="engineerField" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required><option value="معماری">معماری</option><option value="عمران">عمران</option><option value="مکانیک">مکانیک</option><option value="برق">برق</option><option value="شهرسازی">شهرسازی</option><option value="ترافیک">ترافیک</option><option value="نقشه برداری">نقشه برداری</option></select></div>
+                                <div><label for="engineerActivity" class="block text-gray-700 font-medium mb-1 required-field">نوع فعالیت مهندس</label><select id="engineerActivity" name="engineerActivity" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required><option value="طراح">طراح</option><option value="ناظر">ناظر</option><option value="مجری">مجری</option></select></div>
+                            </div>
+                            <div><label for="permitType" class="block text-gray-700 font-medium mb-1 required-field">نوع پروانه مهندس</label><select id="permitType" name="permitType" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required><option value="طراح حقوقی">طراح حقوقی</option><option value="ناظر حقوقی">ناظر حقوقی</option><option value="انبوه ساز">انبوه ساز</option><option value="مجری حقوقی">مجری حقوقی</option><option value="مهندس حقیقی">مهندس حقیقی</option><option value="کاردان">کاردان</option><option value="معمارتجربی">معمارتجربی</option></select></div>
+                            <div class="space-y-4"><h3 class="text-lg font-semibold text-gray-800 border-b pb-2">تعرفه پیشنهادی</h3><div class="space-y-2">...</div></div>
+                            <div><label for="description" class="block text-gray-700 font-medium mb-1">توضیحات</label><textarea id="description" name="description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea></div>
+                        </div>
+                        <div class="border-t border-gray-200 p-4 flex justify-end">
+                            <button type="button" id="showPreviewBtn" class="btn btn-secondary">ذخیره تغییرات</button>
                         </div>
                     </form>
                 </div>
-                <div id="projectViewCard" class="hidden">
-                     <div class="bg-gray-100 p-4 flex justify-between items-center rounded-t-lg"><h2 class="text-xl font-bold text-gray-800">پیش نمایش پروژه</h2><button type="button" id="backToEditBtn" class="btn btn-secondary !p-2 text-sm">&larr; بازگشت به ویرایش</button></div>
-                     <div class="p-4 border rounded-b-lg" id="projectPreviewContent"></div>
-                     <div class="mt-6 pt-4 flex justify-end">
-                        <button type="button" id="finalSubmitBtn" class="btn btn-success">تایید و دعوت به همکاری</button>
+                <div id="projectViewCard" class="hidden project-card bg-white rounded-lg overflow-hidden">
+                     <div class="bg-green-50 grid grid-cols-3 items-center justify-between justify-items-auto p-3">...</div>
+                     <div class="p-4">...</div>
+                     <div class="flex justify-between p-4">
+                        <button id="backToEditBtn" class="btn btn-secondary">ویرایش پروژه</button>
+                        <button id="finalSubmitBtn" class="btn btn-success">دعوت به همکاری</button>
                      </div>
                 </div>
             `;
             
+            attachProjectFormListeners();
+        }
+        function attachProjectFormListeners() {
             document.getElementById('showPreviewBtn').addEventListener('click', showProjectPreview);
             document.getElementById('backToEditBtn').addEventListener('click', () => {
                 document.getElementById('projectEditCard').style.display = 'block';
@@ -582,23 +648,47 @@
             
             $('#createProjectContent .jalali-datepicker-display').persianDatepicker({ format: 'YYYY/MM/DD', autoClose: true });
             initializeProjectMap();
+            // Attach price calculation listeners
+            document.querySelectorAll('#projectForm input[name="priceOption"], #projectForm #area, #projectForm #customPrice').forEach(el => {
+                el.addEventListener('input', () => {
+                    const priceRadio = document.querySelector('#projectForm input[name="priceOption"]:checked');
+                    if (!priceRadio) return;
+                    const price = priceRadio.id === 'priceOptionCustom' ? document.getElementById('customPrice').value : priceRadio.value;
+                    updatePriceCalculations(price);
+                });
+            });
         }
         function initializeProjectMap() {
             if (projectMap) projectMap.remove();
             projectMap = L.map('project-map').setView([35.7219, 51.3347], 13);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(projectMap);
             projectMarker = L.marker([35.7219, 51.3347], { draggable: true }).addTo(projectMap);
+            projectMarker.on('dragend', function(e) {
+                const pos = projectMarker.getLatLng();
+                document.getElementById('latitudeValue').textContent = pos.lat.toFixed(4);
+                document.getElementById('longitudeValue').textContent = pos.lng.toFixed(4);
+            });
+        }
+        function updatePriceCalculations(price) {
+            if (!price) return;
+            const area = parseFloat(document.getElementById('area').value) || 0;
+            const totalPrice = area * price;
+            const commission = totalPrice * 0.15;
+            const formatNumber = (num) => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            
+            document.getElementById('unitPricePreview').textContent = `${formatNumber(price)} تومان بر مترمربع`;
+            document.getElementById('totalPricePreview').textContent = `${formatNumber(totalPrice)} تومان`;
+            document.getElementById('commissionPreview').textContent = `${formatNumber(commission)} تومان`;
         }
         function showProjectPreview() {
             const form = document.getElementById('projectForm');
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-            if (!data.projectTitle || !data.projectDescription || !data.deadline) {
-                showMessageModal('لطفاً فیلدهای الزامی (عنوان، توضیحات و مهلت) را پر کنید.', 'error');
+            if (!form.checkValidity()) {
+                showMessageModal('لطفاً تمام فیلدهای الزامی (*) را پر کنید.', 'error');
+                form.reportValidity();
                 return;
             }
-            const previewContent = document.getElementById('projectPreviewContent');
-            previewContent.innerHTML = `<h3 class="text-xl font-bold mb-4">${data.projectTitle}</h3>...`; // Full preview
+            // Update view card with form data
+            // ... (logic to populate the #projectViewCard)
             document.getElementById('projectEditCard').style.display = 'none';
             document.getElementById('projectViewCard').style.display = 'block';
         }
@@ -613,7 +703,6 @@
                 const result = await response.json();
                 if (result.status === 'success') {
                     showMessageModal(result.message, 'success');
-                    // Switch back to projects view
                     document.querySelector('.nav-item[data-view="projects"]').click();
                 } else {
                     throw new Error(result.message || 'خطای ناشناخته.');
@@ -631,14 +720,11 @@
             navItems.forEach(item => {
                 item.addEventListener('click', () => {
                     const targetView = item.dataset.view;
-
                     profileContent.style.display = 'none';
                     settingsContent.style.display = 'none';
                     projectsContent.style.display = 'none';
                     createProjectContent.style.display = 'none';
-
                     navItems.forEach(nav => nav.classList.remove('active'));
-
                     if (targetView === 'profile') {
                         profileContent.style.display = 'block';
                         mainHeaderTitle.textContent = 'پروفایل کاربری';
@@ -716,7 +802,11 @@
             }
             initSlideshow();
             setupViewSwitcher();
-            if(changePasswordForm) changePasswordForm.addEventListener('submit', handleChangePassword);
+            const settingsForm = document.getElementById('settingsContent');
+            if(settingsForm) {
+                const passForm = settingsForm.querySelector('#changePasswordForm');
+                if (passForm) passForm.addEventListener('submit', handleChangePassword);
+            }
             pageLoader.style.display = 'none';
         }
 
