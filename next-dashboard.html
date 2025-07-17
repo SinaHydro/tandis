@@ -247,7 +247,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzO2lSR07u8Rt53HUVdPJYFIVEAYiUWMNyrfmkwzZhQPOKU_hA956nDO6Cpdv-ZR6k6/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwki2B837CsbVqmeHpX-yAt3dpq44A7KoGYQ-Pycuy8eye3lg9_I7s7q-kY-WsHAO5d/exec';
         const SLIDESHOW_IMAGES = [
             'https://images.unsplash.com/photo-1581092916381-6f8901ad5a33?w=500&auto=format&fit=crop&q=60',
             'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=500&auto=format&fit=crop&q=60',
@@ -627,9 +627,43 @@
                     </form>
                 </div>
                 <div id="projectViewCard" class="hidden project-card bg-white rounded-lg overflow-hidden">
-                     <div class="bg-green-50 grid grid-cols-3 items-center justify-between justify-items-auto p-3">...</div>
-                     <div class="p-4">...</div>
-                     <div class="flex justify-between p-4">
+                     <div class="bg-green-50 grid grid-cols-3 items-center justify-between justify-items-auto p-3">
+                        <div class="flex items-center">
+                            <i class="fa fa-home fas ml-2 text-green-500"></i>
+                            <span class="font-semibold text-gray-900">سازه</span>
+                            <span id="viewStructureType" class="font-semibold px-1"></span><span class="font-semibold mr-0 text-gray-900" id="viewUsageType"></span>
+                        </div>
+                        <div class="text-center">
+                            <div class="flex items-center justify-center mt-1 pb-2">
+                                <div class="flex mr-2" id="viewRankStars"></div>
+                            </div>
+                            <div class="flex justify-center mb-1">
+                                <div class="font-bold text-gray-900 text-xl" id="viewEngineerActivity"></div><span class="font-bold px-1 text-gray-900 text-xl" id="viewEngineerRank"></span>
+                                <div class="font-bold text-gray-900 text-xl" id="viewEngineerField"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <span id="viewFileType" class="frosode-badge px-3 py-1 rounded-full text-sm font-medium hidden">فرسوده</span>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between mb-4 mt-2">
+                            <div class="text-gray-900 font-semibold"><i class="fa-ruler-combined fas mx-2 text-gray-400"></i><span id="viewArea"></span> مترمربع</div>
+                            <div class="text-gray-900 font-semibold"><span id="viewFloors"></span> طبقه + <span id="viewBasementFloors"></span> طبقه زیرزمین<i class="fa-building fas mx-2 text-gray-400"></i></div>
+                        </div>
+                        <div class="flex justify-between mb-4">
+                            <div class="text-gray-900 font-semibold"><i class="fa-map-marker-alt fas mx-2 text-gray-400"></i>منطقه <span id="viewDistrict"></span> <span id="viewCity"></span></div>
+                            <div class="text-gray-900 font-semibold">مدت قرارداد: <span id="viewContractMonths"></span> ماه<i class="fa-calendar-alt far mx-2 text-gray-400"></i></div>
+                        </div>
+                        <div class="bg-gray-50 commission-highlight p-3 rounded-2xl">
+                            <div class="grid grid-rows-3 items-center">
+                                <div class="flex items-center pb-1 pt-0 px-3"><i class="fa-tag fas ml-2 self-center text-gray-400"></i><span class="font-medium text-gray-500">قیمت واحد پیشنهادی:</span><div class="flex-auto font-semibold text-base text-gray-500 text-left" id="viewUnitPrice"></div></div>
+                                <div class="bg-green-300 mb-0 price-highlight px-5 py-3 rounded-lg"><div class="flex items-center"><i class="fa-hand-holding-usd fas ml-2 text-green-700"></i><span class="font-medium text-green-800">قیمت کل پیشنهادی:</span><div class="flex-auto font-bold mt-1 text-green-800 text-left text-xl" id="viewTotalPrice"></div></div></div>
+                                <div class="flex items-center pb-0 pt-1 px-3"><i class="fa fa-percent fas ml-2 text-gray-400"></i><span class="font-medium text-gray-500">کمیسیون:</span><div class="flex-auto font-bold mt-1 text-blue-600 text-left text-lg" id="viewCommission"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="flex justify-between p-4 bg-gray-50 border-t">
                         <button id="backToEditBtn" class="btn btn-secondary">ویرایش پروژه</button>
                         <button id="finalSubmitBtn" class="btn btn-success">دعوت به همکاری</button>
                      </div>
@@ -649,14 +683,23 @@
             
             $('#createProjectContent .jalali-datepicker-display').persianDatepicker({ format: 'YYYY/MM/DD', autoClose: true });
             initializeProjectMap();
-            document.querySelectorAll('#projectForm input[name="priceOption"], #projectForm #area, #projectForm #customPrice').forEach(el => {
-                el.addEventListener('input', () => {
-                    const priceRadio = document.querySelector('#projectForm input[name="priceOption"]:checked');
-                    if (!priceRadio) return;
-                    const price = priceRadio.id === 'priceOptionCustom' ? document.getElementById('customPrice').value : priceRadio.value;
-                    updatePriceCalculations(price);
+            
+            const priceOptions = document.querySelectorAll('#projectForm input[name="priceOption"]');
+            const customPriceInput = document.getElementById('customPrice');
+            const areaInput = document.getElementById('area');
+
+            priceOptions.forEach(option => {
+                option.addEventListener('change', function() {
+                    customPriceInput.disabled = (this.id !== 'priceOptionCustom');
+                    if (this.id === 'priceOptionCustom') {
+                        customPriceInput.focus();
+                    }
+                    updatePriceCalculations();
                 });
             });
+            
+            customPriceInput.addEventListener('input', updatePriceCalculations);
+            areaInput.addEventListener('input', updatePriceCalculations);
         }
         async function getAddressFromLatLng(lat, lng) {
             try {
@@ -681,7 +724,7 @@
         }
         function initializeProjectMap() {
             if (projectMap) projectMap.remove();
-            const initialCoords = [38.0766, 46.2970]; // Tehran
+            const initialCoords = [38.0766, 46.2970]; // Tabriz, Iran
             projectMap = L.map('project-map').setView(initialCoords, 13);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(projectMap);
             projectMarker = L.marker(initialCoords, { draggable: true }).addTo(projectMap);
@@ -692,12 +735,18 @@
                 updateMapLocation(e.latlng.lat, e.latlng.lng);
             });
         }
-        function updatePriceCalculations(price) {
-            if (!price) return;
+        function updatePriceCalculations() {
+            const priceRadio = document.querySelector('#projectForm input[name="priceOption"]:checked');
+            if (!priceRadio) return;
+            
+            let price = priceRadio.id === 'priceOptionCustom' 
+                ? parseFloat(document.getElementById('customPrice').value) || 0 
+                : parseFloat(priceRadio.value);
+
             const area = parseFloat(document.getElementById('area').value) || 0;
             const totalPrice = area * price;
             const commission = totalPrice * 0.15;
-            const formatNumber = (num) => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            const formatNumber = (num) => num.toLocaleString('fa-IR');
             
             document.getElementById('unitPricePreview').textContent = `${formatNumber(price)} تومان بر مترمربع`;
             document.getElementById('totalPricePreview').textContent = `${formatNumber(totalPrice)} تومان`;
@@ -711,7 +760,43 @@
                 return;
             }
             // Update view card with form data
-            // ... (logic to populate the #projectViewCard)
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            document.getElementById('viewStructureType').textContent = data.structureType;
+            document.getElementById('viewUsageType').textContent = data.usageType;
+            document.getElementById('viewEngineerActivity').textContent = data.engineerActivity;
+            document.getElementById('viewEngineerRank').textContent = data.engineerRank;
+            document.getElementById('viewEngineerField').textContent = data.engineerField;
+            document.getElementById('viewArea').textContent = data.area;
+            document.getElementById('viewFloors').textContent = data.floors;
+            document.getElementById('viewBasementFloors').textContent = data.basementFloors;
+            document.getElementById('viewDistrict').textContent = data.district;
+            document.getElementById('viewCity').textContent = data.city;
+            document.getElementById('viewContractMonths').textContent = data.contractMonths;
+            
+            const fileTypeBadge = document.getElementById('viewFileType');
+            if (data.fileType === 'فرسوده') fileTypeBadge.classList.remove('hidden');
+            else fileTypeBadge.classList.add('hidden');
+
+            const starsContainer = document.getElementById('viewRankStars');
+            starsContainer.innerHTML = '';
+            let starsCount = { 'پایه 3': 1, 'پایه 2': 2, 'پایه 1': 3, 'پایه ارشد': 4 }[data.engineerRank] || 1;
+            for (let i = 0; i < starsCount; i++) {
+                const star = document.createElement('i');
+                star.className = 'fas fa-star text-yellow-400';
+                starsContainer.appendChild(star);
+            }
+
+            const price = data.priceOption === 'on' ? data.customPrice : data.priceOption;
+            const totalPrice = (parseFloat(data.area) || 0) * (parseFloat(price) || 0);
+            const commission = totalPrice * 0.15;
+            const formatNumber = (num) => num.toLocaleString('fa-IR');
+            
+            document.getElementById('viewUnitPrice').textContent = `${formatNumber(price)} تومان بر مترمربع`;
+            document.getElementById('viewTotalPrice').textContent = `${formatNumber(totalPrice)} تومان`;
+            document.getElementById('viewCommission').textContent = `${formatNumber(commission)} تومان`;
+
             document.getElementById('projectEditCard').style.display = 'none';
             document.getElementById('projectViewCard').style.display = 'block';
         }
@@ -731,7 +816,7 @@
                     throw new Error(result.message || 'خطای ناشناخته.');
                 }
             } catch (error) {
-                showMessageModal(error.message, 'error');
+                showMessageModal(`خطا در ثبت پروژه: ${error.message}`, 'error');
             } finally {
                 pageLoader.style.display = 'none';
             }
