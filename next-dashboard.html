@@ -40,11 +40,6 @@
         .sidebar { width: 288px; flex-shrink: 0; background-color: #f1f5f9; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; }
         @media (max-width: 1024px) { .sidebar { display: none; } } /* Adjusted breakpoint */
         
-        /* --- NEW: Sidebar Header --- */
-        .sidebar-header { display: flex; align-items: center; padding: 1rem; border-bottom: 1px solid #e2e8f0; }
-        .sidebar-header-logo { width: 40px; height: 40px; object-contain: contain; margin-left: 0.75rem; }
-        .sidebar-header-title { font-size: 1.25rem; font-weight: 800; color: #1e293b; }
-
         /* --- UPDATED: Sidebar Profile Section --- */
         .sidebar-profile-section { display: flex; align-items: center; padding: 1rem; border-bottom: 1px solid #cbd5e1; }
         .sidebar-profile-image-container { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
@@ -137,13 +132,7 @@
     <div class="workstation-wrapper">
         <!-- Main Sidebar (Right) -->
         <aside class="sidebar">
-            <!-- NEW Sidebar Header -->
-            <div class="sidebar-header">
-                <img src="https://tandis.shahraavand.ir/images/new-TLogo_B.avif" alt="لوگوی نظام تندیس" class="sidebar-header-logo">
-                <h1 class="sidebar-header-title">نظام تندیس</h1>
-            </div>
-
-            <!-- UPDATED Profile Section -->
+            <!-- Profile Section -->
             <div class="sidebar-profile-section">
                 <div class="sidebar-profile-image-container">
                     <img id="sidebarProfileImage" src="https://placehold.co/80x80/EBF4FF/7F9CF5?text=...&font=vazirmatn" alt="عکس پروفایل" class="sidebar-profile-image">
