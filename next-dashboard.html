@@ -589,12 +589,18 @@
                                 <div><label for="ownerName" class="block text-gray-700 font-medium mb-1 required-field">نام مالک</label><input type="text" id="ownerName" name="ownerName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required></div>
                                 <div><label for="permitNumber" class="block text-gray-700 font-medium mb-1 required-field">شماره پروانه</label><input type="text" id="permitNumber" name="permitNumber" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required></div>
                             </div>
-                            <div>
-                                <label class="block text-gray-700 font-medium mb-1 required-field">آدرس ملک</label>
-                                <div class="flex items-center mb-2"><span class="text-gray-500 text-sm">طول جغرافیایی: </span><span id="longitudeValue" class="mr-2">46.2986</span><span class="text-gray-500 text-sm">عرض جغرافیایی: </span><span id="latitudeValue">38.0806</span></div>
-                                <div id="project-map" class="h-64 w-full z-10 rounded-lg border"></div>
-                                <textarea id="address" name="address" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
-                            </div>
+<div class="mt-8">
+    <label class="block text-sm font-medium text-slate-700 mb-1">آدرس محل سکونت</label>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+        <textarea id="buildingAddress" name="buildingAddress" rows="4" class="mt-1 block w-full sm:text-sm min-h-[220px]"></textarea>
+        <div id="buildingMap" class="map-container min-h-[220px]"></div>
+    </div>
+    <div id="buildingMapInfo" class="mt-2 p-3 text-xs map-info-display rounded-md leading-relaxed shadow-sm"><span class="text-slate-500 italic">موقعیت مکانی انتخاب شده روی نقشه در اینجا نمایش داده می‌شود.</span>
+    </div>
+    <input type="hidden" id="buildingLat" name="buildingLat">
+    <input type="hidden" id="buildingLng" name="buildingLng">
+    <input type="hidden" id="buildingNeighborhood" name="buildingNeighborhood">
+</div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div><label for="city" class="block text-gray-700 font-medium mb-1 required-field">شهر</label><input type="text" id="city" name="city" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required></div>
                                 <div><label for="district" class="block text-gray-700 font-medium mb-1 required-field">منطقه شهرداری</label><input type="number" id="district" name="district" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required></div>
