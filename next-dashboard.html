@@ -144,7 +144,7 @@
                 </a>
                 <a data-view="projects" class="nav-item" id="projects-nav-item" style="display: none;">
                     <i class="fas fa-tasks"></i>
-                    <span>پروژه‌های من</span>
+                    <span>پروژه‌ها</span>
                 </a>
                 <a data-view="create-project" class="nav-item btn-special-project mt-4" id="create-project-nav-item" style="display: none;">
                     <i class="fas fa-plus-circle"></i>
@@ -172,7 +172,7 @@
             
             <div id="profileContent" class="content-body"></div>
             <div id="projectsContent" class="content-body" style="display: none;">
-                <!-- Project cards for engineers will be rendered here -->
+                <!-- Project cards for engineers or employers will be rendered here -->
             </div>
             <div id="settingsContent" class="content-body" style="display: none;">
                 <div class="profile-section">
@@ -247,7 +247,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyKNHMfX0uZ-UMoxpKrk4UYw6Qd8_6uIPqNljEjR8ELm3x_fJ38epqIGYNu5JFJy881/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhG_D5oqyzuPO3B4M9tIqES0XAvVlLKNGHXMAcnfBak4ztJ1fqPUUcC6In1Msn_SUP/exec';
         const SLIDESHOW_IMAGES = [
             'https://images.unsplash.com/photo-1581092916381-6f8901ad5a33?w=500&auto=format&fit=crop&q=60',
             'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=500&auto=format&fit=crop&q=60',
@@ -851,7 +851,13 @@
                         mainHeaderTitle.textContent = 'تنظیمات';
                     } else if (targetView === 'projects') {
                         projectsContent.style.display = 'block';
-                        mainHeaderTitle.textContent = 'پروژه‌های من';
+                        if (userData.role === 'employer') {
+                            mainHeaderTitle.textContent = 'پروژه‌های من';
+                            renderEmployerProjects();
+                        } else {
+                            mainHeaderTitle.textContent = 'بازار کار پروژه‌ها';
+                            renderProjectMarketplace();
+                        }
                     } else if (targetView === 'create-project') {
                         createProjectContent.style.display = 'block';
                         mainHeaderTitle.textContent = 'ثبت پروژه جدید';
