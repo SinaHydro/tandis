@@ -114,6 +114,10 @@
                 grid-template-columns: repeat(2, 1fr);
             }
         }
+        /* Style for filter container */
+        #filter-container {
+             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        }
     </style>
 </head>
 <body>
@@ -258,7 +262,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwncwWo_i6P6HW81kRuRjb9rXK4aOEWOhEQMJj1NpmI1wl-e3bM-rxT3ws05YJBWPvX/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzO9kOWxdJji7zMmUoRLxQVdmJSsPkdXDNNB2VMqigZI0cGw0sGpTZICJb-1IeLtvMY/exec';
         const SLIDESHOW_IMAGES = [
             'https://images.unsplash.com/photo-1581092916381-6f8901ad5a33?w=500&auto=format&fit=crop&q=60',
             'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=500&auto=format&fit=crop&q=60',
@@ -272,8 +276,8 @@
         let currentSlide = 0;
         let projectMap = null;
         let projectMarker = null;
-        let fetchedProjects = [];
-        let appliedProjectIds = new Set();
+        let fetchedProjects = []; // Full list of projects from the server
+        let appliedProjectIds = new Set(); // IDs of projects the engineer has applied to
 
         // --- DOM ELEMENTS ---
         const pageLoader = document.getElementById('page-loader');
@@ -290,6 +294,15 @@
         const changePasswordForm = document.getElementById('changePasswordForm');
         
         // --- HELPER FUNCTIONS ---
+        // [MODIFIED] Moved this function to be globally accessible within the script
+        function generateProvinceOptions(selectedValue) {
+            let options = '<option value="">همه استان‌ها</option>';
+            PROVINCES.forEach(province => {
+                options += `<option value="${province}" ${province === selectedValue ? 'selected' : ''}>${province}</option>`;
+            });
+            return options;
+        }
+
         function getDirectDriveLink(url, type = 'image') {
             if (!url || typeof url !== 'string') return '';
             const match = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
@@ -482,14 +495,6 @@
                 </div>
             `;
         }
-
-        function generateProvinceOptions(selectedValue) {
-            let options = '<option value="">انتخاب استان</option>';
-            PROVINCES.forEach(province => {
-                options += `<option value="${province}" ${province === selectedValue ? 'selected' : ''}>${province}</option>`;
-            });
-            return options;
-        }
         
         function getPersonalFieldsHTML(data, role) {
             const prefix = role === 'engineer' ? 'engineer' : 'employer';
@@ -614,6 +619,7 @@
                     <form id="projectForm">
                         ${isEditMode ? `<input type="hidden" id="ProjectID" name="ProjectID" value="${projectData.ProjectID}">` : ''}
                         <div class="p-6 space-y-6">
+                            <!-- [MODIFIED] Project Name field is at the top of the form as requested -->
                             <div><label for="projectName" class="block text-gray-700 font-medium mb-1 required-field">نام پروژه</label><input type="text" id="projectName" name="projectName" class="w-full" required value="${projectData?.projectName || ''}"></div>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div><label for="ownerName" class="block text-gray-700 font-medium mb-1 required-field">نام مالک</label><input type="text" id="ownerName" name="ownerName" class="w-full" required value="${projectData?.ownerName || ''}"></div>
@@ -715,6 +721,7 @@
             
             let footerHtml = '';
             if (role === 'engineer') {
+                // [MODIFIED] Button is disabled if the user has already applied for the project.
                 if (isApplied) {
                     footerHtml = `<button class="btn btn-success w-full" disabled><i class="fas fa-check-circle mr-2"></i>درخواست ارسال شد</button>`;
                 } else {
@@ -901,7 +908,60 @@
             }
         }
 
-        function renderProjectsHeader(title, refreshCallback) {
+        // [NEW] Function to render the header and filter section for project lists
+        function renderProjectsHeader(title, refreshCallback, isMarketplace = false) {
+            let filterHtml = '';
+            if (isMarketplace) {
+                filterHtml = `
+                    <div id="filter-container" class="bg-slate-50 p-4 rounded-lg mb-6 border border-slate-200">
+                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            <div>
+                                <label for="filterProvince" class="block text-sm font-medium text-slate-700 mb-1">استان</label>
+                                <select id="filterProvince" name="province" class="w-full text-sm">
+                                    ${generateProvinceOptions('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label for="filterCity" class="block text-sm font-medium text-slate-700 mb-1">شهر</label>
+                                <input type="text" id="filterCity" name="city" class="w-full text-sm" placeholder="نام شهر را وارد کنید">
+                            </div>
+                            <div>
+                                <label for="filterEngineerField" class="block text-sm font-medium text-slate-700 mb-1">رشته مهندس</label>
+                                <select id="filterEngineerField" name="engineerField" class="w-full text-sm">
+                                    <option value="">همه</option>
+                                    <option value="معماری">معماری</option><option value="عمران">عمران</option><option value="مکانیک">مکانیک</option><option value="برق">برق</option><option value="شهرسازی">شهرسازی</option><option value="ترافیک">ترافیک</option><option value="نقشه برداری">نقشه برداری</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="filterEngineerRank" class="block text-sm font-medium text-slate-700 mb-1">پایه مهندس</label>
+                                <select id="filterEngineerRank" name="engineerRank" class="w-full text-sm">
+                                    <option value="">همه</option>
+                                    <option value="پایه 3">پایه 3</option><option value="پایه 2">پایه 2</option><option value="پایه 1">پایه 1</option><option value="پایه ارشد">پایه ارشد</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="filterEngineerActivity" class="block text-sm font-medium text-slate-700 mb-1">نوع فعالیت</label>
+                                <select id="filterEngineerActivity" name="engineerActivity" class="w-full text-sm">
+                                    <option value="">همه</option>
+                                    <option value="طراح">طراح</option><option value="ناظر">ناظر</option><option value="مجری">مجری</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="filterPermitType" class="block text-sm font-medium text-slate-700 mb-1">نوع پروانه</label>
+                                <select id="filterPermitType" name="permitType" class="w-full text-sm">
+                                    <option value="">همه</option>
+                                    <option value="طراح حقوقی">طراح حقوقی</option><option value="ناظر حقوقی">ناظر حقوقی</option><option value="انبوه ساز">انبوه ساز</option><option value="مجری حقوقی">مجری حقوقی</option><option value="مهندس حقیقی">مهندس حقیقی</option><option value="کاردان">کاردان</option><option value="معمارتجربی">معمارتجربی</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex flex-col sm:flex-row justify-end gap-3">
+                            <button id="resetFiltersBtn" class="btn btn-secondary">حذف فیلترها</button>
+                            <button id="applyFiltersBtn" class="btn btn-primary">اعمال فیلتر</button>
+                        </div>
+                    </div>
+                `;
+            }
+
             const headerHtml = `
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-xl font-bold text-slate-700">${title}</h2>
@@ -910,27 +970,86 @@
                         <span class="mr-2">به‌روزرسانی</span>
                     </button>
                 </div>
+                ${filterHtml}
                 <div id="project-list-container"></div>
             `;
             projectsContent.innerHTML = headerHtml;
             document.getElementById('refreshProjectsBtn').addEventListener('click', refreshCallback);
+
+            if (isMarketplace) {
+                document.getElementById('applyFiltersBtn').addEventListener('click', applyFilters);
+                document.getElementById('resetFiltersBtn').addEventListener('click', resetFilters);
+            }
+
             return document.getElementById('project-list-container');
         }
+        
+        // [NEW] Renders the list of projects in the container
+        function displayProjects(projectsToDisplay) {
+            const container = document.getElementById('project-list-container');
+            if (!container) return;
 
+            if (projectsToDisplay.length > 0) {
+                // Pass the 'isApplied' flag to the card rendering function
+                container.innerHTML = projectsToDisplay.map(p => getProjectCardHTML(p, 'engineer', appliedProjectIds.has(p.ProjectID))).join('');
+            } else {
+                container.innerHTML = '<p class="text-center text-slate-500 col-span-full">پروژه‌ای مطابق با فیلترهای شما یافت نشد.</p>';
+            }
+        }
+
+        // [NEW] Applies the selected filters to the project list
+        function applyFilters() {
+            const filters = {
+                // Note: Project data from the sheet does not contain 'province'. This filter will only work if province data is added to the Projects sheet.
+                province: document.getElementById('filterProvince').value,
+                city: document.getElementById('filterCity').value.trim().toLowerCase(),
+                engineerField: document.getElementById('filterEngineerField').value,
+                engineerRank: document.getElementById('filterEngineerRank').value,
+                engineerActivity: document.getElementById('filterEngineerActivity').value,
+                permitType: document.getElementById('filterPermitType').value,
+            };
+
+            const filtered = fetchedProjects.filter(p => {
+                const cityMatch = !filters.city || (p.city && p.city.toLowerCase().includes(filters.city));
+                const fieldMatch = !filters.engineerField || p.engineerField === filters.engineerField;
+                const rankMatch = !filters.engineerRank || p.engineerRank === filters.engineerRank;
+                const activityMatch = !filters.engineerActivity || p.engineerActivity === filters.engineerActivity;
+                const permitMatch = !filters.permitType || p.permitType === filters.permitType;
+                const provinceMatch = !filters.province || (p.province && p.province === filters.province); // This line is for future use when province data is available
+
+                return provinceMatch && cityMatch && fieldMatch && rankMatch && activityMatch && permitMatch;
+            });
+
+            displayProjects(filtered);
+        }
+
+        // [NEW] Resets all filters and shows the original project list
+        function resetFilters() {
+            const filterContainer = document.getElementById('filter-container');
+            if (filterContainer) {
+                filterContainer.querySelectorAll('input, select').forEach(el => {
+                    if (el.tagName === 'SELECT') {
+                        el.selectedIndex = 0;
+                    } else {
+                        el.value = '';
+                    }
+                });
+            }
+            displayProjects(fetchedProjects);
+        }
+
+        // [MODIFIED] This function now fetches both projects and application status, and includes the filter UI.
         async function renderProjectMarketplace() {
             mainHeaderTitle.textContent = 'بازار کار پروژه‌ها';
-            const container = renderProjectsHeader('بازار کار پروژه‌ها', renderProjectMarketplace);
+            const container = renderProjectsHeader('بازار کار پروژه‌ها', renderProjectMarketplace, true);
             container.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
             try {
-                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getOpenProjects`);
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getMarketplaceData&email=${encodeURIComponent(userData.email)}`);
                 const result = await response.json();
-                if (result.success && Array.isArray(result.data)) {
-                    fetchedProjects = result.data;
-                    if (fetchedProjects.length > 0) {
-                        container.innerHTML = fetchedProjects.map(p => getProjectCardHTML(p, 'engineer')).join('');
-                    } else {
-                        container.innerHTML = '<p class="text-center text-slate-500">در حال حاضر پروژه‌ی بازی برای نمایش وجود ندارد.</p>';
-                    }
+                if (result.success && result.data) {
+                    fetchedProjects = result.data.openProjects || [];
+                    appliedProjectIds = new Set(result.data.appliedProjectIds || []);
+                    displayProjects(fetchedProjects);
                 } else {
                      container.innerHTML = `<p class="text-center text-red-500">${result.message || 'خطا در دریافت اطلاعات پروژه‌ها.'}</p>`;
                 }
@@ -941,7 +1060,7 @@
 
         async function renderEmployerProjects() {
             mainHeaderTitle.textContent = 'پروژه‌های من';
-            const container = renderProjectsHeader('پروژه‌های من', renderEmployerProjects);
+            const container = renderProjectsHeader('پروژه‌های من', renderEmployerProjects, false); // No filters for employer view
             container.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
             try {
                 const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getProjectsByEmployer&email=${encodeURIComponent(userData.email)}`);
@@ -1038,7 +1157,8 @@
                 const result = await response.json();
                 if (result.status === 'success') {
                     showModal(result.message, 'success');
-                    button.textContent = 'درخواست ارسال شد';
+                    button.innerHTML = '<i class="fas fa-check-circle mr-2"></i>درخواست ارسال شد';
+                    appliedProjectIds.add(projectId); // Update state locally
                 } else {
                     throw new Error(result.message);
                 }
