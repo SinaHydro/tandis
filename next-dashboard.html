@@ -83,7 +83,6 @@
         input[type="text"], input[type="date"], input[type="tel"], input[type="number"], input[type="password"], textarea, select { background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.625rem 0.875rem; transition: all 0.2s ease; width: 100%; }
         input:focus, textarea:focus, select:focus, input[type="password"]:focus { border-color: var(--primary-color); background-color: white; box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2); outline: none; }
         input:disabled, select:disabled, textarea:disabled { background-color: #eef2f7; color: #64748b; cursor: not-allowed; border-color: #e2e8f0; }
-        /* [MODIFIED] Increased select height */
         select { 
             -webkit-appearance: none; -moz-appearance: none; appearance: none; 
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E"); 
@@ -137,6 +136,13 @@
         #filter-container {
              grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         }
+        /* Styles for the Neumorphic card from EngineerProfile2.html */
+        .neumorphic-card { background: #ffffff; border-radius: 20px; box-shadow: 8px 8px 16px #e0e0e0, -8px -8px 16px #ffffff; padding: 20px; margin: 20px auto; width: 100%; max-width: 600px; } 
+        .neumorphic-button { background: #ffffff; border: none; border-radius: 10px; box-shadow: 4px 4px 8px #e0e0e0, -4px -4px 8px #ffffff; padding: 8px 16px; cursor: pointer; transition: all 0.3s ease; font-size: 1rem; } 
+        .neumorphic-button:hover { box-shadow: 2px 2px 4px #e0e0e0, -2px -2px 4px #ffffff; }
+        .progress-bar { height: 6px; border-radius: 3px; background-color: #e9ecef; width: 100%; } 
+        .progress-fill { height: 100%; border-radius: 3px; background-color: #3b82f6; transition: width 0.3s ease; }
+        .needs-help { background-color: #fee2e2; padding: 4px 8px; border-radius: 4px; color: #dc2626; font-size: 0.875rem; }
     </style>
 </head>
 <body>
@@ -182,7 +188,6 @@
                     <i class="fas fa-plus-circle"></i>
                     <span>ثبت پروژه جدید</span>
                 </a>
-                <!-- [NEW] Button for engineers to register an activity -->
                 <a data-view="create-activity" class="nav-item btn-special-project mt-4" id="create-activity-nav-item" style="display: none;">
                     <i class="fas fa-bullhorn"></i>
                     <span>ثبت فعالیت جدید</span>
@@ -245,7 +250,6 @@
             <div id="createProjectContent" class="content-body" style="display: none;">
                 <!-- Project form will be rendered here -->
             </div>
-            <!-- [NEW] Content area for the new activity form -->
             <div id="createActivityContent" class="content-body" style="display: none;">
                 <!-- Activity form will be rendered here -->
             </div>
@@ -291,7 +295,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyAiQo3ztUHTf-_LYy6hGS3Foj5zpX_2r4lSHbHQUh-prCNpqhyBEJU2OeR_SBwDDYC/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwVhl0gqeA-h3x9EHDmxii6RmVBl3zPGTJyfcNHsE7CXGAHc8iPiPhsKd6sD9xzNXwG/exec';
         const SLIDESHOW_IMAGES = [
             'https://images.unsplash.com/photo-1581092916381-6f8901ad5a33?w=500&auto=format&fit=crop&q=60',
             'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=500&auto=format&fit=crop&q=60',
@@ -307,7 +311,7 @@
         let projectMarker = null;
         let fetchedProjects = [];
         let appliedProjectIds = new Set();
-        let currentActivityData = {}; // To hold activity data between form and preview
+        let currentActivityData = {};
 
         // --- DOM ELEMENTS ---
         const pageLoader = document.getElementById('page-loader');
@@ -668,7 +672,7 @@
             await updateProfileSection(sectionId, dataToSave);
         }
         
-        // --- Project Logic (Create, View, Edit, Apply) ---
+        // --- Project Logic ---
 
         function renderProjectForm(projectData = null) {
             const isEditMode = projectData !== null;
@@ -968,136 +972,195 @@
             }
         }
 
-        // --- [NEW] Activity Logic ---
-        function renderActivityForm(isPreview = false) {
+        // --- [MODIFIED] Activity Logic ---
+        function renderActivityForm() {
             const formHtml = `
-                <div id="activityFormCard" class="project-card bg-white rounded-lg overflow-hidden">
-                    <form id="activityForm">
-                        <div class="p-6 space-y-6">
-                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label for="activityType" class="block text-gray-700 font-medium mb-1 required-field">نوع فعالیت</label>
-                                    <select id="activityType" name="activityType" class="w-full" required>
-                                        <option value="طراحی">طراحی</option>
-                                        <option value="نظارت">نظارت</option>
-                                        <option value="اجرا">اجرا</option>
-                                        <option value="مشاوره">مشاوره</option>
-                                        <option value="سایر">سایر</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="specialty" class="block text-gray-700 font-medium mb-1 required-field">رشته تخصصی</label>
-                                    <select id="specialty" name="specialty" class="w-full" required>
-                                        <option value="معماری">معماری</option>
-                                        <option value="عمران">عمران</option>
-                                        <option value="مکانیک">مکانیک</option>
-                                        <option value="برق">برق</option>
-                                        <option value="شهرسازی">شهرسازی</option>
-                                        <option value="ترافیک">ترافیک</option>
-                                        <option value="نقشه برداری">نقشه برداری</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label for="activityProvince" class="block text-gray-700 font-medium mb-1 required-field">استان محل فعالیت</label>
-                                    <select id="activityProvince" name="province" class="w-full" required>${generateProvinceOptions(currentActivityData.province || '')}</select>
-                                </div>
-                                <div>
-                                    <label for="activityCity" class="block text-gray-700 font-medium mb-1 required-field">شهر محل فعالیت</label>
-                                    <input type="text" id="activityCity" name="city" class="w-full" required value="${currentActivityData.city || ''}">
-                                </div>
-                            </div>
-                            <div>
-                                <label for="portfolioLink" class="block text-gray-700 font-medium mb-1">لینک نمونه کار (اختیاری)</label>
-                                <input type="url" id="portfolioLink" name="portfolioLink" class="w-full" placeholder="https://example.com" value="${currentActivityData.portfolioLink || ''}">
-                            </div>
-                            <div>
-                                <label for="activityDescription" class="block text-gray-700 font-medium mb-1 required-field">شرح فعالیت و تخصص</label>
-                                <textarea id="activityDescription" name="description" rows="5" class="w-full" required>${currentActivityData.description || ''}</textarea>
-                            </div>
-                        </div>
-                        <div class="border-t border-gray-200 mt-6 p-4 flex justify-end gap-4">
-                            <button type="button" id="cancelActivityFormBtn" class="btn btn-secondary"><i class="fas fa-times mr-2"></i>انصراف</button>
-                            <button type="submit" class="btn btn-primary"><i class="fas fa-eye mr-2"></i>ذخیره و پیش نمایش</button>
-                        </div>
-                    </form>
+                <div id="activityFormContainer" class="neumorphic-card flex flex-col">
+                    <!-- This container will hold either the form or the preview -->
                 </div>
             `;
+            createActivityContent.innerHTML = formHtml;
+            renderActivityEdit(); // Initially render the edit/form view
+        }
+
+        function renderActivityEdit() {
+            const container = document.getElementById('activityFormContainer');
+            if (!container) return;
+
+            const editHtml = `
+                <div id="editMode" class="flex flex-col gap-4 text-lg"> 
+                    <h2 class="text-xl font-bold text-center text-slate-800">ثبت و معرفی فعالیت</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4"> 
+                        <div> 
+                            <label class="block text-gray-700 font-medium mb-1">نوع پروانه</label>                         
+                            <select id="licenseType" class="w-full p-2 border border-gray-300 rounded-md text-base"> 
+                                <option value="انبوه ساز">انبوه ساز</option>                             
+                                <option value="سازنده حقوقی">سازنده حقوقی</option>                             
+                                <option value="مهندس حقیقی">مهندس حقیقی</option>                             
+                                <option value="کاردان">کاردان</option>                             
+                                <option value="معمارتجربی">معمارتجربی</option>                             
+                            </select>                         
+                        </div>                     
+                        <div> 
+                            <label class="block text-gray-700 font-medium mb-1">پایه پروانه</label>                         
+                            <select id="engineerLevel" class="w-full p-2 border border-gray-300 rounded-md text-base"> 
+                                <option value="پایه 3">پایه 3</option>                             
+                                <option value="پایه 2">پایه 2</option>                             
+                                <option value="پایه 1">پایه 1</option>                             
+                                <option value="پایه ارشد">پایه ارشد</option>                             
+                            </select>                         
+                        </div>                                         
+                    </div>                 
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4"> 
+                        <div> 
+                            <label class="block text-gray-700 font-medium mb-1">حداکثر متراژ</label>                         
+                            <input type="number" id="maxArea" class="w-full p-2 border border-gray-300 rounded-md text-base" value="5000"> 
+                        </div>                     
+                        <div> 
+                            <label class="block text-gray-700 font-medium mb-1">متراژ اشغال‌شده</label>                         
+                            <input type="number" id="occupiedArea" class="w-full p-2 border border-gray-300 rounded-md text-base" value="1250"> 
+                        </div>                     
+                        <div> 
+                            <label class="block text-gray-700 font-medium mb-1">تعداد کارهای جاری</label>                         
+                            <input type="number" id="currentProjects" class="w-full p-2 border border-gray-300 rounded-md text-base" value="2"> 
+                        </div>                     
+                        <div> 
+                            <label class="block text-gray-700 font-medium mb-1">حداکثر تعداد کار</label>                         
+                            <input type="number" id="maxProjects" class="w-full p-2 border border-gray-300 rounded-md text-base" value="4"> 
+                        </div>                     
+                    </div>                 
+                    <div class="mb-4"> 
+                        <label class="block text-gray-700 font-medium mb-4 text-base text-center">قیمت پیشنهادی (هر متر مربع)</label>                     
+                        <div id="priceRowsEdit"> 
+                            <div class="price-row mb-4 flex justify-between items-center"> 
+                                <label class="flex items-center"> 
+                                    <input type="checkbox" class="ml-4" checked> <span class="text-base">ساختمان 1 تا 2 طبقه</span> 
+                                </label>                             
+                                <input type="text" class="w-32 p-2 border border-gray-300 rounded-md text-base" value="107,000"> 
+                            </div>
+                            <!-- ... other price rows ... -->
+                            <div class="price-row mb-4 flex justify-between items-center"> 
+                                <label class="flex items-center"> 
+                                    <input type="checkbox" class="ml-4" checked> <span class="text-base">ساختمان 3 تا 5 طبقه</span> 
+                                </label>                             
+                                <input type="text" class="w-32 p-2 border border-gray-300 rounded-md text-base" value="125,000"> 
+                            </div>
+                        </div>                     
+                    </div>
+                    <div class="flex items-center mb-4"> 
+                        <input type="checkbox" id="needsHelpCheckbox" class="ml-2"> 
+                        <label for="needsHelpCheckbox" class="text-gray-700 text-base">نیازمند کمک مجری</label> 
+                    </div>
+                    <div class="flex justify-end space-x-4"> 
+                        <button type="button" id="cancelActivityBtn" class="neumorphic-button">انصراف</button>                     
+                        <button type="button" id="saveActivityBtn" class="neumorphic-button bg-blue-500 text-white">ذخیره تغییرات</button>                     
+                    </div>                 
+                </div>
+            `;
+            container.innerHTML = editHtml;
+            document.getElementById('saveActivityBtn').addEventListener('click', handleSaveActivity);
+            document.getElementById('cancelActivityBtn').addEventListener('click', () => {
+                document.querySelector('.nav-item[data-view="dashboard"]').click();
+            });
+        }
+
+        function handleSaveActivity() {
+            const licenseType = document.getElementById('licenseType').value;
+            const engineerLevel = document.getElementById('engineerLevel').value;
+            const needsHelp = document.getElementById('needsHelpCheckbox').checked;
+            const maxArea = document.getElementById('maxArea').value;
+            const occupiedArea = document.getElementById('occupiedArea').value;
+            const currentProjects = document.getElementById('currentProjects').value;
+            const maxProjects = document.getElementById('maxProjects').value;
+
+            const prices = [];
+            const priceRows = document.getElementById('priceRowsEdit').children;
+            for (let row of priceRows) {
+                const checkbox = row.querySelector('input[type="checkbox"]');
+                if (checkbox.checked) {
+                    const label = row.querySelector('span').textContent.trim();
+                    const price = row.querySelector('input[type="text"]').value;
+                    prices.push({ label, price });
+                }
+            }
+
+            currentActivityData = {
+                licenseType, engineerLevel, needsHelp, maxArea, occupiedArea,
+                currentProjects, maxProjects, prices: JSON.stringify(prices) // Stringify for Google Sheets
+            };
+            
+            renderActivityPreview(currentActivityData);
+        }
+
+        function renderActivityPreview(data) {
+            const container = document.getElementById('activityFormContainer');
+            if (!container) return;
+
+            const pricesArray = JSON.parse(data.prices);
+            const remainingArea = data.maxArea - data.occupiedArea;
+            const areaPercentage = (remainingArea / data.maxArea) * 100;
+            const remainingProjects = data.maxProjects - data.currentProjects;
+            const projectPercentage = (remainingProjects / data.maxProjects) * 100;
+
+            let priceHtml = pricesArray.map(p => `
+                <div class="price-row mb-4 flex justify-between"> 
+                    <span>${p.label}</span> 
+                    <span>${p.price} تومان</span> 
+                </div>
+            `).join('');
+
+            const levelMap = { 'پایه 3': 1, 'پایه 2': 2, 'پایه 1': 3, 'پایه ارشد': 4 };
+            const starsCount = levelMap[data.engineerLevel] || 1;
 
             const previewHtml = `
-                <div id="activityPreviewCard" class="project-card bg-white rounded-lg overflow-hidden">
-                    <div class="p-6 space-y-4">
-                        <h3 class="text-xl font-bold text-slate-800 border-b pb-2 mb-4">پیش نمایش فعالیت</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                            <div class="bg-slate-50 p-3 rounded-lg">
-                                <p class="text-slate-500 font-semibold">نوع فعالیت</p>
-                                <p class="text-slate-800 font-bold text-base">${currentActivityData.activityType || ''}</p>
-                            </div>
-                            <div class="bg-slate-50 p-3 rounded-lg">
-                                <p class="text-slate-500 font-semibold">رشته تخصصی</p>
-                                <p class="text-slate-800 font-bold text-base">${currentActivityData.specialty || ''}</p>
-                            </div>
-                             <div class="bg-slate-50 p-3 rounded-lg">
-                                <p class="text-slate-500 font-semibold">استان</p>
-                                <p class="text-slate-800 font-bold text-base">${currentActivityData.province || ''}</p>
-                            </div>
-                             <div class="bg-slate-50 p-3 rounded-lg">
-                                <p class="text-slate-500 font-semibold">شهر</p>
-                                <p class="text-slate-800 font-bold text-base">${currentActivityData.city || ''}</p>
-                            </div>
+                <div class="flex flex-col">
+                    <div class="bg-green-50 flex items-center justify-between mb-4 -mt-5 -mx-5 p-5" style="border-radius: 20px 20px 0px 0px; display:grid; grid-template-columns:1fr 1fr 1fr;"> 
+                        <div class="flex items-center justify-start pr-5 space-x-2"> <i class="fas fa-check-circle text-green-500" title="کاربر تایید شده"></i> <span class="mr-6 pr-4 text-base">${data.licenseType}</span></div>                 
+                        <div class="flex flex-col-reverse gap-1 items-center justify-center mr-0 sm:justify-start"> <span class="font-bold px-0 text-gray-800 text-lg">${data.engineerLevel}</span> 
+                            <div class="flex text-yellow-400">${'<i class="fas fa-star"></i>'.repeat(starsCount)}</div>                     
                         </div>
-                        <div class="bg-slate-50 p-3 rounded-lg">
-                            <p class="text-slate-500 font-semibold">لینک نمونه کار</p>
-                            <a href="${currentActivityData.portfolioLink || '#'}" target="_blank" class="text-blue-500 hover:underline break-all">${currentActivityData.portfolioLink || 'ثبت نشده'}</a>
-                        </div>
-                        <div class="bg-slate-50 p-3 rounded-lg">
-                            <p class="text-slate-500 font-semibold">شرح فعالیت</p>
-                            <p class="text-slate-800 whitespace-pre-wrap">${currentActivityData.description || ''}</p>
-                        </div>
-                    </div>
-                    <div class="border-t border-gray-200 mt-6 p-4 flex justify-end gap-4">
-                        <button type="button" id="editActivityBtn" class="btn btn-secondary"><i class="fas fa-edit mr-2"></i>ویرایش</button>
-                        <button type="button" id="submitActivityBtn" class="btn btn-primary"><i class="fas fa-paper-plane mr-2"></i>ارسال معرفی فعالیت</button>
+                        <span class="bg-green-200 mx-5 needs-help place-self-end self-center text-center text-green-900 ${data.needsHelp ? '' : 'hidden'}">نیازمند کمک مجری</span>
+                    </div>             
+                    <div class="flex flex-col gap-4">                
+                        <div> 
+                            <div class="flex gap-4 items-center justify-between"> 
+                                <label class="font-medium text-base text-gray-700">متراژ کار باقی‌مانده</label><span class="text-gray-600 text-base">${remainingArea.toLocaleString('fa-IR')} متر مربع</span>
+                            </div>                     
+                            <div class="progress-bar mt-2"> 
+                                <div class="bg-green-500 progress-fill" style="width: ${areaPercentage}%"></div>                         
+                            </div>                     
+                        </div>                 
+                        <div> 
+                            <div class="flex gap-4 items-center justify-between"> 
+                                <label class="font-medium text-base text-gray-700">تعداد کار باقی‌مانده</label><span class="text-gray-600 text-base">${remainingProjects} از ${data.maxProjects}</span> 
+                            </div>                     
+                            <div class="progress-bar mt-2"> 
+                                <div class="bg-green-500 progress-fill" style="width: ${projectPercentage}%"></div>                         
+                            </div>                     
+                        </div>                 
+                        <div class="bg-green-100 mt-6 pb-0 pt-5 px-5" style="border-radius: 16px;"> 
+                            <label class="block font-medium mb-4 mt-0 text-base text-center text-green-900">قیمت پیشنهادی (هر متر مربع)</label>                     
+                            <div>${priceHtml}</div>                     
+                        </div>                 
+                        <div class="flex justify-between space-x-6"> 
+                            <button id="editActivityBtn" class="neumorphic-button text-lg"> <i class="fas fa-edit"></i> ویرایش</button>                     
+                            <button id="submitActivityBtn" class="bg-green-500 font-bold ml-1 neumorphic-button text-lg text-white"> <i class="fas fa-paper-plane"></i> ارسال معرفی فعالیت</button>                     
+                        </div>                 
                     </div>
                 </div>
             `;
-            
-            createActivityContent.innerHTML = isPreview ? previewHtml : formHtml;
+            container.innerHTML = previewHtml;
 
-            if (isPreview) {
-                document.getElementById('editActivityBtn').addEventListener('click', () => renderActivityForm(false));
-                document.getElementById('submitActivityBtn').addEventListener('click', submitActivityData);
-            } else {
-                // Pre-fill specialty from user profile if available
-                const specialtySelect = document.getElementById('specialty');
-                const userSpecialty = userData?.stepsData?.step3?.engineerField;
-                if (userSpecialty && specialtySelect) {
-                    specialtySelect.value = userSpecialty;
-                }
-
-                document.getElementById('activityForm').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const form = e.target;
-                    if (!form.checkValidity()) {
-                        showModal('لطفاً تمام فیلدهای الزامی (*) را پر کنید.', 'error');
-                        form.reportValidity();
-                        return;
-                    }
-                    currentActivityData = Object.fromEntries(new FormData(form).entries());
-                    renderActivityForm(true);
-                });
-                document.getElementById('cancelActivityFormBtn').addEventListener('click', () => {
-                     document.querySelector('.nav-item[data-view="dashboard"]').click();
-                });
-            }
+            document.getElementById('editActivityBtn').addEventListener('click', renderActivityEdit);
+            document.getElementById('submitActivityBtn').addEventListener('click', submitActivityData);
         }
 
         async function submitActivityData() {
             const button = document.getElementById('submitActivityBtn');
             button.disabled = true;
             button.innerHTML = '<div class="spinner !w-5 !h-5 !border-2"></div>';
-
+            
+            // The data is already in currentActivityData
             const payload = { action: 'createActivity', engineerEmail: userData.email, activityData: currentActivityData };
             
             try {
