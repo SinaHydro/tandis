@@ -83,11 +83,13 @@
         input[type="text"], input[type="date"], input[type="tel"], input[type="number"], input[type="password"], textarea, select { background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.625rem 0.875rem; transition: all 0.2s ease; width: 100%; }
         input:focus, textarea:focus, select:focus, input[type="password"]:focus { border-color: var(--primary-color); background-color: white; box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2); outline: none; }
         input:disabled, select:disabled, textarea:disabled { background-color: #eef2f7; color: #64748b; cursor: not-allowed; border-color: #e2e8f0; }
+        /* [MODIFIED] Increased select height */
         select { 
             -webkit-appearance: none; -moz-appearance: none; appearance: none; 
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E"); 
             background-position: left 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-left: 2.5rem;
-            padding-top: 0.625rem; padding-bottom: 0.625rem;
+            padding-top: 0.75rem; 
+            padding-bottom: 0.75rem;
         }
         .btn { padding: 0.625rem 1.25rem; border-radius: 0.375rem; font-weight: 600; transition: all 0.2s ease-in-out; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border: none; }
         .btn-primary { background-color: var(--primary-color); color: white; }
@@ -180,6 +182,11 @@
                     <i class="fas fa-plus-circle"></i>
                     <span>ثبت پروژه جدید</span>
                 </a>
+                <!-- [NEW] Button for engineers to register an activity -->
+                <a data-view="create-activity" class="nav-item btn-special-project mt-4" id="create-activity-nav-item" style="display: none;">
+                    <i class="fas fa-bullhorn"></i>
+                    <span>ثبت فعالیت جدید</span>
+                </a>
             </nav>
 
             <div class="sidebar-footer">
@@ -238,6 +245,10 @@
             <div id="createProjectContent" class="content-body" style="display: none;">
                 <!-- Project form will be rendered here -->
             </div>
+            <!-- [NEW] Content area for the new activity form -->
+            <div id="createActivityContent" class="content-body" style="display: none;">
+                <!-- Activity form will be rendered here -->
+            </div>
         </main>
         
         <aside class="advertisement-sidebar">
@@ -280,7 +291,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxINk_Q5_icTuHWhed9VRvaQgt4AWY80tNF_UXlf5CkhfPz1gEIEdtr_B_OOMskcXo/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyAiQo3ztUHTf-_LYy6hGS3Foj5zpX_2r4lSHbHQUh-prCNpqhyBEJU2OeR_SBwDDYC/exec';
         const SLIDESHOW_IMAGES = [
             'https://images.unsplash.com/photo-1581092916381-6f8901ad5a33?w=500&auto=format&fit=crop&q=60',
             'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=500&auto=format&fit=crop&q=60',
@@ -296,6 +307,7 @@
         let projectMarker = null;
         let fetchedProjects = [];
         let appliedProjectIds = new Set();
+        let currentActivityData = {}; // To hold activity data between form and preview
 
         // --- DOM ELEMENTS ---
         const pageLoader = document.getElementById('page-loader');
@@ -304,6 +316,7 @@
         const settingsContent = document.getElementById('settingsContent');
         const projectsContent = document.getElementById('projectsContent');
         const createProjectContent = document.getElementById('createProjectContent');
+        const createActivityContent = document.getElementById('createActivityContent');
         const mainHeaderTitle = document.getElementById('main-header-title');
         const sidebarProfileImage = document.getElementById('sidebarProfileImage');
         const sidebarProfileName = document.getElementById('sidebarProfileName');
@@ -491,14 +504,19 @@
             sidebarProfileImage.onerror = () => { sidebarProfileImage.src = 'https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740'; };
 
             const projectsNavItem = document.getElementById('projects-nav-item');
+            const createProjectNavItem = document.getElementById('create-project-nav-item');
+            const createActivityNavItem = document.getElementById('create-activity-nav-item');
+
             if (userData.role === 'employer') {
                 projectsNavItem.style.display = 'flex';
+                createProjectNavItem.style.display = 'flex';
+                createActivityNavItem.style.display = 'none';
                 projectsNavItem.querySelector('span').textContent = 'پروژه‌های من';
-                document.getElementById('create-project-nav-item').style.display = 'flex';
             } else if (userData.role === 'engineer') {
                 projectsNavItem.style.display = 'flex';
+                createProjectNavItem.style.display = 'none';
+                createActivityNavItem.style.display = 'flex';
                 projectsNavItem.querySelector('span').textContent = 'بازار کار پروژه‌ها';
-                document.getElementById('create-project-nav-item').style.display = 'none';
             }
 
             profileContent.innerHTML = '';
@@ -799,7 +817,6 @@
                 </div>
                 <div class="p-4">
                     <div class="flex justify-between mb-4 mt-2"><div class="text-gray-900 font-semibold"><i class="fa-ruler-combined fas mx-2 text-gray-400"></i>${formatNumber(project.area)} مترمربع</div><div class="text-gray-900 font-semibold">${project.floors} طبقه + ${project.basementFloors} طبقه زیرزمین<i class="fa-building fas mx-2 text-gray-400"></i></div></div>
-                    <!-- [MODIFIED] Location display format updated -->
                     <div class="flex justify-between mb-4"><div class="text-gray-900 font-semibold"><i class="fa-map-marker-alt fas mx-2 text-gray-400"></i>منطقه ${project.district} ${project.city}</div><div class="text-gray-900 font-semibold">مدت قرارداد: ${project.contractMonths} ماه<i class="fa-calendar-alt far mx-2 text-gray-400"></i></div></div>
                     <div class="bg-gray-50 commission-highlight p-3 rounded-2xl">
                         <div class="grid grid-rows-3 items-center">
@@ -948,6 +965,157 @@
                 showModal(`خطا در ثبت/ویرایش پروژه: ${error.message}`, 'error');
             } finally {
                 pageLoader.style.display = 'none';
+            }
+        }
+
+        // --- [NEW] Activity Logic ---
+        function renderActivityForm(isPreview = false) {
+            const formHtml = `
+                <div id="activityFormCard" class="project-card bg-white rounded-lg overflow-hidden">
+                    <form id="activityForm">
+                        <div class="p-6 space-y-6">
+                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="activityType" class="block text-gray-700 font-medium mb-1 required-field">نوع فعالیت</label>
+                                    <select id="activityType" name="activityType" class="w-full" required>
+                                        <option value="طراحی">طراحی</option>
+                                        <option value="نظارت">نظارت</option>
+                                        <option value="اجرا">اجرا</option>
+                                        <option value="مشاوره">مشاوره</option>
+                                        <option value="سایر">سایر</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="specialty" class="block text-gray-700 font-medium mb-1 required-field">رشته تخصصی</label>
+                                    <select id="specialty" name="specialty" class="w-full" required>
+                                        <option value="معماری">معماری</option>
+                                        <option value="عمران">عمران</option>
+                                        <option value="مکانیک">مکانیک</option>
+                                        <option value="برق">برق</option>
+                                        <option value="شهرسازی">شهرسازی</option>
+                                        <option value="ترافیک">ترافیک</option>
+                                        <option value="نقشه برداری">نقشه برداری</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="activityProvince" class="block text-gray-700 font-medium mb-1 required-field">استان محل فعالیت</label>
+                                    <select id="activityProvince" name="province" class="w-full" required>${generateProvinceOptions(currentActivityData.province || '')}</select>
+                                </div>
+                                <div>
+                                    <label for="activityCity" class="block text-gray-700 font-medium mb-1 required-field">شهر محل فعالیت</label>
+                                    <input type="text" id="activityCity" name="city" class="w-full" required value="${currentActivityData.city || ''}">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="portfolioLink" class="block text-gray-700 font-medium mb-1">لینک نمونه کار (اختیاری)</label>
+                                <input type="url" id="portfolioLink" name="portfolioLink" class="w-full" placeholder="https://example.com" value="${currentActivityData.portfolioLink || ''}">
+                            </div>
+                            <div>
+                                <label for="activityDescription" class="block text-gray-700 font-medium mb-1 required-field">شرح فعالیت و تخصص</label>
+                                <textarea id="activityDescription" name="description" rows="5" class="w-full" required>${currentActivityData.description || ''}</textarea>
+                            </div>
+                        </div>
+                        <div class="border-t border-gray-200 mt-6 p-4 flex justify-end gap-4">
+                            <button type="button" id="cancelActivityFormBtn" class="btn btn-secondary"><i class="fas fa-times mr-2"></i>انصراف</button>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-eye mr-2"></i>ذخیره و پیش نمایش</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+
+            const previewHtml = `
+                <div id="activityPreviewCard" class="project-card bg-white rounded-lg overflow-hidden">
+                    <div class="p-6 space-y-4">
+                        <h3 class="text-xl font-bold text-slate-800 border-b pb-2 mb-4">پیش نمایش فعالیت</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                            <div class="bg-slate-50 p-3 rounded-lg">
+                                <p class="text-slate-500 font-semibold">نوع فعالیت</p>
+                                <p class="text-slate-800 font-bold text-base">${currentActivityData.activityType || ''}</p>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-lg">
+                                <p class="text-slate-500 font-semibold">رشته تخصصی</p>
+                                <p class="text-slate-800 font-bold text-base">${currentActivityData.specialty || ''}</p>
+                            </div>
+                             <div class="bg-slate-50 p-3 rounded-lg">
+                                <p class="text-slate-500 font-semibold">استان</p>
+                                <p class="text-slate-800 font-bold text-base">${currentActivityData.province || ''}</p>
+                            </div>
+                             <div class="bg-slate-50 p-3 rounded-lg">
+                                <p class="text-slate-500 font-semibold">شهر</p>
+                                <p class="text-slate-800 font-bold text-base">${currentActivityData.city || ''}</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-lg">
+                            <p class="text-slate-500 font-semibold">لینک نمونه کار</p>
+                            <a href="${currentActivityData.portfolioLink || '#'}" target="_blank" class="text-blue-500 hover:underline break-all">${currentActivityData.portfolioLink || 'ثبت نشده'}</a>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-lg">
+                            <p class="text-slate-500 font-semibold">شرح فعالیت</p>
+                            <p class="text-slate-800 whitespace-pre-wrap">${currentActivityData.description || ''}</p>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-200 mt-6 p-4 flex justify-end gap-4">
+                        <button type="button" id="editActivityBtn" class="btn btn-secondary"><i class="fas fa-edit mr-2"></i>ویرایش</button>
+                        <button type="button" id="submitActivityBtn" class="btn btn-primary"><i class="fas fa-paper-plane mr-2"></i>ارسال معرفی فعالیت</button>
+                    </div>
+                </div>
+            `;
+            
+            createActivityContent.innerHTML = isPreview ? previewHtml : formHtml;
+
+            if (isPreview) {
+                document.getElementById('editActivityBtn').addEventListener('click', () => renderActivityForm(false));
+                document.getElementById('submitActivityBtn').addEventListener('click', submitActivityData);
+            } else {
+                // Pre-fill specialty from user profile if available
+                const specialtySelect = document.getElementById('specialty');
+                const userSpecialty = userData?.stepsData?.step3?.engineerField;
+                if (userSpecialty && specialtySelect) {
+                    specialtySelect.value = userSpecialty;
+                }
+
+                document.getElementById('activityForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const form = e.target;
+                    if (!form.checkValidity()) {
+                        showModal('لطفاً تمام فیلدهای الزامی (*) را پر کنید.', 'error');
+                        form.reportValidity();
+                        return;
+                    }
+                    currentActivityData = Object.fromEntries(new FormData(form).entries());
+                    renderActivityForm(true);
+                });
+                document.getElementById('cancelActivityFormBtn').addEventListener('click', () => {
+                     document.querySelector('.nav-item[data-view="dashboard"]').click();
+                });
+            }
+        }
+
+        async function submitActivityData() {
+            const button = document.getElementById('submitActivityBtn');
+            button.disabled = true;
+            button.innerHTML = '<div class="spinner !w-5 !h-5 !border-2"></div>';
+
+            const payload = { action: 'createActivity', engineerEmail: userData.email, activityData: currentActivityData };
+            
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'cors', cache: 'no-cache', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+                if (!response.ok) throw new Error(`خطای سرور: ${response.status}`);
+                const result = await response.json();
+                if (result.status === 'success') {
+                    showModal(result.message, 'success');
+                    currentActivityData = {};
+                    document.querySelector('.nav-item[data-view="dashboard"]').click();
+                } else {
+                    throw new Error(result.message || 'خطای ناشناخته.');
+                }
+            } catch (error) {
+                 showModal(`خطا در ثبت فعالیت: ${error.message}`, 'error');
+            } finally {
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>ارسال معرفی فعالیت';
             }
         }
 
@@ -1305,6 +1473,11 @@
                             createProjectContent.style.display = 'block';
                             mainHeaderTitle.textContent = 'ثبت / ویرایش پروژه';
                             renderProjectForm();
+                            break;
+                        case 'create-activity':
+                            createActivityContent.style.display = 'block';
+                            mainHeaderTitle.textContent = 'ثبت فعالیت جدید';
+                            renderActivityForm();
                             break;
                     }
                     e.currentTarget.classList.add('active');
