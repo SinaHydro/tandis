@@ -247,7 +247,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhG_D5oqyzuPO3B4M9tIqES0XAvVlLKNGHXMAcnfBak4ztJ1fqPUUcC6In1Msn_SUP/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzkie0iGZiQtXm4V5r3StZcteC4B_u448T61wxVgKqq3KEgMWsYAVh7w0X9a829CC5G/exec';
         const SLIDESHOW_IMAGES = [
             'https://images.unsplash.com/photo-1581092916381-6f8901ad5a33?w=500&auto=format&fit=crop&q=60',
             'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=500&auto=format&fit=crop&q=60',
@@ -261,7 +261,7 @@
         let currentSlide = 0;
         let projectMap = null;
         let projectMarker = null;
-        let fetchedProjects = []; // To store fetched projects data
+        let fetchedProjects = [];
 
         // --- DOM ELEMENTS ---
         const pageLoader = document.getElementById('page-loader');
@@ -625,34 +625,31 @@
                             <div class="space-y-4">
                                 <h3 id="tariff-title" class="text-lg font-semibold text-gray-800 border-b pb-2">تعرفه پیشنهادی</h3>
                                 <div class="space-y-2">
-                                    <!-- [FIXED] Radio buttons moved to the right -->
-                                    <div class="flex justify-between items-center"><label for="priceOption1" class="flex-grow">ساختمان ۱ تا ۲ طبقه: <span>۱۰۷,۰۰۰ تومان</span></label><input type="radio" id="priceOption1" name="priceOption" value="107000" class="mr-2"></div>
-                                    <div class="flex justify-between items-center"><label for="priceOption2" class="flex-grow">ساختمان ۳ تا ۵ طبقه: <span>۱۲۵,۰۰۰ تومان</span></label><input type="radio" id="priceOption2" name="priceOption" value="125000" class="mr-2"></div>
-                                    <div class="flex justify-between items-center"><label for="priceOption3" class="flex-grow">ساختمان ۶ تا ۷ طبقه: <span>۱۲۷,۸۰۰ تومان</span></label><input type="radio" id="priceOption3" name="priceOption" value="127800" class="mr-2"></div>
-                                    <div class="flex justify-between items-center"><label for="priceOption4" class="flex-grow">ساختمان ۸ تا ۱۰ طبقه: <span>۱۳۹,۵۰۰ تومان</span></label><input type="radio" id="priceOption4" name="priceOption" value="139500" class="mr-2"></div>
-                                    <div class="flex justify-between items-center"><label for="priceOption5" class="flex-grow">ساختمان ۱۱ تا ۱۲ طبقه: <span>۱۴۲,۸۰۰ تومان</span></label><input type="radio" id="priceOption5" name="priceOption" value="142800" class="mr-2"></div>
-                                    <div class="flex justify-between items-center"><label for="priceOption6" class="flex-grow">ساختمان ۱۳ تا ۱۵ طبقه: <span>۱۴۸,۸۰۰ تومان</span></label><input type="radio" id="priceOption6" name="priceOption" value="148800" class="mr-2"></div>
-                                    <div class="flex justify-between items-center"><label for="priceOption7" class="flex-grow">ساختمان بالای ۱۶ طبقه: <span>۱۵۹,۲۰۰ تومان</span></label><input type="radio" id="priceOption7" name="priceOption" value="159200" class="mr-2"></div>
-                                    <div class="flex items-center mt-2"><label for="priceOptionCustom" class="mr-2">سایر:</label><input type="number" id="customPrice" name="customPrice" min="0" class="px-3 py-1 border border-gray-300 rounded-lg w-32" disabled><span class="mr-2">تومان</span><input type="radio" id="priceOptionCustom" name="priceOption" value="custom" class="mr-auto"></div>
+                                    <div class="flex items-center"><label for="priceOption1" class="flex-grow">ساختمان ۱ تا ۲ طبقه: <span>۱۰۷,۰۰۰ تومان</span></label><input type="radio" id="priceOption1" name="priceOption" value="107000" class="ml-2"></div>
+                                    <div class="flex items-center"><label for="priceOption2" class="flex-grow">ساختمان ۳ تا ۵ طبقه: <span>۱۲۵,۰۰۰ تومان</span></label><input type="radio" id="priceOption2" name="priceOption" value="125000" class="ml-2"></div>
+                                    <div class="flex items-center"><label for="priceOption3" class="flex-grow">ساختمان ۶ تا ۷ طبقه: <span>۱۲۷,۸۰۰ تومان</span></label><input type="radio" id="priceOption3" name="priceOption" value="127800" class="ml-2"></div>
+                                    <div class="flex items-center"><label for="priceOption4" class="flex-grow">ساختمان ۸ تا ۱۰ طبقه: <span>۱۳۹,۵۰۰ تومان</span></label><input type="radio" id="priceOption4" name="priceOption" value="139500" class="ml-2"></div>
+                                    <div class="flex items-center"><label for="priceOption5" class="flex-grow">ساختمان ۱۱ تا ۱۲ طبقه: <span>۱۴۲,۸۰۰ تومان</span></label><input type="radio" id="priceOption5" name="priceOption" value="142800" class="ml-2"></div>
+                                    <div class="flex items-center"><label for="priceOption6" class="flex-grow">ساختمان ۱۳ تا ۱۵ طبقه: <span>۱۴۸,۸۰۰ تومان</span></label><input type="radio" id="priceOption6" name="priceOption" value="148800" class="ml-2"></div>
+                                    <div class="flex items-center"><label for="priceOption7" class="flex-grow">ساختمان بالای ۱۶ طبقه: <span>۱۵۹,۲۰۰ تومان</span></label><input type="radio" id="priceOption7" name="priceOption" value="159200" class="ml-2"></div>
+                                    <div class="flex items-center mt-2"><label for="priceOptionCustom" class="flex-grow">سایر:</label><input type="number" id="customPrice" name="customPrice" min="0" class="px-3 py-1 border border-gray-300 rounded-lg w-32 mx-2" disabled><span>تومان</span><input type="radio" id="priceOptionCustom" name="priceOption" value="custom" class="ml-auto"></div>
                                 </div>
                                 <div class="price-highlight p-3 rounded-lg mt-4"><div class="flex items-center"><i class="fas fa-tag text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت واحد:</span><span id="unitPricePreview" class="mr-2 font-semibold"></span></div><div class="flex items-center mt-2"><i class="fas fa-calculator text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت کل:</span><span id="totalPricePreview" class="mr-2 font-bold text-green-600"></span></div><div class="flex items-center mt-2"><i class="fas fa-hand-holding-usd text-blue-500 ml-2"></i><span class="text-gray-700 font-medium">کمیسیون (۱۵٪):</span><span id="commissionPreview" class="mr-2 font-bold text-blue-600"></span></div></div>
                             </div>
                             <div><label for="description" class="block text-gray-700 font-medium mb-1">توضیحات</label><textarea id="description" name="description" rows="3" class="w-full">${projectData?.description || ''}</textarea></div>
                         </div>
                         <div class="border-t border-gray-200 mt-6 p-4 flex justify-end">
-                            <button type="submit" class="btn btn-primary">${isEditMode ? 'ذخیره تغییرات' : 'ثبت و پیش نمایش'}</button>
+                            <button type="submit" class="btn btn-primary">${isEditMode ? 'ذخیره تغییرات' : 'ثبت پروژه'}</button>
                         </div>
                     </form>
                 </div>
             `;
             
-            // Set select values if in edit mode
             if (isEditMode) {
                 ['usageType', 'structureType', 'fileType', 'engineerRank', 'engineerField', 'engineerActivity', 'permitType'].forEach(id => {
                     const select = document.getElementById(id);
                     if (select && projectData[id]) select.value = projectData[id];
                 });
-                // Handle radio buttons for price
                 const unitPrice = parseFloat(projectData.unitPrice);
                 const standardOption = document.querySelector(`#projectForm input[name="priceOption"][value="${unitPrice}"]`);
                 if (standardOption) {
@@ -695,7 +692,7 @@
                         <div class="flex items-center justify-center mt-1 pb-2">${starsHtml}</div>
                         <div class="flex justify-center mb-1"><div class="font-bold text-gray-900 text-xl">${project.engineerActivity} ${project.engineerRank} ${project.engineerField}</div></div>
                     </div>
-                    <div><span class="frosode-badge px-3 py-1 rounded-full text-sm font-medium ${project.fileType === 'فرسوده' ? '' : 'hidden'}">فرسوده</span></div>
+                    <div class="text-right"><span class="frosode-badge px-3 py-1 rounded-full text-sm font-medium ${project.fileType === 'فرسوده' ? '' : 'hidden'}">فرسوده</span></div>
                 </div>
                 <div class="p-4">
                     <div class="flex justify-between mb-4 mt-2"><div class="text-gray-900 font-semibold"><i class="fa-ruler-combined fas mx-2 text-gray-400"></i>${formatNumber(project.area)} مترمربع</div><div class="text-gray-900 font-semibold">${project.floors} طبقه + ${project.basementFloors} طبقه زیرزمین<i class="fa-building fas mx-2 text-gray-400"></i></div></div>
@@ -771,7 +768,14 @@
             projectMap = L.map('project-map').setView(initialCoords, 13);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(projectMap);
             projectMarker = L.marker(initialCoords, { draggable: true }).addTo(projectMap);
-            updateMapLocation(initialCoords[0], initialCoords[1]);
+            
+            if (!document.getElementById('latitude').value) {
+                 updateMapLocation(initialCoords[0], initialCoords[1]);
+            } else {
+                document.getElementById('latitudeValue').textContent = lat.toFixed(4);
+                document.getElementById('longitudeValue').textContent = lng.toFixed(4);
+            }
+
             projectMarker.on('dragend', (e) => updateMapLocation(e.target.getLatLng().lat, e.target.getLatLng().lng));
             projectMap.on('click', (e) => {
                 projectMarker.setLatLng(e.latlng);
@@ -836,35 +840,62 @@
             }
         }
 
+        // [NEW] Generic function to render projects header with a refresh button
+        function renderProjectsHeader(title, refreshCallback) {
+            const headerHtml = `
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-slate-700">${title}</h2>
+                    <button id="refreshProjectsBtn" class="btn btn-secondary !p-2">
+                        <i class="fas fa-sync-alt"></i>
+                        <span class="mr-2">به‌روزرسانی</span>
+                    </button>
+                </div>
+                <div id="project-list-container"></div>
+            `;
+            projectsContent.innerHTML = headerHtml;
+            document.getElementById('refreshProjectsBtn').addEventListener('click', refreshCallback);
+            return document.getElementById('project-list-container');
+        }
+
         async function renderProjectMarketplace() {
-            projectsContent.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
+            const container = renderProjectsHeader('بازار کار پروژه‌ها', renderProjectMarketplace);
+            container.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
             try {
                 const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getOpenProjects`);
                 const result = await response.json();
-                if (result.success && result.data.length > 0) {
+                if (result.success && Array.isArray(result.data)) {
                     fetchedProjects = result.data;
-                    projectsContent.innerHTML = fetchedProjects.map(p => getProjectCardHTML(p, 'engineer')).join('');
+                    if (fetchedProjects.length > 0) {
+                        container.innerHTML = fetchedProjects.map(p => getProjectCardHTML(p, 'engineer')).join('');
+                    } else {
+                        container.innerHTML = '<p class="text-center text-slate-500">در حال حاضر پروژه‌ی بازی برای نمایش وجود ندارد.</p>';
+                    }
                 } else {
-                    projectsContent.innerHTML = '<p class="text-center text-slate-500">در حال حاضر پروژه‌ی بازی برای نمایش وجود ندارد.</p>';
+                     container.innerHTML = `<p class="text-center text-red-500">${result.message || 'خطا در دریافت اطلاعات پروژه‌ها.'}</p>`;
                 }
             } catch (error) {
-                projectsContent.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری پروژه‌ها: ${error.message}</p>`;
+                container.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری پروژه‌ها: ${error.message}</p>`;
             }
         }
 
         async function renderEmployerProjects() {
-            projectsContent.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
+            const container = renderProjectsHeader('پروژه‌های من', renderEmployerProjects);
+            container.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
             try {
                 const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getProjectsByEmployer&email=${encodeURIComponent(userData.email)}`);
                 const result = await response.json();
-                if (result.success && result.data.length > 0) {
+                if (result.success && Array.isArray(result.data)) {
                     fetchedProjects = result.data;
-                    projectsContent.innerHTML = fetchedProjects.map(p => getProjectCardHTML(p, 'employer')).join('');
+                     if (fetchedProjects.length > 0) {
+                        container.innerHTML = fetchedProjects.map(p => getProjectCardHTML(p, 'employer')).join('');
+                     } else {
+                        container.innerHTML = '<p class="text-center text-slate-500">شما هنوز پروژه‌ای ثبت نکرده‌اید.</p>';
+                     }
                 } else {
-                    projectsContent.innerHTML = '<p class="text-center text-slate-500">شما هنوز پروژه‌ای ثبت نکرده‌اید.</p>';
+                    container.innerHTML = `<p class="text-center text-red-500">${result.message || 'خطا در دریافت اطلاعات پروژه‌ها.'}</p>`;
                 }
             } catch (error) {
-                projectsContent.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری پروژه‌ها: ${error.message}</p>`;
+                container.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری پروژه‌ها: ${error.message}</p>`;
             }
         }
 
@@ -892,7 +923,6 @@
             const projectToEdit = fetchedProjects.find(p => p.ProjectID === projectId);
             if (projectToEdit) {
                 document.querySelector('.nav-item[data-view="create-project"]').click();
-                // A short delay to ensure the view is switched before rendering the form
                 setTimeout(() => renderProjectForm(projectToEdit), 50);
             }
         }
@@ -918,20 +948,15 @@
                         case 'projects':
                             projectsContent.style.display = 'block';
                             if (userData.role === 'employer') {
-                                mainHeaderTitle.textContent = 'پروژه‌های من';
                                 renderEmployerProjects();
                             } else {
-                                mainHeaderTitle.textContent = 'بازار کار پروژه‌ها';
                                 renderProjectMarketplace();
                             }
                             break;
                         case 'create-project':
                             createProjectContent.style.display = 'block';
                             mainHeaderTitle.textContent = 'ثبت / ویرایش پروژه';
-                            // When clicked from sidebar, render a blank form
-                            if (!document.getElementById('projectForm') || !document.getElementById('ProjectID')) {
-                                renderProjectForm();
-                            }
+                            renderProjectForm(); // Always render a blank form
                             break;
                     }
                     item.classList.add('active');
@@ -997,7 +1022,6 @@
             setupViewSwitcher();
             changePasswordForm.addEventListener('submit', handleChangePassword);
 
-            // Add event listener for project actions using event delegation
             projectsContent.addEventListener('click', (e) => {
                 const applyBtn = e.target.closest('button[data-action="apply"]');
                 const editBtn = e.target.closest('button[data-action="edit-project"]');
