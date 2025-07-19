@@ -1476,7 +1476,190 @@
                 dashboardContent.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری داشبورد: ${error.message}</p>`;
             }
         }
+        
+        // --- [NEW] Functions for new panels ---
+        
+        function getActivityCardHTML(activity, role, isRequested = false) {
+            const formatNumber = (num) => num ? parseInt(num).toLocaleString('fa-IR') : '0';
+            const remainingArea = (activity.maxArea || 0) - (activity.occupiedArea || 0);
+            const areaPercentage = (remainingArea / (activity.maxArea || 1)) * 100;
+            const remainingProjects = (activity.maxProjects || 0) - (activity.currentProjects || 0);
+            const projectPercentage = (remainingProjects / (activity.maxProjects || 1)) * 100;
 
+            const levelMap = { 'پایه 3': 1, 'پایه 2': 2, 'پایه 1': 3, 'پایه ارشد': 4 };
+            const starsCount = levelMap[activity.engineerLevel] || 1;
+            let starsHtml = Array(starsCount).fill('<i class="fas fa-star text-yellow-400"></i>').join('');
+
+            let footerHtml = '';
+            if (role === 'engineer') { // The engineer viewing their own activity
+                const isActivityActive = activity.Status === 'فعال';
+                const statusChangeText = isActivityActive ? 'غیرفعال کردن' : 'فعال کردن';
+                const statusChangeAction = 'change-activity-status';
+                const statusChangeBtnClass = isActivityActive ? 'btn-danger' : 'btn-success';
+                const statusChangeIcon = isActivityActive ? 'fa-toggle-off' : 'fa-toggle-on';
+
+                footerHtml = `
+                    <div class="flex gap-2 w-full">
+                        <button data-action="${statusChangeAction}" data-activity-id="${activity.ActivityID}" data-status="${activity.Status}" class="btn ${statusChangeBtnClass} flex-1"><i class="fas ${statusChangeIcon} mr-2"></i>${statusChangeText}</button>
+                        <button data-action="edit-activity" data-activity-id="${activity.ActivityID}" class="btn btn-secondary flex-1"><i class="fas fa-edit mr-2"></i>ویرایش</button>
+                    </div>
+                `;
+            } else if (role === 'employer') { // The employer viewing the marketplace
+                if (isRequested) {
+                    footerHtml = `<button data-action="cancel-collaboration" data-activity-id="${activity.ActivityID}" class="btn btn-danger w-full"><i class="fas fa-times-circle mr-2"></i>لغو درخواست همکاری</button>`;
+                } else {
+                    footerHtml = `<button data-action="request-collaboration" data-activity-id="${activity.ActivityID}" class="btn btn-success w-full"><i class="fas fa-paper-plane mr-2"></i>درخواست همکاری</button>`;
+                }
+            }
+
+            return `
+                <div class="activity-card bg-white rounded-lg overflow-hidden flex flex-col">
+                    <div class="p-4 border-b">
+                        <div class="flex justify-between items-start">
+                             <h4 class="font-bold text-lg text-slate-800">${activity.engineerActivity} ${activity.engineerLevel} ${activity.engineerField}</h4>
+                             <span class="text-xs px-2 py-1 rounded-full ${activity.Status === 'فعال' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${activity.Status}</span>
+                        </div>
+                        <p class="text-sm text-slate-500"><i class="fas fa-map-marker-alt text-slate-400 mr-1"></i> ${activity.province}, ${activity.city}</p>
+                    </div>
+                    <div class="p-4 flex-grow">
+                        <div class="mb-4">
+                            <div class="flex justify-between text-sm mb-1"><span>ظرفیت متراژ باقی‌مانده</span><span>${formatNumber(remainingArea)} متر</span></div>
+                            <div class="progress-bar"><div class="progress-fill bg-blue-500" style="width: ${areaPercentage}%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1"><span>ظرفیت تعداد کار باقی‌مانده</span><span>${formatNumber(remainingProjects)} کار</span></div>
+                            <div class="progress-bar"><div class="progress-fill bg-amber-500" style="width: ${projectPercentage}%"></div></div>
+                        </div>
+                    </div>
+                     <div class="p-4 border-t bg-slate-50">
+                        ${footerHtml}
+                    </div>
+                </div>
+            `;
+        }
+        
+        async function renderMyActivities() {
+            const container = contentPanes.myActivities;
+            container.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
+            try {
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getActivitiesByEngineer&email=${encodeURIComponent(userData.email)}`);
+                const result = await response.json();
+                if (result.success && Array.isArray(result.data)) {
+                    fetchedActivities = result.data.sort((a, b) => new Date(b.lastModifiedDate) - new Date(a.lastModifiedDate));
+                    if (fetchedActivities.length > 0) {
+                        container.innerHTML = `<div id="activity-list-container">` + fetchedActivities.map(act => getActivityCardHTML(act, 'engineer')).join('') + `</div>`;
+                    } else {
+                        container.innerHTML = '<p class="text-center text-slate-500">شما هنوز فعالیتی ثبت نکرده‌اید.</p>';
+                    }
+                } else {
+                    container.innerHTML = `<p class="text-center text-red-500">${result.message || 'خطا در دریافت اطلاعات فعالیت‌ها.'}</p>`;
+                }
+            } catch (error) {
+                container.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری فعالیت‌ها: ${error.message}</p>`;
+            }
+        }
+        
+        async function renderEngineersMarketplace() {
+            const container = contentPanes.engineers;
+            container.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
+            try {
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getEngineersMarketplace&email=${encodeURIComponent(userData.email)}`);
+                const result = await response.json();
+                if (result.success && result.data) {
+                    const { activeActivities, requestedActivityIds: requestedIds } = result.data;
+                    requestedActivityIds = new Set(requestedIds || []);
+                    
+                    if (activeActivities && activeActivities.length > 0) {
+                        container.innerHTML = `<div id="engineers-list-container">` + activeActivities
+                            .sort((a, b) => new Date(b.lastModifiedDate) - new Date(a.lastModifiedDate))
+                            .map(act => getActivityCardHTML(act, 'employer', requestedActivityIds.has(act.ActivityID)))
+                            .join('') + `</div>`;
+                    } else {
+                        container.innerHTML = '<p class="text-center text-slate-500">در حال حاضر هیچ مهندس فعالی برای همکاری یافت نشد.</p>';
+                    }
+                } else {
+                    container.innerHTML = `<p class="text-center text-red-500">${result.message || 'خطا در دریافت اطلاعات مهندسان.'}</p>`;
+                }
+            } catch (error) {
+                container.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری لیست مهندسان: ${error.message}</p>`;
+            }
+        }
+        
+        function handleEditActivity(activityId) {
+            const activityToEdit = fetchedActivities.find(act => act.ActivityID === activityId);
+            if (activityToEdit) {
+                document.querySelector('.nav-item[data-view="create-activity"]').click();
+                setTimeout(() => renderActivityForm(activityToEdit), 50);
+            }
+        }
+        
+        async function handleChangeActivityStatus(activityId, newStatus) {
+            const message = newStatus === 'غیرفعال'
+                ? 'آیا از غیرفعال کردن این فعالیت مطمئن هستید؟ پس از این کار، فعالیت شما در بازار کار نمایش داده نخواهد شد.'
+                : 'آیا می‌خواهید این فعالیت را دوباره فعال کنید؟';
+            
+            showModal(message, 'confirm', async () => {
+                pageLoader.style.display = 'flex';
+                try {
+                    const payload = { action: 'changeActivityStatus', activityId, newStatus };
+                    const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'cors', cache: 'no-cache', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+                    const result = await response.json();
+                    if (result.status === 'success') {
+                        showModal(result.message, 'success');
+                        renderMyActivities(); // Refresh the activity list
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (error) {
+                    showModal(`خطا در تغییر وضعیت: ${error.message}`, 'error');
+                } finally {
+                    pageLoader.style.display = 'none';
+                }
+            });
+        }
+        
+        async function handleRequestCollaboration(activityId, button) {
+             button.disabled = true;
+            button.innerHTML = '<div class="spinner !w-5 !h-5 !border-2"></div>';
+            try {
+                const payload = { action: 'requestCollaboration', employerEmail: userData.email, activityId };
+                const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'cors', cache: 'no-cache', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    showModal(result.message, 'success');
+                    renderEngineersMarketplace(); // Refresh to update button state
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                showModal(`خطا: ${error.message}`, 'error');
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>درخواست همکاری';
+            }
+        }
+        
+        async function handleCancelCollaboration(activityId, button) {
+            showModal('آیا از لغو درخواست همکاری برای این فعالیت مطمئن هستید؟', 'confirm', async () => {
+                button.disabled = true;
+                button.innerHTML = '<div class="spinner !w-5 !h-5 !border-2"></div>';
+                try {
+                    const payload = { action: 'cancelCollaboration', employerEmail: userData.email, activityId };
+                    const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'cors', cache: 'no-cache', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+                    const result = await response.json();
+                    if (result.status === 'success') {
+                        showModal(result.message, 'success');
+                        renderEngineersMarketplace(); // Refresh to update button state
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (error) {
+                    showModal(`خطا: ${error.message}`, 'error');
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-times-circle mr-2"></i>لغو درخواست همکاری';
+                }
+            });
+        }
+        
         async function handleApplyForProject(projectId, button) {
             button.disabled = true;
             button.innerHTML = '<div class="spinner !w-5 !h-5 !border-2"></div>';
@@ -1571,7 +1754,12 @@
 
             navItems.forEach(item => {
                 item.addEventListener('click', (e) => {
+                    e.preventDefault(); // Prevent default anchor behavior
                     const targetView = e.currentTarget.dataset.view;
+                    
+                    // Do nothing if clicking the active view
+                    if (currentView === targetView && contentPanes[targetView].style.display === 'block') return;
+
                     currentView = targetView;
                     
                     Object.values(contentPanes).forEach(pane => pane.style.display = 'none');
@@ -1581,13 +1769,15 @@
                     e.currentTarget.classList.add('active');
 
                     const action = viewActions[targetView];
-                    mainHeaderTitle.textContent = action.title;
-                    action.render();
-                    
-                    if (action.refreshable) {
-                        refreshButton.classList.remove('hidden');
-                    } else {
-                        refreshButton.classList.add('hidden');
+                    if (action) {
+                        mainHeaderTitle.textContent = action.title;
+                        action.render();
+                        
+                        if (action.refreshable) {
+                            refreshButton.classList.remove('hidden');
+                        } else {
+                            refreshButton.classList.add('hidden');
+                        }
                     }
                 });
             });
@@ -1686,16 +1876,13 @@
                              case 'cancel-collaboration': handleCancelCollaboration(activityId, targetButton); break;
                          }
                     });
-                    
+                    pageLoader.style.display = 'none';
                 } else {
                     pageLoader.innerHTML = `<p class="text-red-600 font-bold text-center p-4">خطا در بارگذاری اطلاعات کاربری.<br>کاربری با ایمیل '${email}' یافت نشد.<br>لطفاً از صحیح بودن آدرس اطمینان حاصل کنید.</p>`;
-                    return; // Stop execution if user not found
                 }
             } catch (error) {
                 console.error("An unexpected error occurred during initialization:", error);
                 pageLoader.innerHTML = `<p class="text-red-600 font-bold">یک خطای غیرمنتظره رخ داد: ${error.message}</p>`;
-            } finally {
-                pageLoader.style.display = 'none';
             }
         }
 
