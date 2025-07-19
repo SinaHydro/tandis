@@ -1686,13 +1686,16 @@
                              case 'cancel-collaboration': handleCancelCollaboration(activityId, targetButton); break;
                          }
                     });
-                    pageLoader.style.display = 'none';
+                    
                 } else {
                     pageLoader.innerHTML = `<p class="text-red-600 font-bold text-center p-4">خطا در بارگذاری اطلاعات کاربری.<br>کاربری با ایمیل '${email}' یافت نشد.<br>لطفاً از صحیح بودن آدرس اطمینان حاصل کنید.</p>`;
+                    return; // Stop execution if user not found
                 }
             } catch (error) {
                 console.error("An unexpected error occurred during initialization:", error);
                 pageLoader.innerHTML = `<p class="text-red-600 font-bold">یک خطای غیرمنتظره رخ داد: ${error.message}</p>`;
+            } finally {
+                pageLoader.style.display = 'none';
             }
         }
 
