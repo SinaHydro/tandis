@@ -149,6 +149,14 @@
         .progress-bar { height: 6px; border-radius: 3px; background-color: #e9ecef; width: 100%; } 
         .progress-fill { height: 100%; border-radius: 3px; background-color: #3b82f6; transition: width 0.3s ease; }
         .needs-help { background-color: #fee2e2; padding: 4px 8px; border-radius: 4px; color: #dc2626; font-size: 0.875rem; }
+        .password-toggle {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #94a3b8;
+        }
     </style>
 </head>
 <body>
@@ -247,15 +255,24 @@
                             <div class="space-y-4 max-w-lg mx-auto p-4">
                                 <div>
                                     <label for="currentPassword" class="block text-sm font-medium text-slate-700 mb-1 required-field">رمز عبور فعلی</label>
-                                    <input type="password" id="currentPassword" name="currentPassword" required class="mt-1">
+                                    <div class="relative">
+                                        <input type="password" id="currentPassword" name="currentPassword" required class="mt-1 w-full pl-10">
+                                        <i class="fas fa-eye password-toggle" data-toggle="currentPassword"></i>
+                                    </div>
                                 </div>
                                 <div>
                                     <label for="newPassword" class="block text-sm font-medium text-slate-700 mb-1 required-field">رمز عبور جدید</label>
-                                    <input type="password" id="newPassword" name="newPassword" required class="mt-1">
+                                     <div class="relative">
+                                        <input type="password" id="newPassword" name="newPassword" required class="mt-1 w-full pl-10">
+                                        <i class="fas fa-eye password-toggle" data-toggle="newPassword"></i>
+                                    </div>
                                 </div>
                                 <div>
                                     <label for="confirmNewPassword" class="block text-sm font-medium text-slate-700 mb-1 required-field">تکرار رمز عبور جدید</label>
-                                    <input type="password" id="confirmNewPassword" name="confirmNewPassword" required class="mt-1">
+                                    <div class="relative">
+                                        <input type="password" id="confirmNewPassword" name="confirmNewPassword" required class="mt-1 w-full pl-10">
+                                        <i class="fas fa-eye password-toggle" data-toggle="confirmNewPassword"></i>
+                                    </div>
                                 </div>
                                 <div class="pt-4">
                                      <button type="submit" class="btn btn-primary w-full justify-center">
@@ -709,7 +726,7 @@
 
         function renderProjectForm(projectData = null) {
             const isEditMode = projectData !== null;
-            createProjectContent.innerHTML = `
+            const formHtml = `
                 <div id="projectEditCard" class="project-card bg-white rounded-lg overflow-hidden">
                     <form id="projectForm">
                         ${isEditMode ? `<input type="hidden" id="ProjectID" name="ProjectID" value="${projectData.ProjectID}">` : ''}
@@ -783,26 +800,29 @@
                     </form>
                 </div>
             `;
+            createProjectContent.innerHTML = formHtml;
             
-            if (isEditMode) {
-                ['usageType', 'structureType', 'fileType', 'engineerRank', 'engineerField', 'engineerActivity', 'permitType', 'province'].forEach(id => {
-                    const select = document.getElementById(id);
-                    if (select && projectData[id]) select.value = projectData[id];
-                });
-                const unitPrice = parseFloat(projectData.unitPrice);
-                const standardOption = document.querySelector(`#projectForm input[name="priceOption"][value="${unitPrice}"]`);
-                if (standardOption) {
-                    standardOption.checked = true;
+            setTimeout(() => {
+                if (isEditMode) {
+                    ['usageType', 'structureType', 'fileType', 'engineerRank', 'engineerField', 'engineerActivity', 'permitType', 'province'].forEach(id => {
+                        const select = document.getElementById(id);
+                        if (select && projectData[id]) select.value = projectData[id];
+                    });
+                    const unitPrice = parseFloat(projectData.unitPrice);
+                    const standardOption = document.querySelector(`#projectForm input[name="priceOption"][value="${unitPrice}"]`);
+                    if (standardOption) {
+                        standardOption.checked = true;
+                    } else {
+                        document.getElementById('priceOptionCustom').checked = true;
+                        document.getElementById('customPrice').value = unitPrice;
+                        document.getElementById('customPrice').disabled = false;
+                    }
                 } else {
-                    document.getElementById('priceOptionCustom').checked = true;
-                    document.getElementById('customPrice').value = unitPrice;
-                    document.getElementById('customPrice').disabled = false;
+                     document.getElementById('priceOption1').checked = true;
                 }
-            } else {
-                 document.getElementById('priceOption1').checked = true;
-            }
 
-            attachProjectFormListeners();
+                attachProjectFormListeners();
+            }, 50);
         }
 
         function getProjectCardHTML(project, role, isApplied = false) {
@@ -1014,7 +1034,10 @@
                 </div>
             `;
             createActivityContent.innerHTML = formHtml;
-            renderActivityEdit(activityData);
+            
+            setTimeout(() => {
+                renderActivityEdit(activityData);
+            }, 50);
         }
 
         function renderActivityEdit(activityData = null) {
@@ -1862,6 +1885,24 @@
                             });
                         });
                     }
+                    
+                    document.getElementById('settingsContent').addEventListener('click', function(e) {
+                        if (e.target.matches('.password-toggle')) {
+                            const targetId = e.target.dataset.toggle;
+                            const targetInput = document.getElementById(targetId);
+                            if (targetInput) {
+                                if (targetInput.type === 'password') {
+                                    targetInput.type = 'text';
+                                    e.target.classList.remove('fa-eye');
+                                    e.target.classList.add('fa-eye-slash');
+                                } else {
+                                    targetInput.type = 'password';
+                                    e.target.classList.remove('fa-eye-slash');
+                                    e.target.classList.add('fa-eye');
+                                }
+                            }
+                        }
+                    });
 
                     document.getElementById('main-content-area').addEventListener('click', (e) => {
                          const targetButton = e.target.closest('button[data-action]');
