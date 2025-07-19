@@ -223,7 +223,7 @@
         </aside>
 
         <!-- Main Content -->
-        <main class="main-content-area">
+        <main id="main-content-area" class="main-content-area">
             <header class="p-4 border-b border-slate-200 bg-white flex-shrink-0 flex justify-between items-center">
                 <h1 id="main-header-title" class="text-2xl font-bold text-slate-800">داشبورد</h1>
                 <button id="refresh-button" class="btn btn-secondary !p-2 hidden">
@@ -1851,6 +1851,17 @@
 
                     initSlideshow();
                     changePasswordForm.addEventListener('submit', handleChangePassword);
+
+                    const logoutButton = document.getElementById('logoutButton');
+                    if (logoutButton) {
+                        logoutButton.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            showModal('آیا برای خروج از حساب کاربری خود اطمینان دارید؟', 'confirm', () => {
+                                const loginUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/')) + '/login.html';
+                                window.location.href = loginUrl;
+                            });
+                        });
+                    }
 
                     document.getElementById('main-content-area').addEventListener('click', (e) => {
                          const targetButton = e.target.closest('button[data-action]');
