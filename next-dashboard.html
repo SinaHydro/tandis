@@ -1645,7 +1645,7 @@
             const params = new URLSearchParams(window.location.search);
             const email = params.get('email');
             if (!email) {
-                pageLoader.innerHTML = '<p class="text-red-600 font-bold">خطا: ایمیل کاربر مشخص نشده است.</p>';
+                pageLoader.innerHTML = '<p class="text-red-600 font-bold p-4 text-center">خطا: ایمیل کاربر در آدرس صفحه مشخص نشده است.<br>لطفاً از طریق پنل اصلی وارد شوید.</p>';
                 return;
             }
 
@@ -1686,16 +1686,13 @@
                              case 'cancel-collaboration': handleCancelCollaboration(activityId, targetButton); break;
                          }
                     });
-
+                    pageLoader.style.display = 'none';
                 } else {
-                    pageLoader.innerHTML = '<p class="text-red-600 font-bold">خطا در بارگذاری اطلاعات. لطفاً صفحه را دوباره بارگیری کنید.</p>';
-                    return;
+                    pageLoader.innerHTML = `<p class="text-red-600 font-bold text-center p-4">خطا در بارگذاری اطلاعات کاربری.<br>کاربری با ایمیل '${email}' یافت نشد.<br>لطفاً از صحیح بودن آدرس اطمینان حاصل کنید.</p>`;
                 }
             } catch (error) {
                 console.error("An unexpected error occurred during initialization:", error);
                 pageLoader.innerHTML = `<p class="text-red-600 font-bold">یک خطای غیرمنتظره رخ داد: ${error.message}</p>`;
-            } finally {
-                pageLoader.style.display = 'none';
             }
         }
 
