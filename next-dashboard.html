@@ -557,7 +557,8 @@
 
             // Hide all role-specific nav items first
             ['projects-nav-item', 'my-activities-nav-item', 'create-activity-nav-item', 'engineers-nav-item', 'create-project-nav-item'].forEach(id => {
-                document.getElementById(id).style.display = 'none';
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
             });
             
             // Show nav items based on role
@@ -724,100 +725,100 @@
         
         // --- Project Logic ---
 
-function renderProjectForm(projectData = null) {
-    const isEditMode = projectData !== null;
-    createProjectContent.innerHTML = `
-        <div id="projectEditCard" class="project-card bg-white rounded-lg overflow-hidden">
-            <form id="projectForm">
-                ${isEditMode ? `<input type="hidden" id="ProjectID" name="ProjectID" value="${projectData.ProjectID}">` : ''}
-                <div class="p-6 space-y-6">
-                    <div><label for="projectName" class="block text-gray-700 font-medium mb-1 required-field">نام پروژه</label><input type="text" id="projectName" name="projectName" class="w-full" required value="${projectData?.projectName || ''}"></div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div><label for="ownerName" class="block text-gray-700 font-medium mb-1 required-field">نام مالک</label><input type="text" id="ownerName" name="ownerName" class="w-full" required value="${projectData?.ownerName || ''}"></div>
-                        <div><label for="permitNumber" class="block text-gray-700 font-medium mb-1 required-field">شماره پروانه</label><input type="text" id="permitNumber" name="permitNumber" class="w-full" required value="${projectData?.permitNumber || ''}"></div>
-                        <div><label for="permitValidity" class="block text-gray-700 font-medium mb-1 required-field">اعتبار پروانه (ماه)</label><input type="number" id="permitValidity" name="permitValidity" min="1" class="w-full" required value="${projectData?.permitValidity || ''}"></div>
-                    </div>
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-1 required-field">آدرس ملک</label>
-                        <div class="flex items-center mb-2 text-sm text-gray-500">
-                            <span>طول جغرافیایی: </span><span id="longitudeValue" class="mr-2 font-mono">...</span>
-                            <span class="mr-4">عرض جغرافیایی: </span><span id="latitudeValue" class="mr-2 font-mono">...</span>
+        function renderProjectForm(projectData = null) {
+            const isEditMode = projectData !== null;
+            createProjectContent.innerHTML = `
+                <div id="projectEditCard" class="project-card bg-white rounded-lg overflow-hidden">
+                    <form id="projectForm">
+                        ${isEditMode ? `<input type="hidden" id="ProjectID" name="ProjectID" value="${projectData.ProjectID}">` : ''}
+                        <div class="p-6 space-y-6">
+                            <div><label for="projectName" class="block text-gray-700 font-medium mb-1 required-field">نام پروژه</label><input type="text" id="projectName" name="projectName" class="w-full" required value="${projectData?.projectName || ''}"></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div><label for="ownerName" class="block text-gray-700 font-medium mb-1 required-field">نام مالک</label><input type="text" id="ownerName" name="ownerName" class="w-full" required value="${projectData?.ownerName || ''}"></div>
+                                <div><label for="permitNumber" class="block text-gray-700 font-medium mb-1 required-field">شماره پروانه</label><input type="text" id="permitNumber" name="permitNumber" class="w-full" required value="${projectData?.permitNumber || ''}"></div>
+                                <div><label for="permitValidity" class="block text-gray-700 font-medium mb-1 required-field">اعتبار پروانه (ماه)</label><input type="number" id="permitValidity" name="permitValidity" min="1" class="w-full" required value="${projectData?.permitValidity || ''}"></div>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-1 required-field">آدرس ملک</label>
+                                <div class="flex items-center mb-2 text-sm text-gray-500">
+                                    <span>طول جغرافیایی: </span><span id="longitudeValue" class="mr-2 font-mono">...</span>
+                                    <span class="mr-4">عرض جغرافیایی: </span><span id="latitudeValue" class="mr-2 font-mono">...</span>
+                                </div>
+                                <div id="project-map" class="h-64 w-full z-10 rounded-lg border"></div>
+                                <textarea id="address" name="address" rows="2" class="w-full mt-2" required placeholder="آدرس متنی در اینجا نمایش داده می‌شود...">${projectData?.address || ''}</textarea>
+                                <input type="hidden" id="latitude" name="latitude" value="${projectData?.latitude || ''}">
+                                <input type="hidden" id="longitude" name="longitude" value="${projectData?.longitude || ''}">
+                            </div>
+                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div><label for="city" class="block text-gray-700 font-medium mb-1 required-field">شهر</label><input type="text" id="city" name="city" class="w-full" required value="${projectData?.city || ''}"></div>
+                                <div><label for="district" class="block text-gray-700 font-medium mb-1 required-field">منطقه شهرداری</label><input type="number" id="district" name="district" min="1" class="w-full" required value="${projectData?.district || ''}"></div>
+                                <div><label for="usageType" class="block text-gray-700 font-medium mb-1 required-field">کاربری ملک</label><select id="usageType" name="usageType" class="w-full" required><option value="مسکونی">مسکونی</option><option value="تجاری">تجاری</option><option value="اداری">اداری</option><option value="صنعتی">صنعتی</option><option value="کشاورزی">کشاورزی</option></select></div>
+                            </div>
+                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div><label for="area" class="block text-gray-700 font-medium mb-1 required-field">متراژ (مترمربع)</label><input type="number" id="area" name="area" min="1" class="w-full" required value="${projectData?.area || ''}"></div>
+                                <div><label for="floors" class="block text-gray-700 font-medium mb-1 required-field">تعداد طبقات</label><input type="number" id="floors" name="floors" min="1" class="w-full" required value="${projectData?.floors || ''}"></div>
+                                <div><label for="basementFloors" class="block text-gray-700 font-medium mb-1 required-field">تعداد طبقات زیرزمین</label><input type="number" id="basementFloors" name="basementFloors" min="0" class="w-full" required value="${projectData?.basementFloors || '0'}"></div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div><label for="structureType" class="block text-gray-700 font-medium mb-1 required-field">نوع سازه</label><select id="structureType" name="structureType" class="w-full" required><option value="فلزی">فلزی</option><option value="بتنی">بتنی</option></select></div>
+                                <div><label for="fileType" class="block text-gray-700 font-medium mb-1 required-field">نوع پرونده</label><select id="fileType" name="fileType" class="w-full" required><option value="عادی">عادی</option><option value="فرسوده">فرسوده</option></select></div>
+                                <div><label for="contractMonths" class="block text-gray-700 font-medium mb-1 required-field">مدت قرارداد (ماه)</label><input type="number" id="contractMonths" name="contractMonths" min="1" class="w-full" required value="${projectData?.contractMonths || ''}"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">مشخصات مهندس مورد نیاز پروژه</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                    <div><label for="engineerRank" class="block text-gray-700 font-medium mb-1 required-field">پایه مهندس</label><select id="engineerRank" name="engineerRank" class="w-full" required><option value="پایه 3">پایه 3</option><option value="پایه 2">پایه 2</option><option value="پایه 1">پایه 1</option><option value="پایه ارشد">پایه ارشد</option></select></div>
+                                    <div><label for="engineerField" class="block text-gray-700 font-medium mb-1 required-field">رشته مهندس</label><select id="engineerField" name="engineerField" class="w-full" required><option value="معماری">معماری</option><option value="عمران">عمران</option><option value="مکانیک">مکانیک</option><option value="برق">برق</option><option value="شهرسازی">شهرسازی</option><option value="ترافیک">ترافیک</option><option value="نقشه برداری">نقشه برداری</option></select></div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div><label for="engineerActivity" class="block text-gray-700 font-medium mb-1 required-field">نوع فعالیت مهندس</label><select id="engineerActivity" name="engineerActivity" class="w-full" required><option value="طراح">طراح</option><option value="ناظر">ناظر</option><option value="مجری">مجری</option></select></div>
+                                    <div><label for="permitType" class="block text-gray-700 font-medium mb-1 required-field">نوع پروانه مهندس</label><select id="permitType" name="permitType" class="w-full" required><option value="طراح حقوقی">طراح حقوقی</option><option value="ناظر حقوقی">ناظر حقوقی</option><option value="انبوه ساز">انبوه ساز</option><option value="مجری حقوقی">مجری حقوقی</option><option value="مهندس حقیقی">مهندس حقیقی</option><option value="کاردان">کاردان</option><option value="معمارتجربی">معمارتجربی</option></select></div>
+                                </div>
+                            </div>
+                            <div class="space-y-4">
+                                <h3 id="tariff-title" class="text-lg font-semibold text-gray-800 border-b pb-2">تعرفه پیشنهادی</h3>
+                                <div class="space-y-2">
+                                    <div class="flex items-center"><label for="priceOption1" class="flex-grow">ساختمان ۱ تا ۲ طبقه: <span>۱۰۷,۰۰۰ تومان</span></label><input type="radio" id="priceOption1" name="priceOption" value="107000" class="ml-2"></div>
+                                    <div class="flex items-center"><label for="priceOption2" class="flex-grow">ساختمان ۳ تا ۵ طبقه: <span>۱۲۵,۰۰۰ تومان</span></label><input type="radio" id="priceOption2" name="priceOption" value="125000" class="ml-2"></div>
+                                    <div class="flex items-center"><label for="priceOption3" class="flex-grow">ساختمان ۶ تا ۷ طبقه: <span>۱۲۷,۸۰۰ تومان</span></label><input type="radio" id="priceOption3" name="priceOption" value="127800" class="ml-2"></div>
+                                    <div class="flex items-center"><label for="priceOption4" class="flex-grow">ساختمان ۸ تا ۱۰ طبقه: <span>۱۳۹,۵۰۰ تومان</span></label><input type="radio" id="priceOption4" name="priceOption" value="139500" class="ml-2"></div>
+                                    <div class="flex items-center"><label for="priceOption5" class="flex-grow">ساختمان ۱۱ تا ۱۲ طبقه: <span>۱۴۲,۸۰۰ تومان</span></label><input type="radio" id="priceOption5" name="priceOption" value="142800" class="ml-2"></div>
+                                    <div class="flex items-center"><label for="priceOption6" class="flex-grow">ساختمان ۱۳ تا ۱۵ طبقه: <span>۱۴۸,۸۰۰ تومان</span></label><input type="radio" id="priceOption6" name="priceOption" value="148800" class="ml-2"></div>
+                                    <div class="flex items-center"><label for="priceOption7" class="flex-grow">ساختمان بالای ۱۶ طبقه: <span>۱۵۹,۲۰۰ تومان</span></label><input type="radio" id="priceOption7" name="priceOption" value="159200" class="ml-2"></div>
+                                    <div class="flex items-center mt-2"><label for="priceOptionCustom" class="flex-grow">سایر:</label><input type="number" id="customPrice" name="customPrice" min="0" class="px-3 py-1 border border-gray-300 rounded-lg w-32 mx-2" disabled><span>تومان</span><input type="radio" id="priceOptionCustom" name="priceOption" value="custom" class="ml-auto"></div>
+                                </div>
+                                <div class="price-highlight p-3 rounded-lg mt-4"><div class="flex items-center"><i class="fas fa-tag text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت واحد:</span><span id="unitPricePreview" class="mr-2 font-semibold"></span></div><div class="flex items-center mt-2"><i class="fas fa-calculator text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت کل:</span><span id="totalPricePreview" class="mr-2 font-bold text-green-600"></span></div><div class="flex items-center mt-2"><i class="fas fa-hand-holding-usd text-blue-500 ml-2"></i><span class="text-gray-700 font-medium">کمیسیون (۱۵٪):</span><span id="commissionPreview" class="mr-2 font-bold" style="color: var(--primary-color)"></span></div></div>
+                            </div>
+                            <div><label for="description" class="block text-gray-700 font-medium mb-1">توضیحات</label><textarea id="description" name="description" rows="3" class="w-full">${projectData?.description || ''}</textarea></div>
                         </div>
-                        <div id="project-map" class="h-64 w-full z-10 rounded-lg border"></div>
-                        <textarea id="address" name="address" rows="2" class="w-full mt-2" required placeholder="آدرس متنی در اینجا نمایش داده می‌شود...">${projectData?.address || ''}</textarea>
-                        <input type="hidden" id="latitude" name="latitude" value="${projectData?.latitude || ''}">
-                        <input type="hidden" id="longitude" name="longitude" value="${projectData?.longitude || ''}">
-                    </div>
-                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div><label for="city" class="block text-gray-700 font-medium mb-1 required-field">شهر</label><input type="text" id="city" name="city" class="w-full" required value="${projectData?.city || ''}"></div>
-                        <div><label for="district" class="block text-gray-700 font-medium mb-1 required-field">منطقه شهرداری</label><input type="number" id="district" name="district" min="1" class="w-full" required value="${projectData?.district || ''}"></div>
-                        <div><label for="usageType" class="block text-gray-700 font-medium mb-1 required-field">کاربری ملک</label><select id="usageType" name="usageType" class="w-full" required><option value="مسکونی">مسکونی</option><option value="تجاری">تجاری</option><option value="اداری">اداری</option><option value="صنعتی">صنعتی</option><option value="کشاورزی">کشاورزی</option></select></div>
-                    </div>
-                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div><label for="area" class="block text-gray-700 font-medium mb-1 required-field">متراژ (مترمربع)</label><input type="number" id="area" name="area" min="1" class="w-full" required value="${projectData?.area || ''}"></div>
-                        <div><label for="floors" class="block text-gray-700 font-medium mb-1 required-field">تعداد طبقات</label><input type="number" id="floors" name="floors" min="1" class="w-full" required value="${projectData?.floors || ''}"></div>
-                        <div><label for="basementFloors" class="block text-gray-700 font-medium mb-1 required-field">تعداد طبقات زیرزمین</label><input type="number" id="basementFloors" name="basementFloors" min="0" class="w-full" required value="${projectData?.basementFloors || '0'}"></div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div><label for="structureType" class="block text-gray-700 font-medium mb-1 required-field">نوع سازه</label><select id="structureType" name="structureType" class="w-full" required><option value="فلزی">فلزی</option><option value="بتنی">بتنی</option></select></div>
-                        <div><label for="fileType" class="block text-gray-700 font-medium mb-1 required-field">نوع پرونده</label><select id="fileType" name="fileType" class="w-full" required><option value="عادی">عادی</option><option value="فرسوده">فرسوده</option></select></div>
-                        <div><label for="contractMonths" class="block text-gray-700 font-medium mb-1 required-field">مدت قرارداد (ماه)</label><input type="number" id="contractMonths" name="contractMonths" min="1" class="w-full" required value="${projectData?.contractMonths || ''}"></div>
-                    </div>
-                    <div class="space-y-2">
-                        <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">مشخصات مهندس مورد نیاز پروژه</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                            <div><label for="engineerRank" class="block text-gray-700 font-medium mb-1 required-field">پایه مهندس</label><select id="engineerRank" name="engineerRank" class="w-full" required><option value="پایه 3">پایه 3</option><option value="پایه 2">پایه 2</option><option value="پایه 1">پایه 1</option><option value="پایه ارشد">پایه ارشد</option></select></div>
-                            <div><label for="engineerField" class="block text-gray-700 font-medium mb-1 required-field">رشته مهندس</label><select id="engineerField" name="engineerField" class="w-full" required><option value="معماری">معماری</option><option value="عمران">عمران</option><option value="مکانیک">مکانیک</option><option value="برق">برق</option><option value="شهرسازی">شهرسازی</option><option value="ترافیک">ترافیک</option><option value="نقشه برداری">نقشه برداری</option></select></div>
+                        <div class="border-t border-gray-200 mt-6 p-4 flex justify-end gap-4">
+                            <button type="button" id="cancelProjectFormBtn" class="btn btn-secondary">انصراف</button>
+                            <button type="submit" class="btn btn-primary">${isEditMode ? 'ذخیره تغییرات' : 'ثبت پروژه'}</button>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><label for="engineerActivity" class="block text-gray-700 font-medium mb-1 required-field">نوع فعالیت مهندس</label><select id="engineerActivity" name="engineerActivity" class="w-full" required><option value="طراح">طراح</option><option value="ناظر">ناظر</option><option value="مجری">مجری</option></select></div>
-                            <div><label for="permitType" class="block text-gray-700 font-medium mb-1 required-field">نوع پروانه مهندس</label><select id="permitType" name="permitType" class="w-full" required><option value="طراح حقوقی">طراح حقوقی</option><option value="ناظر حقوقی">ناظر حقوقی</option><option value="انبوه ساز">انبوه ساز</option><option value="مجری حقوقی">مجری حقوقی</option><option value="مهندس حقیقی">مهندس حقیقی</option><option value="کاردان">کاردان</option><option value="معمارتجربی">معمارتجربی</option></select></div>
-                        </div>
-                    </div>
-                    <div class="space-y-4">
-                        <h3 id="tariff-title" class="text-lg font-semibold text-gray-800 border-b pb-2">تعرفه پیشنهادی</h3>
-                        <div class="space-y-2">
-                            <div class="flex items-center"><label for="priceOption1" class="flex-grow">ساختمان ۱ تا ۲ طبقه: <span>۱۰۷,۰۰۰ تومان</span></label><input type="radio" id="priceOption1" name="priceOption" value="107000" class="ml-2"></div>
-                            <div class="flex items-center"><label for="priceOption2" class="flex-grow">ساختمان ۳ تا ۵ طبقه: <span>۱۲۵,۰۰۰ تومان</span></label><input type="radio" id="priceOption2" name="priceOption" value="125000" class="ml-2"></div>
-                            <div class="flex items-center"><label for="priceOption3" class="flex-grow">ساختمان ۶ تا ۷ طبقه: <span>۱۲۷,۸۰۰ تومان</span></label><input type="radio" id="priceOption3" name="priceOption" value="127800" class="ml-2"></div>
-                            <div class="flex items-center"><label for="priceOption4" class="flex-grow">ساختمان ۸ تا ۱۰ طبقه: <span>۱۳۹,۵۰۰ تومان</span></label><input type="radio" id="priceOption4" name="priceOption" value="139500" class="ml-2"></div>
-                            <div class="flex items-center"><label for="priceOption5" class="flex-grow">ساختمان ۱۱ تا ۱۲ طبقه: <span>۱۴۲,۸۰۰ تومان</span></label><input type="radio" id="priceOption5" name="priceOption" value="142800" class="ml-2"></div>
-                            <div class="flex items-center"><label for="priceOption6" class="flex-grow">ساختمان ۱۳ تا ۱۵ طبقه: <span>۱۴۸,۸۰۰ تومان</span></label><input type="radio" id="priceOption6" name="priceOption" value="148800" class="ml-2"></div>
-                            <div class="flex items-center"><label for="priceOption7" class="flex-grow">ساختمان بالای ۱۶ طبقه: <span>۱۵۹,۲۰۰ تومان</span></label><input type="radio" id="priceOption7" name="priceOption" value="159200" class="ml-2"></div>
-                            <div class="flex items-center mt-2"><label for="priceOptionCustom" class="flex-grow">سایر:</label><input type="number" id="customPrice" name="customPrice" min="0" class="px-3 py-1 border border-gray-300 rounded-lg w-32 mx-2" disabled><span>تومان</span><input type="radio" id="priceOptionCustom" name="priceOption" value="custom" class="ml-auto"></div>
-                        </div>
-                        <div class="price-highlight p-3 rounded-lg mt-4"><div class="flex items-center"><i class="fas fa-tag text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت واحد:</span><span id="unitPricePreview" class="mr-2 font-semibold"></span></div><div class="flex items-center mt-2"><i class="fas fa-calculator text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت کل:</span><span id="totalPricePreview" class="mr-2 font-bold text-green-600"></span></div><div class="flex items-center mt-2"><i class="fas fa-hand-holding-usd text-blue-500 ml-2"></i><span class="text-gray-700 font-medium">کمیسیون (۱۵٪):</span><span id="commissionPreview" class="mr-2 font-bold" style="color: var(--primary-color)"></span></div></div>
-                    </div>
-                    <div><label for="description" class="block text-gray-700 font-medium mb-1">توضیحات</label><textarea id="description" name="description" rows="3" class="w-full">${projectData?.description || ''}</textarea></div>
+                    </form>
                 </div>
-                <div class="border-t border-gray-200 mt-6 p-4 flex justify-end gap-4">
-                    <button type="button" id="cancelProjectFormBtn" class="btn btn-secondary">انصراف</button>
-                    <button type="submit" class="btn btn-primary">${isEditMode ? 'ذخیره تغییرات' : 'ثبت پروژه'}</button>
-                </div>
-            </form>
-        </div>
-    `;
+            `;
 
-    if (isEditMode) {
-        ['usageType', 'structureType', 'fileType', 'engineerRank', 'engineerField', 'engineerActivity', 'permitType'].forEach(id => {
-            const select = document.getElementById(id);
-            if (select && projectData[id]) select.value = projectData[id];
-        });
-        const unitPrice = parseFloat(projectData.unitPrice);
-        const standardOption = document.querySelector(`#projectForm input[name="priceOption"][value="${unitPrice}"]`);
-        if (standardOption) {
-            standardOption.checked = true;
-        } else {
-            document.getElementById('priceOptionCustom').checked = true;
-            document.getElementById('customPrice').value = unitPrice;
-            document.getElementById('customPrice').disabled = false;
+            if (isEditMode) {
+                ['usageType', 'structureType', 'fileType', 'engineerRank', 'engineerField', 'engineerActivity', 'permitType'].forEach(id => {
+                    const select = document.getElementById(id);
+                    if (select && projectData[id]) select.value = projectData[id];
+                });
+                const unitPrice = parseFloat(projectData.unitPrice);
+                const standardOption = document.querySelector(`#projectForm input[name="priceOption"][value="${unitPrice}"]`);
+                if (standardOption) {
+                    standardOption.checked = true;
+                } else {
+                    document.getElementById('priceOptionCustom').checked = true;
+                    document.getElementById('customPrice').value = unitPrice;
+                    document.getElementById('customPrice').disabled = false;
+                }
+            } else {
+                 document.getElementById('priceOption1').checked = true;
+            }
+
+            attachProjectFormListeners();
         }
-    } else {
-         document.getElementById('priceOption1').checked = true;
-    }
-
-    attachProjectFormListeners();
-}
 
         function getProjectCardHTML(project, role, isApplied = false) {
             const formatNumber = (num) => num ? parseFloat(num).toLocaleString('fa-IR') : '0';
@@ -1028,6 +1029,7 @@ function renderProjectForm(projectData = null) {
             `;
             createActivityContent.innerHTML = formHtml;
             
+            // Pass data to the next step
             setTimeout(() => {
                 renderActivityEdit(activityData);
             }, 50);
@@ -1037,7 +1039,8 @@ function renderProjectForm(projectData = null) {
             const container = document.getElementById('activityFormContainer');
             if (!container) return;
             
-            const data = activityData || currentActivityData;
+            // Use passed data for editing, or the global state for preview, or an empty object for new
+            const data = activityData || currentActivityData || {};
 
             const editHtml = `
                 <div id="editMode" class="flex flex-col gap-4 text-lg"> 
@@ -1601,10 +1604,14 @@ function renderProjectForm(projectData = null) {
             }
         }
         
+        // FIX: Correctly handle editing an activity by passing data to the form
         function handleEditActivity(activityId) {
             const activityToEdit = fetchedActivities.find(act => act.ActivityID === activityId);
             if (activityToEdit) {
+                // First, switch to the correct view by programmatically clicking the nav item
                 document.querySelector('.nav-item[data-view="create-activity"]').click();
+                // Then, after a short delay to allow the view to switch, call the render function with the data
+                setTimeout(() => renderActivityForm(activityToEdit), 50);
             }
         }
         
@@ -1728,13 +1735,13 @@ function renderProjectForm(projectData = null) {
             });
         }
         
-function handleEditProject(projectId) {
-    const projectToEdit = fetchedProjects.find(p => p.ProjectID === projectId);
-    if (projectToEdit) {
-        document.querySelector('.nav-item[data-view="create-project"]').click();
-        setTimeout(() => renderProjectForm(projectToEdit), 50);
-    }
-}
+        function handleEditProject(projectId) {
+            const projectToEdit = fetchedProjects.find(p => p.ProjectID === projectId);
+            if (projectToEdit) {
+                document.querySelector('.nav-item[data-view="create-project"]').click();
+                setTimeout(() => renderProjectForm(projectToEdit), 50);
+            }
+        }
 
         async function handleChangeProjectStatus(projectId, newStatus) {
             const message = newStatus === 'بسته'
@@ -1761,52 +1768,103 @@ function handleEditProject(projectId) {
             });
         }
 
+        // FIX: Centralized view switching logic to ensure all buttons work correctly.
         function setupViewSwitcher() {
             const navItems = document.querySelectorAll('.nav-item[data-view]');
             let currentView = 'dashboard';
 
+            // Defines the action (title update, content rendering) for each view.
             const viewActions = {
-                'dashboard': { title: 'داشبورد', render: () => userData.role === 'employer' ? renderEmployerDashboard() : (contentPanes.dashboard.innerHTML = `<p class="text-center text-slate-600">به پنل کاربری خود خوش آمدید.</p>`) },
+                'dashboard': { 
+                    title: 'داشبورد', 
+                    render: () => {
+                        if (userData.role === 'employer') {
+                            renderEmployerDashboard();
+                        } else {
+                            contentPanes.dashboard.innerHTML = `<p class="text-center text-slate-600">به پنل کاربری خود خوش آمدید.</p>`;
+                        }
+                    },
+                    refreshable: true 
+                },
                 'profile': { title: 'پروفایل کاربری', render: () => {} },
                 'settings': { title: 'تنظیمات', render: () => {} },
-                'projects': { title: userData.role === 'employer' ? 'پروژه‌های من' : 'بازار کار پروژه‌ها', render: () => userData.role === 'employer' ? renderEmployerProjects() : renderProjectMarketplace(), refreshable: true },
-                'create-project': { title: 'ثبت / ویرایش پروژه', render: () => renderProjectForm() },
-                'my-activities': { title: 'فعالیت‌های من', render: renderMyActivities, refreshable: true },
-                'create-activity': { title: 'ثبت / ویرایش فعالیت', render: () => renderActivityForm() },
-                'engineers': { title: 'مهندسان', render: renderEngineersMarketplace, refreshable: true }
+                'projects': { 
+                    title: () => userData.role === 'employer' ? 'پروژه‌های من' : 'بازار کار پروژه‌ها', 
+                    render: () => {
+                        if (userData.role === 'employer') {
+                            renderEmployerProjects();
+                        } else {
+                            renderProjectMarketplace();
+                        }
+                    },
+                    refreshable: true 
+                },
+                'create-project': { 
+                    title: 'ثبت / ویرایش پروژه', 
+                    render: (data) => renderProjectForm(data) 
+                },
+                'my-activities': { 
+                    title: 'فعالیت‌های من', 
+                    render: () => renderMyActivities(), 
+                    refreshable: true 
+                },
+                'create-activity': { 
+                    title: 'ثبت / ویرایش فعالیت', 
+                    render: (data) => renderActivityForm(data)
+                },
+                'engineers': { 
+                    title: 'مهندسان', 
+                    render: () => renderEngineersMarketplace(), 
+                    refreshable: true 
+                }
             };
 
             navItems.forEach(item => {
                 item.addEventListener('click', (e) => {
-                    e.preventDefault(); // Prevent default anchor behavior
+                    e.preventDefault();
                     const targetView = e.currentTarget.dataset.view;
                     
-                    if (currentView === targetView && contentPanes[targetView].style.display === 'block') return;
+                    if (currentView === targetView && contentPanes[targetView].style.display === 'block') {
+                        // If view is already active and refreshable, refresh it.
+                        if (viewActions[targetView]?.refreshable) {
+                             viewActions[targetView].render();
+                        }
+                        return;
+                    }
 
                     currentView = targetView;
                     
-                    Object.values(contentPanes).forEach(pane => pane.style.display = 'none');
+                    Object.values(contentPanes).forEach(pane => {
+                        if(pane) pane.style.display = 'none';
+                    });
                     navItems.forEach(nav => nav.classList.remove('active'));
 
-                    contentPanes[targetView].style.display = 'block';
+                    const targetPane = contentPanes[targetView];
+                    if (targetPane) {
+                        targetPane.style.display = 'block';
+                    }
                     e.currentTarget.classList.add('active');
 
                     const action = viewActions[targetView];
                     if (action) {
-                        mainHeaderTitle.textContent = action.title;
-                        action.render();
+                        // Handle dynamic titles
+                        mainHeaderTitle.textContent = typeof action.title === 'function' ? action.title() : action.title;
                         
-                        if (action.refreshable) {
-                            refreshButton.classList.remove('hidden');
-                        } else {
-                            refreshButton.classList.add('hidden');
+                        // Call render function. For create forms, call with null to indicate it's not an edit.
+                        try {
+                           action.render(null);
+                        } catch (err) {
+                            console.error(`Error rendering view "${targetView}":`, err);
+                            targetPane.innerHTML = `<p class="text-red-500 text-center">خطایی در نمایش این بخش رخ داد.</p>`;
                         }
+                        
+                        refreshButton.classList.toggle('hidden', !action.refreshable);
                     }
                 });
             });
 
             refreshButton.addEventListener('click', () => {
-                if (viewActions[currentView] && viewActions[currentView].refreshable) {
+                if (viewActions[currentView]?.refreshable) {
                     viewActions[currentView].render();
                 }
             });
@@ -1817,6 +1875,8 @@ function handleEditProject(projectId) {
             const newPassword = document.getElementById('newPassword').value;
             const confirmNewPassword = document.getElementById('confirmNewPassword').value;
 
+            // FIX: This validation was already here and is correct.
+            // It checks for password mismatch before sending the request.
             if (newPassword !== confirmNewPassword) {
                 showModal('رمز عبور جدید و تکرار آن یکسان نیستند. لطفاً دوباره بررسی کنید.', 'error');
                 return;
