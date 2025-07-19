@@ -817,7 +817,10 @@
                  document.getElementById('priceOption1').checked = true;
             }
 
-            attachProjectFormListeners();
+            // FIX: Defer listener attachment to prevent race condition with DOM rendering
+            setTimeout(() => {
+                attachProjectFormListeners();
+            }, 50);
         }
 
         function getProjectCardHTML(project, role, isApplied = false) {
@@ -891,7 +894,7 @@
             const cancelBtn = document.getElementById('cancelProjectFormBtn');
             if (cancelBtn) {
                 cancelBtn.addEventListener('click', () => {
-                    document.querySelector('.nav-item[data-view="dashboard"]').click();
+                    switchView('dashboard');
                 });
             }
 
@@ -1009,7 +1012,7 @@
                 const result = await response.json();
                 if (result.status === 'success') {
                     showModal(result.message, 'success');
-                    document.querySelector('.nav-item[data-view="dashboard"]').click();
+                    switchView('dashboard');
                 } else {
                     throw new Error(result.message || 'خطای ناشناخته.');
                 }
@@ -1159,7 +1162,7 @@
 
             document.getElementById('saveActivityBtn').addEventListener('click', () => handleSaveActivity(activityData));
             document.getElementById('cancelActivityBtn').addEventListener('click', () => {
-                document.querySelector('.nav-item[data-view="dashboard"]').click();
+                switchView('dashboard');
             });
         }
 
@@ -1278,7 +1281,7 @@
                 if (result.status === 'success') {
                     showModal(result.message, 'success');
                     currentActivityData = {};
-                    document.querySelector('.nav-item[data-view="my-activities"]').click();
+                    switchView('my-activities');
                 } else {
                     throw new Error(result.message || 'خطای ناشناخته.');
                 }
@@ -1488,7 +1491,7 @@
                 `;
 
                 document.getElementById('dashboardCreateProjectBtn').addEventListener('click', () => {
-                    document.querySelector('.nav-item[data-view="create-project"]').click();
+                    switchView('create-project');
                 });
 
             } catch (error) {
@@ -1604,14 +1607,10 @@
             }
         }
         
-        // FIX: Correctly handle editing an activity by passing data to the form
         function handleEditActivity(activityId) {
             const activityToEdit = fetchedActivities.find(act => act.ActivityID === activityId);
             if (activityToEdit) {
-                // First, switch to the correct view by programmatically clicking the nav item
-                document.querySelector('.nav-item[data-view="create-activity"]').click();
-                // Then, after a short delay to allow the view to switch, call the render function with the data
-                setTimeout(() => renderActivityForm(activityToEdit), 50);
+                switchView('create-activity', activityToEdit);
             }
         }
         
@@ -1738,8 +1737,7 @@
         function handleEditProject(projectId) {
             const projectToEdit = fetchedProjects.find(p => p.ProjectID === projectId);
             if (projectToEdit) {
-                document.querySelector('.nav-item[data-view="create-project"]').click();
-                setTimeout(() => renderProjectForm(projectToEdit), 50);
+                switchView('create-project', projectToEdit);
             }
         }
 
@@ -1768,103 +1766,106 @@
             });
         }
 
-        // FIX: Centralized view switching logic to ensure all buttons work correctly.
+        // Defines the action (title update, content rendering) for each view.
+        const viewActions = {
+            'dashboard': { 
+                title: 'داشبورد', 
+                render: () => {
+                    if (userData.role === 'employer') {
+                        renderEmployerDashboard();
+                    } else {
+                        contentPanes.dashboard.innerHTML = `<p class="text-center text-slate-600">به پنل کاربری خود خوش آمدید.</p>`;
+                    }
+                },
+                refreshable: true 
+            },
+            'profile': { title: 'پروفایل کاربری', render: () => {} },
+            'settings': { title: 'تنظیمات', render: () => {} },
+            'projects': { 
+                title: () => userData.role === 'employer' ? 'پروژه‌های من' : 'بازار کار پروژه‌ها', 
+                render: () => {
+                    if (userData.role === 'employer') {
+                        renderEmployerProjects();
+                    } else {
+                        renderProjectMarketplace();
+                    }
+                },
+                refreshable: true 
+            },
+            'create-project': { 
+                title: 'ثبت / ویرایش پروژه', 
+                render: (data) => renderProjectForm(data) 
+            },
+            'my-activities': { 
+                title: 'فعالیت‌های من', 
+                render: () => renderMyActivities(), 
+                refreshable: true 
+            },
+            'create-activity': { 
+                title: 'ثبت / ویرایش فعالیت', 
+                render: (data) => renderActivityForm(data)
+            },
+            'engineers': { 
+                title: 'مهندسان', 
+                render: () => renderEngineersMarketplace(), 
+                refreshable: true 
+            }
+        };
+
+        // FIX: Centralized function to handle view switching
+        function switchView(view, data = null) {
+            let currentView = document.querySelector('.nav-item.active')?.dataset.view || 'dashboard';
+            
+            // Hide all content panes
+            Object.values(contentPanes).forEach(pane => {
+                if(pane) pane.style.display = 'none';
+            });
+            // Deactivate all nav items
+            document.querySelectorAll('.nav-item[data-view]').forEach(nav => nav.classList.remove('active'));
+
+            const targetPane = contentPanes[view];
+            const targetNavItem = document.querySelector(`.nav-item[data-view="${view}"]`);
+
+            // Show the target pane and activate the nav item
+            if (targetPane) {
+                targetPane.style.display = 'block';
+            }
+            if (targetNavItem) {
+                targetNavItem.classList.add('active');
+            }
+
+            const action = viewActions[view];
+            if (action) {
+                // Update header title
+                mainHeaderTitle.textContent = typeof action.title === 'function' ? action.title() : action.title;
+                
+                // Render the content for the new view
+                try {
+                   action.render(data);
+                } catch (err) {
+                    console.error(`Error rendering view "${view}":`, err);
+                    if(targetPane) targetPane.innerHTML = `<p class="text-red-500 text-center">خطایی در نمایش این بخش رخ داد.</p>`;
+                }
+                
+                // Show/hide the refresh button
+                refreshButton.classList.toggle('hidden', !action.refreshable);
+            }
+        }
+
         function setupViewSwitcher() {
             const navItems = document.querySelectorAll('.nav-item[data-view]');
-            let currentView = 'dashboard';
-
-            // Defines the action (title update, content rendering) for each view.
-            const viewActions = {
-                'dashboard': { 
-                    title: 'داشبورد', 
-                    render: () => {
-                        if (userData.role === 'employer') {
-                            renderEmployerDashboard();
-                        } else {
-                            contentPanes.dashboard.innerHTML = `<p class="text-center text-slate-600">به پنل کاربری خود خوش آمدید.</p>`;
-                        }
-                    },
-                    refreshable: true 
-                },
-                'profile': { title: 'پروفایل کاربری', render: () => {} },
-                'settings': { title: 'تنظیمات', render: () => {} },
-                'projects': { 
-                    title: () => userData.role === 'employer' ? 'پروژه‌های من' : 'بازار کار پروژه‌ها', 
-                    render: () => {
-                        if (userData.role === 'employer') {
-                            renderEmployerProjects();
-                        } else {
-                            renderProjectMarketplace();
-                        }
-                    },
-                    refreshable: true 
-                },
-                'create-project': { 
-                    title: 'ثبت / ویرایش پروژه', 
-                    render: (data) => renderProjectForm(data) 
-                },
-                'my-activities': { 
-                    title: 'فعالیت‌های من', 
-                    render: () => renderMyActivities(), 
-                    refreshable: true 
-                },
-                'create-activity': { 
-                    title: 'ثبت / ویرایش فعالیت', 
-                    render: (data) => renderActivityForm(data)
-                },
-                'engineers': { 
-                    title: 'مهندسان', 
-                    render: () => renderEngineersMarketplace(), 
-                    refreshable: true 
-                }
-            };
 
             navItems.forEach(item => {
                 item.addEventListener('click', (e) => {
                     e.preventDefault();
                     const targetView = e.currentTarget.dataset.view;
-                    
-                    if (currentView === targetView && contentPanes[targetView].style.display === 'block') {
-                        // If view is already active and refreshable, refresh it.
-                        if (viewActions[targetView]?.refreshable) {
-                             viewActions[targetView].render();
-                        }
-                        return;
-                    }
-
-                    currentView = targetView;
-                    
-                    Object.values(contentPanes).forEach(pane => {
-                        if(pane) pane.style.display = 'none';
-                    });
-                    navItems.forEach(nav => nav.classList.remove('active'));
-
-                    const targetPane = contentPanes[targetView];
-                    if (targetPane) {
-                        targetPane.style.display = 'block';
-                    }
-                    e.currentTarget.classList.add('active');
-
-                    const action = viewActions[targetView];
-                    if (action) {
-                        // Handle dynamic titles
-                        mainHeaderTitle.textContent = typeof action.title === 'function' ? action.title() : action.title;
-                        
-                        // Call render function. For create forms, call with null to indicate it's not an edit.
-                        try {
-                           action.render(null);
-                        } catch (err) {
-                            console.error(`Error rendering view "${targetView}":`, err);
-                            targetPane.innerHTML = `<p class="text-red-500 text-center">خطایی در نمایش این بخش رخ داد.</p>`;
-                        }
-                        
-                        refreshButton.classList.toggle('hidden', !action.refreshable);
-                    }
+                    switchView(targetView, null); // Direct clicks from sidebar are for creating new items, so data is null
                 });
             });
 
             refreshButton.addEventListener('click', () => {
-                if (viewActions[currentView]?.refreshable) {
+                const currentView = document.querySelector('.nav-item.active')?.dataset.view;
+                if (currentView && viewActions[currentView]?.refreshable) {
                     viewActions[currentView].render();
                 }
             });
@@ -1875,8 +1876,6 @@
             const newPassword = document.getElementById('newPassword').value;
             const confirmNewPassword = document.getElementById('confirmNewPassword').value;
 
-            // FIX: This validation was already here and is correct.
-            // It checks for password mismatch before sending the request.
             if (newPassword !== confirmNewPassword) {
                 showModal('رمز عبور جدید و تکرار آن یکسان نیستند. لطفاً دوباره بررسی کنید.', 'error');
                 return;
@@ -1935,7 +1934,7 @@
                     renderProfile();
                     setupViewSwitcher();
                     
-                    document.querySelector('.nav-item[data-view="dashboard"]').click();
+                    switchView('dashboard'); // Initial view
 
                     initSlideshow();
                     changePasswordForm.addEventListener('submit', handleChangePassword);
