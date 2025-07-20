@@ -54,11 +54,9 @@
         .nav-item i { margin-left: 0.75rem; width: 20px; text-align: center; }
         .nav-item:hover { background-color: #e2e8f0; color: #1e293b; }
         .nav-item.active { background-color: var(--primary-color); color: white; box-shadow: 0 4px 6px -1px rgba(33, 150, 243, 0.2); }
-        
         .nav-item.btn-special-project { background-color: var(--special-color); color: white; font-weight: 700; justify-content: center; }
         .nav-item.btn-special-project:hover { background-color: var(--special-color-dark); }
         .nav-item.btn-special-project.active { background-color: var(--special-color-dark); box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
-
         .sidebar-footer { padding: 1rem; margin-top: auto; border-top: 1px solid #e2e8f0; }
         .advertisement-sidebar { width: 248px; flex-shrink: 0; background-color: #f8fafc; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; padding: 1.5rem 1rem; }
         @media (max-width: 1280px) { .advertisement-sidebar { display: none; } }
@@ -97,13 +95,8 @@
         .btn-danger:hover { background-color: #dc2626; }
         .btn-success { background-color: #22c55e; color: white; }
         .btn-success:hover { background-color: #16a34a; }
-        .btn-special {
-            background-color: var(--special-color);
-            color: white;
-        }
-        .btn-special:hover {
-            background-color: var(--special-color-dark);
-        }
+        .btn-special { background-color: var(--special-color); color: white; }
+        .btn-special:hover { background-color: var(--special-color-dark); }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .map-container { height: 250px; border-radius: 0.5rem; border: 1px solid #cbd5e1; }
         .file-preview-container { width: 100%; height: 12rem; overflow: hidden; border: 1px solid #e2e8f0; border-radius: 0.375rem; display: flex; align-items: center; justify-content: center; background-color: #f8fafc; }
@@ -114,60 +107,22 @@
         #cropperContainer img { max-width: 100%; height: auto; }
         .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 32px; height: 32px; border-radius: 50%; border-left-color: var(--primary-color); animation: spin 1s ease infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #page-loader { position: fixed; inset: 0; background-color: rgba(255,255,255,0.8); z-index: 9999; display: flex; flex-direction:column; align-items: center; justify-content: center; }
-        
+        #page-loader { position: fixed; inset: 0; background-color: rgba(255,255,255,0.9); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; }
         .project-card, .activity-card { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); transition: all 0.3s ease; }
         .project-card:hover, .activity-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
-        .price-highlight { background-color: #f0fdf4; }
-        .commission-highlight { background-color: #f8fafc; }
-        .frosode-badge { background-color: #fef2f2; color: #dc2626; }
-        #project-list-container, #activity-list-container, #engineers-list-container {
-            display: grid;
-            grid-template-columns: repeat(1, 1fr);
-            gap: 1.5rem;
-        }
-        @media (min-width: 1024px) {
-            #project-list-container, #activity-list-container, #engineers-list-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        #filter-container {
-             display: flex;
-             flex-wrap: wrap;
-             gap: 1rem;
-             align-items: flex-end;
-        }
-        #filter-container > div, #filter-container > select, #filter-container > input {
-            flex: 1 1 150px;
-        }
-        #filter-container > .actions {
-            flex: 0 0 auto;
-        }
-        .neumorphic-card { background: #ffffff; border-radius: 20px; box-shadow: 8px 8px 16px #e0e0e0, -8px -8px 16px #ffffff; padding: 20px; margin: 20px auto; width: 100%; max-width: 800px; } 
-        .neumorphic-button { background: #ffffff; border: none; border-radius: 10px; box-shadow: 4px 4px 8px #e0e0e0, -4px -4px 8px #ffffff; padding: 8px 16px; cursor: pointer; transition: all 0.3s ease; font-size: 1rem; } 
-        .neumorphic-button:hover { box-shadow: 2px 2px 4px #e0e0e0, -2px -2px 4px #ffffff; }
-        .progress-bar { height: 6px; border-radius: 3px; background-color: #e9ecef; width: 100%; } 
-        .progress-fill { height: 100%; border-radius: 3px; background-color: #3b82f6; transition: width 0.3s ease; }
-        .needs-help { background-color: #fee2e2; padding: 4px 8px; border-radius: 4px; color: #dc2626; font-size: 0.875rem; }
-        .password-toggle {
-            position: absolute;
-            left: 0.75rem;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #94a3b8;
-        }
+        #project-list-container, #engineers-list-container { display: grid; grid-template-columns: repeat(1, 1fr); gap: 1.5rem; }
+        @media (min-width: 1024px) { #project-list-container, #engineers-list-container { grid-template-columns: repeat(2, 1fr); } }
     </style>
 </head>
 <body>
 
     <div id="page-loader">
         <div class="spinner"></div>
-        <p class="mt-4 text-slate-600 font-semibold">احراز هویت...</p>
+        <p class="mt-4 text-slate-600 font-semibold">در حال بررسی دسترسی و بارگذاری اطلاعات...</p>
     </div>
 
     <div class="workstation-wrapper" style="display: none;">
-        <!-- Sidebar -->
+        <!-- Main Sidebar (Right) -->
         <aside class="sidebar">
             <div class="sidebar-profile-section">
                 <div class="sidebar-profile-image-container">
@@ -184,22 +139,43 @@
             </div>
 
             <nav class="sidebar-nav">
-                <a data-view="dashboard" class="nav-item active"><i class="fas fa-tachometer-alt"></i><span>داشبورد</span></a>
-                <a data-view="profile" class="nav-item"><i class="fas fa-user-circle"></i><span>پروفایل</span></a>
-                <a data-view="projects" class="nav-item"><i class="fas fa-tasks"></i><span>پروژه‌های من</span></a>
-                <a data-view="engineers" class="nav-item"><i class="fas fa-users"></i><span>مهندسان</span></a>
-                <a data-view="create-project" class="nav-item btn-special-project mt-4"><i class="fas fa-plus-circle"></i><span>ثبت پروژه جدید</span></a>
+                <a data-view="dashboard" class="nav-item active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>داشبورد</span>
+                </a>
+                <a data-view="profile" class="nav-item">
+                    <i class="fas fa-user-circle"></i>
+                    <span>پروفایل</span>
+                </a>
+                <a data-view="projects" class="nav-item">
+                    <i class="fas fa-tasks"></i>
+                    <span>پروژه‌های من</span>
+                </a>
+                <a data-view="engineers" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>مهندسان</span>
+                </a>
+                <a data-view="create-project" class="nav-item btn-special-project mt-4">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>ثبت پروژه جدید</span>
+                </a>
             </nav>
 
             <div class="sidebar-footer">
-                <a data-view="settings" class="nav-item"><i class="fas fa-cog"></i><span>تنظیمات</span></a>
-                <a href="#" id="logoutButton" class="nav-item"><i class="fas fa-sign-out-alt"></i><span>خروج از سیستم</span></a>
+                <a data-view="settings" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>تنظیمات</span>
+                </a>
+                <a href="#" id="logoutButton" class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>خروج از سیستم</span>
+                </a>
             </div>
         </aside>
 
         <!-- Main Content -->
-        <main id="main-content-area" class="main-content-area">
-            <header class="p-4 border-b border-slate-200 bg-white flex justify-between items-center">
+        <main class="main-content-area">
+            <header class="p-4 border-b border-slate-200 bg-white flex-shrink-0 flex justify-between items-center">
                 <h1 id="main-header-title" class="text-2xl font-bold text-slate-800">داشبورد</h1>
                 <button id="refresh-button" class="btn btn-secondary !p-2 hidden">
                     <i class="fas fa-sync-alt"></i>
@@ -211,10 +187,42 @@
             <div id="profileContent" class="content-body" style="display: none;"></div>
             <div id="projectsContent" class="content-body" style="display: none;"></div>
             <div id="engineersContent" class="content-body" style="display: none;"></div>
-            <div id="settingsContent" class="content-body" style="display: none;"></div>
             <div id="createProjectContent" class="content-body" style="display: none;"></div>
+            <div id="settingsContent" class="content-body" style="display: none;">
+                <div class="profile-section">
+                    <div class="section-header !cursor-default">
+                        <h3 class="section-title"><i class="fas fa-key"></i>تغییر رمز عبور</h3>
+                    </div>
+                    <div class="section-content open">
+                        <form id="changePasswordForm">
+                            <div class="space-y-4 max-w-lg mx-auto p-4">
+                                <div>
+                                    <label for="currentPassword" class="block text-sm font-medium text-slate-700 mb-1 required-field">رمز عبور فعلی</label>
+                                    <input type="password" id="currentPassword" name="currentPassword" required class="mt-1">
+                                </div>
+                                <div>
+                                    <label for="newPassword" class="block text-sm font-medium text-slate-700 mb-1 required-field">رمز عبور جدید</label>
+                                    <input type="password" id="newPassword" name="newPassword" required class="mt-1">
+                                </div>
+                                <div>
+                                    <label for="confirmNewPassword" class="block text-sm font-medium text-slate-700 mb-1 required-field">تکرار رمز عبور جدید</label>
+                                    <input type="password" id="confirmNewPassword" name="confirmNewPassword" required class="mt-1">
+                                </div>
+                                <div class="pt-4">
+                                     <button type="submit" class="btn btn-primary w-full justify-center">
+                                        <i class="fas fa-save"></i>
+                                        <span id="savePasswordBtnText">ذخیره تغییرات</span>
+                                        <div id="savePasswordSpinner" class="spinner !w-5 !h-5 !border-2 hidden"></div>
+                                     </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </main>
         
+        <!-- Advertisement Sidebar (Left) -->
         <aside class="advertisement-sidebar">
              <div class="text-center mb-6 pb-6 border-b border-slate-300">
                 <img src="https://tandis.shahraavand.ir/images/new-TLogo_B.avif" alt="لوگوی تندیس" class="w-20 h-20 mx-auto mb-2 rounded-md object-contain">
@@ -253,6 +261,8 @@
     </div>
 
     <script>
+    // This script is specifically for the EMPLOYER workstation.
+    // It verifies the user's role before loading any sensitive data.
     (async function() {
         // --- CONFIGURATION ---
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyEXn3OCvVo-wveUL88mSGFeAyAM_JAvyNYKZ3olRx6ieTkYvM8vspS0p7TPLtlpK_h/exec';
@@ -270,28 +280,31 @@
         let projectMap = null;
         let projectMarker = null;
         let fetchedProjects = [];
-        let requestedActivityIds = new Set();
-        
+        let fetchedEngineers = [];
+        let requestedActivityIds = new Set(); // For collaboration requests
+
         // --- DOM ELEMENTS ---
         const pageLoader = document.getElementById('page-loader');
-        const mainWrapper = document.querySelector('.workstation-wrapper');
+        const workstationWrapper = document.querySelector('.workstation-wrapper');
         const mainHeaderTitle = document.getElementById('main-header-title');
         const refreshButton = document.getElementById('refresh-button');
         const sidebarProfileImage = document.getElementById('sidebarProfileImage');
         const sidebarProfileName = document.getElementById('sidebarProfileName');
-        const sidebarProfileRole = document.getElementById('sidebarProfileRole');
         const profileImageInput = document.getElementById('profileImageInput');
+        const changePasswordForm = document.getElementById('changePasswordForm');
+        const logoutButton = document.getElementById('logoutButton');
         
+        // --- Content Panes ---
         const contentPanes = {
             dashboard: document.getElementById('dashboardContent'),
             profile: document.getElementById('profileContent'),
             projects: document.getElementById('projectsContent'),
             engineers: document.getElementById('engineersContent'),
             settings: document.getElementById('settingsContent'),
-            createProject: document.getElementById('createProjectContent')
+            createProject: document.getElementById('createProjectContent'),
         };
         
-        // --- HELPER FUNCTIONS ---
+        // --- HELPER FUNCTIONS (SHARED LOGIC) ---
         function generateProvinceOptions(selectedValue) {
             let options = '<option value="">انتخاب استان</option>';
             PROVINCES.forEach(province => {
@@ -308,24 +321,18 @@
             const minutes = Math.round(seconds / 60);
             const hours = Math.round(minutes / 60);
             const days = Math.round(hours / 24);
-            const months = Math.round(days / 30.44);
-
             if (seconds < 60) return 'لحظاتی پیش';
             if (minutes < 60) return `${minutes} دقیقه پیش`;
             if (hours < 24) return `${hours} ساعت پیش`;
             if (days < 30) return `${days} روز پیش`;
-            if (months < 12) return `${months} ماه پیش`;
-            
             return new Date(dateString).toLocaleDateString('fa-IR');
         }
 
-        function getDirectDriveLink(url, type = 'image') {
+        function getDirectDriveLink(url) {
             if (!url || typeof url !== 'string') return '';
             const match = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
-            if (!match || !match[1]) return url;
-            const fileId = match[1];
-            if (type === 'pdf') return `https://drive.google.com/file/d/${fileId}/preview`;
-            return `https://lh3.googleusercontent.com/d/${fileId}`;
+            if (!match || !match[1]) return url; // Return original if not a drive link
+            return `https://lh3.googleusercontent.com/d/${match[1]}`;
         }
 
         function showModal(message, type = 'info', onConfirm = null) {
@@ -337,14 +344,10 @@
 
             modalMessageText.textContent = message;
             let iconHtml = '';
-            let confirmIcon = '<i class="fas fa-check"></i>';
             switch(type) {
                 case 'error': iconHtml = `<i class="fas fa-times-circle text-red-500"></i>`; break;
                 case 'success': iconHtml = `<i class="fas fa-check-circle text-green-500"></i>`; break;
-                case 'confirm': 
-                    iconHtml = `<i class="fas fa-question-circle text-yellow-500"></i>`;
-                    confirmIcon = '<i class="fas fa-check"></i>';
-                    break;
+                case 'confirm': iconHtml = `<i class="fas fa-question-circle text-yellow-500"></i>`; break;
                 default: iconHtml = `<i class="fas fa-info-circle text-blue-500"></i>`; break;
             }
             modalIconContainer.innerHTML = iconHtml;
@@ -354,7 +357,7 @@
             if (onConfirm && typeof onConfirm === 'function') {
                 modalConfirmBtn.style.display = 'inline-flex';
                 modalCancelBtn.style.display = 'inline-flex';
-                modalConfirmBtn.innerHTML = `${confirmIcon}<span class="mr-2">تایید</span>`;
+                modalConfirmBtn.innerHTML = `<i class="fas fa-check mr-2"></i>تایید`;
                 modalConfirmBtn.onclick = () => {
                     closeModal();
                     onConfirm();
@@ -363,25 +366,11 @@
             } else {
                 modalConfirmBtn.style.display = 'inline-flex';
                 modalCancelBtn.style.display = 'none';
-                modalConfirmBtn.innerHTML = `${confirmIcon}<span class="mr-2">متوجه شدم</span>`;
+                modalConfirmBtn.innerHTML = `<i class="fas fa-check mr-2"></i>متوجه شدم`;
                 modalConfirmBtn.onclick = closeModal;
             }
 
             modal.style.display = 'flex';
-        }
-
-        async function fetchUserProfile(email) {
-            try {
-                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getUserProfile&email=${encodeURIComponent(email)}`);
-                if (!response.ok) throw new Error(`Server responded with status ${response.status}`);
-                const result = await response.json();
-                if (result.success) return result.data;
-                throw new Error(result.message || "Could not find user profile.");
-            } catch (error) {
-                console.error("Error fetching user profile:", error);
-                pageLoader.innerHTML = `<p class="text-red-600 font-bold p-4 text-center">خطا در بارگذاری اطلاعات: ${error.message}<br>لطفاً صفحه را رفرش کنید.</p>`;
-                return null;
-            }
         }
 
         async function updateProfileSection(sectionKey, sectionData) {
@@ -395,20 +384,19 @@
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(payload)
                 });
-                if (!response.ok) throw new Error(`Server error: ${response.status}`);
                 const result = await response.json();
                 if (result.status === 'success') {
                     showModal('اطلاعات با موفقیت ذخیره شد.', 'success');
-                    const updatedData = await fetchUserProfile(userData.email);
-                    if (updatedData) {
-                        userData = { ...updatedData, email: userData.email };
+                    // Re-fetch user data to update the UI
+                    const updatedData = await fetch(`${GOOGLE_SCRIPT_URL}?func=getUserProfile&email=${encodeURIComponent(userData.email)}`).then(res => res.json());
+                    if (updatedData.success) {
+                        userData = { ...updatedData.data, email: userData.email };
                         renderProfile();
                     }
                     return true;
                 }
                 throw new Error(result.message || "Failed to update profile.");
             } catch (error) {
-                console.error("Error updating profile section:", error);
                 showModal(`خطا در ذخیره‌سازی: ${error.message}`, 'error');
                 return false;
             } finally {
@@ -416,67 +404,21 @@
             }
         }
         
-        function initSlideshow() {
-            const slideshowContainer = document.getElementById('slideshow');
-            const dotsContainer = document.getElementById('slide-dots-container');
-            if (!slideshowContainer || !dotsContainer) return;
-
-            slideshowContainer.innerHTML = '';
-            dotsContainer.innerHTML = '';
-
-            SLIDESHOW_IMAGES.forEach((src, index) => {
-                const img = document.createElement('img');
-                img.src = src;
-                img.alt = `Slide ${index + 1}`;
-                img.className = 'slide-image';
-                slideshowContainer.appendChild(img);
-
-                const dot = document.createElement('span');
-                dot.className = 'dot';
-                dot.dataset.slideIndex = index;
-                dot.onclick = () => showSlide(index);
-                dotsContainer.appendChild(dot);
-            });
-
-            showSlide(0);
-            setInterval(() => {
-                currentSlide = (currentSlide + 1) % SLIDESHOW_IMAGES.length;
-                showSlide(currentSlide);
-            }, 5000);
-        }
-
-        function showSlide(index) {
-           const slides = document.querySelectorAll('.slide-image');
-            const dots = document.querySelectorAll('.dot');
-            if (slides.length === 0) return;
-            
-            slides.forEach(slide => slide.classList.remove('active'));
-            dots.forEach(dot => dot.classList.remove('active'));
-            
-            if (slides[index]) slides[index].classList.add('active');
-            if (dots[index]) dots[index].classList.add('active');
-            currentSlide = index;
-        }
-
-        // --- RENDER FUNCTIONS ---
-
-        function renderProfileSidebar() {
-            if (!userData) return;
-            const name = `${userData.stepsData.step1.employerFirstName || ''} ${userData.stepsData.step1.employerLastName || ''}`;
-            sidebarProfileName.textContent = name.trim() || 'کارفرما';
-            sidebarProfileRole.textContent = 'کارفرما';
-            const directImageUrl = getDirectDriveLink(userData.files.applicantImage.fileUrl, 'image');
-            sidebarProfileImage.src = directImageUrl || 'https://placehold.co/60x60/2196F3/FFFFFF?text=U';
-        }
-
+        // --- UI RENDERING FUNCTIONS ---
         function renderProfile() {
             if (!userData) return;
-            const profileContent = contentPanes.profile;
+
+            const name = `${userData.stepsData.step1.employerFirstName || ''} ${userData.stepsData.step1.employerLastName || ''}`;
+            sidebarProfileName.textContent = name.trim() ? name : 'کاربر';
+            
+            const directImageUrl = getDirectDriveLink(userData.files.applicantImage.fileUrl);
+            sidebarProfileImage.src = directImageUrl || 'https://placehold.co/60x60/2196F3/FFFFFF?text=U';
+            sidebarProfileImage.onerror = () => { sidebarProfileImage.src = 'https://placehold.co/60x60/2196F3/FFFFFF?text=U'; };
+
             profileContent.innerHTML = '';
             const sections = [
                 { id: 'personal', title: 'مشخصات فردی', icon: 'fa-user-circle', content: getPersonalFieldsHTML(userData.stepsData.step1) },
                 { id: 'contact', title: 'اطلاعات تماس', icon: 'fa-address-card', content: getContactFieldsHTML(userData.stepsData.step2) },
-                { id: 'professional', title: 'اطلاعات حرفه‌ای', icon: 'fa-briefcase', content: getProfessionalFieldsHTML(userData.stepsData.step3) },
                 { id: 'documents', title: 'مدارک', icon: 'fa-file-alt', content: getDocumentsHTML(userData.files) }
             ];
             sections.forEach(section => {
@@ -508,40 +450,40 @@
         }
         
         function getPersonalFieldsHTML(data) {
+            const prefix = 'employer';
             return `<div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
-                <div><label class="block text-sm font-medium text-slate-700 mb-1">نام</label><input type="text" name="employerFirstName" value="${data.employerFirstName || ''}" disabled></div>
-                <div><label class="block text-sm font-medium text-slate-700 mb-1">نام خانوادگی</label><input type="text" name="employerLastName" value="${data.employerLastName || ''}" disabled></div>
-                <div><label class="block text-sm font-medium text-slate-700 mb-1">کدملی</label><input type="text" name="employerNationalId" value="${data.employerNationalId || ''}" disabled></div>
-                <div><label class="block text-sm font-medium text-slate-700 mb-1">تاریخ تولد</label><input type="text" name="employerDob" value="${data.employerDob || ''}" disabled></div>
-                <div><label class="block text-sm font-medium text-slate-700 mb-1">جنسیت</label><select name="employerGender" disabled><option value="مرد" ${data.employerGender === 'مرد' ? 'selected' : ''}>مرد</option><option value="زن" ${data.employerGender === 'زن' ? 'selected' : ''}>زن</option></select></div>
-                <div><label class="block text-sm font-medium text-slate-700 mb-1">تلفن موبایل</label><input type="tel" name="employerMobile" value="${data.employerMobile || ''}" disabled></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">نام</label><input type="text" name="${prefix}FirstName" value="${data[`${prefix}FirstName`] || ''}" disabled></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">نام خانوادگی</label><input type="text" name="${prefix}LastName" value="${data[`${prefix}LastName`] || ''}" disabled></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">کدملی</label><input type="text" name="${prefix}NationalId" value="${data[`${prefix}NationalId`] || ''}" disabled></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">تاریخ تولد</label><input type="text" value="${data[`${prefix}Dob`] || ''}" class="jalali-datepicker-display" disabled><input type="hidden" name="${prefix}Dob" class="jalali-datepicker-value"></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">جنسیت</label><select name="${prefix}Gender" disabled><option value="مرد" ${data[`${prefix}Gender`] === 'مرد' ? 'selected' : ''}>مرد</option><option value="زن" ${data[`${prefix}Gender`] === 'زن' ? 'selected' : ''}>زن</option></select></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">تلفن موبایل</label><input type="tel" name="${prefix}Mobile" value="${data[`${prefix}Mobile`] || ''}" disabled></div>
             </div>`;
         }
 
         function getContactFieldsHTML(data) {
+            const prefix = 'employer';
+            const address = data[`${prefix}Address`] || '';
+            const mapId = `${prefix}LocationMap`;
             return `<div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
-                <div><label class="block text-sm font-medium text-slate-700 mb-1">تلفن ثابت</label><input type="tel" name="employerPhone" value="${data.employerPhone || ''}" disabled></div>
-                <div><label class="block text-sm font-medium text-slate-700 mb-1">کدپستی</label><input type="text" name="employerPostalCode" value="${data.employerPostalCode || ''}" disabled></div>
-                <div><label class="block text-sm font-medium text-slate-700 mb-1">استان</label><select name="employerProvince" disabled>${generateProvinceOptions(data.employerProvince)}</select></div>
-                <div><label class="block text-sm font-medium text-slate-700 mb-1">شهر</label><input type="text" name="employerCity" value="${data.employerCity || ''}" disabled></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">تلفن ثابت</label><input type="tel" name="${prefix}Phone" value="${data[`${prefix}Phone`] || ''}" disabled></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">کدپستی</label><input type="text" name="${prefix}PostalCode" value="${data[`${prefix}PostalCode`] || ''}" disabled></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">استان</label><select name="${prefix}Province" disabled>${generateProvinceOptions(data[`${prefix}Province`])}</select></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">شهر</label><input type="text" name="${prefix}City" value="${data[`${prefix}City`] || ''}" disabled></div>
             </div>
             <div class="mt-6">
                 <label class="block text-sm font-medium text-slate-700 mb-1">آدرس و موقعیت مکانی</label>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <textarea name="employerAddress" rows="4" class="min-h-[250px]" disabled>${data.employerAddress || ''}</textarea>
-                    <div id="employerLocationMap" class="map-container"></div>
-                    <input type="hidden" name="employerAddressLat" value="${data.employerAddressLat || ''}">
-                    <input type="hidden" name="employerAddressLng" value="${data.employerAddressLng || ''}">
+                    <textarea name="${prefix}Address" rows="4" class="min-h-[250px]" disabled>${address}</textarea>
+                    <div id="${mapId}" class="map-container"></div>
+                    <input type="hidden" name="${prefix}AddressLat" value="${data[`${prefix}AddressLat`] || ''}">
+                    <input type="hidden" name="${prefix}AddressLng" value="${data[`${prefix}AddressLng`] || ''}">
                 </div>
             </div>`;
         }
         
-        function getProfessionalFieldsHTML(data) {
-            return `<div>اطلاعات حرفه‌ای در اینجا نمایش داده می‌شود.</div>`;
-        }
-        
         function getDocumentsHTML(data) {
-            const nationalIdUrl = getDirectDriveLink(data.employerNationalIdCardImage?.fileUrl, 'image');
+            const nationalIdUrl = getDirectDriveLink(data.employerNationalIdCardImage?.fileUrl);
             const resumeUrl = getDirectDriveLink(data.employerOtherDocs?.fileUrl, 'pdf');
             let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">';
             html += `<div><h4 class="font-semibold mb-2">تصویر کارت ملی</h4><div class="file-preview-container">${nationalIdUrl ? `<img src="${nationalIdUrl}" onerror="this.parentElement.innerHTML = '<p>نمایش ممکن نیست</p>';">` : `<p>فایل یافت نشد</p>`}</div></div>`;
@@ -550,6 +492,7 @@
             return html;
         }
 
+        // --- Event Listeners and Handlers ---
         function attachSectionEventListeners() {
              document.querySelectorAll('.section-header').forEach(header => {
                 header.addEventListener('click', (e) => {
@@ -557,35 +500,18 @@
                     const content = header.nextElementSibling;
                     header.classList.toggle('open');
                     content.style.display = content.style.display === 'block' ? 'none' : 'block';
-                    if (content.style.display === 'block') {
-                        content.querySelectorAll('.map-container').forEach(mapDiv => {
-                            if (mapDiv && !mapDiv._leaflet_id) initializeMapForSection(mapDiv);
-                        });
-                    }
                 });
             });
             document.querySelectorAll('button[data-action="edit"]').forEach(b => b.addEventListener('click', handleEditClick));
             document.querySelectorAll('button[data-action="cancel"]').forEach(b => b.addEventListener('click', handleCancelClick));
             document.querySelectorAll('button[data-action="save"]').forEach(b => b.addEventListener('click', handleSaveClick));
         }
-
-        function initializeMapForSection(mapDiv) {
-            const sectionContent = mapDiv.closest('.section-content');
-            const latInput = sectionContent.querySelector('input[name*="Lat"]');
-            const lngInput = sectionContent.querySelector('input[name*="Lng"]');
-            const lat = parseFloat(latInput.value) || 35.7219;
-            const lng = parseFloat(lngInput.value) || 51.3347;
-            
-            const map = L.map(mapDiv.id).setView([lat, lng], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-            L.marker([lat, lng]).addTo(map);
-        }
         
         function handleEditClick(e) {
             const sectionId = e.currentTarget.dataset.section;
             const sectionEl = document.getElementById(`section-${sectionId}`);
             if (sectionId === 'documents') {
-                showModal('ویرایش مدارک در این بخش پشتیبانی نمی‌شود.', 'info');
+                showModal('ویرایش مدارک در این بخش پشتیبانی نمی‌شود. لطفاً با پشتیبانی تماس بگیرید.', 'info');
                 return;
             }
             sectionEl.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
@@ -606,9 +532,159 @@
             });
             await updateProfileSection(sectionId, dataToSave);
         }
-        
-        // --- Employer-Specific Render Functions ---
 
+        // --- Project Logic ---
+        function renderProjectForm(projectData = null) {
+            const isEditMode = projectData !== null;
+            createProjectContent.innerHTML = `
+                <div class="project-card bg-white rounded-lg overflow-hidden p-6">
+                    <form id="projectForm">
+                        ${isEditMode ? `<input type="hidden" name="ProjectID" value="${projectData.ProjectID}">` : ''}
+                        <div class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="block text-gray-700 font-medium mb-1 required-field">نام پروژه</label><input type="text" name="projectName" required value="${projectData?.projectName || ''}"></div>
+                                <div><label class="block text-gray-700 font-medium mb-1 required-field">استان</label><select name="province" required>${generateProvinceOptions(projectData?.province || '')}</select></div>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-1 required-field">آدرس ملک</label>
+                                <div id="project-map" class="h-64 w-full z-10 rounded-lg border mb-2"></div>
+                                <textarea name="address" rows="2" required placeholder="آدرس متنی...">${projectData?.address || ''}</textarea>
+                                <input type="hidden" name="latitude" value="${projectData?.latitude || ''}">
+                                <input type="hidden" name="longitude" value="${projectData?.longitude || ''}">
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="block text-gray-700 font-medium mb-1 required-field">شهر</label><input type="text" name="city" required value="${projectData?.city || ''}"></div>
+                                <div><label class="block text-gray-700 font-medium mb-1 required-field">منطقه شهرداری</label><input type="number" name="district" min="1" required value="${projectData?.district || ''}"></div>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-800 border-b pb-2 pt-4">مشخصات مهندس مورد نیاز</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="block text-gray-700 font-medium mb-1 required-field">پایه مهندس</label><select name="engineerRank" required><option>پایه 3</option><option>پایه 2</option><option>پایه 1</option><option>پایه ارشد</option></select></div>
+                                <div><label class="block text-gray-700 font-medium mb-1 required-field">رشته مهندس</label><select name="engineerField" required><option>معماری</option><option>عمران</option><option>مکانیک</option><option>برق</option></select></div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="block text-gray-700 font-medium mb-1 required-field">نوع فعالیت مهندس</label><select name="engineerActivity" required><option>طراح</option><option>ناظر</option><option>مجری</option></select></div>
+                                <div><label class="block text-gray-700 font-medium mb-1 required-field">نوع پروانه مهندس</label><select name="permitType" required><option>طراح حقوقی</option><option>ناظر حقوقی</option><option>مهندس حقیقی</option></select></div>
+                            </div>
+                            <div><label class="block text-gray-700 font-medium mb-1">توضیحات</label><textarea name="description" rows="3">${projectData?.description || ''}</textarea></div>
+                        </div>
+                        <div class="border-t mt-6 pt-4 flex justify-end gap-4">
+                            <button type="button" id="cancelProjectFormBtn" class="btn btn-secondary">انصراف</button>
+                            <button type="submit" class="btn btn-primary">${isEditMode ? 'ذخیره تغییرات' : 'ثبت پروژه'}</button>
+                        </div>
+                    </form>
+                </div>`;
+            
+            if (isEditMode) {
+                ['engineerRank', 'engineerField', 'engineerActivity', 'permitType'].forEach(id => {
+                    const select = document.querySelector(`#projectForm [name=${id}]`);
+                    if (select && projectData[id]) select.value = projectData[id];
+                });
+            }
+            attachProjectFormListeners();
+        }
+        
+        function getProjectCardHTML(project) {
+            const formatNumber = (num) => num ? parseFloat(num).toLocaleString('fa-IR') : '0';
+            const isProjectOpen = project.Status === 'باز';
+            const statusChangeText = isProjectOpen ? 'بستن پروژه' : 'باز کردن پروژه';
+            const statusChangeAction = isProjectOpen ? 'close-project' : 'open-project';
+            const statusChangeBtnClass = isProjectOpen ? 'btn-danger' : 'btn-secondary';
+            const statusChangeIcon = isProjectOpen ? 'fa-lock' : 'fa-lock-open';
+            
+            return `
+            <div class="project-card bg-white rounded-lg overflow-hidden">
+                <div class="p-4 border-b">
+                    <div class="flex justify-between items-start">
+                        <h4 class="font-bold text-lg text-slate-800">${project.projectName || 'بدون نام'}</h4>
+                        <span class="text-xs font-medium px-2 py-1 rounded-full ${isProjectOpen ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${project.Status}</span>
+                    </div>
+                    <p class="text-sm text-slate-500 mt-1">${project.city}, ${project.province} - ثبت: ${formatTimeAgo(project.SubmissionDate)}</p>
+                </div>
+                <div class="p-4 space-y-3 text-sm">
+                    <div class="flex justify-between"><span>مهندس مورد نیاز:</span> <span class="font-semibold">${project.engineerActivity} ${project.engineerField} ${project.engineerRank}</span></div>
+                    <div class="flex justify-between"><span>تعداد درخواست‌ها:</span> <span class="font-bold text-lg text-blue-600">${project.applicantCount || 0}</span></div>
+                </div>
+                <div class="flex justify-between p-4 bg-gray-50 border-t">
+                     <button data-action="${statusChangeAction}" data-project-id="${project.ProjectID}" class="btn ${statusChangeBtnClass} text-xs"><i class="fas ${statusChangeIcon} mr-2"></i>${statusChangeText}</button>
+                     <button data-action="edit-project" data-project-id="${project.ProjectID}" class="btn btn-secondary text-xs"><i class="fas fa-edit mr-2"></i>ویرایش</button>
+                </div>
+            </div>`;
+        }
+        
+        function attachProjectFormListeners() {
+            document.getElementById('projectForm').addEventListener('submit', submitProjectData);
+            document.getElementById('cancelProjectFormBtn').addEventListener('click', () => {
+                document.querySelector('.nav-item[data-view="projects"]').click();
+            });
+            initializeProjectMap();
+        }
+
+        function initializeProjectMap() {
+            if (projectMap) projectMap.remove();
+            const lat = parseFloat(document.querySelector('#projectForm [name="latitude"]').value) || 35.7219;
+            const lng = parseFloat(document.querySelector('#projectForm [name="longitude"]').value) || 51.3347;
+            projectMap = L.map('project-map').setView([lat, lng], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(projectMap);
+            projectMarker = L.marker([lat, lng], { draggable: true }).addTo(projectMap);
+            
+            projectMarker.on('dragend', (e) => {
+                const latlng = e.target.getLatLng();
+                document.querySelector('#projectForm [name="latitude"]').value = latlng.lat;
+                document.querySelector('#projectForm [name="longitude"]').value = latlng.lng;
+            });
+        }
+
+        async function submitProjectData(e) {
+            e.preventDefault();
+            const form = document.getElementById('projectForm');
+            if (!form.checkValidity()) {
+                showModal('لطفاً تمام فیلدهای الزامی (*) را پر کنید.', 'error');
+                form.reportValidity();
+                return;
+            }
+            const projectData = Object.fromEntries(new FormData(form).entries());
+            const isUpdate = !!projectData.ProjectID;
+            const action = isUpdate ? 'updateProject' : 'createProject';
+            const payload = { action, employerEmail: userData.email, projectData };
+
+            pageLoader.style.display = 'flex';
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    showModal(result.message, 'success');
+                    document.querySelector('.nav-item[data-view="projects"]').click();
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                showModal(`خطا در ثبت پروژه: ${error.message}`, 'error');
+            } finally {
+                pageLoader.style.display = 'none';
+            }
+        }
+        
+        async function renderEmployerProjects() {
+            const container = contentPanes.projects;
+            container.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
+            try {
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getProjectsByEmployer&email=${encodeURIComponent(userData.email)}`);
+                const result = await response.json();
+                if (result.success && Array.isArray(result.data)) {
+                    fetchedProjects = result.data.sort((a,b) => new Date(b.lastModifiedDate) - new Date(a.lastModifiedDate));
+                     if (fetchedProjects.length > 0) {
+                        container.innerHTML = `<div id="project-list-container">${fetchedProjects.map(p => getProjectCardHTML(p)).join('')}</div>`;
+                     } else {
+                        container.innerHTML = '<p class="text-center text-slate-500">شما هنوز پروژه‌ای ثبت نکرده‌اید.</p>';
+                     }
+                } else {
+                    container.innerHTML = `<p class="text-center text-red-500">${result.message || 'خطا در دریافت پروژه‌ها.'}</p>`;
+                }
+            } catch (error) {
+                container.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری پروژه‌ها: ${error.message}</p>`;
+            }
+        }
+        
         async function renderEmployerDashboard() {
             const container = contentPanes.dashboard;
             container.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
@@ -619,181 +695,244 @@
                 
                 const { stats, projects } = result.data;
                 const projectsListHtml = projects.length > 0 ? projects
-                    .map(p => `<div class="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm"><div><p class="font-semibold text-slate-800">${p.projectName}</p><p class="text-sm text-slate-500">وضعیت: ${p.Status}</p></div><p class="font-semibold text-blue-600">${p.applicantCount} درخواست</p></div>`).join('') 
-                    : '<p class="text-center text-slate-500">هنوز پروژه‌ای ثبت نکرده‌اید.</p>';
+                    .map(p => `
+                    <div class="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                        <div><p class="font-semibold text-slate-800">${p.projectName}</p><p class="text-sm text-slate-500">وضعیت: ${p.Status}</p></div>
+                        <div class="text-left"><p class="font-semibold text-blue-600">${p.applicantCount} درخواست</p></div>
+                    </div>`).join('') : '<p class="text-center text-slate-500">هنوز پروژه‌ای ثبت نکرده‌اید.</p>';
 
                 container.innerHTML = `
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-green-100 text-green-800 p-6 rounded-lg shadow"><p class="text-4xl font-bold">${stats.open}</p><p class="mt-2 font-semibold">پروژه‌های باز</p></div>
-                        <div class="bg-red-100 text-red-800 p-6 rounded-lg shadow"><p class="text-4xl font-bold">${stats.closed}</p><p class="mt-2 font-semibold">پروژه‌های بسته</p></div>
-                        <div class="md:col-span-2 bg-white p-6 rounded-lg shadow">
-                            <h3 class="text-lg font-bold text-slate-800 mb-4">لیست پروژه‌های شما</h3>
-                            <div class="space-y-3">${projectsListHtml}</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="lg:col-span-2 bg-green-100 text-green-800 p-6 rounded-lg shadow"><p class="text-4xl font-bold">${stats.open}</p><p class="mt-2 font-semibold">پروژه‌های باز</p></div>
+                        <div class="lg:col-span-2 bg-red-100 text-red-800 p-6 rounded-lg shadow"><p class="text-4xl font-bold">${stats.closed}</p><p class="mt-2 font-semibold">پروژه‌های بسته</p></div>
+                        <div class="lg:col-span-4 bg-white rounded-lg shadow overflow-hidden flex flex-col md:flex-row items-center">
+                            <div class="p-6 flex-grow"><h3 class="text-lg font-bold text-slate-800 mb-2">پروژه جدیدی دارید؟</h3><p class="text-slate-600 mb-4">با ثبت پروژه، آن را در معرض دید صدها مهندس متخصص قرار دهید.</p><button id="dashboardCreateProjectBtn" class="btn btn-special"><i class="fas fa-plus-circle"></i><span>ثبت پروژه جدید</span></button></div>
+                            <div class="w-full md:w-1/3 h-48 md:h-full flex-shrink-0"><img src="https://images.unsplash.com/photo-1580922942632-fb585198592e?w=600&auto=format&fit=crop" class="w-full h-full object-cover" alt="Building"></div>
                         </div>
+                        <div class="lg:col-span-4 bg-white p-6 rounded-lg shadow"><h3 class="text-lg font-bold text-slate-800 mb-4">آخرین پروژه‌ها</h3><div class="space-y-3">${projectsListHtml}</div></div>
                     </div>`;
+
+                document.getElementById('dashboardCreateProjectBtn').addEventListener('click', () => document.querySelector('.nav-item[data-view="create-project"]').click());
             } catch (error) {
                 container.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری داشبورد: ${error.message}</p>`;
             }
         }
 
-        async function renderEmployerProjects() {
-            const container = contentPanes.projects;
+        // --- Engineers Marketplace Logic ---
+        async function renderEngineersMarketplace() {
+            const container = contentPanes.engineers;
             container.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
             try {
-                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getProjectsByEmployer&email=${encodeURIComponent(userData.email)}`);
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getEngineersMarketplace&employerEmail=${encodeURIComponent(userData.email)}`);
                 const result = await response.json();
-                if (result.success && Array.isArray(result.data)) {
-                    fetchedProjects = result.data;
-                    container.innerHTML = fetchedProjects.length > 0
-                        ? `<div id="project-list-container">${fetchedProjects.map(getProjectCardHTML).join('')}</div>`
-                        : '<p class="text-center text-slate-500">شما هنوز پروژه‌ای ثبت نکرده‌اید.</p>';
-                } else {
-                    container.innerHTML = `<p class="text-center text-red-500">${result.message || 'خطا در دریافت پروژه‌ها.'}</p>`;
-                }
-            } catch (error) {
-                container.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری پروژه‌ها: ${error.message}</p>`;
-            }
-        }
-
-        function getProjectCardHTML(project) {
-            const isProjectOpen = project.Status === 'باز';
-            return `
-            <div class="project-card bg-white rounded-lg overflow-hidden">
-                <div class="p-4 border-b">
-                    <h4 class="font-bold text-lg text-slate-800">${project.projectName || 'بدون نام'}</h4>
-                    <p class="text-sm text-slate-500">وضعیت: <span class="font-semibold ${isProjectOpen ? 'text-green-600' : 'text-red-600'}">${project.Status}</span></p>
-                </div>
-                <div class="p-4 bg-gray-50 border-t flex gap-2">
-                    <button data-action="change-status" data-project-id="${project.ProjectID}" data-status="${isProjectOpen ? 'بسته' : 'باز'}" class="btn ${isProjectOpen ? 'btn-danger' : 'btn-success'} flex-1">${isProjectOpen ? 'بستن پروژه' : 'باز کردن پروژه'}</button>
-                    <button data-action="edit-project" data-project-id="${project.ProjectID}" class="btn btn-secondary flex-1">ویرایش</button>
-                </div>
-            </div>`;
-        }
-        
-        async function renderEngineersMarketplace() {
-            contentPanes.engineers.innerHTML = '<p class="text-center text-slate-500">بخش مهندسان در دست ساخت است.</p>';
-        }
-
-        function renderProjectForm(projectData = null) {
-            const isEditMode = projectData !== null;
-            contentPanes.createProject.innerHTML = `
-                <form id="projectForm" class="bg-white p-6 rounded-lg shadow-md space-y-6 max-w-4xl mx-auto">
-                    <h2 class="text-2xl font-bold border-b pb-4">${isEditMode ? 'ویرایش پروژه' : 'ثبت پروژه جدید'}</h2>
-                    ${isEditMode ? `<input type="hidden" name="ProjectID" value="${projectData.ProjectID}">` : ''}
-                    <div><label class="block font-medium required-field">نام پروژه</label><input type="text" name="projectName" class="w-full mt-1" required value="${projectData?.projectName || ''}"></div>
-                    <div>
-                        <label class="block font-medium required-field">آدرس ملک</label>
-                        <div id="project-map" class="h-64 w-full z-10 rounded-lg border mt-1 bg-slate-100"></div>
-                        <input type="hidden" id="latitude" name="latitude" value="${projectData?.latitude || ''}">
-                        <input type="hidden" id="longitude" name="longitude" value="${projectData?.longitude || ''}">
-                    </div>
-                    <div class="flex justify-end gap-4 pt-4">
-                        <button type="button" id="cancelProjectFormBtn" class="btn btn-secondary">انصراف</button>
-                        <button type="submit" class="btn btn-primary">${isEditMode ? 'ذخیره تغییرات' : 'ثبت پروژه'}</button>
-                    </div>
-                </form>`;
-            
-            requestAnimationFrame(() => {
-                initializeProjectMap(projectData);
-                document.getElementById('projectForm').addEventListener('submit', handleProjectSubmit);
-                document.getElementById('cancelProjectFormBtn').addEventListener('click', () => switchView('dashboard'));
-            });
-        }
-        
-        async function handleProjectSubmit(e) {
-            e.preventDefault();
-            const projectData = Object.fromEntries(new FormData(e.target).entries());
-            const action = projectData.ProjectID ? 'updateProject' : 'createProject';
-            const payload = { action, employerEmail: userData.email, projectData };
-
-            pageLoader.style.display = 'flex';
-            try {
-                const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-                const result = await response.json();
-                if (result.status === 'success') {
-                    showModal(result.message, 'success');
-                    switchView('projects');
+                if (result.success) {
+                    fetchedEngineers = result.data.activeActivities || [];
+                    requestedActivityIds = new Set(result.data.requestedActivityIds || []);
+                    if (fetchedEngineers.length > 0) {
+                        container.innerHTML = `<div id="engineers-list-container">${fetchedEngineers.map(e => getActivityCardHTML(e)).join('')}</div>`;
+                    } else {
+                        container.innerHTML = '<p class="text-center text-slate-500">در حال حاضر هیچ مهندسی فعالیت خود را معرفی نکرده است.</p>';
+                    }
                 } else {
                     throw new Error(result.message);
                 }
             } catch (error) {
-                showModal(`خطا: ${error.message}`, 'error');
-            } finally {
-                pageLoader.style.display = 'none';
+                 container.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری لیست مهندسان: ${error.message}</p>`;
             }
         }
+        
+        function getActivityCardHTML(activity) {
+            const isRequested = requestedActivityIds.has(activity.ActivityID);
+            const buttonHtml = isRequested
+                ? `<button data-action="cancel-collaboration" data-activity-id="${activity.ActivityID}" class="btn btn-danger w-full"><i class="fas fa-times-circle mr-2"></i>لغو درخواست</button>`
+                : `<button data-action="request-collaboration" data-activity-id="${activity.ActivityID}" class="btn btn-success w-full"><i class="fas fa-paper-plane mr-2"></i>ارسال درخواست همکاری</button>`;
 
-        function initializeProjectMap(projectData) {
-            if (projectMap) projectMap.remove();
-            const lat = parseFloat(projectData?.latitude) || 35.7219;
-            const lng = parseFloat(projectData?.longitude) || 51.3347;
-            
-            projectMap = L.map('project-map').setView([lat, lng], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(projectMap);
-            projectMarker = L.marker([lat, lng], { draggable: true }).addTo(projectMap);
+            return `
+                <div class="activity-card bg-white rounded-lg overflow-hidden">
+                    <div class="p-4 border-b">
+                        <h4 class="font-bold text-lg text-slate-800">${activity.engineerActivity} ${activity.engineerField} - ${activity.engineerLevel}</h4>
+                        <p class="text-sm text-slate-500 mt-1">${activity.city}, ${activity.province}</p>
+                    </div>
+                    <div class="p-4 text-sm">
+                        <p><strong>نوع پروانه:</strong> ${activity.licenseType}</p>
+                        <p><strong>آخرین بروزرسانی:</strong> ${formatTimeAgo(activity.lastModifiedDate)}</p>
+                    </div>
+                     <div class="flex justify-between p-4 bg-gray-50 border-t">
+                        ${buttonHtml}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // --- MAIN APP LOGIC ---
+        function setupViewSwitcher() {
+            const navItems = document.querySelectorAll('.nav-item[data-view]');
+            let currentView = 'dashboard';
 
-            projectMarker.on('dragend', (e) => {
-                const { lat, lng } = e.target.getLatLng();
-                document.getElementById('latitude').value = lat;
-                document.getElementById('longitude').value = lng;
+            const viewActions = {
+                'dashboard': { title: 'داشبورد', render: renderEmployerDashboard, refreshable: true },
+                'profile': { title: 'پروفایل کاربری', render: () => {} },
+                'settings': { title: 'تنظیمات', render: () => {} },
+                'projects': { title: 'پروژه‌های من', render: renderEmployerProjects, refreshable: true },
+                'create-project': { title: 'ثبت / ویرایش پروژه', render: () => renderProjectForm() },
+                'engineers': { title: 'مهندسان', render: renderEngineersMarketplace, refreshable: true }
+            };
+
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    const targetView = e.currentTarget.dataset.view;
+                    if (currentView === targetView) return; // Don't re-render if view is the same
+                    currentView = targetView;
+                    
+                    Object.values(contentPanes).forEach(pane => pane.style.display = 'none');
+                    navItems.forEach(nav => nav.classList.remove('active'));
+
+                    contentPanes[targetView].style.display = 'block';
+                    e.currentTarget.classList.add('active');
+
+                    const action = viewActions[targetView];
+                    mainHeaderTitle.textContent = action.title;
+                    action.render();
+                    refreshButton.style.display = action.refreshable ? 'flex' : 'none';
+                });
+            });
+
+            refreshButton.addEventListener('click', () => {
+                if (viewActions[currentView] && viewActions[currentView].refreshable) {
+                    viewActions[currentView].render();
+                }
             });
         }
 
-        // --- VIEW SWITCHER ---
-        const viewActions = {
-            'dashboard': { title: 'داشبورد', render: renderEmployerDashboard, refreshable: true },
-            'profile': { title: 'پروفایل کاربری', render: renderProfile },
-            'projects': { title: 'پروژه‌های من', render: renderEmployerProjects, refreshable: true },
-            'engineers': { title: 'مهندسان', render: renderEngineersMarketplace, refreshable: true },
-            'settings': { title: 'تنظیمات', render: () => contentPanes.settings.innerHTML = "بخش تنظیمات در دست ساخت است." },
-            'create-project': { title: 'ثبت پروژه جدید', render: (data) => renderProjectForm(data) }
-        };
+        async function handleChangePassword(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const btnText = btn.querySelector('span');
+            const spinner = btn.querySelector('.spinner');
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
 
-        function switchView(view, data = null) {
-            Object.values(contentPanes).forEach(pane => pane.style.display = 'none');
-            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            if (newPassword !== document.getElementById('confirmNewPassword').value) {
+                return showModal('رمز عبور جدید و تکرار آن یکسان نیستند.', 'error');
+            }
             
-            const action = viewActions[view];
-            if (action) {
-                contentPanes[view].style.display = 'block';
-                document.querySelector(`[data-view="${view}"]`).classList.add('active');
-                mainHeaderTitle.textContent = action.title;
-                refreshButton.classList.toggle('hidden', !action.refreshable);
-                action.render(data);
+            btn.disabled = true;
+            btnText.classList.add('hidden');
+            spinner.classList.remove('hidden');
+
+            try {
+                const payload = { action: 'changePassword', email: userData.email, currentPassword, newPassword };
+                const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    showModal(result.message, 'success');
+                    changePasswordForm.reset();
+                } else { throw new Error(result.message); }
+            } catch (error) {
+                showModal(error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btnText.classList.remove('hidden');
+                spinner.classList.add('hidden');
+            }
+        }
+        
+        async function handleMainActions(e) {
+            const targetButton = e.target.closest('button[data-action]');
+            if (!targetButton) return;
+            
+            const action = targetButton.dataset.action;
+            const projectId = targetButton.dataset.projectId;
+            const activityId = targetButton.dataset.activityId;
+            let payload;
+
+            switch(action) {
+                case 'edit-project':
+                    const projectToEdit = fetchedProjects.find(p => p.ProjectID === projectId);
+                    if (projectToEdit) {
+                        document.querySelector('.nav-item[data-view="create-project"]').click();
+                        setTimeout(() => renderProjectForm(projectToEdit), 50);
+                    }
+                    break;
+                case 'close-project':
+                case 'open-project':
+                    const newStatus = action === 'close-project' ? 'بسته' : 'باز';
+                    showModal(`آیا از ${newStatus} کردن این پروژه مطمئن هستید؟`, 'confirm', async () => {
+                        payload = { action: 'changeProjectStatus', projectId, newStatus };
+                        pageLoader.style.display = 'flex';
+                        const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json());
+                        pageLoader.style.display = 'none';
+                        if (response.status === 'success') {
+                            showModal(response.message, 'success');
+                            renderEmployerProjects(); // Refresh list
+                        } else {
+                            showModal(response.message, 'error');
+                        }
+                    });
+                    break;
+                case 'request-collaboration':
+                case 'cancel-collaboration':
+                     targetButton.disabled = true;
+                     targetButton.innerHTML = '<div class="spinner !w-5 !h-5 !border-2"></div>';
+                     payload = { action, employerEmail: userData.email, activityId };
+                     const reqResponse = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json());
+                     if (reqResponse.status === 'success') {
+                         showModal(reqResponse.message, 'success');
+                         renderEngineersMarketplace(); // Refresh list to update button state
+                     } else {
+                         showModal(reqResponse.message, 'error');
+                         targetButton.disabled = false; // Re-enable on error
+                         targetButton.innerHTML = action === 'request-collaboration' ? '<i class="fas fa-paper-plane mr-2"></i>ارسال درخواست همکاری' : '<i class="fas fa-times-circle mr-2"></i>لغو درخواست';
+                     }
+                    break;
             }
         }
 
         // --- INITIALIZATION ---
-        async function main() {
-            const params = new URLSearchParams(window.location.search);
-            const email = params.get('email');
-            if (!email) {
-                pageLoader.innerHTML = '<p class="text-red-600 font-bold">خطا: ایمیل کاربر مشخص نشده است. لطفاً دوباره وارد شوید.</p>';
-                setTimeout(() => window.location.href = 'index.html', 3000);
+        async function initializePage() {
+            // 1. Security Check: Verify user role
+            const userEmail = sessionStorage.getItem('userEmail');
+            if (!userEmail) {
+                window.location.href = '/login.html'; // Redirect if no user email
                 return;
             }
 
-            const userProfile = await fetchUserProfile(email);
-            if (userProfile && userProfile.role === 'employer') {
-                userData = userProfile;
-                userData.email = email;
-                renderProfileSidebar();
-                initSlideshow();
+            try {
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getUserProfile&email=${encodeURIComponent(userEmail)}`);
+                const result = await response.json();
 
-                document.querySelectorAll('.nav-item[data-view]').forEach(item => {
-                    item.addEventListener('click', (e) => switchView(e.currentTarget.dataset.view));
-                });
+                if (!result.success || result.data.role !== 'employer') {
+                    alert('Access Denied. You do not have permission to view this page.');
+                    sessionStorage.removeItem('userEmail');
+                    window.location.href = '/login.html';
+                    return;
+                }
                 
-                switchView('dashboard');
-                mainWrapper.style.display = 'flex';
+                // 2. If access is granted, store user data and show the page
+                userData = { ...result.data, email: userEmail };
+                workstationWrapper.style.display = 'flex';
                 pageLoader.style.display = 'none';
-            } else {
-                pageLoader.innerHTML = `<p class="text-red-600 font-bold p-4 text-center">دسترسی غیرمجاز.<br>شما اجازه ورود به این پنل را ندارید.</p>`;
-                setTimeout(() => window.location.href = 'index.html', 3000);
+
+                // 3. Initialize UI components
+                renderProfile();
+                setupViewSwitcher();
+                document.querySelector('.nav-item[data-view="dashboard"]').click();
+                
+                // 4. Attach global event listeners
+                changePasswordForm.addEventListener('submit', handleChangePassword);
+                document.querySelector('.main-content-area').addEventListener('click', handleMainActions);
+                logoutButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    sessionStorage.removeItem('userEmail');
+                    window.location.href = '/login.html';
+                });
+
+            } catch (error) {
+                pageLoader.innerHTML = `<p class="text-red-600 font-bold">یک خطای غیرمنتظره رخ داد: ${error.message}</p>`;
             }
         }
 
-        main();
+        initializePage();
     })();
     </script>
 </body>
