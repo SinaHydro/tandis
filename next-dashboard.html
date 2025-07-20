@@ -799,8 +799,9 @@
                 </div>
             `;
 
-            // FIX: Move all DOM manipulation of the new form inside a timeout to ensure elements are available.
-            setTimeout(() => {
+            // FIX: Use requestAnimationFrame to ensure the DOM is updated before initializing the map.
+            // This prevents the "Map container not found" error.
+            requestAnimationFrame(() => {
                 try {
                     if (isEditMode) {
                         ['usageType', 'structureType', 'fileType', 'engineerRank', 'engineerField', 'engineerActivity', 'permitType'].forEach(id => {
@@ -826,7 +827,7 @@
                     console.error("Error initializing project form:", e);
                     showModal("یک خطای غیرمنتظره در بارگذاری فرم رخ داد. لطفاً دوباره امتحان کنید.", "error");
                 }
-            }, 50); 
+            }); 
         }
 
         function getProjectCardHTML(project, role, isApplied = false) {
