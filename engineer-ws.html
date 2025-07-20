@@ -265,6 +265,8 @@
 
         // --- STATE ---
         let userData = null;
+        let cropper = null;
+        let currentSlide = 0;
         let fetchedProjects = [];
         let fetchedActivities = [];
         let appliedProjectIds = new Set();
@@ -277,7 +279,8 @@
         const refreshButton = document.getElementById('refresh-button');
         const sidebarProfileImage = document.getElementById('sidebarProfileImage');
         const sidebarProfileName = document.getElementById('sidebarProfileName');
-        const changePasswordForm = document.getElementById('changePasswordForm');
+        const sidebarProfileRole = document.getElementById('sidebarProfileRole');
+        const profileImageInput = document.getElementById('profileImageInput');
         
         const contentPanes = {
             dashboard: document.getElementById('dashboardContent'),
@@ -302,20 +305,27 @@
             const date = new Date(dateString);
             const now = new Date();
             const seconds = Math.round((now - date) / 1000);
-            if (seconds < 60) return 'لحظاتی پیش';
             const minutes = Math.round(seconds / 60);
-            if (minutes < 60) return `${minutes} دقیقه پیش`;
             const hours = Math.round(minutes / 60);
-            if (hours < 24) return `${hours} ساعت پیش`;
             const days = Math.round(hours / 24);
-            return `${days} روز پیش`;
+            const months = Math.round(days / 30.44);
+
+            if (seconds < 60) return 'لحظاتی پیش';
+            if (minutes < 60) return `${minutes} دقیقه پیش`;
+            if (hours < 24) return `${hours} ساعت پیش`;
+            if (days < 30) return `${days} روز پیش`;
+            if (months < 12) return `${months} ماه پیش`;
+            
+            return new Date(dateString).toLocaleDateString('fa-IR');
         }
 
-        function getDirectDriveLink(url) {
+        function getDirectDriveLink(url, type = 'image') {
             if (!url || typeof url !== 'string') return '';
             const match = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
             if (!match || !match[1]) return url;
-            return `https://lh3.googleusercontent.com/d/${match[1]}`;
+            const fileId = match[1];
+            if (type === 'pdf') return `https://drive.google.com/file/d/${fileId}/preview`;
+            return `https://lh3.googleusercontent.com/d/${fileId}`;
         }
 
         function showModal(message, type = 'info', onConfirm = null) {
@@ -327,10 +337,14 @@
 
             modalMessageText.textContent = message;
             let iconHtml = '';
+            let confirmIcon = '<i class="fas fa-check"></i>';
             switch(type) {
                 case 'error': iconHtml = `<i class="fas fa-times-circle text-red-500"></i>`; break;
                 case 'success': iconHtml = `<i class="fas fa-check-circle text-green-500"></i>`; break;
-                case 'confirm': iconHtml = `<i class="fas fa-question-circle text-yellow-500"></i>`; break;
+                case 'confirm': 
+                    iconHtml = `<i class="fas fa-question-circle text-yellow-500"></i>`;
+                    confirmIcon = '<i class="fas fa-check"></i>';
+                    break;
                 default: iconHtml = `<i class="fas fa-info-circle text-blue-500"></i>`; break;
             }
             modalIconContainer.innerHTML = iconHtml;
@@ -340,13 +354,19 @@
             if (onConfirm && typeof onConfirm === 'function') {
                 modalConfirmBtn.style.display = 'inline-flex';
                 modalCancelBtn.style.display = 'inline-flex';
-                modalConfirmBtn.onclick = () => { closeModal(); onConfirm(); };
+                modalConfirmBtn.innerHTML = `${confirmIcon}<span class="mr-2">تایید</span>`;
+                modalConfirmBtn.onclick = () => {
+                    closeModal();
+                    onConfirm();
+                };
                 modalCancelBtn.onclick = closeModal;
             } else {
                 modalConfirmBtn.style.display = 'inline-flex';
                 modalCancelBtn.style.display = 'none';
+                modalConfirmBtn.innerHTML = `${confirmIcon}<span class="mr-2">متوجه شدم</span>`;
                 modalConfirmBtn.onclick = closeModal;
             }
+
             modal.style.display = 'flex';
         }
 
@@ -364,20 +384,231 @@
             }
         }
 
+        async function updateProfileSection(sectionKey, sectionData) {
+            pageLoader.style.display = 'flex';
+            try {
+                const payload = { action: 'updateSection', email: userData.email, sectionKey, sectionData };
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) throw new Error(`Server error: ${response.status}`);
+                const result = await response.json();
+                if (result.status === 'success') {
+                    showModal('اطلاعات با موفقیت ذخیره شد.', 'success');
+                    const updatedData = await fetchUserProfile(userData.email);
+                    if (updatedData) {
+                        userData = { ...updatedData, email: userData.email };
+                        renderProfile();
+                    }
+                    return true;
+                }
+                throw new Error(result.message || "Failed to update profile.");
+            } catch (error) {
+                console.error("Error updating profile section:", error);
+                showModal(`خطا در ذخیره‌سازی: ${error.message}`, 'error');
+                return false;
+            } finally {
+                pageLoader.style.display = 'none';
+            }
+        }
+        
+        function initSlideshow() {
+            const slideshowContainer = document.getElementById('slideshow');
+            const dotsContainer = document.getElementById('slide-dots-container');
+            if (!slideshowContainer || !dotsContainer) return;
+
+            slideshowContainer.innerHTML = '';
+            dotsContainer.innerHTML = '';
+
+            SLIDESHOW_IMAGES.forEach((src, index) => {
+                const img = document.createElement('img');
+                img.src = src;
+                img.alt = `Slide ${index + 1}`;
+                img.className = 'slide-image';
+                slideshowContainer.appendChild(img);
+
+                const dot = document.createElement('span');
+                dot.className = 'dot';
+                dot.dataset.slideIndex = index;
+                dot.onclick = () => showSlide(index);
+                dotsContainer.appendChild(dot);
+            });
+
+            showSlide(0);
+            setInterval(() => {
+                currentSlide = (currentSlide + 1) % SLIDESHOW_IMAGES.length;
+                showSlide(currentSlide);
+            }, 5000);
+        }
+
+        function showSlide(index) {
+           const slides = document.querySelectorAll('.slide-image');
+            const dots = document.querySelectorAll('.dot');
+            if (slides.length === 0) return;
+            
+            slides.forEach(slide => slide.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+            
+            if (slides[index]) slides[index].classList.add('active');
+            if (dots[index]) dots[index].classList.add('active');
+            currentSlide = index;
+        }
+
         // --- RENDER FUNCTIONS ---
 
         function renderProfileSidebar() {
             if (!userData) return;
             const name = `${userData.stepsData.step1.engineerFirstName || ''} ${userData.stepsData.step1.engineerLastName || ''}`;
             sidebarProfileName.textContent = name.trim() || 'مهندس';
-            const directImageUrl = getDirectDriveLink(userData.files.applicantImage.fileUrl);
+            sidebarProfileRole.textContent = 'مهندس';
+            const directImageUrl = getDirectDriveLink(userData.files.applicantImage.fileUrl, 'image');
             sidebarProfileImage.src = directImageUrl || 'https://placehold.co/60x60/2196F3/FFFFFF?text=U';
         }
+
+        function renderProfile() {
+            if (!userData) return;
+            const profileContent = contentPanes.profile;
+            profileContent.innerHTML = '';
+            const sections = [
+                { id: 'personal', title: 'مشخصات فردی', icon: 'fa-user-circle', content: getPersonalFieldsHTML(userData.stepsData.step1) },
+                { id: 'contact', title: 'اطلاعات تماس', icon: 'fa-address-card', content: getContactFieldsHTML(userData.stepsData.step2) },
+                { id: 'professional', title: 'اطلاعات حرفه‌ای', icon: 'fa-briefcase', content: getProfessionalFieldsHTML(userData.stepsData.step3) },
+                { id: 'documents', title: 'مدارک', icon: 'fa-file-alt', content: getDocumentsHTML(userData.files) }
+            ];
+            sections.forEach(section => {
+                profileContent.insertAdjacentHTML('beforeend', getSectionHTML(section.id, section.title, section.icon, section.content));
+            });
+            
+            attachSectionEventListeners();
+        }
         
-        function renderDashboard() {
-            contentPanes.dashboard.innerHTML = `<p class="text-center text-slate-600 text-lg">به پنل کاربری خود خوش آمدید.</p>`;
+        function getSectionHTML(id, title, icon, content) {
+            return `
+                <div id="section-${id}" class="profile-section">
+                    <div class="section-header">
+                        <h3 class="section-title"><i class="fas ${icon}"></i>${title}</h3>
+                        <div class="flex items-center gap-4">
+                            <button data-action="edit" data-section="${id}" class="btn btn-secondary !p-2 text-sm"><i class="fas fa-edit mr-1"></i> ویرایش</button>
+                            <i class="fas fa-chevron-down section-toggle-icon"></i>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        ${content}
+                        <div class="section-actions mt-6 hidden">
+                            <button data-action="cancel" data-section="${id}" class="btn btn-secondary"><i class="fas fa-times mr-2"></i>انصراف</button>
+                            <button data-action="save" data-section="${id}" class="btn btn-primary"><i class="fas fa-save mr-2"></i>ذخیره تغییرات</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getPersonalFieldsHTML(data) {
+            return `<div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">نام</label><input type="text" name="engineerFirstName" value="${data.engineerFirstName || ''}" disabled></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">نام خانوادگی</label><input type="text" name="engineerLastName" value="${data.engineerLastName || ''}" disabled></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">کدملی</label><input type="text" name="engineerNationalId" value="${data.engineerNationalId || ''}" disabled></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">تاریخ تولد</label><input type="text" name="engineerDob" value="${data.engineerDob || ''}" disabled></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">جنسیت</label><select name="engineerGender" disabled><option value="مرد" ${data.engineerGender === 'مرد' ? 'selected' : ''}>مرد</option><option value="زن" ${data.engineerGender === 'زن' ? 'selected' : ''}>زن</option></select></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">تلفن موبایل</label><input type="tel" name="engineerMobile" value="${data.engineerMobile || ''}" disabled></div>
+            </div>`;
         }
 
+        function getContactFieldsHTML(data) {
+            return `<div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">تلفن ثابت</label><input type="tel" name="engineerPhone" value="${data.engineerPhone || ''}" disabled></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">کدپستی</label><input type="text" name="engineerPostalCode" value="${data.engineerPostalCode || ''}" disabled></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">استان</label><select name="engineerProvince" disabled>${generateProvinceOptions(data.engineerProvince)}</select></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">شهر</label><input type="text" name="engineerCity" value="${data.engineerCity || ''}" disabled></div>
+            </div>
+            <div class="mt-6">
+                <label class="block text-sm font-medium text-slate-700 mb-1">آدرس و موقعیت مکانی</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <textarea name="engineerResidentialAddress" rows="4" class="min-h-[250px]" disabled>${data.engineerResidentialAddress || ''}</textarea>
+                    <div id="engineerLocationMap" class="map-container"></div>
+                    <input type="hidden" name="engineerResidentialLat" value="${data.engineerResidentialLat || ''}">
+                    <input type="hidden" name="engineerResidentialLng" value="${data.engineerResidentialLng || ''}">
+                </div>
+            </div>`;
+        }
+        
+        function getProfessionalFieldsHTML(data) {
+            return `<div>اطلاعات حرفه‌ای در اینجا نمایش داده می‌شود.</div>`;
+        }
+        
+        function getDocumentsHTML(data) {
+            const nationalIdUrl = getDirectDriveLink(data.nationalIdCardImageEngineer?.fileUrl, 'image');
+            const workPermitUrl = getDirectDriveLink(data.workPermitPdf?.fileUrl, 'pdf');
+            let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">';
+            html += `<div><h4 class="font-semibold mb-2">تصویر کارت ملی</h4><div class="file-preview-container">${nationalIdUrl ? `<img src="${nationalIdUrl}" onerror="this.parentElement.innerHTML = '<p>نمایش ممکن نیست</p>';">` : `<p>فایل یافت نشد</p>`}</div></div>`;
+            html += `<div><h4 class="font-semibold mb-2">پروانه اشتغال (PDF)</h4><div class="file-preview-container">${workPermitUrl ? `<iframe src="${workPermitUrl}"></iframe>` : '<p>فایل یافت نشد</p>'}</div></div>`;
+            html += '</div>';
+            return html;
+        }
+
+        function attachSectionEventListeners() {
+             document.querySelectorAll('.section-header').forEach(header => {
+                header.addEventListener('click', (e) => {
+                    if (e.target.closest('button[data-action="edit"]')) return;
+                    const content = header.nextElementSibling;
+                    header.classList.toggle('open');
+                    content.style.display = content.style.display === 'block' ? 'none' : 'block';
+                    if (content.style.display === 'block') {
+                        content.querySelectorAll('.map-container').forEach(mapDiv => {
+                            if (mapDiv && !mapDiv._leaflet_id) initializeMapForSection(mapDiv);
+                        });
+                    }
+                });
+            });
+            document.querySelectorAll('button[data-action="edit"]').forEach(b => b.addEventListener('click', handleEditClick));
+            document.querySelectorAll('button[data-action="cancel"]').forEach(b => b.addEventListener('click', handleCancelClick));
+            document.querySelectorAll('button[data-action="save"]').forEach(b => b.addEventListener('click', handleSaveClick));
+        }
+
+        function initializeMapForSection(mapDiv) {
+            const sectionContent = mapDiv.closest('.section-content');
+            const latInput = sectionContent.querySelector('input[name*="Lat"]');
+            const lngInput = sectionContent.querySelector('input[name*="Lng"]');
+            const lat = parseFloat(latInput.value) || 35.7219;
+            const lng = parseFloat(lngInput.value) || 51.3347;
+            
+            const map = L.map(mapDiv.id).setView([lat, lng], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            L.marker([lat, lng]).addTo(map);
+        }
+        
+        function handleEditClick(e) {
+            const sectionId = e.currentTarget.dataset.section;
+            const sectionEl = document.getElementById(`section-${sectionId}`);
+            if (sectionId === 'documents') {
+                showModal('ویرایش مدارک در این بخش پشتیبانی نمی‌شود.', 'info');
+                return;
+            }
+            sectionEl.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
+            sectionEl.querySelector('.section-actions').classList.remove('hidden');
+            e.currentTarget.classList.add('hidden');
+        }
+        
+        function handleCancelClick(e) { renderProfile(); }
+        
+        async function handleSaveClick(e) {
+            const sectionId = e.currentTarget.dataset.section;
+            const sectionEl = document.getElementById(`section-${sectionId}`);
+            const dataToSave = {};
+            sectionEl.querySelectorAll('input, select, textarea').forEach(el => {
+                if (el.name) {
+                    dataToSave[el.name] = el.value;
+                }
+            });
+            await updateProfileSection(sectionId, dataToSave);
+        }
+        
+        // --- Engineer-Specific Render Functions ---
+        
         async function renderProjectMarketplace() {
             const container = contentPanes.projects;
             container.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
@@ -395,12 +626,11 @@
                 container.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری پروژه‌ها: ${error.message}</p>`;
             }
         }
-        
-        function displayProjects(projectsToDisplay) {
-            const container = document.getElementById('project-list-container') || contentPanes.projects;
-            container.innerHTML = `<div id="project-list-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>`; // Reset container
-            const listContainer = document.getElementById('project-list-container');
 
+        function displayProjects(projectsToDisplay) {
+            const container = contentPanes.projects;
+            container.innerHTML = `<div id="project-list-container"></div>`;
+            const listContainer = document.getElementById('project-list-container');
             if (projectsToDisplay.length > 0) {
                 listContainer.innerHTML = projectsToDisplay.map(p => getProjectCardHTML(p, appliedProjectIds.has(p.ProjectID))).join('');
             } else {
@@ -411,7 +641,6 @@
         function getProjectCardHTML(project, isApplied) {
             const formatNumber = (num) => num ? parseFloat(num).toLocaleString('fa-IR') : '0';
             const totalPrice = (parseFloat(project.area) || 0) * (parseFloat(project.unitPrice) || 0);
-
             return `
             <div class="project-card bg-white rounded-lg overflow-hidden">
                 <div class="p-4 border-b">
@@ -419,20 +648,20 @@
                     <p class="text-sm text-slate-500">${formatTimeAgo(project.lastModifiedDate)}</p>
                 </div>
                 <div class="p-4 space-y-2">
-                    <p><i class="fas fa-tools text-gray-400 mr-2"></i><strong>رشته:</strong> ${project.engineerField} - <strong>پایه:</strong> ${project.engineerRank}</p>
-                    <p><i class="fas fa-map-marker-alt text-gray-400 mr-2"></i><strong>مکان:</strong> ${project.city}</p>
-                    <p><i class="fas fa-ruler-combined text-gray-400 mr-2"></i><strong>متراژ:</strong> ${formatNumber(project.area)} مترمربع</p>
-                    <p class="font-bold text-green-600"><i class="fas fa-money-bill-wave text-gray-400 mr-2"></i><strong>قیمت کل:</strong> ${formatNumber(totalPrice)} تومان</p>
+                    <p><strong>رشته:</strong> ${project.engineerField} - <strong>پایه:</strong> ${project.engineerRank}</p>
+                    <p><strong>مکان:</strong> ${project.city}</p>
+                    <p><strong>متراژ:</strong> ${formatNumber(project.area)} مترمربع</p>
+                    <p class="font-bold text-green-600"><strong>قیمت کل:</strong> ${formatNumber(totalPrice)} تومان</p>
                 </div>
                 <div class="p-4 bg-gray-50 border-t">
                     ${isApplied 
-                        ? `<button data-action="cancel-application" data-project-id="${project.ProjectID}" class="btn btn-danger w-full"><i class="fas fa-times-circle mr-2"></i>لغو درخواست</button>` 
-                        : `<button data-action="apply" data-project-id="${project.ProjectID}" class="btn btn-success w-full"><i class="fas fa-paper-plane mr-2"></i>ارسال درخواست همکاری</button>`
+                        ? `<button data-action="cancel-application" data-project-id="${project.ProjectID}" class="btn btn-danger w-full">لغو درخواست</button>` 
+                        : `<button data-action="apply" data-project-id="${project.ProjectID}" class="btn btn-success w-full">ارسال درخواست</button>`
                     }
                 </div>
             </div>`;
         }
-        
+
         async function renderMyActivities() {
             const container = contentPanes.myActivities;
             container.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
@@ -442,7 +671,7 @@
                 if (result.success && Array.isArray(result.data)) {
                     fetchedActivities = result.data;
                     if (fetchedActivities.length > 0) {
-                        container.innerHTML = `<div id="activity-list-container">${fetchedActivities.map(act => getActivityCardHTML(act)).join('')}</div>`;
+                        container.innerHTML = `<div id="activity-list-container">${fetchedActivities.map(getActivityCardHTML).join('')}</div>`;
                     } else {
                         container.innerHTML = '<p class="text-center text-slate-500">شما هنوز فعالیتی ثبت نکرده‌اید.</p>';
                     }
@@ -455,18 +684,16 @@
         }
         
         function getActivityCardHTML(activity) {
-            const formatNumber = (num) => num ? parseInt(num).toLocaleString('fa-IR') : '0';
             const remainingArea = (activity.maxArea || 0) - (activity.occupiedArea || 0);
             const areaPercentage = (remainingArea / (activity.maxArea || 1)) * 100;
-
             return `
                 <div class="activity-card bg-white rounded-lg overflow-hidden">
                     <div class="p-4 border-b">
                          <h4 class="font-bold text-lg text-slate-800">${activity.engineerActivity} ${activity.engineerLevel} ${activity.engineerField}</h4>
-                         <p class="text-sm text-slate-500"><i class="fas fa-map-marker-alt text-slate-400 mr-1"></i> ${activity.province}, ${activity.city}</p>
+                         <p class="text-sm text-slate-500"><i class="fas fa-map-marker-alt mr-1"></i> ${activity.province}, ${activity.city}</p>
                     </div>
                     <div class="p-4">
-                        <div class="flex justify-between text-sm mb-1"><span>ظرفیت متراژ</span><span>${formatNumber(remainingArea)} متر</span></div>
+                        <div class="flex justify-between text-sm mb-1"><span>ظرفیت متراژ</span><span>${remainingArea.toLocaleString('fa-IR')} متر</span></div>
                         <div class="progress-bar"><div class="progress-fill bg-blue-500" style="width: ${areaPercentage}%"></div></div>
                     </div>
                      <div class="p-4 border-t bg-slate-50 flex gap-2">
@@ -478,23 +705,93 @@
         }
 
         function renderActivityForm(activityData = null) {
-            // Placeholder for the form. This can be expanded with all the fields.
             contentPanes.createActivity.innerHTML = `
                 <div class="neumorphic-card">
                     <h2 class="text-xl font-bold mb-4">${activityData ? 'ویرایش فعالیت' : 'ثبت فعالیت جدید'}</h2>
-                    <p>فرم ثبت و ویرایش فعالیت در اینجا قرار خواهد گرفت.</p>
-                </div>
-            `;
+                    <p>فرم کامل ثبت و ویرایش فعالیت در اینجا قرار خواهد گرفت.</p>
+                </div>`;
+        }
+        
+        // --- EVENT HANDLERS & LOGIC ---
+
+        async function handleApplyForProject(projectId, button) {
+            button.disabled = true;
+            button.innerHTML = '<div class="spinner !w-5 !h-5 !border-2"></div>';
+            try {
+                const payload = { action: 'applyForProject', engineerEmail: userData.email, projectId };
+                const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    showModal(result.message, 'success');
+                    appliedProjectIds.add(projectId);
+                    renderProjectMarketplace(); // Refresh the view
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                showModal(`خطا: ${error.message}`, 'error');
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>ارسال درخواست';
+            }
+        }
+        
+        async function handleCancelApplication(projectId, button) {
+            showModal('آیا از لغو درخواست همکاری مطمئن هستید؟', 'confirm', async () => {
+                button.disabled = true;
+                button.innerHTML = '<div class="spinner !w-5 !h-5 !border-2"></div>';
+                try {
+                    const payload = { action: 'cancelApplication', engineerEmail: userData.email, projectId };
+                    const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                    const result = await response.json();
+                    if (result.status === 'success') {
+                        showModal(result.message, 'success');
+                        appliedProjectIds.delete(projectId);
+                        renderProjectMarketplace(); // Refresh
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (error) {
+                    showModal(`خطا: ${error.message}`, 'error');
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-times-circle mr-2"></i>لغو درخواست';
+                }
+            });
+        }
+        
+        function handleEditActivity(activityId) {
+            const activityToEdit = fetchedActivities.find(act => act.ActivityID === activityId);
+            switchView('create-activity', activityToEdit);
+        }
+        
+        async function handleChangeActivityStatus(activityId, newStatus) {
+            showModal(`آیا از ${newStatus === 'فعال' ? 'فعال کردن' : 'غیرفعال کردن'} این فعالیت مطمئن هستید؟`, 'confirm', async () => {
+                pageLoader.style.display = 'flex';
+                try {
+                    const payload = { action: 'changeActivityStatus', engineerEmail: userData.email, activityId, newStatus };
+                    const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                    const result = await response.json();
+                    if (result.status === 'success') {
+                        showModal(result.message, 'success');
+                        renderMyActivities();
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (error) {
+                    showModal(`خطا در تغییر وضعیت: ${error.message}`, 'error');
+                } finally {
+                    pageLoader.style.display = 'none';
+                }
+            });
         }
 
         // --- VIEW SWITCHER ---
         const viewActions = {
-            'dashboard': { title: 'داشبورد', render: renderDashboard },
-            'profile': { title: 'پروفایل کاربری', render: () => contentPanes.profile.innerHTML = "بخش پروفایل در دست ساخت است." },
+            'dashboard': { title: 'داشبورد', render: () => contentPanes.dashboard.innerHTML = `<p class="text-center text-slate-600">به پنل کاربری خود خوش آمدید.</p>` },
+            'profile': { title: 'پروفایل کاربری', render: renderProfile },
             'projects': { title: 'بازار کار پروژه‌ها', render: renderProjectMarketplace, refreshable: true },
             'my-activities': { title: 'فعالیت‌های من', render: renderMyActivities, refreshable: true },
             'settings': { title: 'تنظیمات', render: () => contentPanes.settings.innerHTML = "بخش تنظیمات در دست ساخت است." },
-            'create-activity': { title: 'ثبت فعالیت جدید', render: (data) => renderActivityForm(data) }
+            'create-activity': { title: 'ثبت / ویرایش فعالیت', render: (data) => renderActivityForm(data) }
         };
 
         function switchView(view, data = null) {
@@ -524,15 +821,37 @@
             const userProfile = await fetchUserProfile(email);
             if (userProfile && userProfile.role === 'engineer') {
                 userData = userProfile;
+                userData.email = email; // Make sure email is part of the userData object
                 renderProfileSidebar();
                 document.querySelectorAll('.nav-item[data-view]').forEach(item => {
                     item.addEventListener('click', (e) => switchView(e.currentTarget.dataset.view));
                 });
+                
+                document.getElementById('main-content-area').addEventListener('click', (e) => {
+                     const targetButton = e.target.closest('button[data-action]');
+                     if (!targetButton) return;
+                     
+                     const action = targetButton.dataset.action;
+                     const projectId = targetButton.dataset.projectId;
+                     const activityId = targetButton.dataset.activityId;
+
+                     switch(action) {
+                         case 'apply': handleApplyForProject(projectId, targetButton); break;
+                         case 'cancel-application': handleCancelApplication(projectId, targetButton); break;
+                         case 'edit-activity': handleEditActivity(activityId); break;
+                         case 'change-activity-status': 
+                             const currentStatus = targetButton.dataset.status;
+                             const newStatus = currentStatus === 'فعال' ? 'غیرفعال' : 'فعال';
+                             handleChangeActivityStatus(activityId, newStatus);
+                             break;
+                     }
+                });
+
                 switchView('dashboard');
                 mainWrapper.style.display = 'flex';
                 pageLoader.style.display = 'none';
             } else {
-                pageLoader.innerHTML = `<p class="text-red-600 font-bold p-4 text-center">دسترسی غیرمجاز.<br>شما اجازه ورود به این پنل را ندارید.</p>`;
+                pageLoader.innerHTML = `<p class="text-red-600 font-bold p-4 text-center">دسترسی غیرمجاز.<br>شما اجازه ورود به این پنل را ندارید یا نقش شما مهندس نیست.</p>`;
                 setTimeout(() => window.location.href = 'index.html', 3000);
             }
         }
