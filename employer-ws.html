@@ -97,10 +97,8 @@
         #page-loader { position: fixed; inset: 0; background-color: rgba(255,255,255,0.9); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; }
         .project-card, .activity-card { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); transition: all 0.3s ease; }
         .project-card:hover, .activity-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
-        #project-list-container, #activity-list-container { display: grid; grid-template-columns: repeat(1, 1fr); gap: 1.5rem; }
-        @media (min-width: 1024px) { #project-list-container, #activity-list-container { grid-template-columns: repeat(2, 1fr); } }
-        .price-highlight { background-color: #f0fdf4; }
-        .commission-highlight { background-color: #f8fafc; }
+        #project-list-container { display: grid; grid-template-columns: repeat(1, 1fr); gap: 1.5rem; }
+        @media (min-width: 1024px) { #project-list-container { grid-template-columns: repeat(2, 1fr); } }
         .map-container { height: 250px; border-radius: 0.5rem; border: 1px solid #cbd5e1; }
     </style>
 </head>
@@ -391,7 +389,7 @@
             if (!userData) return;
 
             const name = `${userData.stepsData.step1.employerFirstName || ''} ${userData.stepsData.step1.employerLastName || ''}`;
-            sidebarProfileName.textContent = name.trim() ? name : 'کاربر';
+            sidebarProfileName.textContent = name.trim() ? name : 'کارفرما';
             
             const directImageUrl = getDirectDriveLink(userData.files.applicantImage.fileUrl);
             sidebarProfileImage.src = directImageUrl || 'https://placehold.co/60x60/2196F3/FFFFFF?text=U';
@@ -399,10 +397,9 @@
 
             contentPanes.profile.innerHTML = '';
             const sections = [
-                { id: 'personal', title: 'مشخصات فردی', icon: 'fa-user-circle', content: getPersonalFieldsHTML(userData.stepsData.step1, userData.role) },
-                { id: 'contact', title: 'اطلاعات تماس', icon: 'fa-address-card', content: getContactFieldsHTML(userData.stepsData.step2, userData.role) },
-                { id: 'professional', title: 'اطلاعات حرفه‌ای', icon: 'fa-briefcase', content: '<div>اطلاعات حرفه‌ای در اینجا نمایش داده می‌شود.</div>' },
-                { id: 'documents', title: 'مدارک', icon: 'fa-file-alt', content: getDocumentsHTML(userData.files, userData.role) }
+                { id: 'personal', title: 'مشخصات فردی', icon: 'fa-user-circle', content: getPersonalFieldsHTML(userData.stepsData.step1) },
+                { id: 'contact', title: 'اطلاعات تماس', icon: 'fa-address-card', content: getContactFieldsHTML(userData.stepsData.step2) },
+                { id: 'documents', title: 'مدارک', icon: 'fa-file-alt', content: getDocumentsHTML(userData.files) }
             ];
             sections.forEach(section => {
                 contentPanes.profile.insertAdjacentHTML('beforeend', getSectionHTML(section.id, section.title, section.icon, section.content));
@@ -432,7 +429,7 @@
             `;
         }
         
-        function getPersonalFieldsHTML(data, role) {
+        function getPersonalFieldsHTML(data) {
             const prefix = 'employer';
             return `<div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
                 <div><label for="${prefix}FirstName" class="block text-sm font-medium text-slate-700 mb-1">نام</label><input type="text" id="${prefix}FirstName" name="${prefix}FirstName" value="${data[`${prefix}FirstName`] || ''}" disabled></div>
@@ -444,7 +441,7 @@
             </div>`;
         }
 
-        function getContactFieldsHTML(data, role) {
+        function getContactFieldsHTML(data) {
             const prefix = 'employer';
             const address = data[`${prefix}Address`] || '';
             const mapId = `${prefix}LocationMap`;
@@ -465,7 +462,7 @@
             </div>`;
         }
         
-        function getDocumentsHTML(data, role) {
+        function getDocumentsHTML(data) {
             const nationalIdUrl = getDirectDriveLink(data.employerNationalIdCardImage?.fileUrl);
             const resumeUrl = getDirectDriveLink(data.employerOtherDocs?.fileUrl, 'pdf');
             let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">';
