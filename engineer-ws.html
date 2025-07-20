@@ -315,6 +315,55 @@
             modal.style.display = 'flex';
         }
 
+        function initSlideshow() {
+            const slideshowContainer = document.getElementById('slideshow');
+            const dotsContainer = document.getElementById('slide-dots-container');
+            if (!slideshowContainer || !dotsContainer) return;
+
+            const SLIDESHOW_IMAGES = [
+                'https://images.unsplash.com/photo-1581092916381-6f8901ad5a33?w=500&auto=format&fit=crop&q=60',
+                'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=500&auto=format&fit=crop&q=60',
+                'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=500&auto=format&fit=crop&q=60'
+            ];
+            let currentSlide = 0;
+
+            slideshowContainer.innerHTML = '';
+            dotsContainer.innerHTML = '';
+
+            SLIDESHOW_IMAGES.forEach((src, index) => {
+                const img = document.createElement('img');
+                img.src = src;
+                img.alt = `Slide ${index + 1}`;
+                img.className = 'slide-image';
+                slideshowContainer.appendChild(img);
+
+                const dot = document.createElement('span');
+                dot.className = 'dot';
+                dot.dataset.slideIndex = index;
+                dot.onclick = () => showSlide(index);
+                dotsContainer.appendChild(dot);
+            });
+            
+            function showSlide(index) {
+               const slides = document.querySelectorAll('.slide-image');
+                const dots = document.querySelectorAll('.dot');
+                if (slides.length === 0) return;
+                
+                slides.forEach(slide => slide.classList.remove('active'));
+                dots.forEach(dot => dot.classList.remove('active'));
+                
+                if (slides[index]) slides[index].classList.add('active');
+                if (dots[index]) dots[index].classList.add('active');
+                currentSlide = index;
+            }
+
+            showSlide(0);
+            setInterval(() => {
+                currentSlide = (currentSlide + 1) % SLIDESHOW_IMAGES.length;
+                showSlide(currentSlide);
+            }, 5000);
+        }
+
         // --- UI RENDERING ---
         function renderProfile() {
             if (!userData) return;
@@ -330,12 +379,16 @@
             `;
             // Re-attach listeners for the newly created elements
             profileContent.querySelectorAll('.section-header').forEach(header => header.addEventListener('click', (e) => {
-                if (!e.target.closest('button')) header.classList.toggle('open');
+                if (!e.target.closest('button')) {
+                    const content = header.nextElementSibling;
+                    header.classList.toggle('open');
+                    content.style.display = content.style.display === 'block' ? 'none' : 'block';
+                }
             }));
         }
         
         function getSectionHTML(id, title, icon, content) {
-            return `<div class="profile-section"><div class="section-header open"><h3 class="section-title"><i class="fas ${icon}"></i>${title}</h3><i class="fas fa-chevron-down section-toggle-icon"></i></div><div class="section-content open">${content}</div></div>`;
+            return `<div class="profile-section"><div class="section-header"><h3 class="section-title"><i class="fas ${icon}"></i>${title}</h3><i class="fas fa-chevron-down section-toggle-icon"></i></div><div class="section-content">${content}</div></div>`;
         }
         
         function getPersonalFieldsHTML(data) {
@@ -574,9 +627,22 @@
         }
 
         async function initializePage() {
-            const userEmail = sessionStorage.getItem('userEmail');
+            // First, check if the email is passed as a URL parameter (from login redirect)
+            const urlParams = new URLSearchParams(window.location.search);
+            const emailFromUrl = urlParams.get('email');
+
+            let userEmail = sessionStorage.getItem('userEmail');
+
+            if (emailFromUrl) {
+                userEmail = emailFromUrl;
+                sessionStorage.setItem('userEmail', userEmail); // Store it for the session
+                // Clean the URL to hide the email parameter
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
             if (!userEmail) {
-                window.location.href = '/engineer-ws.html';
+                // If no email in session or URL, redirect to login
+                window.location.href = 'index.html';
                 return;
             }
 
@@ -584,9 +650,10 @@
                 const result = await fetch(`${GOOGLE_SCRIPT_URL}?func=getUserProfile&email=${encodeURIComponent(userEmail)}`).then(res => res.json());
 
                 if (!result.success || result.data.role !== 'engineer') {
-                    alert('Access Denied. You must be an engineer to view this page.');
-                    sessionStorage.removeItem('userEmail');
-                    window.location.href = '/index.html';
+                    showModal('شما اجازه دسترسی به این صفحه را ندارید. لطفاً به عنوان مهندس وارد شوید.', 'error', () => {
+                        sessionStorage.removeItem('userEmail');
+                        window.location.href = 'index.html';
+                    });
                     return;
                 }
                 
@@ -594,6 +661,7 @@
                 workstationWrapper.style.display = 'flex';
                 pageLoader.style.display = 'none';
 
+                initSlideshow();
                 setupViewSwitcher();
                 document.querySelector('[data-view="dashboard"]').click(); // Start on dashboard
                 
@@ -601,7 +669,7 @@
                 logoutButton.addEventListener('click', (e) => {
                     e.preventDefault();
                     sessionStorage.removeItem('userEmail');
-                    window.location.href = '/index.html';
+                    window.location.href = 'engineer-ws.html';
                 });
 
             } catch (error) {
