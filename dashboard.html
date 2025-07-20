@@ -799,7 +799,7 @@
         <script>
         (function() {
             // --- CONFIGURATION ---
-            const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwURZkNTH6OZ78JqPWXqOBeAdWsgrj2lhPn16Yn0jdJ537qCioVAsofUJrbV6qvvG0N/exec'; // <-- آدرس وب اپ خود را اینجا قرار دهید
+            const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyEXn3OCvVo-wveUL88mSGFeAyAM_JAvyNYKZ3olRx6ieTkYvM8vspS0p7TPLtlpK_h/exec'; // <-- آدرس وب اپ خود را اینجا قرار دهید
             
             // --- STATE VARIABLES ---
             let currentStep = 1;
@@ -2154,7 +2154,15 @@
                         showMessageModal("اطلاعات پروفایل با موفقیت ارسال شد! در حال انتقال شما...", 'success');
                         activeForm.reset();
                         setTimeout(() => {
-                            window.location.href = `./next-dashboard.html?email=${encodeURIComponent(initialUserData.email)}`;
+                            // **FIXED REDIRECTION LOGIC**
+                            if (currentUserRole === 'employer') {
+                                window.location.href = `./employer-ws.html?email=${encodeURIComponent(initialUserData.email)}`;
+                            } else if (currentUserRole === 'engineer') {
+                                window.location.href = `./engineer-ws.html?email=${encodeURIComponent(initialUserData.email)}`;
+                            } else {
+                                // Fallback, though it shouldn't be reached
+                                window.location.href = './login.html';
+                            }
                         }, 3000);
                     } else {
                         throw new Error(result.message || "خطای ناشناخته در پردازش اطلاعات در سرور.");
