@@ -799,28 +799,34 @@
                 </div>
             `;
 
-            if (isEditMode) {
-                ['usageType', 'structureType', 'fileType', 'engineerRank', 'engineerField', 'engineerActivity', 'permitType'].forEach(id => {
-                    const select = document.getElementById(id);
-                    if (select && projectData[id]) select.value = projectData[id];
-                });
-                const unitPrice = parseFloat(projectData.unitPrice);
-                const standardOption = document.querySelector(`#projectForm input[name="priceOption"][value="${unitPrice}"]`);
-                if (standardOption) {
-                    standardOption.checked = true;
-                } else {
-                    document.getElementById('priceOptionCustom').checked = true;
-                    document.getElementById('customPrice').value = unitPrice;
-                    document.getElementById('customPrice').disabled = false;
-                }
-            } else {
-                 document.getElementById('priceOption1').checked = true;
-            }
-
-            // FIX: Defer listener attachment to prevent race condition with DOM rendering
+            // FIX: Move all DOM manipulation of the new form inside a timeout to ensure elements are available.
             setTimeout(() => {
-                attachProjectFormListeners();
-            }, 50);
+                try {
+                    if (isEditMode) {
+                        ['usageType', 'structureType', 'fileType', 'engineerRank', 'engineerField', 'engineerActivity', 'permitType'].forEach(id => {
+                            const select = document.getElementById(id);
+                            if (select && projectData[id]) select.value = projectData[id];
+                        });
+                        const unitPrice = parseFloat(projectData.unitPrice);
+                        const standardOption = document.querySelector(`#projectForm input[name="priceOption"][value="${unitPrice}"]`);
+                        if (standardOption) {
+                            standardOption.checked = true;
+                        } else {
+                            document.getElementById('priceOptionCustom').checked = true;
+                            document.getElementById('customPrice').value = unitPrice;
+                            document.getElementById('customPrice').disabled = false;
+                        }
+                    } else {
+                         const priceOption1 = document.getElementById('priceOption1');
+                         if(priceOption1) priceOption1.checked = true;
+                    }
+
+                    attachProjectFormListeners();
+                } catch (e) {
+                    console.error("Error initializing project form:", e);
+                    showModal("یک خطای غیرمنتظره در بارگذاری فرم رخ داد. لطفاً دوباره امتحان کنید.", "error");
+                }
+            }, 0); 
         }
 
         function getProjectCardHTML(project, role, isApplied = false) {
