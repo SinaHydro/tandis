@@ -576,7 +576,7 @@
         async function initializePage() {
             const userEmail = sessionStorage.getItem('userEmail');
             if (!userEmail) {
-                window.location.href = '/dashboard.html';
+                window.location.href = '/engineer-ws.html';
                 return;
             }
 
@@ -586,7 +586,7 @@
                 if (!result.success || result.data.role !== 'engineer') {
                     alert('Access Denied. You must be an engineer to view this page.');
                     sessionStorage.removeItem('userEmail');
-                    window.location.href = '/dashboard.html';
+                    window.location.href = '/index.html';
                     return;
                 }
                 
@@ -601,7 +601,7 @@
                 logoutButton.addEventListener('click', (e) => {
                     e.preventDefault();
                     sessionStorage.removeItem('userEmail');
-                    window.location.href = '/engineer-ws.html';
+                    window.location.href = '/index.html';
                 });
 
             } catch (error) {
