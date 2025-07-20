@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ایستگاه کاری کارفرما - نظام تندیس</title>
+    
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css"/>
+    
+    <style>
+        :root {
+            --primary-color: #2196F3;
+            --primary-color-dark: #1976D2;
+            --special-color: #FFA000;
+            --special-color-dark: #F57C00;
+        }
+        body { font-family: 'Vazirmatn', sans-serif; background-color: #f8fafc; }
+        .workstation-wrapper { display: flex; height: 100vh; max-height: 100vh; overflow: hidden; }
+        .main-content-area { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .content-body { flex-grow: 1; overflow-y: auto; padding: 1.5rem 2rem; }
+        .sidebar { width: 248px; flex-shrink: 0; background-color: #f1f5f9; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; }
+        @media (max-width: 1024px) { .sidebar { display: none; } }
+        .sidebar-profile-section { display: flex; align-items: center; padding: 1rem; border-bottom: 1px solid #cbd5e1; }
+        .sidebar-profile-image-container { position: relative; width: 60px; height: 60px; flex-shrink: 0; }
+        .sidebar-profile-image { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 3px solid var(--primary-color); }
+        .sidebar-profile-details { margin-right: 1rem; text-align: right; }
+        .sidebar-profile-name { font-size: 1.05rem; font-weight: 700; color: #1e293b; }
+        .sidebar-profile-role { font-size: 0.85rem; font-weight: 500; color: var(--primary-color); margin-top: 0.25rem; }
+        .sidebar-nav { padding: 1rem; flex-grow: 1; }
+        .nav-item { display: flex; align-items: center; padding: 0.75rem 1rem; margin-bottom: 0.5rem; border-radius: 0.5rem; color: #475569; font-weight: 500; transition: all 0.2s ease; cursor: pointer; }
+        .nav-item i { margin-left: 0.75rem; width: 20px; text-align: center; }
+        .nav-item:hover { background-color: #e2e8f0; color: #1e293b; }
+        .nav-item.active { background-color: var(--primary-color); color: white; }
+        .nav-item.btn-special-project { background-color: var(--special-color); color: white; font-weight: 700; justify-content: center; }
+        .nav-item.btn-special-project:hover { background-color: var(--special-color-dark); }
+        .sidebar-footer { padding: 1rem; margin-top: auto; border-top: 1px solid #e2e8f0; }
+        .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 32px; height: 32px; border-radius: 50%; border-left-color: var(--primary-color); animation: spin 1s ease infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #page-loader { position: fixed; inset: 0; background-color: rgba(255,255,255,0.8); z-index: 9999; display: flex; flex-direction:column; align-items: center; justify-content: center; }
+        .project-card, .activity-card { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+        .modal { display: none; align-items: center; justify-content: center; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); }
+        .modal-content { background-color: #ffffff; margin: auto; padding: 2rem; width: 90%; max-width: 500px; border-radius: 0.75rem; }
+        .btn { padding: 0.625rem 1.25rem; border-radius: 0.375rem; font-weight: 600; transition: all 0.2s ease-in-out; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border: none; }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-primary:hover { background-color: var(--primary-color-dark); }
+        .btn-secondary { background-color: #e2e8f0; color: #1e293b; }
+        .btn-secondary:hover { background-color: #cbd5e1; }
+        .btn-danger { background-color: #ef4444; color: white; }
+        .btn-danger:hover { background-color: #dc2626; }
+        .btn-success { background-color: #22c55e; color: white; }
+        .btn-success:hover { background-color: #16a34a; }
+        .btn-special { background-color: var(--special-color); color: white; }
+        .btn-special:hover { background-color: var(--special-color-dark); }
+        label.required-field::after { content: "*"; color: red; margin-right: 4px; }
+        input[type="text"], input[type="number"], textarea, select { background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.875rem 1rem; transition: all 0.2s ease; width: 100%; }
+        input:focus, textarea:focus, select:focus { border-color: var(--primary-color); background-color: white; box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2); outline: none; }
+    </style>
+</head>
+<body>
+
+    <div id="page-loader">
+        <div class="spinner"></div>
+        <p class="mt-4 text-slate-600 font-semibold">احراز هویت...</p>
+    </div>
+
+    <div class="workstation-wrapper" style="display: none;">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-profile-section">
+                <div class="sidebar-profile-image-container">
+                    <img id="sidebarProfileImage" src="https://placehold.co/60x60/2196F3/FFFFFF?text=U" alt="عکس پروفایل" class="sidebar-profile-image">
+                </div>
+                <div class="sidebar-profile-details">
+                    <h2 id="sidebarProfileName" class="sidebar-profile-name">...</h2>
+                    <p id="sidebarProfileRole" class="sidebar-profile-role">کارفرما</p>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a data-view="dashboard" class="nav-item active"><i class="fas fa-tachometer-alt"></i><span>داشبورد</span></a>
+                <a data-view="profile" class="nav-item"><i class="fas fa-user-circle"></i><span>پروفایل</span></a>
+                <a data-view="projects" class="nav-item"><i class="fas fa-tasks"></i><span>پروژه‌های من</span></a>
+                <a data-view="engineers" class="nav-item"><i class="fas fa-users"></i><span>مهندسان</span></a>
+                <a data-view="create-project" class="nav-item btn-special-project mt-4"><i class="fas fa-plus-circle"></i><span>ثبت پروژه جدید</span></a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a data-view="settings" class="nav-item"><i class="fas fa-cog"></i><span>تنظیمات</span></a>
+                <a href="#" id="logoutButton" class="nav-item"><i class="fas fa-sign-out-alt"></i><span>خروج</span></a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main id="main-content-area" class="main-content-area">
+            <header class="p-4 border-b border-slate-200 bg-white flex justify-between items-center">
+                <h1 id="main-header-title" class="text-2xl font-bold text-slate-800">داشبورد</h1>
+                <button id="refresh-button" class="btn btn-secondary !p-2 hidden"><i class="fas fa-sync-alt"></i><span class="mr-2">به‌روزرسانی</span></button>
+            </header>
+            
+            <div id="dashboardContent" class="content-body"></div>
+            <div id="profileContent" class="content-body" style="display: none;"></div>
+            <div id="projectsContent" class="content-body" style="display: none;"></div>
+            <div id="engineersContent" class="content-body" style="display: none;"></div>
+            <div id="settingsContent" class="content-body" style="display: none;"></div>
+            <div id="createProjectContent" class="content-body" style="display: none;"></div>
+        </main>
+    </div>
+
+    <!-- Message Modal -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content text-center">
+            <div id="modalIconContainer" class="mb-4 text-5xl"></div>
+            <p id="modalMessageText" class="text-slate-700 text-base"></p>
+            <div class="mt-6 flex justify-center"><button id="modalConfirmBtn" class="btn btn-primary">متوجه شدم</button></div>
+        </div>
+    </div>
+
+    <script>
+    (async function() {
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyEXn3OCvVo-wveUL88mSGFeAyAM_JAvyNYKZ3olRx6ieTkYvM8vspS0p7TPLtlpK_h/exec';
+        let userData = null;
+        let projectMap = null;
+        let fetchedProjects = [];
+
+        const pageLoader = document.getElementById('page-loader');
+        const mainWrapper = document.querySelector('.workstation-wrapper');
+        const mainHeaderTitle = document.getElementById('main-header-title');
+        const refreshButton = document.getElementById('refresh-button');
+        const sidebarProfileImage = document.getElementById('sidebarProfileImage');
+        const sidebarProfileName = document.getElementById('sidebarProfileName');
+        
+        const contentPanes = {
+            dashboard: document.getElementById('dashboardContent'),
+            profile: document.getElementById('profileContent'),
+            projects: document.getElementById('projectsContent'),
+            engineers: document.getElementById('engineersContent'),
+            settings: document.getElementById('settingsContent'),
+            createProject: document.getElementById('createProjectContent'),
+        };
+
+        function showModal(message, type = 'info') {
+            const modal = document.getElementById('messageModal');
+            const modalMessageText = document.getElementById('modalMessageText');
+            const modalIconContainer = document.getElementById('modalIconContainer');
+            modalMessageText.textContent = message;
+            let iconHtml = '';
+            if (type === 'error') iconHtml = `<i class="fas fa-times-circle text-red-500"></i>`;
+            else if (type === 'success') iconHtml = `<i class="fas fa-check-circle text-green-500"></i>`;
+            else iconHtml = `<i class="fas fa-info-circle text-blue-500"></i>`;
+            modalIconContainer.innerHTML = iconHtml;
+            modal.style.display = 'flex';
+            document.getElementById('modalConfirmBtn').onclick = () => modal.style.display = 'none';
+        }
+
+        async function fetchUserProfile(email) {
+            try {
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getUserProfile&email=${encodeURIComponent(email)}`);
+                if (!response.ok) throw new Error(`خطای سرور: ${response.status}`);
+                const result = await response.json();
+                if (result.success) return result.data;
+                throw new Error(result.message || "پروفایل کاربر یافت نشد.");
+            } catch (error) {
+                console.error("Error fetching user profile:", error);
+                pageLoader.innerHTML = `<p class="text-red-600 font-bold p-4 text-center">خطا در بارگذاری اطلاعات: ${error.message}<br>لطفاً صفحه را رفرش کنید.</p>`;
+                return null;
+            }
+        }
+
+        function renderProfileSidebar() {
+            if (!userData) return;
+            const name = `${userData.stepsData.step1.employerFirstName || ''} ${userData.stepsData.step1.employerLastName || ''}`;
+            sidebarProfileName.textContent = name.trim() || 'کارفرما';
+            sidebarProfileImage.src = userData.files.employerNationalIdCardImage?.fileUrl || 'https://placehold.co/60x60/2196F3/FFFFFF?text=U';
+        }
+        
+        async function renderEmployerDashboard() {
+            const container = contentPanes.dashboard;
+            container.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
+            try {
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getDashboardData&email=${encodeURIComponent(userData.email)}`);
+                const result = await response.json();
+                if (!result.success) throw new Error(result.message);
+                
+                const { stats, projects } = result.data;
+                const projectsListHtml = projects.length > 0 ? projects
+                    .map(p => `<div class="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm"><div><p class="font-semibold text-slate-800">${p.projectName}</p><p class="text-sm text-slate-500">وضعیت: ${p.Status}</p></div><p class="font-semibold text-blue-600">${p.applicantCount} درخواست</p></div>`).join('') 
+                    : '<p class="text-center text-slate-500">هنوز پروژه‌ای ثبت نکرده‌اید.</p>';
+
+                container.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="bg-green-100 text-green-800 p-6 rounded-lg shadow"><p class="text-4xl font-bold">${stats.open}</p><p class="mt-2 font-semibold">پروژه‌های باز</p></div><div class="bg-red-100 text-red-800 p-6 rounded-lg shadow"><p class="text-4xl font-bold">${stats.closed}</p><p class="mt-2 font-semibold">پروژه‌های بسته</p></div><div class="md:col-span-2 bg-white p-6 rounded-lg shadow"><h3 class="text-lg font-bold text-slate-800 mb-4">لیست پروژه‌های شما</h3><div class="space-y-3">${projectsListHtml}</div></div></div>`;
+            } catch (error) {
+                container.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری داشبورد: ${error.message}</p>`;
+            }
+        }
+
+        async function renderEmployerProjects() {
+            const container = contentPanes.projects;
+            container.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
+            try {
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getProjectsByEmployer&email=${encodeURIComponent(userData.email)}`);
+                const result = await response.json();
+                if (result.success && Array.isArray(result.data)) {
+                    fetchedProjects = result.data;
+                    container.innerHTML = fetchedProjects.length > 0
+                        ? `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">${fetchedProjects.map(getProjectCardHTML).join('')}</div>`
+                        : '<p class="text-center text-slate-500">شما هنوز پروژه‌ای ثبت نکرده‌اید.</p>';
+                } else {
+                    container.innerHTML = `<p class="text-center text-red-500">${result.message || 'خطا در دریافت پروژه‌ها.'}</p>`;
+                }
+            } catch (error) {
+                container.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری پروژه‌ها: ${error.message}</p>`;
+            }
+        }
+
+        function renderProjectForm(projectData = null) {
+            const isEditMode = projectData !== null;
+            contentPanes.createProject.innerHTML = `
+                <form id="projectForm" class="bg-white p-6 rounded-lg shadow-md space-y-6 max-w-4xl mx-auto">
+                    <h2 class="text-2xl font-bold border-b pb-4">${isEditMode ? 'ویرایش پروژه' : 'ثبت پروژه جدید'}</h2>
+                    ${isEditMode ? `<input type="hidden" name="ProjectID" value="${projectData.ProjectID}">` : ''}
+                    <div><label class="block font-medium required-field">نام پروژه</label><input type="text" name="projectName" class="w-full mt-1" required value="${projectData?.projectName || ''}"></div>
+                    <div>
+                        <label class="block font-medium required-field">آدرس ملک</label>
+                        <div id="project-map" class="h-64 w-full z-10 rounded-lg border mt-1 bg-slate-100"></div>
+                        <input type="hidden" id="latitude" name="latitude" value="${projectData?.latitude || ''}">
+                        <input type="hidden" id="longitude" name="longitude" value="${projectData?.longitude || ''}">
+                    </div>
+                    <div class="flex justify-end gap-4 pt-4">
+                        <button type="button" id="cancelProjectFormBtn" class="btn btn-secondary">انصراف</button>
+                        <button type="submit" class="btn btn-primary">${isEditMode ? 'ذخیره تغییرات' : 'ثبت پروژه'}</button>
+                    </div>
+                </form>`;
+            
+            requestAnimationFrame(() => {
+                initializeProjectMap(projectData);
+                document.getElementById('projectForm').addEventListener('submit', handleProjectSubmit);
+                document.getElementById('cancelProjectFormBtn').addEventListener('click', () => switchView('dashboard'));
+            });
+        }
+
+        function getProjectCardHTML(project) {
+            const isProjectOpen = project.Status === 'باز';
+            return `<div class="project-card bg-white rounded-lg overflow-hidden p-4 flex flex-col justify-between"><div><h4 class="font-bold text-lg text-slate-800">${project.projectName || 'بدون نام'}</h4><p class="text-sm text-slate-500">وضعیت: <span class="font-semibold ${isProjectOpen ? 'text-green-600' : 'text-red-600'}">${project.Status}</span></p></div><div class="flex gap-2 mt-4"><button data-action="change-status" data-project-id="${project.ProjectID}" data-status="${isProjectOpen ? 'بسته' : 'باز'}" class="btn ${isProjectOpen ? 'btn-danger' : 'btn-success'} flex-1">${isProjectOpen ? 'بستن' : 'باز کردن'}</button><button data-action="edit-project" data-project-id="${project.ProjectID}" class="btn btn-secondary flex-1">ویرایش</button></div></div>`;
+        }
+
+        async function handleProjectSubmit(e) {
+            e.preventDefault();
+            const projectData = Object.fromEntries(new FormData(e.target).entries());
+            const action = projectData.ProjectID ? 'updateProject' : 'createProject';
+            const payload = { action, employerEmail: userData.email, projectData };
+
+            pageLoader.style.display = 'flex';
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), headers: {'Content-Type': 'application/json'} });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    showModal(result.message, 'success');
+                    switchView('projects');
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                showModal(`خطا: ${error.message}`, 'error');
+            } finally {
+                pageLoader.style.display = 'none';
+            }
+        }
+
+        function initializeProjectMap(projectData) {
+            if (projectMap) projectMap.remove();
+            const lat = parseFloat(projectData?.latitude) || 35.7219;
+            const lng = parseFloat(projectData?.longitude) || 51.3347;
+            
+            projectMap = L.map('project-map').setView([lat, lng], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(projectMap);
+            projectMarker = L.marker([lat, lng], { draggable: true }).addTo(projectMap);
+
+            projectMarker.on('dragend', (e) => {
+                const { lat, lng } = e.target.getLatLng();
+                document.getElementById('latitude').value = lat;
+                document.getElementById('longitude').value = lng;
+            });
+        }
+        
+        const viewActions = {
+            'dashboard': { title: 'داشبورد', render: renderEmployerDashboard, refreshable: true },
+            'profile': { title: 'پروفایل کاربری', render: () => contentPanes.profile.innerHTML = "بخش پروفایل در دست ساخت است." },
+            'projects': { title: 'پروژه‌های من', render: renderEmployerProjects, refreshable: true },
+            'engineers': { title: 'مهندسان', render: () => contentPanes.engineers.innerHTML = "بخش مهندسان در دست ساخت است.", refreshable: true },
+            'settings': { title: 'تنظیمات', render: () => contentPanes.settings.innerHTML = "بخش تنظیمات در دست ساخت است." },
+            'create-project': { title: 'ثبت پروژه جدید', render: (data) => renderProjectForm(data) }
+        };
+
+        function switchView(view, data = null) {
+            Object.values(contentPanes).forEach(pane => pane.style.display = 'none');
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            
+            const action = viewActions[view];
+            if (action) {
+                contentPanes[view].style.display = 'block';
+                document.querySelector(`[data-view="${view}"]`).classList.add('active');
+                mainHeaderTitle.textContent = action.title;
+                refreshButton.classList.toggle('hidden', !action.refreshable);
+                action.render(data);
+            }
+        }
+
+        async function main() {
+            const params = new URLSearchParams(window.location.search);
+            const email = params.get('email');
+            if (!email) {
+                pageLoader.innerHTML = '<p class="text-red-600 font-bold">خطا: ایمیل کاربر مشخص نشده است. لطفاً دوباره وارد شوید.</p>';
+                setTimeout(() => window.location.href = 'login.html', 3000);
+                return;
+            }
+
+            const userProfile = await fetchUserProfile(email);
+            if (userProfile && userProfile.role === 'employer') {
+                userData = userProfile;
+                userData.email = email;
+                renderProfileSidebar();
+                document.querySelectorAll('.nav-item[data-view]').forEach(item => {
+                    item.addEventListener('click', (e) => switchView(e.currentTarget.dataset.view));
+                });
+                switchView('dashboard');
+                mainWrapper.style.display = 'flex';
+                pageLoader.style.display = 'none';
+            } else {
+                pageLoader.innerHTML = `<p class="text-red-600 font-bold p-4 text-center">دسترسی غیرمجاز.<br>شما اجازه ورود به این پنل را ندارید.</p>`;
+                setTimeout(() => window.location.href = 'login.html', 3000);
+            }
+        }
+
+        main();
+    })();
+    </script>
+</body>
+</html>
