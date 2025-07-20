@@ -823,6 +823,8 @@
                 userData = userProfile;
                 userData.email = email; // Make sure email is part of the userData object
                 renderProfileSidebar();
+                initSlideshow();
+
                 document.querySelectorAll('.nav-item[data-view]').forEach(item => {
                     item.addEventListener('click', (e) => switchView(e.currentTarget.dataset.view));
                 });
