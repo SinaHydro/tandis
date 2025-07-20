@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ایستگاه کاری مهندس - نظام تندیس</title>
+    
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css"/>
+
+    <style>
+        :root {
+            --primary-color: #2196F3;
+            --primary-color-dark: #1976D2;
+            --special-color: #FFA000;
+            --special-color-dark: #F57C00;
+        }
+        body { font-family: 'Vazirmatn', sans-serif; background-color: #f8fafc; }
+        .workstation-wrapper { display: flex; height: 100vh; max-height: 100vh; overflow: hidden; }
+        .main-content-area { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .content-body { flex-grow: 1; overflow-y: auto; padding: 1.5rem 2rem; }
+        .sidebar { width: 248px; flex-shrink: 0; background-color: #f1f5f9; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; }
+        @media (max-width: 1024px) { .sidebar { display: none; } }
+        .sidebar-profile-section { display: flex; align-items: center; padding: 1rem; border-bottom: 1px solid #cbd5e1; }
+        .sidebar-profile-image-container { position: relative; width: 60px; height: 60px; flex-shrink: 0; }
+        .sidebar-profile-image { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 3px solid var(--primary-color); }
+        .sidebar-profile-details { margin-right: 1rem; text-align: right; }
+        .sidebar-profile-name { font-size: 1.05rem; font-weight: 700; color: #1e293b; }
+        .sidebar-profile-role { font-size: 0.85rem; font-weight: 500; color: var(--primary-color); margin-top: 0.25rem; }
+        .sidebar-nav { padding: 1rem; flex-grow: 1; }
+        .nav-item { display: flex; align-items: center; padding: 0.75rem 1rem; margin-bottom: 0.5rem; border-radius: 0.5rem; color: #475569; font-weight: 500; transition: all 0.2s ease; cursor: pointer; }
+        .nav-item i { margin-left: 0.75rem; width: 20px; text-align: center; }
+        .nav-item:hover { background-color: #e2e8f0; color: #1e293b; }
+        .nav-item.active { background-color: var(--primary-color); color: white; }
+        .nav-item.btn-special-project { background-color: var(--special-color); color: white; font-weight: 700; justify-content: center; }
+        .nav-item.btn-special-project:hover { background-color: var(--special-color-dark); }
+        .sidebar-footer { padding: 1rem; margin-top: auto; border-top: 1px solid #e2e8f0; }
+        .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 32px; height: 32px; border-radius: 50%; border-left-color: var(--primary-color); animation: spin 1s ease infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #page-loader { position: fixed; inset: 0; background-color: rgba(255,255,255,0.8); z-index: 9999; display: flex; flex-direction:column; align-items: center; justify-content: center; }
+        .project-card, .activity-card { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+        .modal { display: none; align-items: center; justify-content: center; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); }
+        .modal-content { background-color: #ffffff; margin: auto; padding: 2rem; width: 90%; max-width: 500px; border-radius: 0.75rem; }
+        .btn { padding: 0.625rem 1.25rem; border-radius: 0.375rem; font-weight: 600; transition: all 0.2s ease-in-out; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border: none; }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-primary:hover { background-color: var(--primary-color-dark); }
+        .btn-danger { background-color: #ef4444; color: white; }
+        .btn-danger:hover { background-color: #dc2626; }
+        .btn-success { background-color: #22c55e; color: white; }
+        .btn-success:hover { background-color: #16a34a; }
+    </style>
+</head>
+<body>
+
+    <div id="page-loader">
+        <div class="spinner"></div>
+        <p class="mt-4 text-slate-600 font-semibold">احراز هویت...</p>
+    </div>
+
+    <div class="workstation-wrapper" style="display: none;">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-profile-section">
+                <div class="sidebar-profile-image-container">
+                    <img id="sidebarProfileImage" src="https://placehold.co/60x60/2196F3/FFFFFF?text=U" alt="عکس پروفایل" class="sidebar-profile-image">
+                </div>
+                <div class="sidebar-profile-details">
+                    <h2 id="sidebarProfileName" class="sidebar-profile-name">...</h2>
+                    <p id="sidebarProfileRole" class="sidebar-profile-role">مهندس</p>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a data-view="dashboard" class="nav-item active"><i class="fas fa-tachometer-alt"></i><span>داشبورد</span></a>
+                <a data-view="profile" class="nav-item"><i class="fas fa-user-circle"></i><span>پروفایل</span></a>
+                <a data-view="projects" class="nav-item"><i class="fas fa-tasks"></i><span>بازار کار پروژه‌ها</span></a>
+                <a data-view="my-activities" class="nav-item"><i class="fas fa-list-check"></i><span>فعالیت‌های من</span></a>
+                <a data-view="create-activity" class="nav-item btn-special-project mt-4"><i class="fas fa-bullhorn"></i><span>ثبت فعالیت جدید</span></a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a data-view="settings" class="nav-item"><i class="fas fa-cog"></i><span>تنظیمات</span></a>
+                <a href="#" id="logoutButton" class="nav-item"><i class="fas fa-sign-out-alt"></i><span>خروج</span></a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main id="main-content-area" class="main-content-area">
+            <header class="p-4 border-b border-slate-200 bg-white flex justify-between items-center">
+                <h1 id="main-header-title" class="text-2xl font-bold text-slate-800">داشبورد</h1>
+                <button id="refresh-button" class="btn btn-secondary !p-2 hidden"><i class="fas fa-sync-alt"></i><span class="mr-2">به‌روزرسانی</span></button>
+            </header>
+            
+            <div id="dashboardContent" class="content-body"></div>
+            <div id="profileContent" class="content-body" style="display: none;"></div>
+            <div id="projectsContent" class="content-body" style="display: none;"></div>
+            <div id="myActivitiesContent" class="content-body" style="display: none;"></div>
+            <div id="settingsContent" class="content-body" style="display: none;"></div>
+            <div id="createActivityContent" class="content-body" style="display: none;"></div>
+        </main>
+    </div>
+
+    <!-- Message Modal -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content text-center">
+            <div id="modalIconContainer" class="mb-4 text-5xl"></div>
+            <p id="modalMessageText" class="text-slate-700 text-base"></p>
+            <div class="mt-6 flex justify-center"><button id="modalConfirmBtn" class="btn btn-primary">متوجه شدم</button></div>
+        </div>
+    </div>
+
+    <script>
+    (async function() {
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyEXn3OCvVo-wveUL88mSGFeAyAM_JAvyNYKZ3olRx6ieTkYvM8vspS0p7TPLtlpK_h/exec';
+        let userData = null;
+        let fetchedProjects = [];
+        let appliedProjectIds = new Set();
+
+        const pageLoader = document.getElementById('page-loader');
+        const mainWrapper = document.querySelector('.workstation-wrapper');
+        const mainHeaderTitle = document.getElementById('main-header-title');
+        const refreshButton = document.getElementById('refresh-button');
+        const sidebarProfileImage = document.getElementById('sidebarProfileImage');
+        const sidebarProfileName = document.getElementById('sidebarProfileName');
+        
+        const contentPanes = {
+            dashboard: document.getElementById('dashboardContent'),
+            profile: document.getElementById('profileContent'),
+            projects: document.getElementById('projectsContent'),
+            myActivities: document.getElementById('myActivitiesContent'),
+            settings: document.getElementById('settingsContent'),
+            createActivity: document.getElementById('createActivityContent'),
+        };
+
+        function showModal(message, type = 'info') {
+            const modal = document.getElementById('messageModal');
+            const modalMessageText = document.getElementById('modalMessageText');
+            const modalIconContainer = document.getElementById('modalIconContainer');
+            modalMessageText.textContent = message;
+            let iconHtml = '';
+            if (type === 'error') iconHtml = `<i class="fas fa-times-circle text-red-500"></i>`;
+            else if (type === 'success') iconHtml = `<i class="fas fa-check-circle text-green-500"></i>`;
+            else iconHtml = `<i class="fas fa-info-circle text-blue-500"></i>`;
+            modalIconContainer.innerHTML = iconHtml;
+            modal.style.display = 'flex';
+            document.getElementById('modalConfirmBtn').onclick = () => modal.style.display = 'none';
+        }
+
+        async function fetchUserProfile(email) {
+            try {
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getUserProfile&email=${encodeURIComponent(email)}`);
+                if (!response.ok) throw new Error(`خطای سرور: ${response.status}`);
+                const result = await response.json();
+                if (result.success) return result.data;
+                throw new Error(result.message || "پروفایل کاربر یافت نشد.");
+            } catch (error) {
+                console.error("Error fetching user profile:", error);
+                pageLoader.innerHTML = `<p class="text-red-600 font-bold p-4 text-center">خطا در بارگذاری اطلاعات: ${error.message}<br>لطفاً صفحه را رفرش کنید.</p>`;
+                return null;
+            }
+        }
+
+        function renderProfileSidebar() {
+            if (!userData) return;
+            const name = `${userData.stepsData.step1.engineerFirstName || ''} ${userData.stepsData.step1.engineerLastName || ''}`;
+            sidebarProfileName.textContent = name.trim() || 'مهندس';
+            sidebarProfileImage.src = userData.files.applicantImage?.fileUrl || 'https://placehold.co/60x60/2196F3/FFFFFF?text=U';
+        }
+
+        async function renderProjectMarketplace() {
+            const container = contentPanes.projects;
+            container.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
+            try {
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getMarketplaceData&email=${encodeURIComponent(userData.email)}`);
+                const result = await response.json();
+                if (result.success && result.data) {
+                    fetchedProjects = result.data.openProjects || [];
+                    appliedProjectIds = new Set(result.data.appliedProjectIds || []);
+                    container.innerHTML = fetchedProjects.length > 0
+                        ? `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">${fetchedProjects.map(p => getProjectCardHTML(p, appliedProjectIds.has(p.ProjectID))).join('')}</div>`
+                        : '<p class="text-center text-slate-500">در حال حاضر پروژه‌ای برای نمایش وجود ندارد.</p>';
+                } else {
+                     container.innerHTML = `<p class="text-center text-red-500">${result.message || 'خطا در دریافت پروژه‌ها.'}</p>`;
+                }
+            } catch (error) {
+                container.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری پروژه‌ها: ${error.message}</p>`;
+            }
+        }
+
+        function getProjectCardHTML(project, isApplied) {
+            return `
+            <div class="project-card bg-white rounded-lg overflow-hidden p-4 flex flex-col justify-between">
+                <div>
+                    <h4 class="font-bold text-lg text-slate-800">${project.projectName || 'بدون نام'}</h4>
+                    <p class="text-sm text-slate-500">رشته: ${project.engineerField} - پایه: ${project.engineerRank}</p>
+                    <p class="text-sm text-slate-500">مکان: ${project.city}</p>
+                </div>
+                <div class="mt-4">
+                    ${isApplied 
+                        ? `<button data-action="cancel-application" data-project-id="${project.ProjectID}" class="btn btn-danger w-full">لغو درخواست</button>` 
+                        : `<button data-action="apply" data-project-id="${project.ProjectID}" class="btn btn-success w-full">ارسال درخواست همکاری</button>`
+                    }
+                </div>
+            </div>`;
+        }
+
+        const viewActions = {
+            'dashboard': { title: 'داشبورد', render: () => contentPanes.dashboard.innerHTML = `<p class="text-center text-slate-600 text-lg">به پنل کاربری خود خوش آمدید.</p>` },
+            'profile': { title: 'پروفایل کاربری', render: () => contentPanes.profile.innerHTML = "بخش پروفایل در دست ساخت است." },
+            'projects': { title: 'بازار کار پروژه‌ها', render: renderProjectMarketplace, refreshable: true },
+            'my-activities': { title: 'فعالیت‌های من', render: () => contentPanes.myActivities.innerHTML = "بخش فعالیت‌های من در دست ساخت است.", refreshable: true },
+            'settings': { title: 'تنظیمات', render: () => contentPanes.settings.innerHTML = "بخش تنظیمات در دست ساخت است." },
+            'create-activity': { title: 'ثبت فعالیت جدید', render: () => contentPanes.createActivity.innerHTML = "بخش ثبت فعالیت در دست ساخت است." }
+        };
+
+        function switchView(view) {
+            Object.values(contentPanes).forEach(pane => pane.style.display = 'none');
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            
+            const action = viewActions[view];
+            if (action) {
+                contentPanes[view].style.display = 'block';
+                document.querySelector(`[data-view="${view}"]`).classList.add('active');
+                mainHeaderTitle.textContent = action.title;
+                refreshButton.classList.toggle('hidden', !action.refreshable);
+                action.render();
+            }
+        }
+
+        async function main() {
+            const params = new URLSearchParams(window.location.search);
+            const email = params.get('email');
+            if (!email) {
+                pageLoader.innerHTML = '<p class="text-red-600 font-bold">خطا: ایمیل کاربر مشخص نشده است. لطفاً دوباره وارد شوید.</p>';
+                setTimeout(() => window.location.href = 'login.html', 3000);
+                return;
+            }
+
+            const userProfile = await fetchUserProfile(email);
+            if (userProfile && userProfile.role === 'engineer') {
+                userData = userProfile;
+                userData.email = email;
+                renderProfileSidebar();
+                document.querySelectorAll('.nav-item[data-view]').forEach(item => {
+                    item.addEventListener('click', (e) => switchView(e.currentTarget.dataset.view));
+                });
+                switchView('dashboard');
+                mainWrapper.style.display = 'flex';
+                pageLoader.style.display = 'none';
+            } else {
+                pageLoader.innerHTML = `<p class="text-red-600 font-bold p-4 text-center">دسترسی غیرمجاز.<br>شما اجازه ورود به این پنل را ندارید.</p>`;
+                setTimeout(() => window.location.href = 'login.html', 3000);
+            }
+        }
+
+        main();
+    })();
+    </script>
+</body>
+</html>
