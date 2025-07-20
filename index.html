@@ -371,7 +371,7 @@
         });
 
         // URL وب اپ Google Apps Script
-        const webAppUrl = 'https://script.google.com/macros/s/AKfycbwURZkNTH6OZ78JqPWXqOBeAdWsgrj2lhPn16Yn0jdJ537qCioVAsofUJrbV6qvvG0N/exec';
+        const webAppUrl = 'https://script.google.com/macros/s/AKfycbyEXn3OCvVo-wveUL88mSGFeAyAM_JAvyNYKZ3olRx6ieTkYvM8vspS0p7TPLtlpK_h/exec';
         const loadingOverlay = document.getElementById('loading-overlay');
 
         function showLoading() {
@@ -450,13 +450,25 @@
         // بر اساس وضعیت کاربر، تصمیم‌گیری انجام می‌شود
         switch (result.status) {
             
-            case 'LOGIN_SUCCESS':
-                showMessage(result.message, 'success');
-                // کاربر به ایستگاه کار هدایت می‌شود
-                setTimeout(() => {
-                    window.location.href = `${result.redirectUrl}?email=${encodeURIComponent(email)}`;
-                }, 1500);
-                break;
+case 'LOGIN_SUCCESS':
+    showMessage(result.message, 'success');
+    
+    // **منطق جدید:** هدایت کاربر بر اساس نقش دریافت شده از سرور
+    setTimeout(() => {
+        const userRole = result.role; // نقش را از پاسخ سرور بخوان
+
+        if (userRole === 'employer') {
+            // اگر کاربر کارفرما بود، به پنل کارفرمایان هدایت شود
+            window.location.href = `employer-ws.html?email=${encodeURIComponent(email)}`;
+        } else if (userRole === 'engineer') {
+            // اگر کاربر مهندس بود، به پنل مهندسان هدایت شود
+            window.location.href = `engineer-ws.html?email=${encodeURIComponent(email)}`;
+        } else {
+            // اگر به هر دلیلی نقش مشخص نبود، یک خطا نمایش بده
+            showMessage('نقش کاربری شما مشخص نیست. با پشتیبانی تماس بگیرید.', 'error');
+        }
+    }, 1500);
+    break;
             
             case 'INCOMPLETE_REGISTRATION':
                 showMessage(result.message, 'warning');
