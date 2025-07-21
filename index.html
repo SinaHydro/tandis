@@ -370,140 +370,102 @@
             forgotPasswordForm.classList.remove('hidden');
         });
 
-        // URL وب اپ Google Apps Script
-        const webAppUrl = 'https://script.google.com/macros/s/AKfycbySpV5IM9U2HykbHGvGCgrrWSt1xllWaNXPFR6DmwmqS5aqQr0HD2HGY23H_Fc0YT7N/exec';
-        const loadingOverlay = document.getElementById('loading-overlay');
+            const webAppUrl = 'https://script.google.com/macros/s/AKfycbyEXn3OCvVo-wveUL88mSGFeAyAM_JAvyNYKZ3olRx6ieTkYvM8vspS0p7TPLtlpK_h/exec';
+            const loadingOverlay = document.getElementById('loading-overlay');
 
-        function showLoading() {
-            if (loadingOverlay) loadingOverlay.classList.remove('hidden');
-        }
+            function showLoading() { if (loadingOverlay) loadingOverlay.classList.remove('hidden'); }
+            function hideLoading() { if (loadingOverlay) loadingOverlay.classList.add('hidden'); }
 
-        function hideLoading() {
-            if (loadingOverlay) loadingOverlay.classList.add('hidden');
-        }
+            // ثبت‌نام
+            document.getElementById('signupFormInner').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const email = document.getElementById('signup-email').value;
+                const password = document.getElementById('signup-password').value;
+                const firstName = document.getElementById('first-name').value;
+                const lastName = document.getElementById('last-name').value;
+                const accountType = document.querySelector('input[name="account-type"]:checked').value;
+                
+                showLoading();
 
-        // تابع برای هدایت کاربر به صفحه پروفایل
-        function redirectToProfile(email, firstName, lastName, role) {
-            const profileUrl = `dashboard.html?email=${encodeURIComponent(email)}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&role=${encodeURIComponent(role)}`;
-            window.location.href = profileUrl;
-        }
-
-        // ثبت‌نام
-        document.getElementById('signupFormInner').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const email = document.getElementById('signup-email').value;
-            const password = document.getElementById('signup-password').value;
-            const firstName = document.getElementById('first-name').value;
-            const lastName = document.getElementById('last-name').value;
-            const accountType = document.querySelector('input[name="account-type"]:checked').value;
-
-            // اعتبارسنجی اولیه
-            // (کد اعتبارسنجی شما در اینجا قرار می‌گیرد)
-            
-            showLoading();
-
-            const queryString = `?func=Create&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&accountType=${encodeURIComponent(accountType)}`;
-            const fullUrl = webAppUrl + queryString;
-
-            fetch(fullUrl, { method: 'GET' })
-                .then(response => response.json())
-                .then(data => {
-                    hideLoading();
-                    if (data.success) {
-                        showMessage('ثبت‌نام با موفقیت انجام شد! در حال انتقال...', 'success');
-                        // از داده‌های وارد شده در فرم برای هدایت استفاده می‌کنیم
-                        redirectToProfile(email, firstName, lastName, accountType);
-                    } else {
-                        if (data.error === 'EmailExists') {
-                            showMessage('این ایمیل قبلاً ثبت شده است.', 'error');
+                const queryString = `?func=Create&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&accountType=${encodeURIComponent(accountType)}`;
+                
+                fetch(webAppUrl + queryString, { method: 'GET' })
+                    .then(response => response.json())
+                    .then(data => {
+                        hideLoading();
+                        if (data.success) {
+                            showMessage('ثبت‌نام با موفقیت انجام شد! لطفاً وارد شوید تا پروفایل خود را تکمیل کنید.', 'success');
+                            loginTab.click();
+                            document.getElementById('login-email').value = email;
+                            document.getElementById('login-password').value = password;
                         } else {
-                            showMessage(`خطا در ثبت‌نام: ${data.error || 'پاسخ نامعتبر از سرور'}`, 'error');
+                            showMessage(`خطا در ثبت‌نام: ${data.message || 'پاسخ نامعتبر از سرور'}`, 'error');
                         }
+                    })
+                    .catch(error => {
+                        hideLoading();
+                        showMessage(`خطا در ارتباط با سرور: ${error.message}`, 'error');
+                    });
+            });
+
+            // ورود
+            document.getElementById('loginFormInner').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                
+                showLoading();
+
+                const payload = {
+                    action: 'login',
+                    email: email,
+                    password: password
+                };
+
+                fetch(webAppUrl, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                })
+                .then(response => response.json())
+                .then(result => {
+                    hideLoading();
+                    if (result.success) {
+                        switch (result.status) {
+                        case 'LOGIN_SUCCESS':
+                            showMessage(result.message, 'success');
+                            sessionStorage.setItem('authToken', result.token);
+                            setTimeout(() => {
+                                if (result.role === 'employer') {
+                                    window.location.href = 'employer-ws.html';
+                                } else if (result.role === 'engineer') {
+                                    window.location.href = 'engineer-ws.html';
+                                }
+                            }, 1500);
+                            break;
+                        
+                        case 'INCOMPLETE_REGISTRATION':
+                            showMessage(result.message, 'warning');
+                            setTimeout(() => {
+                                window.location.href = `dashboard.html?email=${encodeURIComponent(email)}`;
+                            }, 1500);
+                            break;
+
+                        case 'PENDING_APPROVAL':
+                            showMessage(result.message, 'warning');
+                            break;
+                            
+                        default:
+                            showMessage('پاسخ سرور نامشخص است.', 'error');
+                        }
+                    } else {
+                        showMessage(result.message || 'خطایی رخ داد.', 'error');
                     }
                 })
                 .catch(error => {
                     hideLoading();
                     showMessage(`خطا در ارتباط با سرور: ${error.message}`, 'error');
                 });
-        });
-
-        // ورود
-        document.getElementById('loginFormInner').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            
-            showLoading();
-
-            const payload = {
-                action: 'login', // یک action برای شناسایی در doPost
-                email: email,
-                password: password
-            };
-
-            fetch(webAppUrl, {
-                method: 'POST',
-                mode: 'cors',
-                cache: 'no-cache',
-                headers: {
-                    'Content-Type': 'text/plain;charset=utf-8',
-                },
-                body: JSON.stringify(payload) // ارسال داده در بدنه درخواست
-            })
-            .then(response => response.json())
-            .then(result => {
-                hideLoading();
-                if (result.success) {
-                    // بر اساس وضعیت کاربر، تصمیم‌گیری انجام می‌شود
-                    switch (result.status) {
-                        
-                    case 'LOGIN_SUCCESS':
-                        showMessage(result.message, 'success');
-                        
-                        // **منطق جدید:** هدایت کاربر بر اساس نقش دریافت شده از سرور
-                        setTimeout(() => {
-                            const userRole = result.role; // نقش را از پاسخ سرور بخوان
-
-                            if (userRole === 'employer') {
-                                // اگر کاربر کارفرما بود، به پنل کارفرمایان هدایت شود
-                                window.location.href = `employer-ws.html?email=${encodeURIComponent(email)}`;
-                            } else if (userRole === 'engineer') {
-                                // اگر کاربر مهندس بود، به پنل مهندسان هدایت شود
-                                window.location.href = `engineer-ws.html?email=${encodeURIComponent(email)}`;
-                            } else {
-                                // اگر به هر دلیلی نقش مشخص نبود، یک خطا نمایش بده
-                                showMessage('نقش کاربری شما مشخص نیست. با پشتیبانی تماس بگیرید.', 'error');
-                            }
-                        }, 1500);
-                        break;
-                        
-                        case 'INCOMPLETE_REGISTRATION':
-                            showMessage(result.message, 'warning');
-                            // کاربر به صفحه تکمیل ثبت‌نام هدایت می‌شود
-                            setTimeout(() => {
-                                window.location.href = `${result.redirectUrl}?email=${encodeURIComponent(email)}`;
-                            }, 1500);
-                            break;
-
-                        case 'PENDING_APPROVAL':
-                            // فقط پیام نمایش داده می‌شود و کاربر در همین صفحه باقی می‌ماند
-                            showMessage(result.message, 'warning');
-                            break;
-                            
-                        default:
-                            showMessage('پاسخ سرور نامشخص است.', 'error');
-                    }
-                } else {
-                    // اگر ورود ناموفق بود (مثلاً رمز اشتباه یا کاربر یافت نشد)
-                    showMessage(result.message || 'خطایی رخ داد.', 'error');
-                }
-            })
-            .catch(error => {
-                hideLoading();
-                showMessage(`خطا در ارتباط با سرور: ${error.message}`, 'error');
             });
-        });
             
         // فراموشی رمز عبور
         document.getElementById('forgotPasswordInner').addEventListener('submit', function(e) {
