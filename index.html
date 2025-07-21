@@ -371,7 +371,7 @@
         });
 
         // URL وب اپ Google Apps Script
-        const webAppUrl = 'https://script.google.com/macros/s/AKfycbzheJG0y291XNo8fjG4kOgZ-OiiicaKcjTAObjefOBqhJY8s0a4ig5cZHEtC1veq6Jx/exec';
+        const webAppUrl = 'https://script.google.com/macros/s/AKfycbySpV5IM9U2HykbHGvGCgrrWSt1xllWaNXPFR6DmwmqS5aqQr0HD2HGY23H_Fc0YT7N/exec';
         const loadingOverlay = document.getElementById('loading-overlay');
 
         function showLoading() {
@@ -434,67 +434,75 @@
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
             
-            // اعتبارسنجی اولیه
-            // (کد اعتبارسنجی شما در اینجا قرار می‌گیرد)
-
             showLoading();
 
-            const queryString = `?func=Login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
-            const fullUrl = webAppUrl + queryString;
+            const payload = {
+                action: 'login', // یک action برای شناسایی در doPost
+                email: email,
+                password: password
+            };
 
-            fetch(fullUrl, { method: 'GET' })
-              .then(response => response.json())
-.then(result => {
-    hideLoading();
-    if (result.success) {
-        // بر اساس وضعیت کاربر، تصمیم‌گیری انجام می‌شود
-        switch (result.status) {
-            
-case 'LOGIN_SUCCESS':
-    showMessage(result.message, 'success');
-    
-    // **منطق جدید:** هدایت کاربر بر اساس نقش دریافت شده از سرور
-    setTimeout(() => {
-        const userRole = result.role; // نقش را از پاسخ سرور بخوان
+            fetch(webAppUrl, {
+                method: 'POST',
+                mode: 'cors',
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8',
+                },
+                body: JSON.stringify(payload) // ارسال داده در بدنه درخواست
+            })
+            .then(response => response.json())
+            .then(result => {
+                hideLoading();
+                if (result.success) {
+                    // بر اساس وضعیت کاربر، تصمیم‌گیری انجام می‌شود
+                    switch (result.status) {
+                        
+                    case 'LOGIN_SUCCESS':
+                        showMessage(result.message, 'success');
+                        
+                        // **منطق جدید:** هدایت کاربر بر اساس نقش دریافت شده از سرور
+                        setTimeout(() => {
+                            const userRole = result.role; // نقش را از پاسخ سرور بخوان
 
-        if (userRole === 'employer') {
-            // اگر کاربر کارفرما بود، به پنل کارفرمایان هدایت شود
-            window.location.href = `employer-ws.html?email=${encodeURIComponent(email)}`;
-        } else if (userRole === 'engineer') {
-            // اگر کاربر مهندس بود، به پنل مهندسان هدایت شود
-            window.location.href = `engineer-ws.html?email=${encodeURIComponent(email)}`;
-        } else {
-            // اگر به هر دلیلی نقش مشخص نبود، یک خطا نمایش بده
-            showMessage('نقش کاربری شما مشخص نیست. با پشتیبانی تماس بگیرید.', 'error');
-        }
-    }, 1500);
-    break;
-            
-            case 'INCOMPLETE_REGISTRATION':
-                showMessage(result.message, 'warning');
-                // کاربر به صفحه تکمیل ثبت‌نام هدایت می‌شود
-                setTimeout(() => {
-                    window.location.href = `${result.redirectUrl}?email=${encodeURIComponent(email)}`;
-                }, 1500);
-                break;
+                            if (userRole === 'employer') {
+                                // اگر کاربر کارفرما بود، به پنل کارفرمایان هدایت شود
+                                window.location.href = `employer-ws.html?email=${encodeURIComponent(email)}`;
+                            } else if (userRole === 'engineer') {
+                                // اگر کاربر مهندس بود، به پنل مهندسان هدایت شود
+                                window.location.href = `engineer-ws.html?email=${encodeURIComponent(email)}`;
+                            } else {
+                                // اگر به هر دلیلی نقش مشخص نبود، یک خطا نمایش بده
+                                showMessage('نقش کاربری شما مشخص نیست. با پشتیبانی تماس بگیرید.', 'error');
+                            }
+                        }, 1500);
+                        break;
+                        
+                        case 'INCOMPLETE_REGISTRATION':
+                            showMessage(result.message, 'warning');
+                            // کاربر به صفحه تکمیل ثبت‌نام هدایت می‌شود
+                            setTimeout(() => {
+                                window.location.href = `${result.redirectUrl}?email=${encodeURIComponent(email)}`;
+                            }, 1500);
+                            break;
 
-            case 'PENDING_APPROVAL':
-                // فقط پیام نمایش داده می‌شود و کاربر در همین صفحه باقی می‌ماند
-                showMessage(result.message, 'warning');
-                break;
-                
-            default:
-                 showMessage('پاسخ سرور نامشخص است.', 'error');
-        }
-    } else {
-        // اگر ورود ناموفق بود (مثلاً رمز اشتباه یا کاربر یافت نشد)
-        showMessage(result.message || 'خطایی رخ داد.', 'error');
-    }
-})
-              .catch(error => {
+                        case 'PENDING_APPROVAL':
+                            // فقط پیام نمایش داده می‌شود و کاربر در همین صفحه باقی می‌ماند
+                            showMessage(result.message, 'warning');
+                            break;
+                            
+                        default:
+                            showMessage('پاسخ سرور نامشخص است.', 'error');
+                    }
+                } else {
+                    // اگر ورود ناموفق بود (مثلاً رمز اشتباه یا کاربر یافت نشد)
+                    showMessage(result.message || 'خطایی رخ داد.', 'error');
+                }
+            })
+            .catch(error => {
                 hideLoading();
                 showMessage(`خطا در ارتباط با سرور: ${error.message}`, 'error');
-              });
+            });
         });
             
         // فراموشی رمز عبور
