@@ -72,7 +72,6 @@
         .section-header.open .section-toggle-icon { transform: rotate(180deg); }
         .section-content { padding: 1.5rem; display: none; }
         .section-content.open { display: block; }
-        .section-actions { display: flex; justify-content: flex-end; gap: 0.75rem; }
         label.required-field::after { content: "*"; color: red; margin-right: 4px; }
         input[type="text"], input[type="date"], input[type="tel"], input[type="number"], input[type="password"], textarea, select { background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.875rem 1rem; transition: all 0.2s ease; width: 100%; }
         input:focus, textarea:focus, select:focus { border-color: var(--primary-color); background-color: white; box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2); outline: none; }
@@ -97,9 +96,8 @@
         #page-loader { position: fixed; inset: 0; background-color: rgba(255,255,255,0.9); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; }
         .project-card, .activity-card { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); transition: all 0.3s ease; }
         .project-card:hover, .activity-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
-        #project-list-container { display: grid; grid-template-columns: repeat(1, 1fr); gap: 1.5rem; }
-        @media (min-width: 1024px) { #project-list-container { grid-template-columns: repeat(2, 1fr); } }
-        .map-container { height: 250px; border-radius: 0.5rem; border: 1px solid #cbd5e1; }
+        #project-list-container, #activity-list-container { display: grid; grid-template-columns: repeat(1, 1fr); gap: 1.5rem; }
+        @media (min-width: 1024px) { #project-list-container, #activity-list-container { grid-template-columns: repeat(2, 1fr); } }
     </style>
 </head>
 <body>
@@ -139,6 +137,10 @@
                     <i class="fas fa-tasks"></i>
                     <span>پروژه‌های من</span>
                 </a>
+                <a data-view="engineers" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>بازار کار مهندسان</span>
+                </a>
                 <a data-view="create-project" class="nav-item btn-special-project mt-4">
                     <i class="fas fa-plus-circle"></i>
                     <span>ثبت پروژه جدید</span>
@@ -170,6 +172,7 @@
             <div id="dashboardContent" class="content-body"></div>
             <div id="profileContent" class="content-body" style="display: none;"></div>
             <div id="projectsContent" class="content-body" style="display: none;"></div>
+            <div id="engineersContent" class="content-body" style="display: none;"></div>
             <div id="createProjectContent" class="content-body" style="display: none;"></div>
             <div id="settingsContent" class="content-body" style="display: none;">
                  <div class="profile-section">
@@ -234,14 +237,15 @@
     // This script is specifically for the EMPLOYER workstation.
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbySpV5IM9U2HykbHGvGCgrrWSt1xllWaNXPFR6DmwmqS5aqQr0HD2HGY23H_Fc0YT7N/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwo2Vi-b_nUqDYS-fkB4kEwh0k7QFd9BPu2qco3KsaS6nbNldBdXPQaF8fYaBTtb6-x/exec';
         const PROVINCES = ["آذربایجان شرقی", "آذربایجان غربی", "اردبیل", "اصفهان", "البرز", "ایلام", "بوشهر", "تهران", "چهارمحال و بختیاری", "خراسان جنوبی", "خراسان رضوی", "خراسان شمالی", "خوزستان", "زنجان", "سمنان", "سیستان و بلوچستان", "فارس", "قزوین", "قم", "کردستان", "کرمان", "کرمانشاه", "کهگیلویه و بویراحمد", "گلستان", "گیلان", "لرستان", "مازندران", "مرکزی", "هرمزگان", "همدان", "یزد"];
 
         // --- STATE ---
         let userData = null;
-        let projectMap = null;
-        let projectMarker = null;
         let fetchedProjects = [];
+        let fetchedEngineers = [];
+        let requestedActivityIds = new Set();
+        const authToken = sessionStorage.getItem('authToken');
 
         // --- DOM ELEMENTS ---
         const pageLoader = document.getElementById('page-loader');
@@ -257,10 +261,46 @@
             dashboard: document.getElementById('dashboardContent'),
             profile: document.getElementById('profileContent'),
             projects: document.getElementById('projectsContent'),
+            engineers: document.getElementById('engineersContent'),
             createProject: document.getElementById('createProjectContent'),
             settings: document.getElementById('settingsContent'),
         };
         
+        // --- API HELPER ---
+        async function fetchProtectedData(payload) {
+            if (!authToken) {
+                window.location.href = 'index.html';
+                return Promise.reject('No token found');
+            }
+            
+            payload.token = authToken;
+
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('خطا در شبکه');
+                
+                const result = await response.json();
+
+                if (result.reason === 'AUTH_FAILED') {
+                    showMessage(result.message, 'error');
+                    sessionStorage.removeItem('authToken');
+                    setTimeout(() => window.location.href = 'index.html', 2000);
+                    throw new Error('Authentication failed');
+                }
+                
+                return result;
+
+            } catch (error) {
+                console.error("Fetch error:", error);
+                showMessage('خطا در ارتباط با سرور.', 'error');
+                throw error;
+            }
+        }
+
         // --- HELPER FUNCTIONS ---
         function generateProvinceOptions(selectedValue = "") {
             return PROVINCES.map(p => `<option value="${p}" ${p === selectedValue ? 'selected' : ''}>${p}</option>`).join('');
@@ -282,6 +322,12 @@
             const match = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
             if (!match) return url;
             return type === 'pdf' ? `https://drive.google.com/file/d/${match[1]}/preview` : `https://lh3.googleusercontent.com/d/${match[1]}`;
+        }
+
+        function showMessage(message, type = 'info') {
+            // A simple placeholder for a toast notification library like Toastify.js
+            // You can replace this with a more sophisticated notification system.
+            alert(message);
         }
 
         function showModal(message, type = 'info', onConfirm = null) {
@@ -356,242 +402,63 @@
             }, 5000);
         }
 
-        // --- Profile Rendering Functions ---
-        async function updateProfileSection(sectionKey, sectionData) {
-            pageLoader.style.display = 'flex';
-            try {
-                const payload = { action: 'updateSection', email: userData.email, sectionKey, sectionData };
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(payload)
-                });
-                const result = await response.json();
-                if (result.status === 'success') {
-                    showModal('اطلاعات با موفقیت ذخیره شد.', 'success');
-                    const updatedDataResponse = await fetch(`${GOOGLE_SCRIPT_URL}?func=getUserProfile&email=${encodeURIComponent(userData.email)}`);
-                    const updatedData = await updatedDataResponse.json();
-                    if (updatedData.success) {
-                        userData = { ...updatedData.data, email: userData.email };
-                        renderProfile();
-                    }
-                    return true;
-                }
-                throw new Error(result.message || "Failed to update profile.");
-            } catch (error) {
-                showModal(`خطا در ذخیره‌سازی: ${error.message}`, 'error');
-                return false;
-            } finally {
-                pageLoader.style.display = 'none';
-            }
-        }
-
+        // --- UI RENDERING ---
         function renderProfile() {
             if (!userData) return;
-
             const name = `${userData.stepsData.step1.employerFirstName || ''} ${userData.stepsData.step1.employerLastName || ''}`;
-            sidebarProfileName.textContent = name.trim() ? name : 'کارفرما';
-            
-            const directImageUrl = getDirectDriveLink(userData.files.applicantImage.fileUrl);
-            sidebarProfileImage.src = directImageUrl || 'https://placehold.co/60x60/2196F3/FFFFFF?text=U';
-            sidebarProfileImage.onerror = () => { sidebarProfileImage.src = 'https://placehold.co/60x60/2196F3/FFFFFF?text=U'; };
+            sidebarProfileName.textContent = name.trim() || 'کاربر';
+            sidebarProfileImage.src = getDirectDriveLink(userData.files.applicantImage.fileUrl) || 'https://placehold.co/60x60/2196F3/FFFFFF?text=U';
 
-            contentPanes.profile.innerHTML = '';
-            const sections = [
-                { id: 'personal', title: 'مشخصات فردی', icon: 'fa-user-circle', content: getPersonalFieldsHTML(userData.stepsData.step1) },
-                { id: 'contact', title: 'اطلاعات تماس', icon: 'fa-address-card', content: getContactFieldsHTML(userData.stepsData.step2) },
-                { id: 'documents', title: 'مدارک', icon: 'fa-file-alt', content: getDocumentsHTML(userData.files) }
-            ];
-            sections.forEach(section => {
-                contentPanes.profile.insertAdjacentHTML('beforeend', getSectionHTML(section.id, section.title, section.icon, section.content));
-            });
-            
-            attachSectionEventListeners();
+            profileContent.innerHTML = `
+                ${getSectionHTML('personal', 'مشخصات فردی', 'fa-user-circle', getPersonalFieldsHTML(userData.stepsData.step1))}
+                ${getSectionHTML('contact', 'اطلاعات تماس', 'fa-address-card', getContactFieldsHTML(userData.stepsData.step2))}
+                ${getSectionHTML('documents', 'مدارک', 'fa-file-alt', getDocumentsHTML(userData.files))}
+            `;
+            profileContent.querySelectorAll('.section-header').forEach(header => header.addEventListener('click', (e) => {
+                if (!e.target.closest('button')) {
+                    const content = header.nextElementSibling;
+                    header.classList.toggle('open');
+                    content.style.display = content.style.display === 'block' ? 'none' : 'block';
+                }
+            }));
         }
         
         function getSectionHTML(id, title, icon, content) {
-            return `
-                <div id="section-${id}" class="profile-section">
-                    <div class="section-header">
-                        <h3 class="section-title"><i class="fas ${icon} ml-3"></i>${title}</h3>
-                        <div class="flex items-center gap-4">
-                            <button data-action="edit" data-section="${id}" class="btn btn-secondary !p-2 text-sm"><i class="fas fa-edit mr-1"></i> ویرایش</button>
-                            <i class="fas fa-chevron-down section-toggle-icon"></i>
-                        </div>
-                    </div>
-                    <div class="section-content">
-                        ${content}
-                        <div class="section-actions mt-6 hidden">
-                            <button data-action="cancel" data-section="${id}" class="btn btn-secondary"><i class="fas fa-times mr-2"></i>انصراف</button>
-                            <button data-action="save" data-section="${id}" class="btn btn-primary"><i class="fas fa-save mr-2"></i>ذخیره تغییرات</button>
-                        </div>
-                    </div>
-                </div>
-            `;
+            return `<div class="profile-section"><div class="section-header"><h3 class="section-title"><i class="fas ${icon}"></i>${title}</h3><i class="fas fa-chevron-down section-toggle-icon"></i></div><div class="section-content">${content}</div></div>`;
         }
         
         function getPersonalFieldsHTML(data) {
             const prefix = 'employer';
             return `<div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
-                <div><label for="${prefix}FirstName" class="block text-sm font-medium text-slate-700 mb-1">نام</label><input type="text" id="${prefix}FirstName" name="${prefix}FirstName" value="${data[`${prefix}FirstName`] || ''}" disabled></div>
-                <div><label for="${prefix}LastName" class="block text-sm font-medium text-slate-700 mb-1">نام خانوادگی</label><input type="text" id="${prefix}LastName" name="${prefix}LastName" value="${data[`${prefix}LastName`] || ''}" disabled></div>
-                <div><label for="${prefix}NationalId" class="block text-sm font-medium text-slate-700 mb-1">کدملی</label><input type="text" id="${prefix}NationalId" name="${prefix}NationalId" value="${data[`${prefix}NationalId`] || ''}" disabled></div>
-                <div><label for="${prefix}Dob" class="block text-sm font-medium text-slate-700 mb-1">تاریخ تولد</label><input type="text" id="${prefix}Dob" name="${prefix}Dob" value="${data[`${prefix}Dob`] || ''}" class="jalali-datepicker-display" disabled><input type="hidden" name="${prefix}Dob" class="jalali-datepicker-value"></div>
-                <div><label for="${prefix}Gender" class="block text-sm font-medium text-slate-700 mb-1">جنسیت</label><select id="${prefix}Gender" name="${prefix}Gender" disabled><option value="مرد" ${data[`${prefix}Gender`] === 'مرد' ? 'selected' : ''}>مرد</option><option value="زن" ${data[`${prefix}Gender`] === 'زن' ? 'selected' : ''}>زن</option></select></div>
-                <div><label for="${prefix}Mobile" class="block text-sm font-medium text-slate-700 mb-1">تلفن موبایل</label><input type="tel" id="${prefix}Mobile" name="${prefix}Mobile" value="${data[`${prefix}Mobile`] || ''}" disabled></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">نام</label><input value="${data[`${prefix}FirstName`] || ''}" disabled></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">نام خانوادگی</label><input value="${data[`${prefix}LastName`] || ''}" disabled></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">کدملی</label><input value="${data[`${prefix}NationalId`] || ''}" disabled></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">تاریخ تولد</label><input value="${data[`${prefix}Dob`] || ''}" disabled></div>
             </div>`;
         }
 
         function getContactFieldsHTML(data) {
             const prefix = 'employer';
-            const address = data[`${prefix}Address`] || '';
-            const mapId = `${prefix}LocationMap`;
             return `<div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
-                <div><label for="${prefix}Phone" class="block text-sm font-medium text-slate-700 mb-1">تلفن ثابت</label><input type="tel" id="${prefix}Phone" name="${prefix}Phone" value="${data[`${prefix}Phone`] || ''}" disabled></div>
-                <div><label for="${prefix}PostalCode" class="block text-sm font-medium text-slate-700 mb-1">کدپستی</label><input type="text" id="${prefix}PostalCode" name="${prefix}PostalCode" value="${data[`${prefix}PostalCode`] || ''}" disabled></div>
-                <div><label for="${prefix}Province" class="block text-sm font-medium text-slate-700 mb-1">استان</label><select id="${prefix}Province" name="${prefix}Province" disabled>${generateProvinceOptions(data[`${prefix}Province`])}</select></div>
-                <div><label for="${prefix}City" class="block text-sm font-medium text-slate-700 mb-1">شهر</label><input type="text" id="${prefix}City" name="${prefix}City" value="${data[`${prefix}City`] || ''}" disabled></div>
-            </div>
-            <div class="mt-6">
-                <label class="block text-sm font-medium text-slate-700 mb-1">آدرس و موقعیت مکانی</label>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <textarea id="${prefix}Address" name="${prefix}Address" rows="4" class="min-h-[250px]" disabled>${address}</textarea>
-                    <div id="${mapId}" class="map-container"></div>
-                    <input type="hidden" id="${prefix}Lat" name="${prefix}Lat" value="${data[`${prefix}AddressLat`] || ''}">
-                    <input type="hidden" id="${prefix}Lng" name="${prefix}Lng" value="${data[`${prefix}AddressLng`] || ''}">
-                </div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">استان</label><input value="${data[`${prefix}Province`] || ''}" disabled></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">شهر</label><input value="${data[`${prefix}City`] || ''}" disabled></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">آدرس</label><textarea rows="3" disabled>${data[`${prefix}Address`] || ''}</textarea></div>
             </div>`;
         }
         
         function getDocumentsHTML(data) {
             const nationalIdUrl = getDirectDriveLink(data.employerNationalIdCardImage?.fileUrl);
             const resumeUrl = getDirectDriveLink(data.employerOtherDocs?.fileUrl, 'pdf');
-            let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">';
-            html += `<div><h4 class="font-semibold mb-2">تصویر کارت ملی</h4><div class="file-preview-container">${nationalIdUrl ? `<img src="${nationalIdUrl}" onerror="this.parentElement.innerHTML = '<p>نمایش ممکن نیست</p>';">` : `<p>فایل یافت نشد</p>`}</div></div>`;
-            html += `<div><h4 class="font-semibold mb-2">رزومه (اختیاری)</h4><div class="file-preview-container">${resumeUrl ? `<iframe src="${resumeUrl}"></iframe>` : '<p>ارسال نشده</p>'}</div></div>`;
-            html += '</div>';
-            return html;
+            return `<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div><h4 class="font-semibold mb-2">کارت ملی</h4><div class="file-preview-container">${nationalIdUrl ? `<img src="${nationalIdUrl}">` : 'فایل یافت نشد'}</div></div>
+                <div><h4 class="font-semibold mb-2">رزومه</h4><div class="file-preview-container">${resumeUrl ? `<iframe src="${resumeUrl}"></iframe>` : 'فایل یافت نشد'}</div></div>
+            </div>`;
         }
 
-        function attachSectionEventListeners() {
-             document.querySelectorAll('.section-header').forEach(header => {
-                header.addEventListener('click', (e) => {
-                    if (e.target.closest('button[data-action="edit"]')) return;
-                    const content = header.nextElementSibling;
-                    header.classList.toggle('open');
-                    content.style.display = content.style.display === 'block' ? 'none' : 'block';
-                    if (content.style.display === 'block') {
-                        content.querySelectorAll('.map-container').forEach(mapDiv => {
-                            if (mapDiv && !mapDiv._leaflet_id) initializeMapForSection(mapDiv);
-                        });
-                    }
-                });
-            });
-            document.querySelectorAll('button[data-action="edit"]').forEach(b => b.addEventListener('click', handleEditClick));
-            document.querySelectorAll('button[data-action="cancel"]').forEach(b => b.addEventListener('click', handleCancelClick));
-            document.querySelectorAll('button[data-action="save"]').forEach(b => b.addEventListener('click', handleSaveClick));
-        }
-
-        function initializeMapForSection(mapDiv) {
-            const sectionContent = mapDiv.closest('.section-content');
-            const latInput = sectionContent.querySelector('input[name*="Lat"]');
-            const lngInput = sectionContent.querySelector('input[name*="Lng"]');
-            const lat = parseFloat(latInput.value) || 35.7219;
-            const lng = parseFloat(lngInput.value) || 51.3347;
-            
-            const map = L.map(mapDiv.id).setView([lat, lng], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-            L.marker([lat, lng]).addTo(map);
-        }
-        
-        function handleEditClick(e) {
-            const sectionId = e.currentTarget.dataset.section;
-            const sectionEl = document.getElementById(`section-${sectionId}`);
-            if (sectionId === 'documents') {
-                showModal('ویرایش مدارک در این بخش پشتیبانی نمی‌شود. لطفاً با پشتیبانی تماس بگیرید.', 'info');
-                return;
-            }
-            sectionEl.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
-            sectionEl.querySelector('.section-actions').classList.remove('hidden');
-            e.currentTarget.classList.add('hidden');
-        }
-        
-        function handleCancelClick(e) { renderProfile(); }
-        
-        async function handleSaveClick(e) {
-            const sectionId = e.currentTarget.dataset.section;
-            const sectionEl = document.getElementById(`section-${sectionId}`);
-            const dataToSave = {};
-            sectionEl.querySelectorAll('input, select, textarea').forEach(el => {
-                if (el.name) {
-                    dataToSave[el.name] = el.value;
-                }
-            });
-            await updateProfileSection(sectionId, dataToSave);
-        }
-
-        // --- [NEW] Project Form Logic (Copied from next-dashboard (8).html) ---
         function renderProjectForm(projectData = null) {
             const isEditMode = projectData !== null;
-            contentPanes.createProject.innerHTML = `
-                <div id="projectEditCard" class="project-card bg-white rounded-lg overflow-hidden">
-                    <form id="projectForm">
-                        ${isEditMode ? `<input type="hidden" name="ProjectID" value="${projectData.ProjectID}">` : ''}
-                        <div class="p-6 space-y-6">
-                            <div><label for="projectName" class="block text-gray-700 font-medium mb-1 required-field">نام پروژه</label><input type="text" id="projectName" name="projectName" class="w-full" required value="${projectData?.projectName || ''}"></div>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div><label for="ownerName" class="block text-gray-700 font-medium mb-1 required-field">نام مالک</label><input type="text" id="ownerName" name="ownerName" class="w-full" required value="${projectData?.ownerName || ''}"></div>
-                                <div><label for="permitNumber" class="block text-gray-700 font-medium mb-1 required-field">شماره پروانه</label><input type="text" id="permitNumber" name="permitNumber" class="w-full" required value="${projectData?.permitNumber || ''}"></div>
-                                <div><label for="permitValidity" class="block text-gray-700 font-medium mb-1 required-field">اعتبار پروانه (ماه)</label><input type="number" id="permitValidity" name="permitValidity" min="1" class="w-full" required value="${projectData?.permitValidity || ''}"></div>
-                            </div>
-                            <div>
-                                <label class="block text-gray-700 font-medium mb-1 required-field">آدرس ملک</label>
-                                <div id="project-map" class="h-64 w-full z-10 rounded-lg border"></div>
-                                <textarea id="address" name="address" rows="2" class="w-full mt-2" required placeholder="آدرس متنی در اینجا نمایش داده می‌شود...">${projectData?.address || ''}</textarea>
-                                <input type="hidden" id="latitude" name="latitude" value="${projectData?.latitude || ''}">
-                                <input type="hidden" id="longitude" name="longitude" value="${projectData?.longitude || ''}">
-                            </div>
-                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div><label for="city" class="block text-gray-700 font-medium mb-1 required-field">شهر</label><input type="text" id="city" name="city" class="w-full" required value="${projectData?.city || ''}"></div>
-                                <div><label for="district" class="block text-gray-700 font-medium mb-1 required-field">منطقه شهرداری</label><input type="number" id="district" name="district" min="1" class="w-full" required value="${projectData?.district || ''}"></div>
-                                <div><label for="usageType" class="block text-gray-700 font-medium mb-1 required-field">کاربری ملک</label><select id="usageType" name="usageType" class="w-full" required><option value="مسکونی">مسکونی</option><option value="تجاری">تجاری</option><option value="اداری">اداری</option><option value="صنعتی">صنعتی</option><option value="کشاورزی">کشاورزی</option></select></div>
-                            </div>
-                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div><label for="area" class="block text-gray-700 font-medium mb-1 required-field">متراژ (مترمربع)</label><input type="number" id="area" name="area" min="1" class="w-full" required value="${projectData?.area || ''}"></div>
-                                <div><label for="floors" class="block text-gray-700 font-medium mb-1 required-field">تعداد طبقات</label><input type="number" id="floors" name="floors" min="1" class="w-full" required value="${projectData?.floors || ''}"></div>
-                                <div><label for="basementFloors" class="block text-gray-700 font-medium mb-1 required-field">تعداد طبقات زیرزمین</label><input type="number" id="basementFloors" name="basementFloors" min="0" class="w-full" required value="${projectData?.basementFloors || '0'}"></div>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div><label for="structureType" class="block text-gray-700 font-medium mb-1 required-field">نوع سازه</label><select id="structureType" name="structureType" class="w-full" required><option value="فلزی">فلزی</option><option value="بتنی">بتنی</option></select></div>
-                                <div><label for="fileType" class="block text-gray-700 font-medium mb-1 required-field">نوع پرونده</label><select id="fileType" name="fileType" class="w-full" required><option value="عادی">عادی</option><option value="فرسوده">فرسوده</option></select></div>
-                                <div><label for="contractMonths" class="block text-gray-700 font-medium mb-1 required-field">مدت قرارداد (ماه)</label><input type="number" id="contractMonths" name="contractMonths" min="1" class="w-full" required value="${projectData?.contractMonths || ''}"></div>
-                            </div>
-                            <div class="space-y-2">
-                                <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">مشخصات مهندس مورد نیاز پروژه</h3>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                                    <div><label for="engineerRank" class="block text-gray-700 font-medium mb-1 required-field">پایه مهندس</label><select id="engineerRank" name="engineerRank" class="w-full" required><option value="پایه 3">پایه 3</option><option value="پایه 2">پایه 2</option><option value="پایه 1">پایه 1</option><option value="پایه ارشد">پایه ارشد</option></select></div>
-                                    <div><label for="engineerField" class="block text-gray-700 font-medium mb-1 required-field">رشته مهندس</label><select id="engineerField" name="engineerField" class="w-full" required><option value="معماری">معماری</option><option value="عمران">عمران</option><option value="مکانیک">مکانیک</option><option value="برق">برق</option><option value="شهرسازی">شهرسازی</option><option value="ترافیک">ترافیک</option><option value="نقشه برداری">نقشه برداری</option></select></div>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div><label for="engineerActivity" class="block text-gray-700 font-medium mb-1 required-field">نوع فعالیت مهندس</label><select id="engineerActivity" name="engineerActivity" class="w-full" required><option value="طراح">طراح</option><option value="ناظر">ناظر</option><option value="مجری">مجری</option></select></div>
-                                    <div><label for="permitType" class="block text-gray-700 font-medium mb-1 required-field">نوع پروانه مهندس</label><select id="permitType" name="permitType" class="w-full" required><option value="طراح حقوقی">طراح حقوقی</option><option value="ناظر حقوقی">ناظر حقوقی</option><option value="انبوه ساز">انبوه ساز</option><option value="مجری حقوقی">مجری حقوقی</option><option value="مهندس حقیقی">مهندس حقیقی</option><option value="کاردان">کاردان</option><option value="معمارتجربی">معمارتجربی</option></select></div>
-                                </div>
-                            </div>
-                            <div><label for="description" class="block text-gray-700 font-medium mb-1">توضیحات</label><textarea id="description" name="description" rows="3" class="w-full">${projectData?.description || ''}</textarea></div>
-                        </div>
-                        <div class="border-t border-gray-200 mt-6 p-4 flex justify-end gap-4">
-                            <button type="button" id="cancelProjectFormBtn" class="btn btn-secondary">انصراف</button>
-                            <button type="submit" class="btn btn-primary">${isEditMode ? 'ذخیره تغییرات' : 'ثبت پروژه'}</button>
-                        </div>
-                    </form>
-                </div>
-            `;
-            
-            if (isEditMode) {
-                ['usageType', 'structureType', 'fileType', 'engineerRank', 'engineerField', 'engineerActivity', 'permitType'].forEach(id => {
-                    const select = document.getElementById(id);
-                    if (select && projectData[id]) select.value = projectData[id];
-                });
-            }
+            createProjectContent.innerHTML = `<div class="project-card bg-white rounded-lg overflow-hidden p-6"><form id="projectForm">${isEditMode ? `<input type="hidden" name="ProjectID" value="${projectData.ProjectID}">` : ''}<div class="space-y-6"><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label class="block text-gray-700 font-medium mb-1 required-field">نام پروژه</label><input type="text" name="projectName" required value="${projectData?.projectName || ''}"></div><div><label class="block text-gray-700 font-medium mb-1 required-field">استان</label><select name="province" required>${generateProvinceOptions(projectData?.province || '')}</select></div></div><div><label class="block text-gray-700 font-medium mb-1 required-field">آدرس ملک</label><div id="project-map" class="h-64 w-full z-10 rounded-lg border mb-2"></div><textarea name="address" rows="2" required placeholder="آدرس متنی...">${projectData?.address || ''}</textarea><input type="hidden" name="latitude" value="${projectData?.latitude || ''}"><input type="hidden" name="longitude" value="${projectData?.longitude || ''}"></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label class="block text-gray-700 font-medium mb-1 required-field">شهر</label><input type="text" name="city" required value="${projectData?.city || ''}"></div><div><label class="block text-gray-700 font-medium mb-1 required-field">منطقه شهرداری</label><input type="number" name="district" min="1" required value="${projectData?.district || ''}"></div></div><h3 class="text-lg font-semibold text-gray-800 border-b pb-2 pt-4">مشخصات مهندس مورد نیاز</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label class="block text-gray-700 font-medium mb-1 required-field">پایه مهندس</label><select name="engineerRank" required><option>پایه 3</option><option>پایه 2</option><option>پایه 1</option><option>پایه ارشد</option></select></div><div><label class="block text-gray-700 font-medium mb-1 required-field">رشته مهندس</label><select name="engineerField" required><option>معماری</option><option>عمران</option><option>مکانیک</option><option>برق</option></select></div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label class="block text-gray-700 font-medium mb-1 required-field">نوع فعالیت مهندس</label><select name="engineerActivity" required><option>طراح</option><option>ناظر</option><option>مجری</option></select></div><div><label class="block text-gray-700 font-medium mb-1 required-field">نوع پروانه مهندس</label><select name="permitType" required><option>طراح حقوقی</option><option>ناظر حقوقی</option><option>مهندس حقیقی</option></select></div></div><div><label class="block text-gray-700 font-medium mb-1">توضیحات</label><textarea name="description" rows="3">${projectData?.description || ''}</textarea></div></div><div class="border-t mt-6 pt-4 flex justify-end gap-4"><button type="button" id="cancelProjectFormBtn" class="btn btn-secondary">انصراف</button><button type="submit" class="btn btn-primary">${isEditMode ? 'ذخیره تغییرات' : 'ثبت پروژه'}</button></div></form></div>`;
+            if (isEditMode) { ['engineerRank', 'engineerField', 'engineerActivity', 'permitType'].forEach(id => { const select = document.querySelector(`#projectForm [name=${id}]`); if (select && projectData[id]) select.value = projectData[id]; }); }
             attachProjectFormListeners();
         }
 
@@ -602,17 +469,15 @@
         }
 
         function initializeProjectMap() {
-            if (projectMap) projectMap.remove();
-            const lat = parseFloat(document.getElementById('latitude').value) || 35.7219;
-            const lng = parseFloat(document.getElementById('longitude').value) || 51.3347;
-            projectMap = L.map('project-map').setView([lat, lng], 13);
+            const lat = parseFloat(document.querySelector('#projectForm [name="latitude"]').value) || 35.7219;
+            const lng = parseFloat(document.querySelector('#projectForm [name="longitude"]').value) || 51.3347;
+            const projectMap = L.map('project-map').setView([lat, lng], 13);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(projectMap);
-            projectMarker = L.marker([lat, lng], { draggable: true }).addTo(projectMap);
-            
+            const projectMarker = L.marker([lat, lng], { draggable: true }).addTo(projectMap);
             projectMarker.on('dragend', (e) => {
                 const latlng = e.target.getLatLng();
-                document.getElementById('latitude').value = latlng.lat;
-                document.getElementById('longitude').value = latlng.lng;
+                document.querySelector('#projectForm [name="latitude"]').value = latlng.lat;
+                document.querySelector('#projectForm [name="longitude"]').value = latlng.lng;
             });
         }
 
@@ -621,16 +486,16 @@
             const form = document.getElementById('projectForm');
             const projectData = Object.fromEntries(new FormData(form).entries());
             const action = projectData.ProjectID ? 'updateProject' : 'createProject';
-            const payload = { action, employerEmail: userData.email, projectData };
+            
             pageLoader.style.display = 'flex';
             try {
-                const result = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json());
+                const result = await fetchProtectedData({ action, projectData });
                 if (result.status === 'success') {
-                    showModal(result.message, 'success');
+                    showMessage(result.message, 'success');
                     document.querySelector('.nav-item[data-view="projects"]').click();
                 } else { throw new Error(result.message); }
             } catch (error) {
-                showModal(`خطا: ${error.message}`, 'error');
+                showMessage(`خطا: ${error.message}`, 'error');
             } finally {
                 pageLoader.style.display = 'none';
             }
@@ -640,7 +505,7 @@
             const container = contentPanes.projects;
             container.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
             try {
-                const result = await fetch(`${GOOGLE_SCRIPT_URL}?func=getProjectsByEmployer&email=${encodeURIComponent(userData.email)}`).then(res => res.json());
+                const result = await fetchProtectedData({ action: 'getProjectsByEmployer' });
                 if (result.success) {
                     fetchedProjects = result.data.sort((a, b) => new Date(b.lastModifiedDate) - new Date(a.lastModifiedDate));
                     container.innerHTML = fetchedProjects.length > 0 ? `<div id="project-list-container">${fetchedProjects.map(p => getProjectCardHTML(p)).join('')}</div>` : '<p class="text-center text-slate-500">شما هنوز پروژه‌ای ثبت نکرده‌اید.</p>';
@@ -659,28 +524,50 @@
             const container = contentPanes.dashboard;
             container.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
             try {
-                const result = await fetch(`${GOOGLE_SCRIPT_URL}?func=getDashboardData&email=${encodeURIComponent(userData.email)}`).then(res => res.json());
+                const result = await fetchProtectedData({ action: 'getDashboardData' });
                 if (!result.success) throw new Error(result.message);
                 const { stats, projects } = result.data;
                 const projectsListHtml = projects.length > 0 ? projects.map(p => `<div class="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"><div><p class="font-semibold text-slate-800">${p.projectName}</p><p class="text-sm text-slate-500">وضعیت: ${p.Status}</p></div><div class="text-left"><p class="font-semibold text-blue-600">${p.applicantCount} درخواست</p></div></div>`).join('') : '<p class="text-center text-slate-500">هنوز پروژه‌ای ثبت نکرده‌اید.</p>';
-                container.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"><div class="lg:col-span-2 bg-green-100 text-green-800 p-6 rounded-lg shadow"><p class="text-4xl font-bold">${stats.open}</p><p class="mt-2 font-semibold">پروژه‌های باز</p></div><div class="lg:col-span-2 bg-red-100 text-red-800 p-6 rounded-lg shadow"><p class="text-4xl font-bold">${stats.closed}</p><p class="mt-2 font-semibold">پروژه‌های بسته</p></div><div class="lg:col-span-4 bg-white rounded-lg shadow overflow-hidden flex flex-col md:flex-row items-center"><div class="p-6 flex-grow"><h3 class="text-lg font-bold text-slate-800 mb-2">پروژه جدیدی دارید؟</h3><p class="text-slate-600 mb-4">با ثبت پروژه، آن را در معرض دید صدها مهندس متخصص قرار دهید.</p><button id="dashboardCreateProjectBtn" class="btn btn-special"><i class="fas fa-plus-circle"></i><span>ثبت پروژه جدید</span></button></div><div class="w-full md:w-1/3 h-48 md:h-full flex-shrink-0"><img src="https://images.unsplash.com/photo-1580922942632-fb585198592e?w=600&auto=format&fit=crop" class="w-full h-full object-cover" alt="Building"></div></div><div class="lg:col-span-4 bg-white p-6 rounded-lg shadow"><h3 class="text-lg font-bold text-slate-800 mb-4">آخرین پروژه‌ها</h3><div class="space-y-3">${projectsListHtml}</div></div></div>`;
+                container.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"><div class="lg:col-span-2 bg-green-100 text-green-800 p-6 rounded-lg shadow"><p class="text-4xl font-bold">${stats.open}</p><p class="mt-2 font-semibold">پروژه‌های باز</p></div><div class="lg:col-span-2 bg-red-100 text-red-800 p-6 rounded-lg shadow"><p class="text-4xl font-bold">${stats.closed}</p><p class="mt-2 font-semibold">پروژه‌های بسته</p></div><div class="lg:col-span-4 bg-white rounded-lg shadow overflow-hidden flex flex-col md:flex-row items-center"><div class="p-6 flex-grow"><h3 class="text-lg font-bold text-slate-800 mb-2">پروژه جدیدی دارید؟</h3><p class="text-slate-600 mb-4">با ثبت پروژه، آن را در معرض دید صدها مهندس متخصص قرار دهید.</p><button id="dashboardCreateProjectBtn" class="btn btn-special-project"><i class="fas fa-plus-circle"></i><span>ثبت پروژه جدید</span></button></div><div class="w-full md:w-1/3 h-48 md:h-full flex-shrink-0"><img src="https://images.unsplash.com/photo-1580922942632-fb585198592e?w=600&auto=format&fit=crop" class="w-full h-full object-cover" alt="Building"></div></div><div class="lg:col-span-4 bg-white p-6 rounded-lg shadow"><h3 class="text-lg font-bold text-slate-800 mb-4">آخرین پروژه‌ها</h3><div class="space-y-3">${projectsListHtml}</div></div></div>`;
                 document.getElementById('dashboardCreateProjectBtn').addEventListener('click', () => document.querySelector('.nav-item[data-view="create-project"]').click());
             } catch (error) {
                 container.innerHTML = `<p class="text-center text-red-500">خطا: ${error.message}</p>`;
             }
         }
-        
+
+        async function renderEngineersMarketplace() {
+            const container = contentPanes.engineers;
+            container.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
+            try {
+                const result = await fetchProtectedData({ action: 'getEngineersMarketplace' });
+                if (result.success) {
+                    fetchedEngineers = result.data.activeActivities || [];
+                    requestedActivityIds = new Set(result.data.requestedActivityIds || []);
+                    container.innerHTML = fetchedEngineers.length > 0 ? `<div id="activity-list-container">${fetchedEngineers.map(e => getEngineerActivityCardHTML(e)).join('')}</div>` : '<p class="text-center text-slate-500">در حال حاضر هیچ مهندسی فعالیت خود را معرفی نکرده است.</p>';
+                } else { throw new Error(result.message); }
+            } catch (error) {
+                container.innerHTML = `<p class="text-center text-red-500">خطا: ${error.message}</p>`;
+            }
+        }
+
+        function getEngineerActivityCardHTML(activity) {
+            const isRequested = requestedActivityIds.has(activity.ActivityID);
+            const buttonHtml = isRequested ? `<button data-action="cancel-collaboration" data-activity-id="${activity.ActivityID}" class="btn btn-danger w-full"><i class="fas fa-times-circle mr-2"></i>لغو درخواست</button>` : `<button data-action="request-collaboration" data-activity-id="${activity.ActivityID}" class="btn btn-success w-full"><i class="fas fa-paper-plane mr-2"></i>ارسال درخواست همکاری</button>`;
+            return `<div class="activity-card bg-white rounded-lg overflow-hidden"><div class="p-4 border-b"><h4 class="font-bold text-lg text-slate-800">${activity.engineerActivity} ${activity.engineerField} - ${activity.engineerLevel}</h4><p class="text-sm text-slate-500 mt-1">${activity.city}, ${activity.province}</p></div><div class="p-4 text-sm"><p><strong>نوع پروانه:</strong> ${activity.licenseType}</p><p><strong>آخرین بروزرسانی:</strong> ${formatTimeAgo(activity.lastModifiedDate)}</p></div><div class="flex justify-between p-4 bg-gray-50 border-t">${buttonHtml}</div></div>`;
+        }
+
         // --- ACTIONS ---
         async function handleMainActions(e) {
             const button = e.target.closest('button[data-action]');
             if (!button) return;
-            const { action, projectId } = button.dataset;
+            const { action, projectId, activityId } = button.dataset;
+            
             switch (action) {
                 case 'edit-project':
                     const projectToEdit = fetchedProjects.find(p => p.ProjectID === projectId);
                     if (projectToEdit) {
                         document.querySelector('[data-view="create-project"]').click();
-                        setTimeout(() => renderProjectForm(projectToEdit), 50);
+                        renderProjectForm(projectToEdit);
                     }
                     break;
                 case 'close-project':
@@ -688,11 +575,20 @@
                     const newStatus = action === 'close-project' ? 'بسته' : 'باز';
                     showModal(`آیا از ${newStatus} کردن این پروژه مطمئن هستید؟`, 'confirm', async () => {
                         pageLoader.style.display = 'flex';
-                        const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'changeProjectStatus', projectId, newStatus }) }).then(r => r.json());
+                        const res = await fetchProtectedData({ action: 'changeProjectStatus', projectId, newStatus });
                         pageLoader.style.display = 'none';
-                        if (res.status === 'success') { showModal(res.message, 'success'); renderEmployerProjects(); }
-                        else { showModal(res.message, 'error'); }
+                        if (res.status === 'success') { showMessage(res.message, 'success'); renderEmployerProjects(); }
+                        else { showMessage(res.message, 'error'); }
                     });
+                    break;
+                case 'request-collaboration':
+                case 'cancel-collaboration':
+                    button.disabled = true;
+                    button.innerHTML = '<div class="spinner !w-5 !h-5 !border-2"></div>';
+                    const payload = { action, activityId };
+                    const res = await fetchProtectedData(payload);
+                    if (res.status === 'success') { showMessage(res.message, 'success'); renderEngineersMarketplace(); }
+                    else { showMessage(res.message, 'error'); button.disabled = false; }
                     break;
             }
         }
@@ -704,6 +600,7 @@
                 'dashboard': { title: 'داشبورد', render: renderEmployerDashboard, refreshable: true },
                 'profile': { title: 'پروفایل کاربری', render: renderProfile },
                 'projects': { title: 'پروژه‌های من', render: renderEmployerProjects, refreshable: true },
+                'engineers': { title: 'بازار کار مهندسان', render: renderEngineersMarketplace, refreshable: true },
                 'create-project': { title: 'ثبت پروژه', render: () => renderProjectForm() },
                 'settings': { title: 'تنظیمات', render: () => {} }
             };
@@ -727,33 +624,22 @@
         }
 
         async function initializePage() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const emailFromUrl = urlParams.get('email');
-            let userEmail = sessionStorage.getItem('userEmail');
-
-            if (emailFromUrl) {
-                userEmail = emailFromUrl;
-                sessionStorage.setItem('userEmail', userEmail);
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-
-            if (!userEmail) {
-                window.location.href = 'employer-ws.html';
+            if (!authToken) {
+                window.location.href = 'index.html';
                 return;
             }
 
             try {
-                const result = await fetch(`${GOOGLE_SCRIPT_URL}?func=getUserProfile&email=${encodeURIComponent(userEmail)}`).then(res => res.json());
+                const result = await fetchProtectedData({ action: 'getUserProfile' });
 
                 if (!result.success || result.data.role !== 'employer') {
-                    showModal('شما اجازه دسترسی به این صفحه را ندارید. لطفاً به عنوان کارفرما وارد شوید.', 'error', () => {
-                        sessionStorage.removeItem('userEmail');
-                        window.location.href = 'index.html';
-                    });
+                    showMessage('شما اجازه دسترسی به این صفحه را ندارید.', 'error');
+                    sessionStorage.removeItem('authToken');
+                    window.location.href = 'index.html';
                     return;
                 }
                 
-                userData = { ...result.data, email: userEmail };
+                userData = result.data;
                 workstationWrapper.style.display = 'flex';
                 pageLoader.style.display = 'none';
 
@@ -764,12 +650,12 @@
                 document.querySelector('.main-content-area').addEventListener('click', handleMainActions);
                 logoutButton.addEventListener('click', (e) => {
                     e.preventDefault();
-                    sessionStorage.removeItem('userEmail');
+                    sessionStorage.removeItem('authToken');
                     window.location.href = 'index.html';
                 });
 
             } catch (error) {
-                pageLoader.innerHTML = `<p class="text-red-600 font-bold p-4">خطا در بارگذاری: ${error.message}</p>`;
+                pageLoader.innerHTML = `<p class="text-red-600 font-bold p-4">امکان بارگذاری اطلاعات وجود ندارد. لطفاً دوباره وارد شوید.</p>`;
             }
         }
 
