@@ -240,7 +240,7 @@
     // This script is specifically for the ENGINEER workstation.
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyEXn3OCvVo-wveUL88mSGFeAyAM_JAvyNYKZ3olRx6ieTkYvM8vspS0p7TPLtlpK_h/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwo2Vi-b_nUqDYS-fkB4kEwh0k7QFd9BPu2qco3KsaS6nbNldBdXPQaF8fYaBTtb6-x/exec';
         const PROVINCES = ["آذربایجان شرقی", "آذربایجان غربی", "اردبیل", "اصفهان", "البرز", "ایلام", "بوشهر", "تهران", "چهارمحال و بختیاری", "خراسان جنوبی", "خراسان رضوی", "خراسان شمالی", "خوزستان", "زنجان", "سمنان", "سیستان و بلوچستان", "فارس", "قزوین", "قم", "کردستان", "کرمان", "کرمانشاه", "کهگیلویه و بویراحمد", "گلستان", "گیلان", "لرستان", "مازندران", "مرکزی", "هرمزگان", "همدان", "یزد"];
 
         // --- STATE ---
@@ -249,6 +249,7 @@
         let fetchedActivities = [];
         let appliedProjectIds = new Set();
         let currentActivityData = {};
+        const authToken = sessionStorage.getItem('authToken');
 
         // --- DOM ELEMENTS ---
         const pageLoader = document.getElementById('page-loader');
@@ -269,6 +270,41 @@
             settings: document.getElementById('settingsContent'),
         };
         
+        // --- API HELPER ---
+        async function fetchProtectedData(payload) {
+            if (!authToken) {
+                window.location.href = 'index.html';
+                return Promise.reject('No token found');
+            }
+            
+            payload.token = authToken;
+
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('خطا در شبکه');
+                
+                const result = await response.json();
+
+                if (result.reason === 'AUTH_FAILED') {
+                    showMessage(result.message, 'error');
+                    sessionStorage.removeItem('authToken');
+                    setTimeout(() => window.location.href = 'index.html', 2000);
+                    throw new Error('Authentication failed');
+                }
+                
+                return result;
+
+            } catch (error) {
+                console.error("Fetch error:", error);
+                showMessage('خطا در ارتباط با سرور.', 'error');
+                throw error;
+            }
+        }
+
         // --- HELPER FUNCTIONS ---
         function generateProvinceOptions(selectedValue = "") {
             return PROVINCES.map(p => `<option value="${p}" ${p === selectedValue ? 'selected' : ''}>${p}</option>`).join('');
@@ -377,7 +413,6 @@
                 ${getSectionHTML('professional', 'اطلاعات حرفه‌ای', 'fa-briefcase', '<div>اطلاعات حرفه‌ای در اینجا نمایش داده می‌شود.</div>')}
                 ${getSectionHTML('documents', 'مدارک', 'fa-file-alt', getDocumentsHTML(userData.files))}
             `;
-            // Re-attach listeners for the newly created elements
             profileContent.querySelectorAll('.section-header').forEach(header => header.addEventListener('click', (e) => {
                 if (!e.target.closest('button')) {
                     const content = header.nextElementSibling;
@@ -419,26 +454,26 @@
             </div>`;
         }
         
-        function renderProjectMarketplace() {
+        async function renderProjectMarketplace() {
             const container = contentPanes.projects;
             container.innerHTML = `<div id="project-list-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>`;
             const listContainer = document.getElementById('project-list-container');
             listContainer.innerHTML = '<div class="spinner mx-auto mt-10 col-span-full"></div>';
 
-            fetch(`${GOOGLE_SCRIPT_URL}?func=getMarketplaceData&email=${encodeURIComponent(userData.email)}`)
-                .then(res => res.json())
-                .then(result => {
-                    if (result.success) {
-                        fetchedProjects = result.data.openProjects || [];
-                        appliedProjectIds = new Set(result.data.appliedProjectIds || []);
-                        if (fetchedProjects.length > 0) {
-                            listContainer.innerHTML = fetchedProjects.map(p => getProjectCardHTML(p)).join('');
-                        } else {
-                            listContainer.innerHTML = '<p class="text-center text-slate-500 col-span-full">در حال حاضر پروژه‌ای برای نمایش وجود ندارد.</p>';
-                        }
-                    } else throw new Error(result.message);
-                })
-                .catch(error => listContainer.innerHTML = `<p class="text-center text-red-500 col-span-full">خطا: ${error.message}</p>`);
+            try {
+                const result = await fetchProtectedData({ action: 'getMarketplaceData' });
+                if (result.success) {
+                    fetchedProjects = result.data.openProjects || [];
+                    appliedProjectIds = new Set(result.data.appliedProjectIds || []);
+                    if (fetchedProjects.length > 0) {
+                        listContainer.innerHTML = fetchedProjects.map(p => getProjectCardHTML(p)).join('');
+                    } else {
+                        listContainer.innerHTML = '<p class="text-center text-slate-500 col-span-full">در حال حاضر پروژه‌ای برای نمایش وجود ندارد.</p>';
+                    }
+                } else throw new Error(result.message);
+            } catch (error) {
+                listContainer.innerHTML = `<p class="text-center text-red-500 col-span-full">خطا: ${error.message}</p>`;
+            }
         }
 
         function getProjectCardHTML(project) {
@@ -462,25 +497,25 @@
             </div>`;
         }
 
-        function renderMyActivities() {
+        async function renderMyActivities() {
             const container = contentPanes.myActivities;
             container.innerHTML = '<div id="activity-list-container" class="space-y-4"></div>';
             const listContainer = document.getElementById('activity-list-container');
             listContainer.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
 
-            fetch(`${GOOGLE_SCRIPT_URL}?func=getActivitiesByEngineer&email=${encodeURIComponent(userData.email)}`)
-                .then(res => res.json())
-                .then(result => {
-                    if (result.success) {
-                        fetchedActivities = result.data || [];
-                        if (fetchedActivities.length > 0) {
-                            listContainer.innerHTML = fetchedActivities.map(a => getActivityCardHTML(a)).join('');
-                        } else {
-                            listContainer.innerHTML = '<p class="text-center text-slate-500">شما هنوز فعالیتی ثبت نکرده‌اید.</p>';
-                        }
-                    } else throw new Error(result.message);
-                })
-                .catch(error => listContainer.innerHTML = `<p class="text-center text-red-500">خطا: ${error.message}</p>`);
+            try {
+                const result = await fetchProtectedData({ action: 'getActivitiesByEngineer' });
+                if (result.success) {
+                    fetchedActivities = result.data || [];
+                    if (fetchedActivities.length > 0) {
+                        listContainer.innerHTML = fetchedActivities.map(a => getActivityCardHTML(a)).join('');
+                    } else {
+                        listContainer.innerHTML = '<p class="text-center text-slate-500">شما هنوز فعالیتی ثبت نکرده‌اید.</p>';
+                    }
+                } else throw new Error(result.message);
+            } catch (error) {
+                listContainer.innerHTML = `<p class="text-center text-red-500">خطا: ${error.message}</p>`;
+            }
         }
 
         function getActivityCardHTML(activity) {
@@ -518,7 +553,6 @@
                 </form>
             </div>`;
             
-            // Populate selects and attach listeners
             document.getElementById('activityForm').addEventListener('submit', submitActivityData);
             document.getElementById('cancelActivityBtn').addEventListener('click', () => document.querySelector('[data-view="my-activities"]').click());
         }
@@ -531,7 +565,6 @@
                 province: form.querySelector('#activityProvince').value,
                 city: form.querySelector('#activityCity').value,
                 licenseType: form.querySelector('#licenseType').value,
-                // ... collect other fields
             };
             if (currentActivityData.ActivityID) {
                 activityData.ActivityID = currentActivityData.ActivityID;
@@ -540,17 +573,13 @@
             
             pageLoader.style.display = 'flex';
             try {
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action, engineerEmail: userData.email, activityData })
-                }).then(res => res.json());
-
+                const response = await fetchProtectedData({ action, activityData });
                 if (response.status === 'success') {
-                    showModal(response.message, 'success');
+                    showMessage(response.message, 'success');
                     document.querySelector('[data-view="my-activities"]').click();
                 } else throw new Error(response.message);
             } catch (error) {
-                showModal(`خطا: ${error.message}`, 'error');
+                showMessage(`خطا: ${error.message}`, 'error');
             } finally {
                 pageLoader.style.display = 'none';
             }
@@ -568,16 +597,17 @@
                 case 'cancel-application':
                     button.disabled = true;
                     button.innerHTML = '<div class="spinner !w-5 !h-5 !border-2"></div>';
-                    payload = { action, engineerEmail: userData.email, projectId };
+                    payload = { action, projectId };
                     try {
-                        const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) }).then(r => r.json());
+                        const res = await fetchProtectedData(payload);
                         if (res.status === 'success') {
-                            showModal(res.message, 'success');
-                            renderProjectMarketplace(); // Refresh
+                            showMessage(res.message, 'success');
+                            renderProjectMarketplace();
                         } else throw new Error(res.message);
                     } catch (err) {
-                        showModal(err.message, 'error');
-                        button.disabled = false; // Re-enable on error
+                        showMessage(err.message, 'error');
+                        button.disabled = false;
+                        renderProjectMarketplace();
                     }
                     break;
                 case 'edit-activity':
@@ -588,7 +618,7 @@
                 case 'change-activity-status':
                      payload = { action, activityId, newStatus };
                      showModal(`آیا از تغییر وضعیت به "${newStatus}" مطمئن هستید؟`, 'confirm', async () => {
-                        const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) }).then(r => r.json());
+                        const res = await fetchProtectedData(payload);
                         if (res.status === 'success') renderMyActivities();
                         else showModal(res.message, 'error');
                      });
@@ -624,57 +654,6 @@
                 const activeView = document.querySelector('.nav-item.active').dataset.view;
                 if (viewActions[activeView]?.refreshable) viewActions[activeView].render();
             });
-        }
-
-        async function initializePage() {
-            // First, check if the email is passed as a URL parameter (from login redirect)
-            const urlParams = new URLSearchParams(window.location.search);
-            const emailFromUrl = urlParams.get('email');
-
-            let userEmail = sessionStorage.getItem('userEmail');
-
-            if (emailFromUrl) {
-                userEmail = emailFromUrl;
-                sessionStorage.setItem('userEmail', userEmail); // Store it for the session
-                // Clean the URL to hide the email parameter
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-
-            if (!userEmail) {
-                // If no email in session or URL, redirect to login
-                window.location.href = 'index.html';
-                return;
-            }
-
-            try {
-                const result = await fetch(`${GOOGLE_SCRIPT_URL}?func=getUserProfile&email=${encodeURIComponent(userEmail)}`).then(res => res.json());
-
-                if (!result.success || result.data.role !== 'engineer') {
-                    showModal('شما اجازه دسترسی به این صفحه را ندارید. لطفاً به عنوان مهندس وارد شوید.', 'error', () => {
-                        sessionStorage.removeItem('userEmail');
-                        window.location.href = 'index.html';
-                    });
-                    return;
-                }
-                
-                userData = { ...result.data, email: userEmail };
-                workstationWrapper.style.display = 'flex';
-                pageLoader.style.display = 'none';
-
-                initSlideshow();
-                setupViewSwitcher();
-                document.querySelector('[data-view="dashboard"]').click(); // Start on dashboard
-                
-                document.querySelector('.main-content-area').addEventListener('click', handleMainActions);
-                logoutButton.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    sessionStorage.removeItem('userEmail');
-                    window.location.href = 'engineer-ws.html';
-                });
-
-            } catch (error) {
-                pageLoader.innerHTML = `<p class="text-red-600 font-bold p-4">خطا در بارگذاری: ${error.message}</p>`;
-            }
         }
 
         initializePage();
