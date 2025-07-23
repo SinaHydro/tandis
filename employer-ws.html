@@ -17,6 +17,9 @@
         <script src="https://unpkg.com/jquery@3.5.1/dist/jquery.min.js"></script>
         <script src="https://unpkg.com/persian-date@1.1.0/dist/persian-date.min.js"></script>
         <script src="https://unpkg.com/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+        <!-- Toastify JS for notifications -->
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
         <style>
             body { font-family: 'Vazirmatn', 'Tahoma', sans-serif; background-color: #f8fafc; }
@@ -28,11 +31,15 @@
             .app-footer { background-color: #f1f5f9; color: #475569; padding: 0.75rem; text-align: center; font-size: 0.75rem; border-top: 1px solid #e2e8f0; flex-shrink: 0; }
             
             /* Loading Screen Styles */
-            #loadingScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; background: linear-gradient(135deg, #FDFEFF 0%, #FCFDFF 50%, #EFF9FF 100%); }
-            #loadingMessage { font-size: 1.75rem; line-height:2.25rem; font-weight: 700; color: #212121; margin-top:1.5rem;} 
+            #loadingScreen { display: flex; flex-direction: row; align-items: stretch; justify-content: center; height: 100%; text-align: center; background: linear-gradient(135deg, #FDFEFF 0%, #FCFDFF 50%, #EFF9FF 100%); }
+            .loading-content { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
+            .welcome-banner { width: 20vw; max-width: 220px; min-width:150px; background-color: rgba(255,255,255,0.5); display: none; align-items: center; justify-content: center; overflow: hidden; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.03); margin: 2rem; height: calc(100vh - 8rem); } 
+            .welcome-banner img { width: 100%; height: 100%; object-fit: cover; }
+            @media (min-width: 1024px) { .welcome-banner { display: flex; } }
+
             .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 48px; height: 48px; border-radius: 50%; border-left-color: #0ea5e9; animation: spin 1s ease infinite; margin-top: 2rem; margin-bottom: 1rem; }
             @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
+            
             /* Profile Section Styles */
             .profile-section { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.75rem; margin-bottom: 1.5rem; overflow: hidden; transition: all 0.3s ease; }
             .section-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; cursor: pointer; user-select: none; background-color: #fdfdfe; border-bottom: 1px solid #e2e8f0; }
@@ -43,7 +50,7 @@
             .section-content.open { display: block; animation: fadeIn 0.5s ease; }
             @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
             .section-footer { padding: 1rem 1.5rem; background-color: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 0.75rem; }
-
+            
             /* General Styles */
             label.required::after { content: " *"; color: #ef4444; }
             input, textarea, select { background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.625rem 0.875rem; transition: all 0.2s ease; width: 100%; }
@@ -65,20 +72,31 @@
         <div id="app" class="form-container-wrapper"> 
             
             <div id="loadingScreen">
-                <div class="border-b-2 flex items-center justify-center pb-11 w-full">
-                    <img src="https://tandis.shahraavand.ir/images/new-TLogo_B.avif" alt="لوگوی تندیس شهرآوند" class="h-30 w-30 ml-5" width="100" height="100" loading="lazy">
-                    <div>
-                        <h1 class="font-black text-4xl text-center text-blue-700">نظام تندیس</h1>
-                        <p class="font-extrabold pt-2 text-lg leading-5 text-center text-yellow-600">تدارک نیازمندی دقیق و یکپارچه ساختمان</p>
-                    </div>
+                <div class="welcome-banner">
+                     <img src="https://images.unsplash.com/photo-1657450717464-b2989dd69a66?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Ymx1ZSUyMGZsb3dlcnxlbnwwfDF8MHx8fDI%3D" 
+                          alt="گل‌های آبی" 
+                          onerror="this.onerror=null;this.src='https://placehold.co/220x500/EBF4FF/2196F3?text=Flowers';">
                 </div>
-                <h2 id="loadingMessage" class="font-bold text-2xl">خوش آمدید!</h2>
-                <div class="spinner"></div>
-                <p class="text-slate-600">در حال بارگذاری اطلاعات حساب کاربری شما...</p>
+                <div class="loading-content">
+                    <div class="border-b-2 flex items-center justify-center pb-11 w-full">
+                        <img src="https://tandis.shahraavand.ir/images/new-TLogo_B.avif" alt="لوگوی تندیس شهرآوند" class="h-30 w-30 ml-5" width="100" height="100" loading="lazy">
+                        <div>
+                            <h1 class="font-black text-4xl text-center text-blue-700">نظام تندیس</h1>
+                            <p class="font-extrabold pt-2 text-lg leading-5 text-center text-yellow-600">تدارک نیازمندی دقیق و یکپارچه ساختمان</p>
+                        </div>
+                    </div>
+                    <h2 class="font-bold text-2xl mt-8">خوش آمدید!</h2>
+                    <div class="spinner"></div>
+                    <p class="text-slate-600">در حال بارگذاری اطلاعات حساب کاربری شما...</p>
+                </div>
+                 <div class="welcome-banner">
+                     <img src="https://images.unsplash.com/photo-1657450717464-b2989dd69a66?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Ymx1ZSUyMGZsb3dlcnxlbnwwfDF8MHx8fDI%3D" 
+                          alt="گل‌های آبی"
+                          onerror="this.onerror=null;this.src='https://placehold.co/220x500/FFF3E0/FFB300?text=Flowers';">
+                </div>
             </div>
 
             <div id="mainFormView" class="hidden flex-col md:flex-row flex-1 overflow-hidden"> 
-                <!-- Sidebar for Desktop -->
                 <div id="stepsSidebar" class="flex-shrink-0 hidden overflow-y-auto p-5 w-64 md:flex md:flex-col lg:w-72"> 
                     <div class="mb-5 text-center">
                         <div class="relative w-36 h-36 mx-auto mb-3 rounded-full overflow-hidden border-2 border-sky-400 shadow-lg"> 
@@ -89,22 +107,17 @@
                     </div>
                     <div class="bg-sky-300 h-px my-4"></div>
                     <p class="text-sm text-center text-slate-600">به پنل کاربری خود در نظام تندیس خوش آمدید.</p>
-                    <button id="logoutButton" class="btn btn-danger w-full mt-auto">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>خروج از حساب</span>
-                    </button>
+                    <button id="logoutButton" class="btn btn-danger w-full mt-auto"><i class="fas fa-sign-out-alt"></i><span>خروج از حساب</span></button>
                 </div>
 
-                <!-- Main Content Area -->
                 <div class="form-content-area flex-1"> 
-                    <!-- Form Content (Scrollable) -->
                     <div class="form-content">
                         <!-- Section 1: Personal Info -->
                         <div id="section-1" class="profile-section">
                             <div class="section-header">
                                 <h3><i class="fas fa-user-tie text-sky-500"></i>۱. مشخصات فردی</h3>
                                 <div class="flex items-center gap-4">
-                                    <span class="text-sm font-medium text-green-600 hidden"><i class="fas fa-check-circle"></i> ذخیره شد</span>
+                                    <span class="save-success-msg text-sm font-medium text-green-600 hidden"><i class="fas fa-check-circle"></i> ذخیره شد</span>
                                     <button class="btn btn-secondary !py-1 !px-3 text-sm edit-btn"><i class="fas fa-edit"></i> ویرایش</button>
                                     <i class="fas fa-chevron-down section-toggle-icon"></i>
                                 </div>
@@ -112,39 +125,14 @@
                             <div class="section-content">
                                 <form data-section="step1">
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
-                                        <div>
-                                            <label for="employerFirstName" class="block text-sm font-medium text-slate-700 mb-1 required">نام</label>
-                                            <input type="text" id="employerFirstName" name="employerFirstName" required disabled>
-                                        </div>
-                                        <div>
-                                            <label for="employerLastName" class="block text-sm font-medium text-slate-700 mb-1 required">نام خانوادگی</label>
-                                            <input type="text" id="employerLastName" name="employerLastName" required disabled>
-                                        </div>
-                                        <div>
-                                            <label for="employerNationalId" class="block text-sm font-medium text-slate-700 mb-1 required">کدملی</label>
-                                            <input type="text" id="employerNationalId" name="employerNationalId" required pattern="\d{10}" disabled>
-                                        </div>
-                                        <div>
-                                            <label for="employerDob" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ تولد</label>
-                                            <input type="text" id="employerDob" required class="jalali-datepicker-display" readonly disabled>
-                                            <input type="hidden" name="employerDob" class="jalali-datepicker-value">
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-slate-700 mb-1 required">جنسیت</label>
-                                            <select id="employerGender" name="employerGender" required disabled>
-                                                <option value="مرد">مرد</option>
-                                                <option value="زن">زن</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label for="employerMobile" class="block text-sm font-medium text-slate-700 mb-1 required">تلفن موبایل</label>
-                                            <input type="tel" id="employerMobile" name="employerMobile" required pattern="09\d{9}" disabled>
-                                        </div>
+                                        <div><label for="employerFirstName" class="block text-sm font-medium text-slate-700 mb-1 required">نام</label><input type="text" id="employerFirstName" name="employerFirstName" required disabled></div>
+                                        <div><label for="employerLastName" class="block text-sm font-medium text-slate-700 mb-1 required">نام خانوادگی</label><input type="text" id="employerLastName" name="employerLastName" required disabled></div>
+                                        <div><label for="employerNationalId" class="block text-sm font-medium text-slate-700 mb-1 required">کدملی</label><input type="text" id="employerNationalId" name="employerNationalId" required pattern="\d{10}" disabled></div>
+                                        <div><label for="employerDob" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ تولد</label><input type="text" id="employerDob" required class="jalali-datepicker-display" readonly disabled><input type="hidden" name="employerDob" class="jalali-datepicker-value"></div>
+                                        <div><label class="block text-sm font-medium text-slate-700 mb-1 required">جنسیت</label><select id="employerGender" name="employerGender" required disabled><option value="مرد">مرد</option><option value="زن">زن</option></select></div>
+                                        <div><label for="employerMobile" class="block text-sm font-medium text-slate-700 mb-1 required">تلفن موبایل</label><input type="tel" id="employerMobile" name="employerMobile" required pattern="09\d{9}" disabled></div>
                                     </div>
-                                    <div class="section-footer hidden">
-                                        <button type="button" class="btn btn-secondary cancel-btn">انصراف</button>
-                                        <button type="submit" class="btn btn-success save-btn">ذخیره تغییرات</button>
-                                    </div>
+                                    <div class="section-footer hidden"><button type="button" class="btn btn-secondary cancel-btn">انصراف</button><button type="submit" class="btn btn-success save-btn">ذخیره تغییرات</button></div>
                                 </form>
                             </div>
                         </div>
@@ -154,7 +142,7 @@
                             <div class="section-header">
                                 <h3><i class="fas fa-address-book text-sky-500"></i>۲. اطلاعات تماس</h3>
                                 <div class="flex items-center gap-4">
-                                    <span class="text-sm font-medium text-green-600 hidden"><i class="fas fa-check-circle"></i> ذخیره شد</span>
+                                    <span class="save-success-msg text-sm font-medium text-green-600 hidden"><i class="fas fa-check-circle"></i> ذخیره شد</span>
                                     <button class="btn btn-secondary !py-1 !px-3 text-sm edit-btn"><i class="fas fa-edit"></i> ویرایش</button>
                                     <i class="fas fa-chevron-down section-toggle-icon"></i>
                                 </div>
@@ -162,36 +150,20 @@
                             <div class="section-content">
                                 <form data-section="step2">
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
-                                        <div>
-                                            <label for="employerPhone" class="block text-sm font-medium text-slate-700 mb-1 required">شماره تماس</label>
-                                            <input type="tel" id="employerPhone" name="employerPhone" required disabled>
-                                        </div>
-                                        <div>
-                                            <label for="employerPostalCode" class="block text-sm font-medium text-slate-700 mb-1 required">کدپستی</label>
-                                            <input type="text" id="employerPostalCode" name="employerPostalCode" required pattern="\d{10}" disabled>
-                                        </div>
-                                        <div>
-                                            <label for="employerProvince" class="block text-sm font-medium text-slate-700 mb-1 required">استان سکونت</label>
-                                            <select id="employerProvince" name="employerProvince" required disabled></select>
-                                        </div>
-                                        <div>
-                                            <label for="employerCity" class="block text-sm font-medium text-slate-700 mb-1">شهر سکونت</label>
-                                            <input type="text" id="employerCity" name="employerCity" disabled>
-                                        </div>
+                                        <div><label for="employerPhone" class="block text-sm font-medium text-slate-700 mb-1 required">شماره تماس</label><input type="tel" id="employerPhone" name="employerPhone" required disabled></div>
+                                        <div><label for="employerPostalCode" class="block text-sm font-medium text-slate-700 mb-1 required">کدپستی</label><input type="text" id="employerPostalCode" name="employerPostalCode" required pattern="\d{10}" disabled></div>
+                                        <div><label for="employerProvince" class="block text-sm font-medium text-slate-700 mb-1 required">استان سکونت</label><select id="employerProvince" name="employerProvince" required disabled></select></div>
+                                        <div><label for="employerCity" class="block text-sm font-medium text-slate-700 mb-1">شهر سکونت</label><input type="text" id="employerCity" name="employerCity" disabled></div>
                                     </div>
                                     <div class="mt-8">
                                         <label class="block text-sm font-medium text-slate-700 mb-1">آدرس</label>
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
                                             <textarea id="employerAddress" name="employerAddress" rows="4" class="min-h-[220px]" disabled></textarea>
-                                            <div id="employerAddressMap" class="map-container min-h-[220px]"></div>
+                                            <div id="employerAddressMap" class="map-container min-h-[220px]" data-map-initialized="false"></div>
                                         </div>
-                                        <input type="hidden" id="employerAddressLat" name="employerAddressLat">
-                                        <input type="hidden" id="employerAddressLng" name="employerAddressLng">
+                                        <input type="hidden" id="employerAddressLat" name="employerAddressLat"><input type="hidden" id="employerAddressLng" name="employerAddressLng">
                                     </div>
-                                    <div class="section-footer hidden">
-                                        <button type="button" class="btn btn-secondary cancel-btn">انصراف</button>
-                                        <button type="submit" class="btn btn-success save-btn">ذخیره تغییرات</button>
-                                    </div>
+                                    <div class="section-footer hidden"><button type="button" class="btn btn-secondary cancel-btn">انصراف</button><button type="submit" class="btn btn-success save-btn">ذخیره تغییرات</button></div>
                                 </form>
                             </div>
                         </div>
@@ -201,7 +173,7 @@
                             <div class="section-header">
                                 <h3><i class="fas fa-building text-sky-500"></i>۳. اطلاعات شرکت</h3>
                                 <div class="flex items-center gap-4">
-                                    <span class="text-sm font-medium text-green-600 hidden"><i class="fas fa-check-circle"></i> ذخیره شد</span>
+                                    <span class="save-success-msg text-sm font-medium text-green-600 hidden"><i class="fas fa-check-circle"></i> ذخیره شد</span>
                                     <button class="btn btn-secondary !py-1 !px-3 text-sm edit-btn"><i class="fas fa-edit"></i> ویرایش</button>
                                     <i class="fas fa-chevron-down section-toggle-icon"></i>
                                 </div>
@@ -209,34 +181,24 @@
                             <div class="section-content">
                                 <form data-section="step3">
                                     <div class="flex items-center mb-4">
-                                        <input type="checkbox" id="employerHasCompany" name="employerHasCompany" class="h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500" disabled>
+                                        <input type="checkbox" id="employerHasCompany" name="employerHasCompany" class="h-4 w-4 text-sky-600" disabled>
                                         <label for="employerHasCompany" class="ml-2 mr-2 block text-sm text-slate-700">شرکت دارم (شخص حقوقی هستم)</label>
                                     </div>
                                     <div id="employerCompanyFields" class="space-y-6">
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
-                                            <div>
-                                                <label for="employerCompanyName" class="block text-sm font-medium text-slate-700 mb-1 required">نام شرکت</label>
-                                                <input type="text" id="employerCompanyName" name="employerCompanyName" disabled>
-                                            </div>
-                                            <div>
-                                                <label for="employerCompanyRegNumber" class="block text-sm font-medium text-slate-700 mb-1 required">شماره ثبت شرکت</label>
-                                                <input type="text" id="employerCompanyRegNumber" name="employerCompanyRegNumber" disabled>
-                                            </div>
+                                            <div><label for="employerCompanyName" class="block text-sm font-medium text-slate-700 mb-1 required">نام شرکت</label><input type="text" id="employerCompanyName" name="employerCompanyName" disabled></div>
+                                            <div><label for="employerCompanyRegNumber" class="block text-sm font-medium text-slate-700 mb-1 required">شماره ثبت</label><input type="text" id="employerCompanyRegNumber" name="employerCompanyRegNumber" disabled></div>
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-slate-700 mb-1">آدرس شرکت</label>
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
                                                 <textarea id="employerCompanyAddress" name="employerCompanyAddress" rows="4" class="min-h-[220px]" disabled></textarea>
-                                                <div id="employerCompanyMap" class="map-container min-h-[220px]"></div>
+                                                <div id="employerCompanyMap" class="map-container min-h-[220px]" data-map-initialized="false"></div>
                                             </div>
-                                            <input type="hidden" id="employerCompanyAddressLat" name="employerCompanyAddressLat">
-                                            <input type="hidden" id="employerCompanyAddressLng" name="employerCompanyAddressLng">
+                                            <input type="hidden" id="employerCompanyAddressLat" name="employerCompanyAddressLat"><input type="hidden" id="employerCompanyAddressLng" name="employerCompanyAddressLng">
                                         </div>
                                     </div>
-                                    <div class="section-footer hidden">
-                                        <button type="button" class="btn btn-secondary cancel-btn">انصراف</button>
-                                        <button type="submit" class="btn btn-success save-btn">ذخیره تغییرات</button>
-                                    </div>
+                                    <div class="section-footer hidden"><button type="button" class="btn btn-secondary cancel-btn">انصراف</button><button type="submit" class="btn btn-success save-btn">ذخیره تغییرات</button></div>
                                 </form>
                             </div>
                         </div>
@@ -245,23 +207,17 @@
                         <div id="section-4" class="profile-section">
                             <div class="section-header">
                                 <h3><i class="fas fa-id-badge text-sky-500"></i>۴. مدارک</h3>
-                                <div class="flex items-center gap-4">
-                                    <i class="fas fa-chevron-down section-toggle-icon"></i>
-                                </div>
+                                <div class="flex items-center gap-4"><i class="fas fa-chevron-down section-toggle-icon"></i></div>
                             </div>
                             <div class="section-content">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6"> 
                                     <div>
                                         <label class="block text-sm font-medium text-slate-700 mb-1">تصویر کارت ملی</label>
-                                        <div id="employerNationalIdCardImagePreviewContainer" class="mt-2 file-preview-container">
-                                            <span class="text-slate-500">بارگذاری نشده</span>
-                                        </div>
+                                        <div id="employerNationalIdCardImagePreviewContainer" class="mt-2 file-preview-container"><span class="text-slate-500">بارگذاری نشده</span></div>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-slate-700 mb-1">رزومه کاری (اختیاری)</label>
-                                        <div id="employerOtherDocsPreviewContainer" class="mt-2 file-preview-container">
-                                            <span class="text-slate-500">بارگذاری نشده</span>
-                                        </div>
+                                        <div id="employerOtherDocsPreviewContainer" class="mt-2 file-preview-container"><span class="text-slate-500">بارگذاری نشده</span></div>
                                     </div>
                                 </div>
                                 <p class="text-xs text-slate-500 mt-4 text-center">برای تغییر مدارک، لطفاً با پشتیبانی تماس بگیرید.</p>
@@ -269,21 +225,15 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- Advertisement Sidebar for Desktop -->
-                <div id="advertisementSidebar" class="hidden md:flex flex-col flex-shrink-0 w-64 lg:w-72 bg-slate-100 border-r border-slate-200 p-5 space-y-4 overflow-y-auto">
-                    <!-- Ad content here -->
-                </div>
+                <div id="advertisementSidebar" class="hidden md:flex flex-col flex-shrink-0 w-64 lg:w-72 bg-slate-100 p-5"></div>
             </div>
-            <div class="app-footer">
-                <p>&copy; تمامی حقوق سایت نظام تندیس متعلق به شرکت شهرآوند است. - ۱۴۰۳</p>
-            </div>
+            <div class="app-footer"><p>&copy; تمامی حقوق سایت نظام تندیس متعلق به شرکت شهرآوند است. - ۱۴۰۳</p></div>
         </div>
 
         <script>
         (async function() {
             // --- CONFIGURATION ---
-            const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwo2Vi-b_nUqDYS-fkB4kEwh0k7QFd9BPu2qco3KsaS6nbNldBdXPQaF8fYaBTtb6-x/exec';
+            const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyJJuU5p02dO4az5iWxcblihnwdwMMTlFvP5VJXqCNGmCVkhRL0BwGbvzPx11lsuEsC/exec';
             const PROVINCES = ["آذربایجان شرقی", "آذربایجان غربی", "اردبیل", "اصفهان", "البرز", "ایلام", "بوشهر", "تهران", "چهارمحال و بختیاری", "خراسان جنوبی", "خراسان رضوی", "خراسان شمالی", "خوزستان", "زنجان", "سمنان", "سیستان و بلوچستان", "فارس", "قزوین", "قم", "کردستان", "کرمان", "کرمانشاه", "کهگیلویه و بویراحمد", "گلستان", "گیلان", "لرستان", "مازندران", "مرکزی", "هرمزگان", "همدان", "یزد"];
 
             // --- STATE ---
@@ -311,87 +261,85 @@
                     if (!response.ok) throw new Error('Network response was not ok');
                     const result = await response.json();
                     if (result.reason === 'AUTH_FAILED') {
-                        alert(result.message);
+                        showMessage(result.message, 'error');
                         sessionStorage.removeItem('authToken');
-                        window.location.href = 'index.html';
+                        setTimeout(() => window.location.href = 'index.html', 2500);
                         throw new Error('Authentication failed');
                     }
                     return result;
                 } catch (error) {
                     console.error("Fetch error:", error);
-                    alert('خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.');
+                    showMessage('خطا در ارتباط با سرور. لطفاً صفحه را رفرش کنید.', 'error');
                     throw error;
                 }
             }
             
             // --- UI FUNCTIONS ---
+            function showMessage(message, type = 'info') {
+                Toastify({
+                    text: message, duration: 5000, close: true, gravity: "top", position: "center",
+                    style: { fontFamily: "Vazirmatn, sans-serif", background: type === 'success' ? "#10b981" : '#f43f5e', borderRadius: "8px" }
+                }).showToast();
+            }
+
             function populateProfileData(data) {
-                userData = data; // Store original data
+                userData = JSON.parse(JSON.stringify(data)); // Deep copy to store original data
                 sidebarProfileName.textContent = `${data.stepsData.step1.employerFirstName || ''} ${data.stepsData.step1.employerLastName || ''}`;
                 sidebarUserEmail.textContent = data.email;
-                if (data.files && data.files.applicantImage && data.files.applicantImage.fileUrl) {
+                if (data.files?.applicantImage?.fileUrl) {
                     sidebarProfileImagePreview.src = getDirectDriveLink(data.files.applicantImage.fileUrl);
                 }
 
-                // Populate all sections
                 Object.keys(data.stepsData).forEach(sectionKey => {
                     const sectionData = data.stepsData[sectionKey];
                     const form = document.querySelector(`form[data-section="${sectionKey}"]`);
                     if (form) {
-                        Object.keys(sectionData).forEach(fieldName => {
+                        for (const fieldName in sectionData) {
                             const field = form.elements[fieldName];
                             if (field) {
                                 if (field.type === 'checkbox') {
                                     field.checked = sectionData[fieldName];
                                 } else if (field.classList.contains('jalali-datepicker-value')) {
-                                    // Handle datepicker
                                     const displayInput = field.previousElementSibling;
                                     if(sectionData[fieldName]) {
-                                        field.value = sectionData[fieldName]; // YYYY-MM-DD
+                                        field.value = sectionData[fieldName];
                                         $(displayInput).persianDatepicker('setDate', new persianDate(new Date(sectionData[fieldName])).valueOf());
                                     }
                                 } else {
                                     field.value = sectionData[fieldName];
                                 }
                             }
-                        });
+                        }
                     }
                 });
 
-                // Special handling for company fields visibility
                 const hasCompanyCheckbox = document.getElementById('employerHasCompany');
-                const companyFieldsContainer = document.getElementById('employerCompanyFields');
-                companyFieldsContainer.style.display = hasCompanyCheckbox.checked ? 'block' : 'none';
+                document.getElementById('employerCompanyFields').style.display = hasCompanyCheckbox.checked ? 'block' : 'none';
+                if(hasCompanyCheckbox.checked){
+                    document.getElementById('employerCompanyName').required = true;
+                    document.getElementById('employerCompanyRegNumber').required = true;
+                }
 
-                // Populate file previews
                 populateFilePreview('employerNationalIdCardImagePreviewContainer', data.files.employerNationalIdCardImage?.fileUrl);
                 populateFilePreview('employerOtherDocsPreviewContainer', data.files.employerOtherDocs?.fileUrl, 'pdf');
-                
-                // Initialize maps with saved coordinates
-                initMap('employerAddressMap', data.stepsData.step2.employerAddressLat, data.stepsData.step2.employerAddressLng, false);
-                initMap('employerCompanyMap', data.stepsData.step3.employerCompanyAddressLat, data.stepsData.step3.employerCompanyAddressLng, false);
             }
 
             function populateFilePreview(containerId, url, type = 'image') {
                 const container = document.getElementById(containerId);
                 if (!container) return;
                 if (url) {
-                    const fileUrl = getDirectDriveLink(url);
-                    if (type === 'pdf') {
-                        container.innerHTML = `<iframe src="${fileUrl}" class="w-full h-full"></iframe>`;
-                    } else {
-                        container.innerHTML = `<img src="${fileUrl}" alt="Preview" class="w-full h-full object-contain">`;
-                    }
+                    const fileUrl = getDirectDriveLink(url, type);
+                    container.innerHTML = type === 'pdf' ? `<iframe src="${fileUrl}" class="w-full h-full"></iframe>` : `<img src="${fileUrl}" alt="Preview" class="w-full h-full object-contain">`;
                 } else {
                     container.innerHTML = '<span class="text-slate-500">بارگذاری نشده</span>';
                 }
             }
 
-            function getDirectDriveLink(url) {
+            function getDirectDriveLink(url, type = 'image') {
                 if (!url || typeof url !== 'string') return '';
                 const match = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
                 if (!match) return url;
-                return `https://lh3.googleusercontent.com/d/${match[1]}`;
+                return type === 'pdf' ? `https://drive.google.com/file/d/${match[1]}/preview` : `https://lh3.googleusercontent.com/d/${match[1]}`;
             }
 
             // --- EVENT HANDLERS ---
@@ -405,34 +353,56 @@
                     const form = section.querySelector('form');
                     const fields = form ? Array.from(form.elements).filter(el => el.name) : [];
 
-                    // Toggle accordion
                     header.addEventListener('click', (e) => {
-                        if (!e.target.closest('button')) {
-                            content.style.display = content.style.display === 'block' ? 'none' : 'block';
-                            header.classList.toggle('open');
+                        if (e.target.closest('button')) return;
+                        const isOpen = content.style.display === 'block';
+                        content.style.display = isOpen ? 'none' : 'block';
+                        header.classList.toggle('open', !isOpen);
+                        
+                        if (!isOpen) { 
+                            const mapContainer = content.querySelector('.map-container');
+                            if (mapContainer && mapContainer.dataset.mapInitialized !== 'true') {
+                                const mapId = mapContainer.id;
+                                let lat, lng;
+                                const isEditing = !editBtn.classList.contains('hidden');
+                                if (mapId === 'employerAddressMap') {
+                                    lat = userData.stepsData.step2.employerAddressLat;
+                                    lng = userData.stepsData.step2.employerAddressLng;
+                                } else if (mapId === 'employerCompanyMap') {
+                                    lat = userData.stepsData.step3.employerCompanyAddressLat;
+                                    lng = userData.stepsData.step3.employerCompanyAddressLng;
+                                }
+                                initMap(mapId, lat, lng, isEditing);
+                                mapContainer.dataset.mapInitialized = 'true';
+                            } else if (mapContainer && maps[mapContainer.id]) {
+                                setTimeout(() => maps[mapContainer.id].invalidateSize(), 10);
+                            }
                         }
                     });
 
-                    // Edit button
                     if (editBtn) {
                         editBtn.addEventListener('click', () => {
                             fields.forEach(field => field.disabled = false);
-                            editBtn.parentElement.nextElementSibling.classList.remove('hidden'); // Show footer
+                            section.querySelector('.section-footer').classList.remove('hidden');
                             editBtn.classList.add('hidden');
+                            const mapContainer = content.querySelector('.map-container');
+                            if(mapContainer && maps[mapContainer.id]){
+                                maps[mapContainer.id].eachLayer(layer => {
+                                    if(layer instanceof L.Marker) layer.dragging.enable();
+                                });
+                            }
                         });
                     }
                     
-                    // Cancel button
                     if (cancelBtn) {
                         cancelBtn.addEventListener('click', () => {
-                            populateProfileData(userData); // Revert changes
+                            populateProfileData(userData);
                             fields.forEach(field => field.disabled = true);
-                            cancelBtn.parentElement.classList.add('hidden'); // Hide footer
+                            section.querySelector('.section-footer').classList.add('hidden');
                             editBtn.classList.remove('hidden');
                         });
                     }
 
-                    // Save (form submit)
                     if (form) {
                         form.addEventListener('submit', async (e) => {
                             e.preventDefault();
@@ -440,8 +410,7 @@
                             const formData = new FormData(form);
                             const sectionData = Object.fromEntries(formData.entries());
                             
-                            // Handle checkbox not being sent if unchecked
-                            if (!sectionData.employerHasCompany) {
+                            if (sectionKey === 'step3' && !sectionData.employerHasCompany) {
                                 sectionData.employerHasCompany = false;
                             }
 
@@ -449,23 +418,18 @@
                             saveBtn.disabled = true;
 
                             try {
-                                const result = await fetchProtectedData({
-                                    action: 'updateProfileSection',
-                                    sectionKey: sectionKey,
-                                    sectionData: sectionData
-                                });
+                                const result = await fetchProtectedData({ action: 'updateProfileSection', sectionKey, sectionData });
                                 if (result.success) {
-                                    // Update local data and UI
                                     userData.stepsData[sectionKey] = sectionData;
                                     fields.forEach(field => field.disabled = true);
-                                    form.parentElement.previousElementSibling.querySelector('.hidden').classList.remove('hidden');
-                                    setTimeout(() => {
-                                        form.parentElement.previousElementSibling.querySelector('.text-green-600').classList.add('hidden');
-                                    }, 2000);
-                                    cancelBtn.parentElement.classList.add('hidden');
+                                    const successMsg = section.querySelector('.save-success-msg');
+                                    successMsg.classList.remove('hidden');
+                                    setTimeout(() => successMsg.classList.add('hidden'), 3000);
+                                    section.querySelector('.section-footer').classList.add('hidden');
                                     editBtn.classList.remove('hidden');
+                                    showMessage('اطلاعات با موفقیت ذخیره شد.', 'success');
                                 } else {
-                                    alert('خطا در ذخیره اطلاعات: ' + result.message);
+                                    showMessage('خطا در ذخیره اطلاعات: ' + result.message, 'error');
                                 }
                             } catch (error) {
                                 console.error('Save failed:', error);
@@ -477,9 +441,12 @@
                     }
                 });
 
-                // Company checkbox logic
                 document.getElementById('employerHasCompany').addEventListener('change', function() {
-                    document.getElementById('employerCompanyFields').style.display = this.checked ? 'block' : 'none';
+                    const companyFields = document.getElementById('employerCompanyFields');
+                    const isChecked = this.checked;
+                    companyFields.style.display = isChecked ? 'block' : 'none';
+                    document.getElementById('employerCompanyName').required = isChecked;
+                    document.getElementById('employerCompanyRegNumber').required = isChecked;
                 });
 
                 logoutButton.addEventListener('click', () => {
@@ -490,25 +457,20 @@
 
             // --- INITIALIZATION ---
             async function initializePage() {
-                if (!authToken) {
-                    window.location.href = 'index.html';
-                    return;
-                }
+                if (!authToken) { window.location.href = 'index.html'; return; }
 
                 try {
                     const result = await fetchProtectedData({ action: 'getUserProfile' });
                     if (!result.success || result.data.role !== 'employer') {
-                        alert('شما اجازه دسترسی به این صفحه را ندارید.');
+                        showMessage('شما اجازه دسترسی به این صفحه را ندارید.', 'error');
                         sessionStorage.removeItem('authToken');
                         window.location.href = 'index.html';
                         return;
                     }
                     
-                    // Populate province dropdown
                     const provinceSelect = document.getElementById('employerProvince');
                     provinceSelect.innerHTML = '<option value="">انتخاب استان</option>' + PROVINCES.map(p => `<option value="${p}">${p}</option>`).join('');
                     
-                    // Initialize datepickers
                     $(".jalali-datepicker-display").persianDatepicker({
                         format: 'YYYY/MM/DD', altField: '.jalali-datepicker-value', altFormat: 'YYYY-MM-DD',
                         observer: true, autoClose: true
@@ -530,8 +492,8 @@
                 const mapContainer = document.getElementById(mapId);
                 if (!mapContainer) return;
                 
-                const initialLat = lat || 38.08;
-                const initialLng = lng || 46.29;
+                const initialLat = parseFloat(lat) || 38.08;
+                const initialLng = parseFloat(lng) || 46.29;
 
                 if (maps[mapId]) maps[mapId].remove();
                 
@@ -543,8 +505,8 @@
                 let marker = L.marker([initialLat, initialLng], { draggable: isEditable }).addTo(map);
 
                 if (isEditable) {
-                    const latInput = document.getElementById(mapId + 'Lat');
-                    const lngInput = document.getElementById(mapId + 'Lng');
+                    const latInput = document.getElementById(mapId.replace('Map', 'Lat'));
+                    const lngInput = document.getElementById(mapId.replace('Map', 'Lng'));
                     
                     const updateInputs = (latlng) => {
                         if(latInput) latInput.value = latlng.lat.toFixed(6);
@@ -557,7 +519,6 @@
                         updateInputs(e.latlng);
                     });
                 }
-                 setTimeout(() => map.invalidateSize(), 200);
             }
 
             initializePage();
