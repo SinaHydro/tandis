@@ -284,14 +284,16 @@
 
             function populateProfileData(data) {
                 userData = JSON.parse(JSON.stringify(data)); // Deep copy to store original data
-                sidebarProfileName.textContent = `${data.stepsData.step1.employerFirstName || ''} ${data.stepsData.step1.employerLastName || ''}`;
-                sidebarUserEmail.textContent = data.email;
+                
+                const step1Data = data.stepsData?.step1 || {};
+                sidebarProfileName.textContent = `${step1Data.employerFirstName || ''} ${step1Data.employerLastName || ''}`;
+                sidebarUserEmail.textContent = data.email || '';
                 if (data.files?.applicantImage?.fileUrl) {
                     sidebarProfileImagePreview.src = getDirectDriveLink(data.files.applicantImage.fileUrl);
                 }
 
-                Object.keys(data.stepsData).forEach(sectionKey => {
-                    const sectionData = data.stepsData[sectionKey];
+                Object.keys(data.stepsData || {}).forEach(sectionKey => {
+                    const sectionData = data.stepsData[sectionKey] || {};
                     const form = document.querySelector(`form[data-section="${sectionKey}"]`);
                     if (form) {
                         for (const fieldName in sectionData) {
@@ -303,7 +305,9 @@
                                     const displayInput = field.previousElementSibling;
                                     if(sectionData[fieldName]) {
                                         field.value = sectionData[fieldName];
-                                        $(displayInput).persianDatepicker('setDate', new persianDate(new Date(sectionData[fieldName])).valueOf());
+                                        try {
+                                          $(displayInput).persianDatepicker('setDate', new persianDate(new Date(sectionData[fieldName])).valueOf());
+                                        } catch(e){ console.error("Error setting date:", e); }
                                     }
                                 } else {
                                     field.value = sectionData[fieldName];
@@ -314,14 +318,17 @@
                 });
 
                 const hasCompanyCheckbox = document.getElementById('employerHasCompany');
-                document.getElementById('employerCompanyFields').style.display = hasCompanyCheckbox.checked ? 'block' : 'none';
-                if(hasCompanyCheckbox.checked){
-                    document.getElementById('employerCompanyName').required = true;
-                    document.getElementById('employerCompanyRegNumber').required = true;
+                const companyFieldsContainer = document.getElementById('employerCompanyFields');
+                if(companyFieldsContainer && hasCompanyCheckbox){
+                    companyFieldsContainer.style.display = hasCompanyCheckbox.checked ? 'block' : 'none';
+                    if(hasCompanyCheckbox.checked){
+                        document.getElementById('employerCompanyName').required = true;
+                        document.getElementById('employerCompanyRegNumber').required = true;
+                    }
                 }
 
-                populateFilePreview('employerNationalIdCardImagePreviewContainer', data.files.employerNationalIdCardImage?.fileUrl);
-                populateFilePreview('employerOtherDocsPreviewContainer', data.files.employerOtherDocs?.fileUrl, 'pdf');
+                populateFilePreview('employerNationalIdCardImagePreviewContainer', data.files?.employerNationalIdCardImage?.fileUrl);
+                populateFilePreview('employerOtherDocsPreviewContainer', data.files?.employerOtherDocs?.fileUrl, 'pdf');
             }
 
             function populateFilePreview(containerId, url, type = 'image') {
@@ -484,6 +491,7 @@
                     mainFormView.style.display = 'flex';
 
                 } catch (error) {
+                    console.error("Initialization failed:", error);
                     loadingScreen.innerHTML = `<p class="text-red-600 font-bold p-4">امکان بارگذاری اطلاعات وجود ندارد. لطفاً دوباره وارد شوید.</p>`;
                 }
             }
