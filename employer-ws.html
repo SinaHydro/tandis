@@ -373,11 +373,11 @@
                                 let lat, lng;
                                 const isEditing = !editBtn.classList.contains('hidden');
                                 if (mapId === 'employerAddressMap') {
-                                    lat = userData.stepsData.step2.employerAddressLat;
-                                    lng = userData.stepsData.step2.employerAddressLng;
+                                    lat = userData?.stepsData?.step2?.employerAddressLat;
+                                    lng = userData?.stepsData?.step2?.employerAddressLng;
                                 } else if (mapId === 'employerCompanyMap') {
-                                    lat = userData.stepsData.step3.employerCompanyAddressLat;
-                                    lng = userData.stepsData.step3.employerCompanyAddressLng;
+                                    lat = userData?.stepsData?.step3?.employerCompanyAddressLat;
+                                    lng = userData?.stepsData?.step3?.employerCompanyAddressLng;
                                 }
                                 initMap(mapId, lat, lng, isEditing);
                                 mapContainer.dataset.mapInitialized = 'true';
