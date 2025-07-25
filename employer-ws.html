@@ -592,8 +592,39 @@
             </div>`;
         }
         
+        // [FIXED] This function now displays employer's professional info
         function getProfessionalFieldsHTML(data) {
-            return `<div>اطلاعات حرفه‌ای در اینجا نمایش داده می‌شود.</div>`;
+            const hasCompany = data.employerHasCompany;
+            let companyInfoHtml = '';
+
+            if (hasCompany) {
+                companyInfoHtml = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 mt-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">نام شرکت</label>
+                            <input type="text" value="${data.employerCompanyName || ''}" disabled class="w-full">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">شماره ثبت شرکت</label>
+                            <input type="text" value="${data.employerCompanyRegNumber || ''}" disabled class="w-full">
+                        </div>
+                    </div>
+                    <div class="mt-5">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">آدرس شرکت</label>
+                        <textarea rows="3" disabled class="w-full">${data.employerCompanyAddress || ''}</textarea>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">وضعیت فعالیت</label>
+                        <input type="text" value="${hasCompany ? 'شخص حقوقی (شرکت)' : 'شخص حقیقی'}" disabled class="w-full">
+                    </div>
+                    ${companyInfoHtml}
+                </div>
+            `;
         }
         
         function getDocumentsHTML(data) {
@@ -640,8 +671,8 @@
         function handleEditClick(e) {
             const sectionId = e.currentTarget.dataset.section;
             const sectionEl = document.getElementById(`section-${sectionId}`);
-            if (sectionId === 'documents') {
-                showModal('ویرایش مدارک در این بخش پشتیبانی نمی‌شود.', 'info');
+            if (sectionId === 'documents' || sectionId === 'professional') {
+                showModal('ویرایش این بخش در اینجا پشتیبانی نمی‌شود.', 'info');
                 return;
             }
             sectionEl.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
@@ -1198,16 +1229,17 @@
             });
         }
 
+        // [FIXED] This function now correctly handles all employer views
         function setupViewSwitcher() {
             const navItems = document.querySelectorAll('.nav-item[data-view]');
             let currentView = 'dashboard';
 
             const viewActions = {
-                'dashboard': { title: 'داشبورد', render: renderEmployerDashboard },
+                'dashboard': { title: 'داشبورد', render: renderEmployerDashboard, refreshable: true },
                 'profile': { title: 'پروفایل کاربری', render: () => {} },
                 'settings': { title: 'تنظیمات', render: () => {} },
                 'projects': { title: 'پروژه‌های من', render: renderEmployerProjects, refreshable: true },
-                'create-project': { title: 'ثبت / ویرایش پروژه', render: () => renderProjectForm() },
+                'create-project': { title: 'ثبت / ویرایش پروژه', render: renderProjectForm },
                 'engineers': { title: 'مهندسان', render: renderEngineersMarketplace, refreshable: true }
             };
 
@@ -1223,7 +1255,9 @@
                     Object.values(contentPanes).forEach(pane => pane.style.display = 'none');
                     navItems.forEach(nav => nav.classList.remove('active'));
 
-                    contentPanes[targetView].style.display = 'block';
+                    if (contentPanes[targetView]) {
+                        contentPanes[targetView].style.display = 'block';
+                    }
                     e.currentTarget.classList.add('active');
 
                     const action = viewActions[targetView];
@@ -1359,7 +1393,6 @@
                 }
             } catch (error) {
                 console.error("An unexpected error occurred during initialization:", error);
-                // Error is already shown by fetchUserProfile
             }
         }
 
