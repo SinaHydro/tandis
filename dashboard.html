@@ -2154,7 +2154,8 @@
                         showMessageModal("اطلاعات پروفایل با موفقیت ارسال شد! در حال انتقال شما...", 'success');
                         activeForm.reset();
                         setTimeout(() => {
-                            window.location.href = `./next-dashboard.html?email=${encodeURIComponent(initialUserData.email)}`;
+                            const targetPage = currentUserRole === 'engineer' ? 'engineer-ws.html' : 'employer-ws.html';
+                            window.location.href = `./${targetPage}?email=${encodeURIComponent(initialUserData.email)}`;
                         }, 3000);
                     } else {
                         throw new Error(result.message || "خطای ناشناخته در پردازش اطلاعات در سرور.");
