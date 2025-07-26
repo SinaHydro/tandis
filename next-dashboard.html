@@ -1027,10 +1027,9 @@
 
         // --- Activity Logic ---
         function renderActivityForm(activityData = null) {
-            const isEditMode = activityData !== null;
             const formHtml = `
                 <div id="activityFormContainer" class="neumorphic-card flex flex-col">
-                    <!-- This container will hold either the form or the preview -->
+                    <div class="spinner mx-auto"></div>
                 </div>
             `;
             createActivityContent.innerHTML = formHtml;
