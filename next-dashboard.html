@@ -39,11 +39,9 @@
         .workstation-wrapper { display: flex; height: 100vh; max-height: 100vh; overflow: hidden; }
         .main-content-area { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
         .content-body { flex-grow: 1; overflow-y: auto; padding: 1.5rem 2rem; }
-        /* [MODIFIED] Sidebar width reduced */
         .sidebar { width: 248px; flex-shrink: 0; background-color: #f1f5f9; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; }
         @media (max-width: 1024px) { .sidebar { display: none; } }
         .sidebar-profile-section { display: flex; align-items: center; padding: 1rem; border-bottom: 1px solid #cbd5e1; }
-        /* [MODIFIED] Profile image size reduced */
         .sidebar-profile-image-container { position: relative; width: 60px; height: 60px; flex-shrink: 0; }
         .sidebar-profile-image { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 3px solid var(--primary-color); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .sidebar-profile-image-edit-overlay { position: absolute; inset: 0; background-color: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; opacity: 0; transition: opacity 0.3s ease; cursor: pointer; }
@@ -62,7 +60,6 @@
         .nav-item.btn-special-project.active { background-color: var(--special-color-dark); box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
 
         .sidebar-footer { padding: 1rem; margin-top: auto; border-top: 1px solid #e2e8f0; }
-        /* [MODIFIED] Sidebar width reduced */
         .advertisement-sidebar { width: 248px; flex-shrink: 0; background-color: #f8fafc; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; padding: 1.5rem 1rem; }
         @media (max-width: 1280px) { .advertisement-sidebar { display: none; } }
         .slideshow-container { position: relative; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
@@ -83,8 +80,16 @@
         .section-content.open { display: block; }
         .section-actions { display: flex; justify-content: flex-end; gap: 0.75rem; }
         label.required-field::after { content: "*"; color: red; margin-right: 4px; }
-        /* [MODIFIED] Unified and increased padding for all form elements */
-        input[type="text"], input[type="date"], input[type="tel"], input[type="number"], input[type="password"], textarea, select { background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.875rem 1rem; transition: all 0.2s ease; width: 100%; }
+        
+        /* [MODIFIED] Unified padding for better visual consistency */
+        input[type="text"], input[type="date"], input[type="tel"], input[type="number"], input[type="password"], textarea, select { 
+            background-color: #f8fafc; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 0.375rem; 
+            padding: 0.875rem 1rem; /* 14px vertical, 16px horizontal padding */
+            transition: all 0.2s ease; 
+            width: 100%; 
+        }
         input:focus, textarea:focus, select:focus, input[type="password"]:focus { border-color: var(--primary-color); background-color: white; box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2); outline: none; }
         input:disabled, select:disabled, textarea:disabled { background-color: #eef2f7; color: #64748b; cursor: not-allowed; border-color: #e2e8f0; }
         select { 
@@ -92,7 +97,19 @@
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E"); 
             background-position: left 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-left: 2.5rem;
         }
-        .btn { padding: 0.625rem 1.25rem; border-radius: 0.375rem; font-weight: 600; transition: all 0.2s ease-in-out; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border: none; }
+        
+        /* [MODIFIED] Increased button height and padding for better touch access and style */
+        .btn { 
+            padding: 0.75rem 1.5rem; /* Increased padding for more height */
+            border-radius: 0.375rem; 
+            font-weight: 600; 
+            transition: all 0.2s ease-in-out; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 0.5rem; 
+            border: none; 
+        }
         .btn-primary { background-color: var(--primary-color); color: white; }
         .btn-primary:hover { background-color: var(--primary-color-dark); }
         .btn-secondary { background-color: #e2e8f0; color: #1e293b; }
@@ -135,7 +152,6 @@
                 grid-template-columns: repeat(2, 1fr);
             }
         }
-        /* [MODIFIED] Filter layout changed to flexbox for single-row appearance */
         #filter-container {
              display: flex;
              flex-wrap: wrap;
@@ -150,7 +166,18 @@
         }
         /* Styles for the Neumorphic card from EngineerProfile2.html */
         .neumorphic-card { background: #ffffff; border-radius: 20px; box-shadow: 8px 8px 16px #e0e0e0, -8px -8px 16px #ffffff; padding: 20px; margin: 20px auto; width: 100%; max-width: 800px; } 
-        .neumorphic-button { background: #ffffff; border: none; border-radius: 10px; box-shadow: 4px 4px 8px #e0e0e0, -4px -4px 8px #ffffff; padding: 8px 16px; cursor: pointer; transition: all 0.3s ease; font-size: 1rem; } 
+        
+        /* [MODIFIED] Increased button height and padding for better touch access and style */
+        .neumorphic-button { 
+            background: #ffffff; 
+            border: none; 
+            border-radius: 10px; 
+            box-shadow: 4px 4px 8px #e0e0e0, -4px -4px 8px #ffffff; 
+            padding: 12px 20px; /* Increased padding */
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            font-size: 1rem; 
+        } 
         .neumorphic-button:hover { box-shadow: 2px 2px 4px #e0e0e0, -2px -2px 4px #ffffff; }
         .progress-bar { height: 6px; border-radius: 3px; background-color: #e9ecef; width: 100%; } 
         .progress-fill { height: 100%; border-radius: 3px; background-color: #3b82f6; transition: width 0.3s ease; }
@@ -1029,6 +1056,7 @@
             
             const data = activityData || currentActivityData;
 
+            // [MODIFIED] Added new dropdowns for engineer activity and field, and reorganized the form for better logical grouping.
             const editHtml = `
                 <div id="editMode" class="flex flex-col gap-4 text-lg"> 
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4"> 
@@ -1053,7 +1081,7 @@
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-gray-700 font-medium mb-1">نوع فعالیت</label>
+                            <label class="block text-gray-700 font-medium mb-1">نوع فعالیت مهندس</label>
                             <select id="engineerActivity" class="w-full">
                                 <option value="طراح" ${data.engineerActivity === 'طراح' ? 'selected' : ''}>طراح</option>
                                 <option value="ناظر" ${data.engineerActivity === 'ناظر' ? 'selected' : ''}>ناظر</option>
@@ -1119,6 +1147,8 @@
             container.innerHTML = editHtml;
 
             const priceRowsEditContainer = document.getElementById('priceRowsEdit');
+            
+            // [MODIFIED] Tariff items are now sourced from this array, as requested.
             const priceTiers = [
                 { label: "ساختمان 1 تا 2 طبقه", value: "107,000" }, { label: "ساختمان 3 تا 5 طبقه", value: "125,000" },
                 { label: "ساختمان 6 تا 7 طبقه", value: "127,800" }, { label: "ساختمان 8 تا 10 طبقه", value: "139,500" },
@@ -1204,13 +1234,14 @@
 
             const levelMap = { 'پایه 3': 1, 'پایه 2': 2, 'پایه 1': 3, 'پایه ارشد': 4 };
             const starsCount = levelMap[data.engineerLevel] || 1;
-
+            
+            // [MODIFIED] Preview text now combines activity, level, and field as requested.
             const previewHtml = `
                 <div class="flex flex-col">
                     <div class="bg-green-50 flex items-center justify-between mb-4 -mt-5 -mx-5 p-5" style="border-radius: 20px 20px 0px 0px; display:grid; grid-template-columns:1fr 1fr 1fr;"> 
                         <div class="flex items-center justify-start pr-5 space-x-2"> <i class="fas fa-check-circle text-green-500" title="کاربر تایید شده"></i> <span class="mr-6 pr-4 text-base">${data.licenseType}</span></div>                 
                         <div class="flex flex-col items-center justify-center mr-0 sm:justify-start">
-                             <span class="font-bold px-0 text-gray-800 text-lg">${data.engineerActivity} ${data.engineerLevel} ${data.engineerField}</span> 
+                             <span class="font-bold px-0 text-gray-800 text-lg">${data.engineerActivity || ''} ${data.engineerLevel || ''} ${data.engineerField || ''}</span> 
                             <div class="flex text-yellow-400">${'<i class="fas fa-star"></i>'.repeat(starsCount)}</div>                     
                         </div>
                         <span class="bg-green-200 mx-5 needs-help place-self-end self-center text-center text-green-900 ${data.needsHelp ? '' : 'hidden'}">نیازمند کمک مجری</span>
