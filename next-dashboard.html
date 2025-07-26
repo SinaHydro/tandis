@@ -59,6 +59,13 @@
         .nav-item.btn-special-project:hover { background-color: var(--special-color-dark); }
         .nav-item.btn-special-project.active { background-color: var(--special-color-dark); box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
 
+        /* [MODIFIED] Added style to temporarily disable nav during initial load */
+        .nav-disabled {
+            pointer-events: none;
+            opacity: 0.6;
+            transition: opacity 0.3s ease;
+        }
+
         .sidebar-footer { padding: 1rem; margin-top: auto; border-top: 1px solid #e2e8f0; }
         .advertisement-sidebar { width: 248px; flex-shrink: 0; background-color: #f8fafc; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; padding: 1.5rem 1rem; }
         @media (max-width: 1280px) { .advertisement-sidebar { display: none; } }
@@ -133,8 +140,6 @@
         #cropperContainer img { max-width: 100%; height: auto; }
         .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 32px; height: 32px; border-radius: 50%; border-left-color: var(--primary-color); animation: spin 1s ease infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        /* [MODIFIED] Changed display to none to hide the loader by default */
-        #page-loader { position: fixed; inset: 0; background-color: rgba(255,255,255,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; }
         
         .project-card, .activity-card { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); transition: all 0.3s ease; }
         .project-card:hover, .activity-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
@@ -183,13 +188,6 @@
 </head>
 <body>
 
-    <div id="page-loader">
-        <div class="flex flex-col items-center">
-            <div class="spinner"></div>
-            <p class="mt-4 text-slate-600 font-semibold">در حال بارگذاری اطلاعات کاربری...</p>
-        </div>
-    </div>
-
     <div class="workstation-wrapper">
         <!-- Main Sidebar (Right) -->
         <aside class="sidebar">
@@ -207,7 +205,8 @@
                 </div>
             </div>
 
-            <nav class="sidebar-nav">
+            <!-- [MODIFIED] Added 'nav-disabled' class to temporarily disable clicks -->
+            <nav class="sidebar-nav nav-disabled">
                 <a data-view="dashboard" class="nav-item active">
                     <i class="fas fa-tachometer-alt"></i>
                     <span>داشبورد</span>
@@ -368,7 +367,6 @@
         let currentActivityData = {};
 
         // --- DOM ELEMENTS ---
-        const pageLoader = document.getElementById('page-loader');
         const mainHeaderTitle = document.getElementById('main-header-title');
         const refreshButton = document.getElementById('refresh-button');
         const sidebarProfileImage = document.getElementById('sidebarProfileImage');
@@ -484,7 +482,9 @@
         }
 
         async function updateProfileSection(sectionKey, sectionData) {
-            pageLoader.style.display = 'flex';
+            // Re-show loader for async operations
+            const pageLoader = document.getElementById('page-loader');
+            if(pageLoader) pageLoader.style.display = 'flex';
             try {
                 const payload = { action: 'updateSection', email: userData.email, sectionKey, sectionData };
                 const response = await fetch(GOOGLE_SCRIPT_URL, {
@@ -511,7 +511,7 @@
                 showModal(`خطا در ذخیره‌سازی: ${error.message}`, 'error');
                 return false;
             } finally {
-                pageLoader.style.display = 'none';
+                if(pageLoader) pageLoader.style.display = 'none';
             }
         }
         
@@ -1017,7 +1017,8 @@
             const action = isUpdate ? 'updateProject' : 'createProject';
             const payload = { action, employerEmail: userData.email, projectData };
 
-            pageLoader.style.display = 'flex';
+            const pageLoader = document.getElementById('page-loader');
+            if(pageLoader) pageLoader.style.display = 'flex';
             try {
                 const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'cors', cache: 'no-cache', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
                 if (!response.ok) throw new Error(`خطای سرور: ${response.status}`);
@@ -1031,7 +1032,7 @@
             } catch (error) {
                 showModal(`خطا در ثبت/ویرایش پروژه: ${error.message}`, 'error');
             } finally {
-                pageLoader.style.display = 'none';
+                if(pageLoader) pageLoader.style.display = 'none';
             }
         }
 
@@ -1579,7 +1580,8 @@
                 : 'آیا می‌خواهید این پروژه را دوباره باز کنید؟';
             
             showModal(message, 'confirm', async () => {
-                pageLoader.style.display = 'flex';
+                const pageLoader = document.getElementById('page-loader');
+                if(pageLoader) pageLoader.style.display = 'flex';
                 try {
                     const payload = { action: 'changeProjectStatus', projectId, newStatus };
                     const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'cors', cache: 'no-cache', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
@@ -1593,7 +1595,7 @@
                 } catch (error) {
                     showModal(`خطا در تغییر وضعیت: ${error.message}`, 'error');
                 } finally {
-                    pageLoader.style.display = 'none';
+                    if(pageLoader) pageLoader.style.display = 'none';
                 }
             });
         }
@@ -1615,6 +1617,7 @@
 
             navItems.forEach(item => {
                 item.addEventListener('click', (e) => {
+                    e.preventDefault(); // Prevent default anchor behavior
                     const targetView = e.currentTarget.dataset.view;
                     currentView = targetView;
                     
@@ -1689,20 +1692,29 @@
             const params = new URLSearchParams(window.location.search);
             const email = params.get('email');
             if (!email) {
-                pageLoader.innerHTML = '<p class="text-red-600 font-bold">خطا: ایمیل کاربر مشخص نشده است.</p>';
-                 // Show the loader with an error message, but don't hide it, as the app can't proceed.
-                pageLoader.style.display = 'flex';
+                // Since the loader is removed, we show the error in the main content area.
+                const dashboard = document.getElementById('dashboardContent');
+                if(dashboard) dashboard.innerHTML = '<p class="text-red-600 font-bold text-center mt-10">خطا: ایمیل کاربر مشخص نشده است.</p>';
                 return;
             }
+
+            // Functions that don't depend on userData can run first.
+            initSlideshow();
+            changePasswordForm.addEventListener('submit', handleChangePassword);
+
+            // Fetch user data
             userData = await fetchUserProfile(email);
+            
+            // Now that we have user data, setup the parts of the UI that need it.
             if (userData) {
                 userData.email = email;
                 renderProfile();
+                setupViewSwitcher(); // Setup nav clicks now that userData is available for viewActions
                 document.querySelector('.nav-item[data-view="dashboard"]').click();
+            } else {
+                 const dashboard = document.getElementById('dashboardContent');
+                 if(dashboard) dashboard.innerHTML = '<p class="text-red-600 font-bold text-center mt-10">خطا: اطلاعات کاربری یافت نشد.</p>';
             }
-            initSlideshow();
-            setupViewSwitcher();
-            changePasswordForm.addEventListener('submit', handleChangePassword);
 
             // Consolidated event listener for dynamic content
             document.getElementById('main-content-area').addEventListener('click', (e) => {
@@ -1711,8 +1723,7 @@
 
                 const action = targetButton.dataset.action;
                 const projectId = targetButton.dataset.projectId;
-                const activityId = targetButton.dataset.activityId;
-
+                
                 switch(action) {
                     case 'apply': handleApplyForProject(projectId, targetButton); break;
                     case 'cancel-application': handleCancelApplication(projectId, targetButton); break;
@@ -1721,6 +1732,9 @@
                     case 'open-project': handleChangeProjectStatus(projectId, 'باز'); break;
                 }
             });
+
+            // [MODIFIED] Re-enable the nav now that all setup is complete.
+            document.querySelector('.sidebar-nav').classList.remove('nav-disabled');
         }
 
         main();
