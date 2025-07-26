@@ -133,7 +133,8 @@
         #cropperContainer img { max-width: 100%; height: auto; }
         .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 32px; height: 32px; border-radius: 50%; border-left-color: var(--primary-color); animation: spin 1s ease infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #page-loader { position: fixed; inset: 0; background-color: rgba(255,255,255,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        /* [MODIFIED] Changed display to none to hide the loader by default */
+        #page-loader { position: fixed; inset: 0; background-color: rgba(255,255,255,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; }
         
         .project-card, .activity-card { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); transition: all 0.3s ease; }
         .project-card:hover, .activity-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
@@ -1301,12 +1302,9 @@
             }
         }
 
-        // [FIX] Added placeholder functions to prevent reference errors.
         function renderMyActivities() {
             const container = contentPanes.myActivities;
             container.innerHTML = '<div class="spinner mx-auto mt-10"></div><p class="text-center text-slate-500">در حال بارگذاری فعالیت‌های شما...</p>';
-            // In the future, you would fetch and display the user's activities here.
-            // For now, we just show a message.
             setTimeout(() => {
                  container.innerHTML = '<p class="text-center text-slate-500">شما هنوز فعالیتی ثبت نکرده‌اید.</p>';
             }, 1000);
@@ -1692,6 +1690,8 @@
             const email = params.get('email');
             if (!email) {
                 pageLoader.innerHTML = '<p class="text-red-600 font-bold">خطا: ایمیل کاربر مشخص نشده است.</p>';
+                 // Show the loader with an error message, but don't hide it, as the app can't proceed.
+                pageLoader.style.display = 'flex';
                 return;
             }
             userData = await fetchUserProfile(email);
@@ -1719,11 +1719,8 @@
                     case 'edit-project': handleEditProject(projectId); break;
                     case 'close-project': handleChangeProjectStatus(projectId, 'بسته'); break;
                     case 'open-project': handleChangeProjectStatus(projectId, 'باز'); break;
-                    // Add cases for new actions here if needed
                 }
             });
-
-            pageLoader.style.display = 'none';
         }
 
         main();
