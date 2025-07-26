@@ -59,7 +59,6 @@
         .nav-item.btn-special-project:hover { background-color: var(--special-color-dark); }
         .nav-item.btn-special-project.active { background-color: var(--special-color-dark); box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
 
-        /* [MODIFIED] Added style to temporarily disable nav during initial load */
         .nav-disabled {
             pointer-events: none;
             opacity: 0.6;
@@ -205,7 +204,6 @@
                 </div>
             </div>
 
-            <!-- [MODIFIED] Added 'nav-disabled' class to temporarily disable clicks -->
             <nav class="sidebar-nav nav-disabled">
                 <a data-view="dashboard" class="nav-item active">
                     <i class="fas fa-tachometer-alt"></i>
@@ -482,7 +480,6 @@
         }
 
         async function updateProfileSection(sectionKey, sectionData) {
-            // Re-show loader for async operations
             const pageLoader = document.getElementById('page-loader');
             if(pageLoader) pageLoader.style.display = 'flex';
             try {
@@ -1604,11 +1601,25 @@
             const navItems = document.querySelectorAll('.nav-item[data-view]');
             let currentView = 'dashboard';
 
+            // [MODIFIED] Added guard clauses and safe defaults to prevent errors if userData is not ready
             const viewActions = {
-                'dashboard': { title: 'داشبورد', render: () => userData.role === 'employer' ? renderEmployerDashboard() : (contentPanes.dashboard.innerHTML = `<p class="text-center text-slate-600">به پنل کاربری خود خوش آمدید.</p>`) },
+                'dashboard': { 
+                    title: 'داشبورد', 
+                    render: () => {
+                        if (!userData) return;
+                        userData.role === 'employer' ? renderEmployerDashboard() : (contentPanes.dashboard.innerHTML = `<p class="text-center text-slate-600">به پنل کاربری خود خوش آمدید.</p>`);
+                    } 
+                },
                 'profile': { title: 'پروفایل کاربری', render: () => {} },
                 'settings': { title: 'تنظیمات', render: () => {} },
-                'projects': { title: userData.role === 'employer' ? 'پروژه‌های من' : 'بازار کار پروژه‌ها', render: () => userData.role === 'employer' ? renderEmployerProjects() : renderProjectMarketplace(), refreshable: true },
+                'projects': { 
+                    title: userData ? (userData.role === 'employer' ? 'پروژه‌های من' : 'بازار کار پروژه‌ها') : 'پروژه‌ها', 
+                    render: () => {
+                        if (!userData) return;
+                        userData.role === 'employer' ? renderEmployerProjects() : renderProjectMarketplace();
+                    }, 
+                    refreshable: true 
+                },
                 'create-project': { title: 'ثبت / ویرایش پروژه', render: () => renderProjectForm() },
                 'my-activities': { title: 'فعالیت‌های من', render: renderMyActivities, refreshable: true },
                 'create-activity': { title: 'ثبت / ویرایش فعالیت', render: () => renderActivityForm() },
@@ -1617,7 +1628,6 @@
 
             navItems.forEach(item => {
                 item.addEventListener('click', (e) => {
-                    e.preventDefault(); // Prevent default anchor behavior
                     const targetView = e.currentTarget.dataset.view;
                     currentView = targetView;
                     
@@ -1691,25 +1701,26 @@
         async function main() {
             const params = new URLSearchParams(window.location.search);
             const email = params.get('email');
+            
+            // Functions that don't depend on userData can run first.
+            initSlideshow();
+            changePasswordForm.addEventListener('submit', handleChangePassword);
+            
             if (!email) {
-                // Since the loader is removed, we show the error in the main content area.
                 const dashboard = document.getElementById('dashboardContent');
                 if(dashboard) dashboard.innerHTML = '<p class="text-red-600 font-bold text-center mt-10">خطا: ایمیل کاربر مشخص نشده است.</p>';
                 return;
             }
 
-            // Functions that don't depend on userData can run first.
-            initSlideshow();
-            changePasswordForm.addEventListener('submit', handleChangePassword);
+            // [MODIFIED] setupViewSwitcher is now called before fetching data to ensure listeners are always attached.
+            setupViewSwitcher(); 
 
             // Fetch user data
             userData = await fetchUserProfile(email);
             
-            // Now that we have user data, setup the parts of the UI that need it.
             if (userData) {
                 userData.email = email;
                 renderProfile();
-                setupViewSwitcher(); // Setup nav clicks now that userData is available for viewActions
                 document.querySelector('.nav-item[data-view="dashboard"]').click();
             } else {
                  const dashboard = document.getElementById('dashboardContent');
@@ -1733,7 +1744,6 @@
                 }
             });
 
-            // [MODIFIED] Re-enable the nav now that all setup is complete.
             document.querySelector('.sidebar-nav').classList.remove('nav-disabled');
         }
 
