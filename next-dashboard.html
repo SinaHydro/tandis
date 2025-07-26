@@ -81,12 +81,11 @@
         .section-actions { display: flex; justify-content: flex-end; gap: 0.75rem; }
         label.required-field::after { content: "*"; color: red; margin-right: 4px; }
         
-        /* [MODIFIED] Unified padding for better visual consistency */
         input[type="text"], input[type="date"], input[type="tel"], input[type="number"], input[type="password"], textarea, select { 
             background-color: #f8fafc; 
             border: 1px solid #cbd5e1; 
             border-radius: 0.375rem; 
-            padding: 0.875rem 1rem; /* 14px vertical, 16px horizontal padding */
+            padding: 0.875rem 1rem;
             transition: all 0.2s ease; 
             width: 100%; 
         }
@@ -98,9 +97,8 @@
             background-position: left 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-left: 2.5rem;
         }
         
-        /* [MODIFIED] Increased button height and padding for better touch access and style */
         .btn { 
-            padding: 0.75rem 1.5rem; /* Increased padding for more height */
+            padding: 0.75rem 1.5rem;
             border-radius: 0.375rem; 
             font-weight: 600; 
             transition: all 0.2s ease-in-out; 
@@ -159,21 +157,19 @@
              align-items: flex-end;
         }
         #filter-container > div {
-            flex: 1 1 180px; /* Flex-grow, flex-shrink, basis */
+            flex: 1 1 180px;
         }
         #filter-container > .actions {
-            flex: 0 0 auto; /* Don't grow or shrink */
+            flex: 0 0 auto;
         }
-        /* Styles for the Neumorphic card from EngineerProfile2.html */
         .neumorphic-card { background: #ffffff; border-radius: 20px; box-shadow: 8px 8px 16px #e0e0e0, -8px -8px 16px #ffffff; padding: 20px; margin: 20px auto; width: 100%; max-width: 800px; } 
         
-        /* [MODIFIED] Increased button height and padding for better touch access and style */
         .neumorphic-button { 
             background: #ffffff; 
             border: none; 
             border-radius: 10px; 
             box-shadow: 4px 4px 8px #e0e0e0, -4px -4px 8px #ffffff; 
-            padding: 12px 20px; /* Increased padding */
+            padding: 12px 20px;
             cursor: pointer; 
             transition: all 0.3s ease; 
             font-size: 1rem; 
@@ -1056,7 +1052,6 @@
             
             const data = activityData || currentActivityData;
 
-            // [MODIFIED] Added new dropdowns for engineer activity and field, and reorganized the form for better logical grouping.
             const editHtml = `
                 <div id="editMode" class="flex flex-col gap-4 text-lg"> 
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4"> 
@@ -1148,7 +1143,6 @@
 
             const priceRowsEditContainer = document.getElementById('priceRowsEdit');
             
-            // [MODIFIED] Tariff items are now sourced from this array, as requested.
             const priceTiers = [
                 { label: "ساختمان 1 تا 2 طبقه", value: "107,000" }, { label: "ساختمان 3 تا 5 طبقه", value: "125,000" },
                 { label: "ساختمان 6 تا 7 طبقه", value: "127,800" }, { label: "ساختمان 8 تا 10 طبقه", value: "139,500" },
@@ -1235,7 +1229,6 @@
             const levelMap = { 'پایه 3': 1, 'پایه 2': 2, 'پایه 1': 3, 'پایه ارشد': 4 };
             const starsCount = levelMap[data.engineerLevel] || 1;
             
-            // [MODIFIED] Preview text now combines activity, level, and field as requested.
             const previewHtml = `
                 <div class="flex flex-col">
                     <div class="bg-green-50 flex items-center justify-between mb-4 -mt-5 -mx-5 p-5" style="border-radius: 20px 20px 0px 0px; display:grid; grid-template-columns:1fr 1fr 1fr;"> 
@@ -1306,6 +1299,22 @@
                 button.disabled = false;
                 button.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>ارسال معرفی فعالیت';
             }
+        }
+
+        // [FIX] Added placeholder functions to prevent reference errors.
+        function renderMyActivities() {
+            const container = contentPanes.myActivities;
+            container.innerHTML = '<div class="spinner mx-auto mt-10"></div><p class="text-center text-slate-500">در حال بارگذاری فعالیت‌های شما...</p>';
+            // In the future, you would fetch and display the user's activities here.
+            // For now, we just show a message.
+            setTimeout(() => {
+                 container.innerHTML = '<p class="text-center text-slate-500">شما هنوز فعالیتی ثبت نکرده‌اید.</p>';
+            }, 1000);
+        }
+
+        function renderEngineersMarketplace() {
+            const container = contentPanes.engineers;
+            container.innerHTML = '<p class="text-center text-slate-500">بخش جستجوی مهندسان در دست ساخت است.</p>';
         }
 
         function renderProjectsHeader(isMarketplace = false) {
