@@ -40,12 +40,13 @@
         .workstation-wrapper { display: flex; height: 100vh; max-height: 100vh; overflow: hidden; }
         .main-content-area { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
         .content-body { flex-grow: 1; overflow-y: auto; padding: 1.5rem 2rem; }
-        .sidebar { width: 288px; flex-shrink: 0; background-color: #f1f5f9; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; }
+        /* [MODIFIED] Sidebar width reduced */
+        .sidebar { width: 250px; flex-shrink: 0; background-color: #f1f5f9; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; }
         @media (max-width: 1024px) { .sidebar { display: none; } }
         .sidebar-profile-section { display: flex; align-items: center; padding: 1rem; border-bottom: 1px solid #cbd5e1; }
-        .sidebar-profile-image-container { position: relative; width: 60px; height: 60px; flex-shrink: 0; }
+        .sidebar-profile-image-container { position: relative; width: 60px; height: 60px; flex-shrink: 0; cursor: pointer; }
         .sidebar-profile-image { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 3px solid var(--primary-color); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .sidebar-profile-image-edit-overlay { position: absolute; inset: 0; background-color: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; opacity: 0; transition: opacity 0.3s ease; cursor: pointer; }
+        .sidebar-profile-image-edit-overlay { position: absolute; inset: 0; background-color: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; opacity: 0; transition: opacity 0.3s ease; }
         .sidebar-profile-image-container:hover .sidebar-profile-image-edit-overlay { opacity: 1; }
         .sidebar-profile-details { margin-right: 1rem; text-align: right; }
         .sidebar-profile-name { font-size: 1.05rem; font-weight: 700; color: #1e293b; }
@@ -62,7 +63,8 @@
         .nav-item.btn-special-project.active { background-color: var(--special-color-dark); box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
 
         .sidebar-footer { padding: 1rem; margin-top: auto; border-top: 1px solid #e2e8f0; }
-        .advertisement-sidebar { width: 288px; flex-shrink: 0; background-color: #f8fafc; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; padding: 1.5rem 1rem; }
+        /* [MODIFIED] Advertisement sidebar width increased */
+        .advertisement-sidebar { width: 320px; flex-shrink: 0; background-color: #f8fafc; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; padding: 1.5rem 1rem; }
         @media (max-width: 1280px) { .advertisement-sidebar { display: none; } }
         .slideshow-container { position: relative; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .slide-image { width: 100%; display: none; aspect-ratio: 16/10; object-fit: cover; }
@@ -71,6 +73,17 @@
         .slide-dots { text-align: center; padding-top: 0.75rem; }
         .dot { cursor: pointer; height: 10px; width: 10px; margin: 0 4px; background-color: #cbd5e1; border-radius: 50%; display: inline-block; transition: background-color 0.3s ease; }
         .dot.active, .dot:hover { background-color: var(--primary-color); }
+        
+        /* [NEW] Info Panel styles */
+        .dynamic-info-panel { background-color: #e0f2fe; border: 1px solid #bae6fd; color: #0c4a6e; padding: 1rem; border-radius: 0.5rem; margin-top: 1.5rem; font-size: 0.875rem; }
+        .dynamic-info-panel p { margin: 0; line-height: 1.6; }
+        .dynamic-info-panel i { color: #0ea5e9; margin-left: 0.5rem; }
+        /* [NEW] Ad sidebar footer styles */
+        .ad-sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid #e2e8f0; text-align: center; color: #475569; }
+        .ad-sidebar-footer img { width: 40px; height: 40px; margin: 0 auto 0.75rem; }
+        .ad-sidebar-footer h4 { font-weight: 600; font-size: 0.9rem; }
+        .ad-sidebar-footer p { font-size: 0.75rem; line-height: 1.5; margin-top: 0.25rem; }
+
         .profile-section { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.75rem; margin-bottom: 1.5rem; overflow: hidden; }
         .section-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; cursor: pointer; user-select: none; background-color: #fdfdfe; border-bottom: 1px solid #e2e8f0; }
         .section-header.open { border-bottom-color: #e2e8f0; }
@@ -81,7 +94,7 @@
         .section-content { padding: 1.5rem; display: none; }
         .section-content.open { display: block; }
         .section-actions { display: flex; justify-content: flex-end; gap: 0.75rem; }
-        label.required-field::after { content: "*"; color: red; margin-right: 4px; }
+        label.required-field::after, label.required::after { content: "*"; color: red; margin-right: 4px; }
         
         .password-input-container { position: relative; }
         .password-toggle-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #6b7280; }
@@ -92,7 +105,7 @@
         }
         input[type="password"] { padding-left: 2.5rem; }
         textarea { padding: 1rem; }
-        select { padding-top: 0.875rem; padding-bottom: 0.875rem; height: calc(2 * 0.875rem + 2 * 1rem - 2px); }
+        select { padding-top: 0.875rem; padding-bottom: 0.875rem; height: calc(1.5em + 2 * 0.875rem + 2px); }
         input:focus, textarea:focus, select:focus, input[type="password"]:focus { 
             border-color: var(--primary-color); background-color: white; 
             box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2); outline: none; 
@@ -110,18 +123,12 @@
         .btn-primary:hover { background-color: var(--primary-color-dark); }
         .btn-secondary { background-color: #e2e8f0; color: #1e293b; }
         .btn-secondary:hover { background-color: #cbd5e1; }
-        .btn-danger { background-color: #ef4444; color: white; }
-        .btn-danger:hover { background-color: #dc2626; }
-        .btn-success { background-color: #22c55e; color: white; }
-        .btn-success:hover { background-color: #16a34a; }
-        .btn-special { background-color: var(--special-color); color: white; }
-        .btn-special:hover { background-color: var(--special-color-dark); }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .map-container { height: 250px; border-radius: 0.5rem; border: 1px solid #cbd5e1; }
-        .file-preview-container { width: 100%; height: 12rem; overflow: hidden; border: 1px solid #e2e8f0; border-radius: 0.375rem; display: flex; align-items: center; justify-content: center; background-color: #f8fafc; }
-        .file-preview-container img, .file-preview-container iframe { width: 100%; height: 100%; object-fit: cover; border: none; }
+        .map-info-display { background-color: #e0f2fe; border: 1px solid #bae6fd; color: #0c4a6e; padding: 0.75rem; border-radius: 0.375rem; margin-top: 0.5rem; font-size: 0.8rem; }
+        
         .modal { display: none; align-items: center; justify-content: center; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); }
         .modal-content { background-color: #ffffff; margin: auto; padding: 2rem; border: none; width: 90%; max-width: 500px; border-radius: 0.75rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+        #cropperModal .modal-content { max-width: 90vw; width: 600px; }
         #cropperContainer { width: 100%; height: 400px; overflow: hidden; background: #f1f1f1; }
         #cropperContainer img { max-width: 100%; height: auto; }
         .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 32px; height: 32px; border-radius: 50%; border-left-color: var(--primary-color); animation: spin 1s ease infinite; }
@@ -133,12 +140,6 @@
         .welcome-content { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
         @media (min-width: 1024px) { .welcome-banner { display: flex; } }
         
-        .project-card, .activity-card { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); transition: all 0.3s ease; }
-        .project-card:hover, .activity-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
-        .price-highlight { background-color: #f0fdf4; }
-        .commission-highlight { background-color: #f8fafc; }
-        .frosode-badge { background-color: #fef2f2; color: #dc2626; }
-        .frosode-badge-container { text-align: center; }
         #project-list-container, #my-activities-container, #engineers-list-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
@@ -152,13 +153,6 @@
         }
         @media (min-width: 768px) { #filter-container .grid { grid-template-columns: repeat(2, 1fr); } }
         @media (min-width: 1280px) { #filter-container .grid { grid-template-columns: repeat(4, 1fr); } }
-
-        .neumorphic-card { background: #ffffff; border-radius: 20px; box-shadow: 8px 8px 16px #e0e0e0, -8px -8px 16px #ffffff; padding: 20px; margin: 20px auto; width: 100%; max-width: 800px; } 
-        .neumorphic-button { background: #ffffff; border: none; border-radius: 10px; box-shadow: 4px 4px 8px #e0e0e0, -4px -4px 8px #ffffff; padding: 8px 16px; cursor: pointer; transition: all 0.3s ease; font-size: 1rem; } 
-        .neumorphic-button:hover { box-shadow: 2px 2px 4px #e0e0e0, -2px -2px 4px #ffffff; }
-        .progress-bar { height: 6px; border-radius: 3px; background-color: #e9ecef; width: 100%; } 
-        .progress-fill { height: 100%; border-radius: 3px; background-color: #3b82f6; transition: width 0.3s ease; }
-        .needs-help { background-color: #fee2e2; padding: 4px 8px; border-radius: 4px; color: #dc2626; font-size: 0.875rem; }
 
         /* Notification Panel Styles */
         .notification-item { border-bottom: 1px solid #e2e8f0; transition: background-color 0.2s ease; }
@@ -197,12 +191,11 @@
         <!-- Main Sidebar (Right) -->
         <aside class="sidebar">
             <div class="sidebar-profile-section">
-                <div class="sidebar-profile-image-container">
+                <div id="sidebar-profile-image-clickable" class="sidebar-profile-image-container">
                     <img id="sidebarProfileImage" src="https://placehold.co/80x80/2196F3/FFFFFF?text=U" alt="عکس پروفایل" class="sidebar-profile-image">
-                    <label for="profileImageInput" class="sidebar-profile-image-edit-overlay">
+                    <div class="sidebar-profile-image-edit-overlay">
                         <i class="fas fa-camera"></i>
-                    </label>
-                    <input type="file" id="profileImageInput" class="hidden" accept="image/*">
+                    </div>
                 </div>
                 <div class="sidebar-profile-details">
                     <h2 id="sidebarProfileName" class="sidebar-profile-name">...</h2>
@@ -262,6 +255,9 @@
         <main class="main-content-area">
             <header class="p-4 border-b border-slate-200 bg-white flex-shrink-0 flex justify-between items-center">
                 <h1 id="main-header-title" class="text-2xl font-bold text-slate-800">داشبورد</h1>
+                <button id="refresh-button" class="btn btn-secondary !p-2 text-sm" title="بروزرسانی محتوای صفحه">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
             </header>
             
             <div id="dashboardContent" class="content-body"></div>
@@ -270,60 +266,30 @@
             <div id="projectsContent" class="content-body" style="display: none;"></div>
             <div id="myActivitiesContent" class="content-body" style="display: none;"></div>
             <div id="engineersContent" class="content-body" style="display: none;"></div>
-            <div id="settingsContent" class="content-body" style="display: none;">
-                <div class="profile-section">
-                    <div class="section-header !cursor-default">
-                        <h3 class="section-title"><i class="fas fa-key"></i>تغییر رمز عبور</h3>
-                    </div>
-                    <div class="section-content open">
-                        <form id="changePasswordForm">
-                            <div class="space-y-4 max-w-lg mx-auto p-4">
-                                <div>
-                                    <label for="currentPassword" class="block text-sm font-medium text-slate-700 mb-1 required-field">رمز عبور فعلی</label>
-                                    <div class="password-input-container">
-                                        <input type="password" id="currentPassword" name="currentPassword" required class="mt-1">
-                                        <i class="fas fa-eye password-toggle-icon" data-target="currentPassword"></i>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label for="newPassword" class="block text-sm font-medium text-slate-700 mb-1 required-field">رمز عبور جدید</label>
-                                    <div class="password-input-container">
-                                        <input type="password" id="newPassword" name="newPassword" required class="mt-1">
-                                        <i class="fas fa-eye password-toggle-icon" data-target="newPassword"></i>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label for="confirmNewPassword" class="block text-sm font-medium text-slate-700 mb-1 required-field">تکرار رمز عبور جدید</label>
-                                    <div class="password-input-container">
-                                        <input type="password" id="confirmNewPassword" name="confirmNewPassword" required class="mt-1">
-                                        <i class="fas fa-eye password-toggle-icon" data-target="confirmNewPassword"></i>
-                                    </div>
-                                </div>
-                                <div class="pt-4">
-                                     <button type="submit" class="btn btn-primary w-full justify-center">
-                                        <i class="fas fa-save"></i>
-                                        <span id="savePasswordBtnText">ذخیره تغییرات</span>
-                                        <div id="savePasswordSpinner" class="spinner !w-5 !h-5 !border-2 hidden"></div>
-                                     </button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
+            <div id="settingsContent" class="content-body" style="display: none;"></div>
             <div id="createProjectContent" class="content-body" style="display: none;"></div>
             <div id="createActivityContent" class="content-body" style="display: none;"></div>
         </main>
         
         <aside class="advertisement-sidebar">
              <div class="text-center mb-6 pb-6 border-b border-slate-300">
-                <img src="https://tandis.shahraavand.ir/images/new-TLogo_B.avif" alt="لوگوی تندیس" class="w-20 h-20 mx-auto mb-2 rounded-md object-contain">
+                <img src="https://tandis.shahraavand.ir/images/new-TLogo_B.avif" alt="لوگوی تندیس" class="w-18 h-18 mx-auto mb-2 rounded-md object-contain">
                 <h2 class="text-xl font-bold text-slate-800">نظام تندیس</h2>
+                 <p class="text-lg font-bold text-yellow-600 mt-1">تدارک نیازمندی دقیق و یکپارچه ساختمان</p>
                 <p class="text-sm text-slate-600 mt-1">پلتفرم تخصصی ارتباط مهندسان و کارفرمایان</p>
             </div>
             <div class="slideshow-container">
                 <div id="slideshow" class="slideshow-container"></div>
                 <div id="slide-dots-container" class="slide-dots"></div>
+            </div>
+            <div id="dynamic-info-panel" class="dynamic-info-panel">
+                <p><i class="fas fa-info-circle"></i>به ایستگاه کاری خود خوش آمدید. برای شروع، از منوی سمت راست، بخش مورد نظر را انتخاب کنید.</p>
+            </div>
+            <div class="ad-sidebar-footer">
+                <img src="https://tandis.shahraavand.ir/images/new-TLogo_B.avif" alt="لوگوی شهرآوند">
+                <h4>شرکت مهندسین مشاور شهرآوند تبریز</h4>
+                <p>محاسبات سازه | طراحی معماری | نظارت ساختمان | اجرای دقیق</p>
+                <p class="font-semibold mt-2">مبتکر ارتباط هوشمند مهندسان و کارفرمایان</p>
             </div>
         </aside>
     </div>
@@ -361,11 +327,13 @@
             </div>
         </div>
     </div>
+    <!-- Hidden file input for cropper -->
+    <input type="file" id="profileImageInput" class="hidden" accept="image/*">
 
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxdas5xMCB-WWeczINnbu2NnIlUGIJm-VfPHLwNsO4HM4JOUg-GqPsG613Kq4WL9LPl/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz8sqsY0JsT5ozvH3YA4OMkXjlLrzgbDGCETEbRozcxzZQQkESrCRXm8gV3kyH4a3px/exec';
         const SLIDESHOW_IMAGES = [
             'https://images.unsplash.com/photo-1581092916381-6f8901ad5a33?w=500&auto=format&fit=crop&q=60',
             'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=500&auto=format&fit=crop&q=60',
