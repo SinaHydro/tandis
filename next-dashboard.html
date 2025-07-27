@@ -1051,10 +1051,9 @@
                             </select>                         
                         </div>
                     </div>
-                    <!-- [MODIFIED] Added new row for engineer activity, level, and field -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-gray-700 font-medium mb-1">نوع فعالیت مهندس</label>
+                            <label class="block text-gray-700 font-medium mb-1">نوع فعالیت</label>
                             <select id="engineerActivity" class="w-full">
                                 <option value="طراح" ${data.engineerActivity === 'طراح' ? 'selected' : ''}>طراح</option>
                                 <option value="ناظر" ${data.engineerActivity === 'ناظر' ? 'selected' : ''}>ناظر</option>
@@ -1167,7 +1166,6 @@
                 province: document.getElementById('activityProvince').value,
                 city: document.getElementById('activityCity').value,
                 licenseType: document.getElementById('licenseType').value,
-                // [MODIFIED] Reading new values from the form
                 engineerLevel: document.getElementById('engineerLevel').value,
                 engineerActivity: document.getElementById('engineerActivity').value,
                 engineerField: document.getElementById('engineerField').value,
@@ -1212,8 +1210,7 @@
                     <div class="bg-green-50 flex items-center justify-between mb-4 -mt-5 -mx-5 p-5" style="border-radius: 20px 20px 0px 0px; display:grid; grid-template-columns:1fr 1fr 1fr;"> 
                         <div class="flex items-center justify-start pr-5 space-x-2"> <i class="fas fa-check-circle text-green-500" title="کاربر تایید شده"></i> <span class="mr-6 pr-4 text-base">${data.licenseType}</span></div>                 
                         <div class="flex flex-col items-center justify-center mr-0 sm:justify-start">
-                             <!-- [MODIFIED] Displaying the combined engineer title -->
-                             <span class="font-bold px-0 text-gray-800 text-lg">${data.engineerActivity || ''} ${data.engineerLevel || ''} ${data.engineerField || ''}</span> 
+                             <span class="font-bold px-0 text-gray-800 text-lg">${data.engineerActivity} ${data.engineerLevel} ${data.engineerField}</span> 
                             <div class="flex text-yellow-400">${'<i class="fas fa-star"></i>'.repeat(starsCount)}</div>                     
                         </div>
                         <span class="bg-green-200 mx-5 needs-help place-self-end self-center text-center text-green-900 ${data.needsHelp ? '' : 'hidden'}">نیازمند کمک مجری</span>
@@ -1571,11 +1568,11 @@
                 'dashboard': { title: 'داشبورد', render: () => userData.role === 'employer' ? renderEmployerDashboard() : (contentPanes.dashboard.innerHTML = `<p class="text-center text-slate-600">به پنل کاربری خود خوش آمدید.</p>`) },
                 'profile': { title: 'پروفایل کاربری', render: () => {} },
                 'settings': { title: 'تنظیمات', render: () => {} },
-                'projects': { title: userData && userData.role === 'employer' ? 'پروژه‌های من' : 'بازار کار پروژه‌ها', render: () => userData.role === 'employer' ? renderEmployerProjects() : renderProjectMarketplace(), refreshable: true },
+                'projects': { title: userData.role === 'employer' ? 'پروژه‌های من' : 'بازار کار پروژه‌ها', render: () => userData.role === 'employer' ? renderEmployerProjects() : renderProjectMarketplace(), refreshable: true },
                 'create-project': { title: 'ثبت / ویرایش پروژه', render: () => renderProjectForm() },
-                'my-activities': { title: 'فعالیت‌های من', render: () => contentPanes.myActivities.innerHTML = '<p class="text-center text-slate-500">بخش فعالیت‌های من در دست ساخت است.</p>', refreshable: true },
+                'my-activities': { title: 'فعالیت‌های من', render: renderMyActivities, refreshable: true },
                 'create-activity': { title: 'ثبت / ویرایش فعالیت', render: () => renderActivityForm() },
-                'engineers': { title: 'مهندسان', render: () => contentPanes.engineers.innerHTML = '<p class="text-center text-slate-500">بخش جستجوی مهندسان در دست ساخت است.</p>', refreshable: true }
+                'engineers': { title: 'مهندسان', render: renderEngineersMarketplace, refreshable: true }
             };
 
             navItems.forEach(item => {
