@@ -42,7 +42,8 @@
         .sidebar { width: 288px; flex-shrink: 0; background-color: #f1f5f9; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; }
         @media (max-width: 1024px) { .sidebar { display: none; } }
         .sidebar-profile-section { display: flex; align-items: center; padding: 1rem; border-bottom: 1px solid #cbd5e1; }
-        .sidebar-profile-image-container { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
+        /* [MODIFIED] Profile image size reduced */
+        .sidebar-profile-image-container { position: relative; width: 60px; height: 60px; flex-shrink: 0; }
         .sidebar-profile-image { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 3px solid var(--primary-color); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .sidebar-profile-image-edit-overlay { position: absolute; inset: 0; background-color: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; opacity: 0; transition: opacity 0.3s ease; cursor: pointer; }
         .sidebar-profile-image-container:hover .sidebar-profile-image-edit-overlay { opacity: 1; }
@@ -81,42 +82,23 @@
         .section-actions { display: flex; justify-content: flex-end; gap: 0.75rem; }
         label.required-field::after { content: "*"; color: red; margin-right: 4px; }
         
-        /* [MODIFIED] Unified padding for inputs and increased height/padding for select/textarea */
         input[type="text"], input[type="date"], input[type="tel"], input[type="number"], input[type="password"], textarea, select { 
-            background-color: #f8fafc; 
-            border: 1px solid #cbd5e1; 
-            border-radius: 0.375rem; 
-            padding: 0.875rem 1rem; /* 14px vertical, 16px horizontal */
-            transition: all 0.2s ease; 
-            width: 100%; 
+            background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem; 
+            padding: 0.875rem 1rem; transition: all 0.2s ease; width: 100%; 
         }
-        textarea {
-            padding: 1rem; /* Increased padding for textareas */
-        }
-        select {
-            padding-top: 0.875rem;
-            padding-bottom: 0.875rem;
-            height: calc(2 * 0.875rem + 2 * 1rem); /* Match height of other inputs */
-        }
+        textarea { padding: 1rem; }
+        select { padding-top: 0.875rem; padding-bottom: 0.875rem; height: calc(2 * 0.875rem + 2 * 1rem); }
         input:focus, textarea:focus, select:focus, input[type="password"]:focus { 
-            border-color: var(--primary-color); 
-            background-color: white; 
-            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2); 
-            outline: none; 
+            border-color: var(--primary-color); background-color: white; 
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2); outline: none; 
         }
         input:disabled, select:disabled, textarea:disabled { 
-            background-color: #eef2f7; 
-            color: #64748b; 
-            cursor: not-allowed; 
-            border-color: #e2e8f0; 
+            background-color: #eef2f7; color: #64748b; cursor: not-allowed; border-color: #e2e8f0; 
         }
         select { 
             -webkit-appearance: none; -moz-appearance: none; appearance: none; 
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E"); 
-            background-position: left 0.5rem center; 
-            background-repeat: no-repeat; 
-            background-size: 1.5em 1.5em; 
-            padding-left: 2.5rem;
+            background-position: left 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-left: 2.5rem;
         }
         .btn { padding: 0.625rem 1.25rem; border-radius: 0.375rem; font-weight: 600; transition: all 0.2s ease-in-out; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border: none; }
         .btn-primary { background-color: var(--primary-color); color: white; }
@@ -127,13 +109,8 @@
         .btn-danger:hover { background-color: #dc2626; }
         .btn-success { background-color: #22c55e; color: white; }
         .btn-success:hover { background-color: #16a34a; }
-        .btn-special {
-            background-color: var(--special-color);
-            color: white;
-        }
-        .btn-special:hover {
-            background-color: var(--special-color-dark);
-        }
+        .btn-special { background-color: var(--special-color); color: white; }
+        .btn-special:hover { background-color: var(--special-color-dark); }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .map-container { height: 250px; border-radius: 0.5rem; border: 1px solid #cbd5e1; }
         .file-preview-container { width: 100%; height: 12rem; overflow: hidden; border: 1px solid #e2e8f0; border-radius: 0.375rem; display: flex; align-items: center; justify-content: center; background-color: #f8fafc; }
@@ -151,20 +128,27 @@
         .price-highlight { background-color: #f0fdf4; }
         .commission-highlight { background-color: #f8fafc; }
         .frosode-badge { background-color: #fef2f2; color: #dc2626; }
-        #project-list-container, #my-activities-container {
+        /* [MODIFIED] Center align the badge */
+        .frosode-badge-container { text-align: center; }
+        #project-list-container, #my-activities-container, #engineers-list-container {
             display: grid;
             grid-template-columns: repeat(1, 1fr);
             gap: 1.5rem;
         }
         @media (min-width: 1024px) {
-            #project-list-container, #my-activities-container {
+            #project-list-container, #my-activities-container, #engineers-list-container {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
-        #filter-container {
-             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        /* [MODIFIED] Filter layout changed to flex for single row */
+        #filter-container .grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
-        /* Styles for the Neumorphic card from EngineerProfile2.html */
+        #filter-container .grid > div {
+            flex: 1 1 200px; /* Flex grow, shrink, and basis */
+        }
         .neumorphic-card { background: #ffffff; border-radius: 20px; box-shadow: 8px 8px 16px #e0e0e0, -8px -8px 16px #ffffff; padding: 20px; margin: 20px auto; width: 100%; max-width: 800px; } 
         .neumorphic-button { background: #ffffff; border: none; border-radius: 10px; box-shadow: 4px 4px 8px #e0e0e0, -4px -4px 8px #ffffff; padding: 8px 16px; cursor: pointer; transition: all 0.3s ease; font-size: 1rem; } 
         .neumorphic-button:hover { box-shadow: 2px 2px 4px #e0e0e0, -2px -2px 4px #ffffff; }
@@ -212,10 +196,14 @@
                     <i class="fas fa-tasks"></i>
                     <span>پروژه‌ها</span>
                 </a>
-                <!-- [NEW] My Activities Nav Item -->
                 <a data-view="my-activities" class="nav-item" id="my-activities-nav-item" style="display: none;">
                     <i class="fas fa-list-check"></i>
                     <span>فعالیت‌های من</span>
+                </a>
+                <!-- [NEW] Engineers Panel Nav Item for Employers -->
+                <a data-view="engineers" class="nav-item" id="engineers-nav-item" style="display: none;">
+                    <i class="fas fa-users-cog"></i>
+                    <span>مهندسان</span>
                 </a>
                 <a data-view="create-project" class="nav-item btn-special-project mt-4" id="create-project-nav-item" style="display: none;">
                     <i class="fas fa-plus-circle"></i>
@@ -249,6 +237,7 @@
             <div id="profileContent" class="content-body" style="display: none;"></div>
             <div id="projectsContent" class="content-body" style="display: none;"></div>
             <div id="myActivitiesContent" class="content-body" style="display: none;"></div>
+            <div id="engineersContent" class="content-body" style="display: none;"></div>
             <div id="settingsContent" class="content-body" style="display: none;">
                 <div class="profile-section">
                     <div class="section-header !cursor-default">
@@ -281,12 +270,8 @@
                     </div>
                 </div>
             </div>
-            <div id="createProjectContent" class="content-body" style="display: none;">
-                <!-- Project form will be rendered here -->
-            </div>
-            <div id="createActivityContent" class="content-body" style="display: none;">
-                <!-- Activity form will be rendered here -->
-            </div>
+            <div id="createProjectContent" class="content-body" style="display: none;"></div>
+            <div id="createActivityContent" class="content-body" style="display: none;"></div>
         </main>
         
         <aside class="advertisement-sidebar">
@@ -329,7 +314,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyeLx3wBTtypjlioj9vQ74PNNMgovMv6h3VEq4XyitbErMD0wO-S1FnzCkItXsRsf_L/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyBG_nQOolpgmfJOqMT1Yu2m5_XUK2Bq0v9vxciJu0XGokjqjukTqRXfSEb38n16fgp/exec';
         const SLIDESHOW_IMAGES = [
             'https://images.unsplash.com/photo-1581092916381-6f8901ad5a33?w=500&auto=format&fit=crop&q=60',
             'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=500&auto=format&fit=crop&q=60',
@@ -345,7 +330,9 @@
         let projectMarker = null;
         let fetchedProjects = [];
         let fetchedActivities = [];
+        let fetchedEngineersActivities = [];
         let appliedProjectIds = new Set();
+        let requestedCooperationIds = new Set();
         let currentActivityData = {};
 
         // --- DOM ELEMENTS ---
@@ -355,6 +342,7 @@
         const settingsContent = document.getElementById('settingsContent');
         const projectsContent = document.getElementById('projectsContent');
         const myActivitiesContent = document.getElementById('myActivitiesContent');
+        const engineersContent = document.getElementById('engineersContent');
         const createProjectContent = document.getElementById('createProjectContent');
         const createActivityContent = document.getElementById('createActivityContent');
         const mainHeaderTitle = document.getElementById('main-header-title');
@@ -463,9 +451,7 @@
             try {
                 const payload = { action: 'updateSection', email: userData.email, sectionKey, sectionData };
                 const response = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    cache: 'no-cache',
+                    method: 'POST', mode: 'cors', cache: 'no-cache',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(payload)
                 });
@@ -547,18 +533,21 @@
             const createProjectNavItem = document.getElementById('create-project-nav-item');
             const createActivityNavItem = document.getElementById('create-activity-nav-item');
             const myActivitiesNavItem = document.getElementById('my-activities-nav-item');
+            const engineersNavItem = document.getElementById('engineers-nav-item');
 
             if (userData.role === 'employer') {
                 projectsNavItem.style.display = 'flex';
                 createProjectNavItem.style.display = 'flex';
+                engineersNavItem.style.display = 'flex';
                 createActivityNavItem.style.display = 'none';
                 myActivitiesNavItem.style.display = 'none';
                 projectsNavItem.querySelector('span').textContent = 'پروژه‌های من';
             } else if (userData.role === 'engineer') {
                 projectsNavItem.style.display = 'flex';
                 myActivitiesNavItem.style.display = 'flex';
-                createProjectNavItem.style.display = 'none';
                 createActivityNavItem.style.display = 'flex';
+                createProjectNavItem.style.display = 'none';
+                engineersNavItem.style.display = 'none';
                 projectsNavItem.querySelector('span').textContent = 'بازار کار پروژه‌ها';
             }
 
@@ -856,7 +845,7 @@
                         <div class="flex items-center justify-center mt-1 pb-2">${starsHtml}</div>
                         <div class="flex justify-center mb-1"><div class="font-bold text-gray-900 text-xl">${project.engineerActivity} ${project.engineerRank} ${project.engineerField}</div></div>
                     </div>
-                    <div class="text-right"><span class="frosode-badge px-3 py-1 rounded-full text-sm font-medium ${project.fileType === 'فرسوده' ? '' : 'hidden'}">فرسوده</span></div>
+                    <div class="frosode-badge-container"><span class="frosode-badge px-3 py-1 rounded-full text-sm font-medium ${project.fileType === 'فرسوده' ? '' : 'hidden'}">فرسوده</span></div>
                 </div>
                 <div class="p-4">
                     <div class="flex justify-between mb-4 mt-2"><div class="text-gray-900 font-semibold"><i class="fa-ruler-combined fas mx-2 text-gray-400"></i>${formatNumber(project.area)} مترمربع</div><div class="text-gray-900 font-semibold">${project.floors} طبقه + ${project.basementFloors} طبقه زیرزمین<i class="fa-building fas mx-2 text-gray-400"></i></div></div>
@@ -1011,17 +1000,11 @@
             }
         }
 
-        // --- [MODIFIED] Activity Logic ---
+        // --- Activity Logic ---
         
-        // [FIXED] This function now ensures a valid object is passed to renderActivityEdit
         function renderActivityForm(activityToEdit = null) {
-            const formHtml = `
-                <div id="activityFormContainer" class="neumorphic-card flex flex-col">
-                    <!-- This container will hold either the form or the preview -->
-                </div>
-            `;
+            const formHtml = `<div id="activityFormContainer" class="neumorphic-card flex flex-col"></div>`;
             createActivityContent.innerHTML = formHtml;
-            // The `|| {}` ensures that if activityToEdit is null or undefined, an empty object is passed, preventing errors.
             renderActivityEdit(activityToEdit || {});
         }
 
@@ -1030,7 +1013,6 @@
             const container = document.getElementById('activityFormContainer');
             if (!container) return;
             
-            // Safely parse prices if it's a string
             let prices = {};
             if (data.prices) {
                 try {
@@ -1042,12 +1024,9 @@
             }
 
             const priceOptions = [
-                { label: 'ساختمان 1 تا 2 طبقه', default: '107,000' },
-                { label: 'ساختمان 3 تا 5 طبقه', default: '125,000' },
-                { label: 'ساختمان 6 تا 7 طبقه', default: '127,800' },
-                { label: 'ساختمان 8 تا 10 طبقه', default: '139,500' },
-                { label: 'ساختمان 11 تا 12 طبقه', default: '142,800' },
-                { label: 'ساختمان 13 تا 15 طبقه', default: '148,800' },
+                { label: 'ساختمان 1 تا 2 طبقه', default: '107,000' }, { label: 'ساختمان 3 تا 5 طبقه', default: '125,000' },
+                { label: 'ساختمان 6 تا 7 طبقه', default: '127,800' }, { label: 'ساختمان 8 تا 10 طبقه', default: '139,500' },
+                { label: 'ساختمان 11 تا 12 طبقه', default: '142,800' }, { label: 'ساختمان 13 تا 15 طبقه', default: '148,800' },
                 { label: 'ساختمان بالای 16 طبقه', default: '159,200' },
             ];
             
@@ -1063,104 +1042,34 @@
 
             const editHtml = `
                 <div id="editMode" class="flex flex-col gap-4"> 
-                    <h2 class="text-xl font-bold text-center text-slate-800">${isEditMode ? 'ویرایش فعالیت' : 'ثبت و معرفی فعالیت'}</h2>
                     ${isEditMode ? `<input type="hidden" id="activityId" value="${data.ActivityID}">` : ''}
-
-                    <!-- [MODIFIED] Row 1: Province, City, License Type -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-gray-700 font-medium mb-1">استان</label>
-                            <select id="province" class="w-full">${generateProvinceOptions(data.province || '')}</select>
-                        </div>
-                        <div>
-                            <label class="block text-gray-700 font-medium mb-1">شهر</label>
-                            <input type="text" id="city" class="w-full" value="${data.city || ''}">
-                        </div>
-                        <div> 
-                            <label class="block text-gray-700 font-medium mb-1">نوع پروانه</label>
-                            <select id="licenseType" class="w-full">
-                                <option value="انبوه ساز">انبوه ساز</option>
-                                <option value="سازنده حقوقی">سازنده حقوقی</option>
-                                <option value="مهندس حقیقی">مهندس حقیقی</option>
-                                <option value="کاردان">کاردان</option>
-                                <option value="معمارتجربی">معمارتجربی</option>
-                            </select>
-                        </div>
+                        <div><label class="block text-gray-700 font-medium mb-1">استان</label><select id="province" class="w-full">${generateProvinceOptions(data.province || '')}</select></div>
+                        <div><label class="block text-gray-700 font-medium mb-1">شهر</label><input type="text" id="city" class="w-full" value="${data.city || ''}"></div>
+                        <div><label class="block text-gray-700 font-medium mb-1">نوع پروانه</label><select id="licenseType" class="w-full"><option>انبوه ساز</option><option>سازنده حقوقی</option><option>مهندس حقیقی</option><option>کاردان</option><option>معمارتجربی</option></select></div>
                     </div>
-
-                    <!-- [MODIFIED] Row 2: Activity, Level, Field -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-gray-700 font-medium mb-1">نوع فعالیت مهندس</label>
-                            <select id="engineerActivity" class="w-full">
-                                <option value="طراح">طراح</option>
-                                <option value="ناظر">ناظر</option>
-                                <option value="مجری">مجری</option>
-                            </select>
-                        </div>
-                        <div> 
-                            <label class="block text-gray-700 font-medium mb-1">پایه پروانه</label>
-                            <select id="engineerLevel" class="w-full"> 
-                                <option value="پایه 3">پایه 3</option>
-                                <option value="پایه 2">پایه 2</option>
-                                <option value="پایه 1">پایه 1</option>
-                                <option value="پایه ارشد">پایه ارشد</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-gray-700 font-medium mb-1">رشته مهندس</label>
-                            <select id="engineerField" class="w-full">
-                                <option value="معماری">معماری</option>
-                                <option value="عمران">عمران</option>
-                                <option value="مکانیک">مکانیک</option>
-                                <option value="برق">برق</option>
-                                <option value="شهرسازی">شهرسازی</option>
-                                <option value="ترافیک">ترافیک</option>
-                                <option value="نقشه برداری">نقشه برداری</option>
-                            </select>
-                        </div>
+                        <div><label class="block text-gray-700 font-medium mb-1">نوع فعالیت مهندس</label><select id="engineerActivity" class="w-full"><option>طراح</option><option>ناظر</option><option>مجری</option></select></div>
+                        <div><label class="block text-gray-700 font-medium mb-1">پایه پروانه</label><select id="engineerLevel" class="w-full"><option>پایه 3</option><option>پایه 2</option><option>پایه 1</option><option>پایه ارشد</option></select></div>
+                        <div><label class="block text-gray-700 font-medium mb-1">رشته مهندس</label><select id="engineerField" class="w-full"><option>معماری</option><option>عمران</option><option>مکانیک</option><option>برق</option><option>شهرسازی</option><option>ترافیک</option><option>نقشه برداری</option></select></div>
                     </div>
-
-                    <!-- [MODIFIED] Row 3: Area and Projects -->
                     <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                        <div> 
-                            <label class="block text-gray-700 font-medium mb-1">حداکثر متراژ</label>
-                            <input type="number" id="maxArea" class="w-full" value="${data.maxArea || '5000'}"> 
-                        </div>
-                        <div> 
-                            <label class="block text-gray-700 font-medium mb-1">متراژ اشغال‌شده</label>
-                            <input type="number" id="occupiedArea" class="w-full" value="${data.occupiedArea || '1250'}"> 
-                        </div>
-                        <div> 
-                            <label class="block text-gray-700 font-medium mb-1">کارهای جاری</label>
-                            <input type="number" id="currentProjects" class="w-full" value="${data.currentProjects || '2'}"> 
-                        </div>
-                        <div> 
-                            <label class="block text-gray-700 font-medium mb-1">حداکثر کار</label>
-                            <input type="number" id="maxProjects" class="w-full" value="${data.maxProjects || '4'}"> 
-                        </div>
+                        <div><label class="block text-gray-700 font-medium mb-1">حداکثر متراژ</label><input type="number" id="maxArea" class="w-full" value="${data.maxArea || '5000'}"></div>
+                        <div><label class="block text-gray-700 font-medium mb-1">متراژ اشغال‌شده</label><input type="number" id="occupiedArea" class="w-full" value="${data.occupiedArea || '1250'}"></div>
+                        <div><label class="block text-gray-700 font-medium mb-1">کارهای جاری</label><input type="number" id="currentProjects" class="w-full" value="${data.currentProjects || '2'}"></div>
+                        <div><label class="block text-gray-700 font-medium mb-1">حداکثر کار</label><input type="number" id="maxProjects" class="w-full" value="${data.maxProjects || '4'}"></div>
                     </div>
-
-                    <!-- [MODIFIED] Price Rows -->
                     <div class="mb-4"> 
-                        <label class="block text-gray-700 font-medium mb-4 text-base text-center">قیمت پیشنهادی (هر متر مربع)</label>                     
+                        <label class="block text-gray-700 font-medium mb-2 text-base text-center">قیمت پیشنهادی (هر متر مربع)</label>
+                        <p class="text-xs text-center text-slate-500 mb-4">فقط ردیف ساختمانی که قصد همکاری دارید را انتخاب کنید و قیمت دلخواه برای همکاری را در مقابل آن وارد نمایید.</p>
                         <div id="priceRowsEdit" class="space-y-3">${priceRowsHtml}</div>
                     </div>
-                    
-                    <div class="flex items-center mb-4"> 
-                        <input type="checkbox" id="needsHelpCheckbox" class="ml-2" ${data.needsHelp ? 'checked' : ''}> 
-                        <label for="needsHelpCheckbox" class="text-gray-700 text-base">نیازمند کمک مجری</label> 
-                    </div>
-
-                    <div class="flex justify-end space-x-4"> 
-                        <button type="button" id="cancelActivityBtn" class="neumorphic-button">انصراف</button>
-                        <button type="button" id="previewActivityBtn" class="neumorphic-button bg-blue-500 text-white">پیش‌نمایش و ثبت</button>
-                    </div>
+                    <div class="flex items-center mb-4"><input type="checkbox" id="needsHelpCheckbox" class="ml-2" ${data.needsHelp ? 'checked' : ''}><label for="needsHelpCheckbox" class="text-gray-700 text-base">نیازمند کمک مجری</label></div>
+                    <div class="flex justify-end space-x-4"><button type="button" id="cancelActivityBtn" class="neumorphic-button">انصراف</button><button type="button" id="previewActivityBtn" class="neumorphic-button bg-blue-500 text-white">پیش‌نمایش و ثبت</button></div>
                 </div>
             `;
             container.innerHTML = editHtml;
 
-            // Set selected values for dropdowns in edit mode
             if (isEditMode) {
                 document.getElementById('licenseType').value = data.licenseType || 'مهندس حقیقی';
                 document.getElementById('engineerLevel').value = data.engineerLevel || 'پایه 3';
@@ -1178,16 +1087,11 @@
         function handlePreviewActivity() {
             const isEditMode = !!document.getElementById('activityId');
             currentActivityData = {
-                province: document.getElementById('province').value,
-                city: document.getElementById('city').value,
-                licenseType: document.getElementById('licenseType').value,
-                engineerLevel: document.getElementById('engineerLevel').value,
-                engineerActivity: document.getElementById('engineerActivity').value,
-                engineerField: document.getElementById('engineerField').value,
-                needsHelp: document.getElementById('needsHelpCheckbox').checked,
-                maxArea: document.getElementById('maxArea').value,
-                occupiedArea: document.getElementById('occupiedArea').value,
-                currentProjects: document.getElementById('currentProjects').value,
+                province: document.getElementById('province').value, city: document.getElementById('city').value,
+                licenseType: document.getElementById('licenseType').value, engineerLevel: document.getElementById('engineerLevel').value,
+                engineerActivity: document.getElementById('engineerActivity').value, engineerField: document.getElementById('engineerField').value,
+                needsHelp: document.getElementById('needsHelpCheckbox').checked, maxArea: document.getElementById('maxArea').value,
+                occupiedArea: document.getElementById('occupiedArea').value, currentProjects: document.getElementById('currentProjects').value,
                 maxProjects: document.getElementById('maxProjects').value,
             };
 
@@ -1196,16 +1100,12 @@
             for (let row of priceRows) {
                 const checkbox = row.querySelector('input[type="checkbox"]');
                 if (checkbox.checked) {
-                    const label = row.querySelector('span').textContent.trim();
-                    const price = row.querySelector('input[type="text"]').value;
-                    prices.push({ label, price });
+                    prices.push({ label: row.querySelector('span').textContent.trim(), price: row.querySelector('input[type="text"]').value });
                 }
             }
             currentActivityData.prices = JSON.stringify(prices);
             
-            if(isEditMode) {
-                currentActivityData.ActivityID = document.getElementById('activityId').value;
-            }
+            if(isEditMode) currentActivityData.ActivityID = document.getElementById('activityId').value;
             
             renderActivityPreview(currentActivityData);
         }
@@ -1221,73 +1121,39 @@
             const remainingProjects = (data.maxProjects || 0) - (data.currentProjects || 0);
             const projectPercentage = data.maxProjects > 0 ? (remainingProjects / data.maxProjects) * 100 : 0;
 
-            let priceHtml = pricesArray.map(p => `
-                <div class="price-row grid grid-cols-2 gap-4 items-center">
-                    <span>${p.label}</span> 
-                    <span class="text-left">${p.price} تومان</span> 
-                </div>
-            `).join('');
+            let priceHtml = pricesArray.map(p => `<div class="price-row grid grid-cols-2 gap-4 items-center"><span>${p.label}</span><span class="text-left">${p.price} تومان</span></div>`).join('');
 
             const levelMap = { 'پایه 3': 1, 'پایه 2': 2, 'پایه 1': 3, 'پایه ارشد': 4 };
             const starsCount = levelMap[data.engineerLevel] || 1;
+            const starsHtml = '<i class="fas fa-star text-yellow-400"></i>'.repeat(starsCount);
 
             const previewHtml = `
                 <div class="flex flex-col">
-                    <div class="bg-green-50 flex items-center justify-between mb-4 -mt-5 -mx-5 p-5" style="border-radius: 20px 20px 0px 0px; display:grid; grid-template-columns:1fr 1fr 1fr;"> 
-                        <div class="flex items-center justify-start pr-5 space-x-2"> 
-                            <i class="fas fa-check-circle text-green-500" title="کاربر تایید شده"></i> 
-                            <span class="mr-6 pr-4 text-base">${data.licenseType}</span>
-                        </div>
-                        <div class="flex flex-col items-center justify-center mr-0 sm:justify-start">
-                            <span class="font-bold px-0 text-gray-800 text-lg">${data.engineerActivity} ${data.engineerLevel} ${data.engineerField}</span> 
-                            <div class="flex text-yellow-400">${'<i class="fas fa-star"></i>'.repeat(starsCount)}</div>
-                        </div>
-                        <div class="place-self-end self-center text-center">
-                           <p class="font-semibold text-slate-700 text-sm">آخرین بروزرسانی:</p>
-                           <p class="text-xs text-slate-500">${formatTimeAgo(data.LastModifiedDate || new Date())}</p>
-                        </div>
+                    <div class="bg-green-50 flex items-center justify-between mb-4 -mt-5 -mx-5 p-5" style="border-radius: 20px 20px 0px 0px; display:grid; grid-template-columns:1fr auto 1fr;"> 
+                        <div class="flex items-center justify-start pr-5 space-x-2"><i class="fas fa-check-circle text-green-500" title="کاربر تایید شده"></i><span class="mr-6 pr-4 text-base">${data.licenseType}</span></div>
+                        <div class="flex flex-col items-center justify-center"><span class="font-bold px-0 text-gray-800 text-lg">${data.engineerActivity} ${data.engineerLevel} ${data.engineerField}</span><div class="flex text-yellow-400">${starsHtml}</div></div>
+                        <div class="place-self-end self-center text-center"><p class="font-semibold text-slate-700 text-sm">آخرین بروزرسانی:</p><p class="text-xs text-slate-500">${formatTimeAgo(data.LastModifiedDate || new Date())}</p></div>
                     </div>
-
                     <div class="flex flex-col gap-4">
-                        <!-- [NEW] Province and City Display -->
-                        <div class="flex items-center justify-center gap-2 p-2 bg-slate-100 rounded-md">
-                            <i class="fas fa-map-marker-alt text-green-600"></i>
-                            <span class="font-semibold text-slate-700">${data.province || 'استان ثبت نشده'} - ${data.city || 'شهر ثبت نشده'}</span>
+                        <div class="flex items-center justify-between gap-2 p-2 bg-slate-100 rounded-md">
+                            <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-green-600"></i><span class="font-semibold text-slate-700">${data.province || 'استان ثبت نشده'} - ${data.city || 'شهر ثبت نشده'}</span></div>
+                            ${data.needsHelp ? '<span class="needs-help">نیازمند کمک مجری</span>' : ''}
                         </div>
-                        
                         <div class="mt-2"> 
-                            <div class="flex gap-4 items-center justify-between"> 
-                                <label class="font-medium text-base text-gray-700">متراژ کار باقی‌مانده</label>
-                                <span class="text-gray-600 text-base">${remainingArea.toLocaleString('fa-IR')} متر مربع</span>
-                            </div>
-                            <div class="progress-bar mt-2"> 
-                                <div class="bg-green-500 progress-fill" style="width: ${areaPercentage}%"></div>
-                            </div>
+                            <div class="flex gap-4 items-center justify-between"><label class="font-medium text-base text-gray-700">متراژ کار باقی‌مانده</label><span class="text-gray-600 text-base">${remainingArea.toLocaleString('fa-IR')} متر مربع</span></div>
+                            <div class="progress-bar mt-2"><div class="bg-green-500 progress-fill" style="width: ${areaPercentage}%"></div></div>
                         </div>
                         <div> 
-                            <div class="flex gap-4 items-center justify-between"> 
-                                <label class="font-medium text-base text-gray-700">تعداد کار باقی‌مانده</label>
-                                <span class="text-gray-600 text-base">${remainingProjects} از ${data.maxProjects}</span> 
-                            </div>
-                            <div class="progress-bar mt-2"> 
-                                <div class="bg-blue-500 progress-fill" style="width: ${projectPercentage}%"></div>
-                            </div>
+                            <div class="flex gap-4 items-center justify-between"><label class="font-medium text-base text-gray-700">تعداد کار باقی‌مانده</label><span class="text-gray-600 text-base">${remainingProjects} از ${data.maxProjects}</span></div>
+                            <div class="progress-bar mt-2"><div class="bg-blue-500 progress-fill" style="width: ${projectPercentage}%"></div></div>
                         </div>
-                        
-                        <div class="flex items-center justify-end mb-4 ${data.needsHelp ? '' : 'hidden'}">
-                             <span class="needs-help">نیازمند کمک مجری</span>
-                        </div>
-
                         <div class="bg-green-100 mt-2 pb-4 pt-5 px-5" style="border-radius: 16px;"> 
                             <label class="block font-medium mb-4 mt-0 text-base text-center text-green-900">قیمت پیشنهادی (هر متر مربع)</label>                     
                             <div class="space-y-3">${priceHtml || '<p class="text-center text-slate-500">قیمتی ثبت نشده است.</p>'}</div>
                         </div>
-
                         <div class="flex justify-between space-x-6 mt-4"> 
-                            <button id="editActivityBtn" class="neumorphic-button text-lg"> <i class="fas fa-edit"></i> ویرایش</button>
-                            <button id="submitActivityBtn" class="bg-green-500 font-bold ml-1 neumorphic-button text-lg text-white"> 
-                                <i class="fas fa-paper-plane"></i> ${isEditMode ? 'ذخیره تغییرات' : 'ارسال معرفی فعالیت'}
-                            </button>
+                            <button id="editActivityBtn" class="neumorphic-button text-lg"><i class="fas fa-edit"></i> ویرایش</button>
+                            <button id="submitActivityBtn" class="bg-green-500 font-bold ml-1 neumorphic-button text-lg text-white"><i class="fas fa-paper-plane"></i> ${isEditMode ? 'ذخیره تغییرات' : 'ارسال معرفی فعالیت'}</button>
                         </div>
                     </div>
                 </div>
@@ -1305,12 +1171,7 @@
             
             const isUpdate = !!currentActivityData.ActivityID;
             const action = isUpdate ? 'updateActivity' : 'createActivity';
-            const payload = {
-                action: action,
-                engineerEmail: userData.email,
-                activityData: currentActivityData,
-                activityId: currentActivityData.ActivityID // For update action
-            };
+            const payload = { action, engineerEmail: userData.email, activityData: currentActivityData, activityId: currentActivityData.ActivityID };
             
             try {
                 const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'cors', cache: 'no-cache', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
@@ -1320,9 +1181,7 @@
                     showModal(result.message, 'success');
                     currentActivityData = {};
                     document.querySelector('.nav-item[data-view="my-activities"]').click();
-                } else {
-                    throw new Error(result.message || 'خطای ناشناخته.');
-                }
+                } else { throw new Error(result.message || 'خطای ناشناخته.'); }
             } catch (error) {
                  showModal(`خطا در ثبت فعالیت: ${error.message}`, 'error');
                  button.disabled = false;
@@ -1330,21 +1189,8 @@
             }
         }
         
-        // --- [NEW] My Activities Panel Logic ---
         async function renderMyActivities() {
-            mainHeaderTitle.textContent = 'فعالیت‌های من';
-            myActivitiesContent.innerHTML = `
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-bold text-slate-700">لیست فعالیت‌های ثبت شده</h2>
-                    <button id="refreshActivitiesBtn" class="btn btn-secondary !p-2">
-                        <i class="fas fa-sync-alt"></i>
-                        <span class="mr-2">به‌روزرسانی</span>
-                    </button>
-                </div>
-                <div id="my-activities-container"><div class="spinner mx-auto mt-10"></div></div>
-            `;
-            document.getElementById('refreshActivitiesBtn').addEventListener('click', renderMyActivities);
-
+            myActivitiesContent.innerHTML = `<div id="my-activities-container"><div class="spinner mx-auto mt-10"></div></div>`;
             try {
                 const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getActivitiesByEngineer&email=${encodeURIComponent(userData.email)}`);
                 const result = await response.json();
@@ -1364,67 +1210,56 @@
             }
         }
         
-        function getActivityCardHTML(data) {
-             const pricesArray = JSON.parse(data.prices || '[]');
+        function getActivityCardHTML(data, forEmployer = false) {
             const remainingArea = (data.maxArea || 0) - (data.occupiedArea || 0);
             const areaPercentage = data.maxArea > 0 ? (remainingArea / data.maxArea) * 100 : 0;
             const remainingProjects = (data.maxProjects || 0) - (data.currentProjects || 0);
             const projectPercentage = data.maxProjects > 0 ? (remainingProjects / data.maxProjects) * 100 : 0;
             const levelMap = { 'پایه 3': 1, 'پایه 2': 2, 'پایه 1': 3, 'پایه ارشد': 4 };
             const starsCount = levelMap[data.engineerLevel] || 1;
+            const starsHtml = '<i class="fas fa-star text-yellow-400"></i>'.repeat(starsCount);
             const isActive = data.Status === 'فعال';
 
+            let footerHtml = '';
+            if (forEmployer) {
+                const isRequested = requestedCooperationIds.has(data.ActivityID);
+                footerHtml = `<button data-action="${isRequested ? 'cancel-cooperation' : 'request-cooperation'}" data-activity-id="${data.ActivityID}" class="btn ${isRequested ? 'btn-danger' : 'btn-success'} w-full"><i class="fas ${isRequested ? 'fa-times-circle' : 'fa-paper-plane'} mr-2"></i>${isRequested ? 'لغو درخواست همکاری' : 'درخواست همکاری'}</button>`;
+            } else {
+                footerHtml = `
+                    <button data-action="change-activity-status" data-activity-id="${data.ActivityID}" data-new-status="${isActive ? 'غیرفعال' : 'فعال'}" class="btn ${isActive ? 'btn-danger' : 'btn-success'} !py-1 !px-3 text-sm"><i class="fas ${isActive ? 'fa-eye-slash' : 'fa-eye'}"></i><span>${isActive ? 'غیرفعال کن' : 'فعال کن'}</span></button>
+                    <button data-action="edit-activity" data-activity-id="${data.ActivityID}" class="btn btn-secondary !py-1 !px-3 text-sm"><i class="fas fa-edit"></i><span>ویرایش</span></button>
+                `;
+            }
+
             return `
-            <div class="activity-card bg-white rounded-lg overflow-hidden ${!isActive ? 'opacity-60 bg-slate-50' : ''}">
+            <div class="activity-card bg-white rounded-lg overflow-hidden ${!isActive && !forEmployer ? 'opacity-60 bg-slate-50' : ''}">
                 <div class="p-4 border-b">
                      <div class="flex justify-between items-start">
-                         <div>
-                            <h4 class="font-bold text-lg text-slate-800">${data.engineerActivity} ${data.engineerLevel} ${data.engineerField}</h4>
-                            <p class="text-sm text-slate-500">آخرین ویرایش: ${formatTimeAgo(data.LastModifiedDate)}</p>
-                         </div>
-                         <span class="px-3 py-1 text-sm font-semibold rounded-full ${isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${data.Status}</span>
+                         <div class="flex flex-col"><h4 class="font-bold text-lg text-slate-800">${data.engineerActivity} ${data.engineerLevel} ${data.engineerField}</h4><div class="flex mt-1">${starsHtml}</div></div>
+                         ${!forEmployer ? `<span class="px-3 py-1 text-sm font-semibold rounded-full ${isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${data.Status}</span>` : `<p class="text-sm text-slate-500 text-left">آخرین ویرایش:<br>${formatTimeAgo(data.LastModifiedDate)}</p>`}
                      </div>
                 </div>
-
                 <div class="p-4 space-y-4">
-                     <div class="flex items-center justify-center gap-2 p-2 bg-slate-100 rounded-md">
-                        <i class="fas fa-map-marker-alt text-green-600"></i>
-                        <span class="font-semibold text-slate-700">${data.province} - ${data.city}</span>
-                    </div>
+                     <div class="flex items-center justify-between gap-2 p-2 bg-slate-100 rounded-md">
+                        <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-green-600"></i><span class="font-semibold text-slate-700">${data.province} - ${data.city}</span></div>
+                        ${data.needsHelp ? '<span class="needs-help">نیازمند کمک مجری</span>' : ''}
+                     </div>
                     <div> 
-                        <div class="flex gap-4 items-center justify-between text-sm"> 
-                            <label class="font-medium text-gray-700">متراژ باقی‌مانده</label>
-                            <span class="text-gray-600">${remainingArea.toLocaleString('fa-IR')} متر</span>
-                        </div>
+                        <div class="flex gap-4 items-center justify-between text-sm"><label class="font-medium text-gray-700">متراژ باقی‌مانده</label><span class="text-gray-600">${remainingArea.toLocaleString('fa-IR')} متر</span></div>
                         <div class="progress-bar mt-1"><div class="progress-fill bg-green-500" style="width: ${areaPercentage}%"></div></div>
                     </div>
                     <div> 
-                        <div class="flex gap-4 items-center justify-between text-sm"> 
-                            <label class="font-medium text-gray-700">کار باقی‌مانده</label>
-                            <span class="text-gray-600">${remainingProjects} از ${data.maxProjects}</span> 
-                        </div>
+                        <div class="flex gap-4 items-center justify-between text-sm"><label class="font-medium text-gray-700">کار باقی‌مانده</label><span class="text-gray-600">${remainingProjects} از ${data.maxProjects}</span></div>
                         <div class="progress-bar mt-1"><div class="progress-fill bg-blue-500" style="width: ${projectPercentage}%"></div></div>
                     </div>
                 </div>
-                
-                <div class="flex justify-end gap-2 p-3 bg-gray-50 border-t">
-                    <button data-action="change-activity-status" data-activity-id="${data.ActivityID}" data-new-status="${isActive ? 'غیرفعال' : 'فعال'}" class="btn ${isActive ? 'btn-danger' : 'btn-success'} !py-1 !px-3 text-sm">
-                       <i class="fas ${isActive ? 'fa-eye-slash' : 'fa-eye'}"></i>
-                       <span>${isActive ? 'غیرفعال کن' : 'فعال کن'}</span>
-                    </button>
-                    <button data-action="edit-activity" data-activity-id="${data.ActivityID}" class="btn btn-secondary !py-1 !px-3 text-sm">
-                       <i class="fas fa-edit"></i>
-                       <span>ویرایش</span>
-                    </button>
-                </div>
+                <div class="flex justify-end gap-2 p-3 bg-gray-50 border-t">${footerHtml}</div>
             </div>`;
         }
         
-        // [FIXED] Refactored to be cleaner and more reliable, avoiding race conditions.
         function handleEditActivity(activityId) {
             const activityToEdit = fetchedActivities.find(act => act.ActivityID === activityId);
             if (activityToEdit) {
-                // Manually perform the view switch
                 document.querySelectorAll('.nav-item[data-view]').forEach(item => item.classList.remove('active'));
                 document.querySelectorAll('.content-body').forEach(el => el.style.display = 'none');
                 
@@ -1434,16 +1269,12 @@
                 createActivityContent.style.display = 'block';
                 mainHeaderTitle.textContent = 'ثبت / ویرایش فعالیت';
                 
-                // Directly render the form with the correct data
                 renderActivityForm(activityToEdit);
             }
         }
         
         async function handleChangeActivityStatus(activityId, newStatus) {
-            const message = newStatus === 'غیرفعال'
-                ? 'آیا از غیرفعال کردن این فعالیت مطمئن هستید؟ دیگر در جستجوها نمایش داده نخواهد شد.'
-                : 'آیا می‌خواهید این فعالیت را دوباره فعال کنید؟';
-            
+            const message = newStatus === 'غیرفعال' ? 'آیا از غیرفعال کردن این فعالیت مطمئن هستید؟' : 'آیا می‌خواهید این فعالیت را دوباره فعال کنید؟';
             showModal(message, 'confirm', async () => {
                 pageLoader.style.display = 'flex';
                 try {
@@ -1462,246 +1293,212 @@
             });
         }
 
-
-        function renderProjectsHeader(title, refreshCallback, isMarketplace = false) {
-            let filterHtml = '';
-            if (isMarketplace) {
-                filterHtml = `
-                    <div id="filter-container" class="bg-slate-50 p-4 rounded-lg mb-6 border border-slate-200">
-                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                            <div>
-                                <label for="filterProvince" class="block text-sm font-medium text-slate-700 mb-1">استان</label>
-                                <select id="filterProvince" name="province" class="w-full text-sm">
-                                    ${generateProvinceOptions('')}
-                                </select>
-                            </div>
-                            <div>
-                                <label for="filterCity" class="block text-sm font-medium text-slate-700 mb-1">شهر</label>
-                                <input type="text" id="filterCity" name="city" class="w-full text-sm" placeholder="نام شهر را وارد کنید">
-                            </div>
-                            <div>
-                                <label for="filterEngineerField" class="block text-sm font-medium text-slate-700 mb-1">رشته مهندس</label>
-                                <select id="filterEngineerField" name="engineerField" class="w-full text-sm">
-                                    <option value="">همه</option>
-                                    <option value="معماری">معماری</option><option value="عمران">عمران</option><option value="مکانیک">مکانیک</option><option value="برق">برق</option><option value="شهرسازی">شهرسازی</option><option value="ترافیک">ترافیک</option><option value="نقشه برداری">نقشه برداری</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="filterEngineerRank" class="block text-sm font-medium text-slate-700 mb-1">پایه مهندس</label>
-                                <select id="filterEngineerRank" name="engineerRank" class="w-full text-sm">
-                                    <option value="">همه</option>
-                                    <option value="پایه 3">پایه 3</option><option value="پایه 2">پایه 2</option><option value="پایه 1">پایه 1</option><option value="پایه ارشد">پایه ارشد</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="filterEngineerActivity" class="block text-sm font-medium text-slate-700 mb-1">نوع فعالیت</label>
-                                <select id="filterEngineerActivity" name="engineerActivity" class="w-full text-sm">
-                                    <option value="">همه</option>
-                                    <option value="طراح">طراح</option><option value="ناظر">ناظر</option><option value="مجری">مجری</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="filterPermitType" class="block text-sm font-medium text-slate-700 mb-1">نوع پروانه</label>
-                                <select id="filterPermitType" name="permitType" class="w-full text-sm">
-                                    <option value="">همه</option>
-                                    <option value="طراح حقوقی">طراح حقوقی</option><option value="ناظر حقوقی">ناظر حقوقی</option><option value="انبوه ساز">انبوه ساز</option><option value="مجری حقوقی">مجری حقوقی</option><option value="مهندس حقیقی">مهندس حقیقی</option><option value="کاردان">کاردان</option><option value="معمارتجربی">معمارتجربی</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="mt-4 flex flex-col sm:flex-row justify-end gap-3">
-                            <button id="resetFiltersBtn" class="btn btn-secondary"><i class="fas fa-undo mr-2"></i>حذف فیلترها</button>
-                            <button id="applyFiltersBtn" class="btn btn-primary"><i class="fas fa-filter mr-2"></i>اعمال فیلتر</button>
-                        </div>
+        function renderProjectsHeader(title, refreshCallback) {
+            const filterHtml = `
+                <div id="filter-container" class="bg-slate-50 p-4 rounded-lg mb-6 border border-slate-200">
+                     <div class="grid">
+                        <div><label class="block text-sm font-medium text-slate-700 mb-1">استان</label><select id="filterProvince" name="province" class="w-full text-sm">${generateProvinceOptions('')}</select></div>
+                        <div><label class="block text-sm font-medium text-slate-700 mb-1">شهر</label><input type="text" id="filterCity" name="city" class="w-full text-sm" placeholder="نام شهر را وارد کنید"></div>
+                        <div><label class="block text-sm font-medium text-slate-700 mb-1">رشته مهندس</label><select id="filterEngineerField" name="engineerField" class="w-full text-sm"><option value="">همه</option><option>معماری</option><option>عمران</option><option>مکانیک</option><option>برق</option><option>شهرسازی</option><option>ترافیک</option><option>نقشه برداری</option></select></div>
+                        <div><label class="block text-sm font-medium text-slate-700 mb-1">پایه مهندس</label><select id="filterEngineerRank" name="engineerRank" class="w-full text-sm"><option value="">همه</option><option>پایه 3</option><option>پایه 2</option><option>پایه 1</option><option>پایه ارشد</option></select></div>
+                        <div><label class="block text-sm font-medium text-slate-700 mb-1">نوع فعالیت</label><select id="filterEngineerActivity" name="engineerActivity" class="w-full text-sm"><option value="">همه</option><option>طراح</option><option>ناظر</option><option>مجری</option></select></div>
+                        <div><label class="block text-sm font-medium text-slate-700 mb-1">نوع پروانه</label><select id="filterPermitType" name="permitType" class="w-full text-sm"><option value="">همه</option><option>طراح حقوقی</option><option>ناظر حقوقی</option><option>انبوه ساز</option><option>مجری حقوقی</option><option>مهندس حقیقی</option><option>کاردان</option><option>معمارتجربی</option></select></div>
                     </div>
-                `;
-            }
-
-            const headerHtml = `
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-bold text-slate-700">${title}</h2>
-                    <button id="refreshProjectsBtn" class="btn btn-secondary !p-2">
-                        <i class="fas fa-sync-alt"></i>
-                        <span class="mr-2">به‌روزرسانی</span>
-                    </button>
+                    <div class="mt-4 flex flex-col sm:flex-row justify-end gap-3">
+                        <button id="resetFiltersBtn" class="btn btn-secondary"><i class="fas fa-undo mr-2"></i>حذف فیلترها</button>
+                        <button id="applyFiltersBtn" class="btn btn-primary"><i class="fas fa-filter mr-2"></i>اعمال فیلتر</button>
+                    </div>
                 </div>
-                ${filterHtml}
-                <div id="project-list-container"></div>
             `;
-            projectsContent.innerHTML = headerHtml;
-            document.getElementById('refreshProjectsBtn').addEventListener('click', refreshCallback);
-
-            if (isMarketplace) {
-                document.getElementById('applyFiltersBtn').addEventListener('click', applyFilters);
-                document.getElementById('resetFiltersBtn').addEventListener('click', resetFilters);
-            }
-
-            return document.getElementById('project-list-container');
+            projectsContent.innerHTML = `${filterHtml}<div id="project-list-container"></div>`;
+            document.getElementById('applyFiltersBtn').addEventListener('click', applyFilters);
+            document.getElementById('resetFiltersBtn').addEventListener('click', resetFilters);
         }
         
         function displayProjects(projectsToDisplay) {
             const container = document.getElementById('project-list-container');
             if (!container) return;
-
-            if (projectsToDisplay.length > 0) {
-                container.innerHTML = projectsToDisplay.map(p => getProjectCardHTML(p, 'engineer', appliedProjectIds.has(p.ProjectID))).join('');
-            } else {
-                container.innerHTML = '<p class="text-center text-slate-500 col-span-full">پروژه‌ای مطابق با فیلترهای شما یافت نشد.</p>';
-            }
+            container.innerHTML = projectsToDisplay.length > 0 ? projectsToDisplay.map(p => getProjectCardHTML(p, 'engineer', appliedProjectIds.has(p.ProjectID))).join('') : '<p class="text-center text-slate-500 col-span-full">پروژه‌ای مطابق با فیلترهای شما یافت نشد.</p>';
         }
 
         function applyFilters() {
             const filters = {
-                province: document.getElementById('filterProvince').value,
-                city: document.getElementById('filterCity').value.trim().toLowerCase(),
-                engineerField: document.getElementById('filterEngineerField').value,
-                engineerRank: document.getElementById('filterEngineerRank').value,
-                engineerActivity: document.getElementById('filterEngineerActivity').value,
-                permitType: document.getElementById('filterPermitType').value,
+                province: document.getElementById('filterProvince').value, city: document.getElementById('filterCity').value.trim().toLowerCase(),
+                engineerField: document.getElementById('filterEngineerField').value, engineerRank: document.getElementById('filterEngineerRank').value,
+                engineerActivity: document.getElementById('filterEngineerActivity').value, permitType: document.getElementById('filterPermitType').value,
             };
-
-            const filtered = fetchedProjects.filter(p => {
-                const provinceMatch = !filters.province || (p.province && p.province === filters.province);
-                const cityMatch = !filters.city || (p.city && p.city.toLowerCase().includes(filters.city));
-                const fieldMatch = !filters.engineerField || p.engineerField === filters.engineerField;
-                const rankMatch = !filters.engineerRank || p.engineerRank === filters.engineerRank;
-                const activityMatch = !filters.engineerActivity || p.engineerActivity === filters.engineerActivity;
-                const permitMatch = !filters.permitType || p.permitType === filters.permitType;
-                
-                return provinceMatch && cityMatch && fieldMatch && rankMatch && activityMatch && permitMatch;
-            });
-
+            const filtered = fetchedProjects.filter(p => 
+                (!filters.province || p.province === filters.province) && (!filters.city || p.city.toLowerCase().includes(filters.city)) &&
+                (!filters.engineerField || p.engineerField === filters.engineerField) && (!filters.engineerRank || p.engineerRank === filters.engineerRank) &&
+                (!filters.engineerActivity || p.engineerActivity === filters.engineerActivity) && (!filters.permitType || p.permitType === filters.permitType)
+            );
             displayProjects(filtered);
         }
 
         function resetFilters() {
             const filterContainer = document.getElementById('filter-container');
             if (filterContainer) {
-                filterContainer.querySelectorAll('input, select').forEach(el => {
-                    if (el.tagName === 'SELECT') {
-                        el.selectedIndex = 0;
-                    } else {
-                        el.value = '';
-                    }
-                });
+                filterContainer.querySelectorAll('input, select').forEach(el => el.tagName === 'SELECT' ? el.selectedIndex = 0 : el.value = '');
             }
             displayProjects(fetchedProjects);
         }
 
         async function renderProjectMarketplace() {
-            mainHeaderTitle.textContent = 'بازار کار پروژه‌ها';
-            const container = renderProjectsHeader('بازار کار پروژه‌ها', renderProjectMarketplace, true);
-            container.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
+            projectsContent.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
             try {
                 const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getMarketplaceData&email=${encodeURIComponent(userData.email)}`);
                 const result = await response.json();
                 if (result.success && result.data) {
                     fetchedProjects = result.data.openProjects || [];
                     appliedProjectIds = new Set(result.data.appliedProjectIds || []);
+                    renderProjectsHeader();
                     displayProjects(fetchedProjects);
                 } else {
-                     container.innerHTML = `<p class="text-center text-red-500">${result.message || 'خطا در دریافت اطلاعات پروژه‌ها.'}</p>`;
+                     projectsContent.innerHTML = `<p class="text-center text-red-500">${result.message || 'خطا در دریافت اطلاعات پروژه‌ها.'}</p>`;
                 }
             } catch (error) {
-                container.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری پروژه‌ها: ${error.message}</p>`;
+                projectsContent.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری پروژه‌ها: ${error.message}</p>`;
             }
         }
 
         async function renderEmployerProjects() {
-            mainHeaderTitle.textContent = 'پروژه‌های من';
-            const container = renderProjectsHeader('پروژه‌های من', renderEmployerProjects, false);
-            container.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
+            projectsContent.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
             try {
                 const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getProjectsByEmployer&email=${encodeURIComponent(userData.email)}`);
                 const result = await response.json();
                 if (result.success && Array.isArray(result.data)) {
                     fetchedProjects = result.data.sort((a,b) => new Date(b.lastModifiedDate) - new Date(a.lastModifiedDate));
                      if (fetchedProjects.length > 0) {
-                        container.innerHTML = fetchedProjects.map(p => getProjectCardHTML(p, 'employer')).join('');
+                        projectsContent.innerHTML = `<div id="project-list-container">${fetchedProjects.map(p => getProjectCardHTML(p, 'employer')).join('')}</div>`;
                      } else {
-                        container.innerHTML = '<p class="text-center text-slate-500">شما هنوز پروژه‌ای ثبت نکرده‌اید.</p>';
+                        projectsContent.innerHTML = '<p class="text-center text-slate-500">شما هنوز پروژه‌ای ثبت نکرده‌اید.</p>';
                      }
                 } else {
-                    container.innerHTML = `<p class="text-center text-red-500">${result.message || 'خطا در دریافت اطلاعات پروژه‌ها.'}</p>`;
+                    projectsContent.innerHTML = `<p class="text-center text-red-500">${result.message || 'خطا در دریافت اطلاعات پروژه‌ها.'}</p>`;
                 }
             } catch (error) {
-                container.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری پروژه‌ها: ${error.message}</p>`;
+                projectsContent.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری پروژه‌ها: ${error.message}</p>`;
             }
         }
         
         async function renderEmployerDashboard() {
-            mainHeaderTitle.textContent = 'داشبورد';
             dashboardContent.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
             try {
                 const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getDashboardData&email=${encodeURIComponent(userData.email)}`);
                 const result = await response.json();
                 if (!result.success) throw new Error(result.message);
-                
                 const { stats, projects } = result.data;
-
-                let projectsListHtml = projects
-                    .sort((a,b) => new Date(b.lastModifiedDate) - new Date(a.lastModifiedDate))
-                    .map(p => `
-                    <div class="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                        <div>
-                            <p class="font-semibold text-slate-800">${p.projectName}</p>
-                            <p class="text-sm text-slate-500">${p.Status === 'باز' ? 'وضعیت: باز' : 'وضعیت: بسته'}</p>
-                        </div>
-                        <div class="text-left">
-                            <p class="font-semibold" style="color: var(--primary-color)">${p.applicantCount} درخواست</p>
-                            <p class="text-xs text-slate-400">همکاری</p>
-                        </div>
-                    </div>
-                `).join('');
-
-                if (projects.length === 0) {
-                    projectsListHtml = '<p class="text-center text-slate-500 col-span-2">هنوز پروژه‌ای ثبت نکرده‌اید.</p>';
-                }
-
+                let projectsListHtml = projects.sort((a,b) => new Date(b.lastModifiedDate) - new Date(a.lastModifiedDate))
+                    .map(p => `<div class="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"><div><p class="font-semibold text-slate-800">${p.projectName}</p><p class="text-sm text-slate-500">${p.Status === 'باز' ? 'وضعیت: باز' : 'وضعیت: بسته'}</p></div><div class="text-left"><p class="font-semibold" style="color: var(--primary-color)">${p.applicantCount} درخواست</p><p class="text-xs text-slate-400">همکاری</p></div></div>`).join('');
+                if (projects.length === 0) projectsListHtml = '<p class="text-center text-slate-500 col-span-2">هنوز پروژه‌ای ثبت نکرده‌اید.</p>';
                 dashboardContent.innerHTML = `
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Stats Cards -->
-                        <div class="bg-green-100 text-green-800 p-6 rounded-lg shadow">
-                            <p class="text-4xl font-bold">${stats.open}</p>
-                            <p class="mt-2 font-semibold">پروژه‌های باز</p>
-                        </div>
-                        <div class="bg-red-100 text-red-800 p-6 rounded-lg shadow">
-                            <p class="text-4xl font-bold">${stats.closed}</p>
-                            <p class="mt-2 font-semibold">پروژه‌های بسته</p>
-                        </div>
-
-                        <!-- Create Project CTA with Image -->
+                        <div class="bg-green-100 text-green-800 p-6 rounded-lg shadow"><p class="text-4xl font-bold">${stats.open}</p><p class="mt-2 font-semibold">پروژه‌های باز</p></div>
+                        <div class="bg-red-100 text-red-800 p-6 rounded-lg shadow"><p class="text-4xl font-bold">${stats.closed}</p><p class="mt-2 font-semibold">پروژه‌های بسته</p></div>
                         <div class="md:col-span-2 bg-white rounded-lg shadow overflow-hidden flex flex-col-reverse md:flex-row items-center">
-                            <div class="p-6 flex-grow w-full md:w-2/3">
-                                 <h3 class="text-lg font-bold text-slate-800 mb-2">پروژه جدیدی دارید؟</h3>
-                                 <p class="text-slate-600 mb-4">با ثبت پروژه جدید، آن را در معرض دید صدها مهندس متخصص قرار دهید و بهترین پیشنهاد را برای همکاری انتخاب کنید.</p>
-                                 <button id="dashboardCreateProjectBtn" class="btn btn-special">
-                                     <i class="fas fa-plus-circle"></i>
-                                     <span>ثبت پروژه جدید</span>
-                                 </button>
-                            </div>
-                            <div class="w-full md:w-1/3 h-48 md:h-full flex-shrink-0">
-                                 <img src="https://images.unsplash.com/photo-1580922942632-fb585198592e?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NDQ4fHwzZCUyMGJ1aWxkaW5nfGVufDB8MHwwfHx8MA%3D%3D" class="w-full h-full object-cover" alt="">
-                            </div>
+                            <div class="p-6 flex-grow w-full md:w-2/3"><h3 class="text-lg font-bold text-slate-800 mb-2">پروژه جدیدی دارید؟</h3><p class="text-slate-600 mb-4">با ثبت پروژه جدید، آن را در معرض دید صدها مهندس متخصص قرار دهید.</p><button id="dashboardCreateProjectBtn" class="btn btn-special"><i class="fas fa-plus-circle"></i><span>ثبت پروژه جدید</span></button></div>
+                            <div class="w-full md:w-1/3 h-48 md:h-full flex-shrink-0"><img src="https://images.unsplash.com/photo-1580922942632-fb585198592e?w=600&auto=format&fit=crop&q=60" class="w-full h-full object-cover" alt=""></div>
                         </div>
-
-
-                        <!-- Projects List -->
-                        <div class="md:col-span-2 bg-white p-6 rounded-lg shadow">
-                            <h3 class="text-lg font-bold text-slate-800 mb-4">لیست پروژه‌های شما</h3>
-                            <div class="space-y-3">
-                                ${projectsListHtml}
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                document.getElementById('dashboardCreateProjectBtn').addEventListener('click', () => {
-                    document.querySelector('.nav-item[data-view="create-project"]').click();
-                });
-
+                        <div class="md:col-span-2 bg-white p-6 rounded-lg shadow"><h3 class="text-lg font-bold text-slate-800 mb-4">آخرین پروژه‌های شما</h3><div class="space-y-3">${projectsListHtml}</div></div>
+                    </div>`;
+                document.getElementById('dashboardCreateProjectBtn').addEventListener('click', () => document.querySelector('.nav-item[data-view="create-project"]').click());
             } catch (error) {
                 dashboardContent.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری داشبورد: ${error.message}</p>`;
             }
+        }
+
+        async function renderEngineerDashboard() {
+            dashboardContent.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
+            try {
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getEngineerDashboardData&email=${encodeURIComponent(userData.email)}`);
+                const result = await response.json();
+                if (!result.success) throw new Error(result.message);
+                const { stats, activities } = result.data;
+                let activitiesListHtml = activities.sort((a,b) => new Date(b.LastModifiedDate) - new Date(a.LastModifiedDate))
+                    .map(act => `<div class="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"><div><p class="font-semibold text-slate-800">${act.engineerActivity} ${act.engineerLevel} ${act.engineerField}</p><p class="text-sm text-slate-500">${act.province} - ${act.city}</p></div><div class="text-left"><span class="px-3 py-1 text-sm font-semibold rounded-full ${act.Status === 'فعال' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${act.Status}</span></div></div>`).join('');
+                if (activities.length === 0) activitiesListHtml = '<p class="text-center text-slate-500 col-span-2">هنوز فعالیتی ثبت نکرده‌اید.</p>';
+
+                dashboardContent.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-green-100 text-green-800 p-6 rounded-lg shadow"><p class="text-4xl font-bold">${stats.active}</p><p class="mt-2 font-semibold">فعالیت‌های فعال</p></div>
+                        <div class="bg-red-100 text-red-800 p-6 rounded-lg shadow"><p class="text-4xl font-bold">${stats.inactive}</p><p class="mt-2 font-semibold">فعالیت‌های غیرفعال</p></div>
+                        <div class="md:col-span-2 bg-white rounded-lg shadow overflow-hidden flex flex-col-reverse md:flex-row items-center">
+                            <div class="p-6 flex-grow w-full md:w-2/3"><h3 class="text-lg font-bold text-slate-800 mb-2">آمادگی خود را اعلام کنید!</h3><p class="text-slate-600 mb-4">با ثبت فعالیت، کارفرمایان می‌توانند شما را پیدا کرده و برای پروژه‌های خود دعوت به همکاری کنند. این بهترین راه برای دیده شدن تخصص شماست.</p><button id="dashboardCreateActivityBtn" class="btn btn-special"><i class="fas fa-bullhorn"></i><span>ثبت فعالیت جدید</span></button></div>
+                            <div class="w-full md:w-1/3 h-48 md:h-full flex-shrink-0"><img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&auto=format&fit=crop&q=60" class="w-full h-full object-cover" alt=""></div>
+                        </div>
+                        <div class="md:col-span-2 bg-white p-6 rounded-lg shadow"><h3 class="text-lg font-bold text-slate-800 mb-4">آخرین فعالیت‌های شما</h3><div class="space-y-3">${activitiesListHtml}</div></div>
+                    </div>`;
+                document.getElementById('dashboardCreateActivityBtn').addEventListener('click', () => document.querySelector('.nav-item[data-view="create-activity"]').click());
+            } catch (error) {
+                dashboardContent.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری داشبورد: ${error.message}</p>`;
+            }
+        }
+        
+        async function renderEngineersPanel() {
+            engineersContent.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
+            try {
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getAllActiveActivities&email=${encodeURIComponent(userData.email)}`);
+                const result = await response.json();
+                if (result.success && result.data) {
+                    fetchedEngineersActivities = result.data.activeActivities || [];
+                    requestedCooperationIds = new Set(result.data.requestedActivityIds || []);
+                    const container = document.createElement('div');
+                    container.id = 'engineers-list-container';
+                    if (fetchedEngineersActivities.length > 0) {
+                        container.innerHTML = fetchedEngineersActivities.map(act => getActivityCardHTML(act, true)).join('');
+                    } else {
+                        container.innerHTML = '<p class="text-center text-slate-500 col-span-full">در حال حاضر هیچ مهندس فعالی یافت نشد.</p>';
+                    }
+                    engineersContent.innerHTML = '';
+                    engineersContent.appendChild(container);
+                } else {
+                     engineersContent.innerHTML = `<p class="text-center text-red-500">${result.message || 'خطا در دریافت لیست مهندسان.'}</p>`;
+                }
+            } catch (error) {
+                engineersContent.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری لیست مهندسان: ${error.message}</p>`;
+            }
+        }
+        
+        async function handleRequestCooperation(activityId, button) {
+            button.disabled = true;
+            button.innerHTML = '<div class="spinner !w-5 !h-5 !border-2"></div>';
+            try {
+                const payload = { action: 'requestCooperation', employerEmail: userData.email, activityId };
+                const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'cors', cache: 'no-cache', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    showModal(result.message, 'success');
+                    requestedCooperationIds.add(activityId);
+                    const card = button.closest('.activity-card');
+                    if(card) card.outerHTML = getActivityCardHTML(fetchedEngineersActivities.find(a => a.ActivityID === activityId), true);
+                } else { throw new Error(result.message); }
+            } catch (error) {
+                showModal(`خطا: ${error.message}`, 'error');
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>درخواست همکاری';
+            }
+        }
+        
+        async function handleCancelCooperation(activityId, button) {
+            showModal('آیا از لغو درخواست همکاری با این مهندس مطمئن هستید؟', 'confirm', async () => {
+                button.disabled = true;
+                button.innerHTML = '<div class="spinner !w-5 !h-5 !border-2"></div>';
+                try {
+                    const payload = { action: 'cancelCooperation', employerEmail: userData.email, activityId };
+                    const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'cors', cache: 'no-cache', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+                    const result = await response.json();
+                    if (result.status === 'success') {
+                        showModal(result.message, 'success');
+                        requestedCooperationIds.delete(activityId);
+                        const card = button.closest('.activity-card');
+                        if(card) card.outerHTML = getActivityCardHTML(fetchedEngineersActivities.find(a => a.ActivityID === activityId), true);
+                    } else { throw new Error(result.message); }
+                } catch (error) {
+                    showModal(`خطا: ${error.message}`, 'error');
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-times-circle mr-2"></i>لغو درخواست همکاری';
+                }
+            });
         }
 
         async function handleApplyForProject(projectId, button) {
@@ -1714,10 +1511,9 @@
                 if (result.status === 'success') {
                     showModal(result.message, 'success');
                     appliedProjectIds.add(projectId);
-                    button.parentElement.innerHTML = getProjectCardHTML(fetchedProjects.find(p => p.ProjectID === projectId), 'engineer', true).match(/<div class="flex justify-between p-4 bg-gray-50 border-t">([\s\S]*)<\/div>/)[1];
-                } else {
-                    throw new Error(result.message);
-                }
+                    const card = button.closest('.project-card');
+                    if(card) card.outerHTML = getProjectCardHTML(fetchedProjects.find(p => p.ProjectID === projectId), 'engineer', true);
+                } else { throw new Error(result.message); }
             } catch (error) {
                 showModal(`خطا: ${error.message}`, 'error');
                 button.disabled = false;
@@ -1736,10 +1532,9 @@
                     if (result.status === 'success') {
                         showModal(result.message, 'success');
                         appliedProjectIds.delete(projectId);
-                        button.parentElement.innerHTML = getProjectCardHTML(fetchedProjects.find(p => p.ProjectID === projectId), 'engineer', false).match(/<div class="flex justify-between p-4 bg-gray-50 border-t">([\s\S]*)<\/div>/)[1];
-                    } else {
-                        throw new Error(result.message);
-                    }
+                        const card = button.closest('.project-card');
+                        if(card) card.outerHTML = getProjectCardHTML(fetchedProjects.find(p => p.ProjectID === projectId), 'engineer', false);
+                    } else { throw new Error(result.message); }
                 } catch (error) {
                     showModal(`خطا: ${error.message}`, 'error');
                     button.disabled = false;
@@ -1757,10 +1552,7 @@
         }
 
         async function handleChangeProjectStatus(projectId, newStatus) {
-            const message = newStatus === 'بسته'
-                ? 'آیا از بستن این پروژه مطمئن هستید؟ پس از بسته شدن، پروژه دیگر برای مهندسان قابل مشاهده نخواهد بود.'
-                : 'آیا می‌خواهید این پروژه را دوباره باز کنید؟';
-            
+            const message = newStatus === 'بسته' ? 'آیا از بستن این پروژه مطمئن هستید؟' : 'آیا می‌خواهید این پروژه را دوباره باز کنید؟';
             showModal(message, 'confirm', async () => {
                 pageLoader.style.display = 'flex';
                 try {
@@ -1769,10 +1561,8 @@
                     const result = await response.json();
                     if (result.status === 'success') {
                         showModal(result.message, 'success');
-                        renderEmployerProjects(); // Refresh the project list
-                    } else {
-                        throw new Error(result.message);
-                    }
+                        renderEmployerProjects();
+                    } else { throw new Error(result.message); }
                 } catch (error) {
                     showModal(`خطا در تغییر وضعیت: ${error.message}`, 'error');
                 } finally {
@@ -1795,38 +1585,19 @@
                             dashboardContent.style.display = 'block';
                             mainHeaderTitle.textContent = 'داشبورد';
                             if (userData.role === 'employer') renderEmployerDashboard();
-                            else dashboardContent.innerHTML = `<p class="text-center text-slate-600">به پنل کاربری خود خوش آمدید.</p>`;
+                            else renderEngineerDashboard();
                             break;
-                        case 'profile':
-                            profileContent.style.display = 'block';
-                            mainHeaderTitle.textContent = 'پروفایل کاربری';
-                            break;
-                        case 'settings':
-                            settingsContent.style.display = 'block';
-                            mainHeaderTitle.textContent = 'تنظیمات';
-                            break;
+                        case 'profile': profileContent.style.display = 'block'; mainHeaderTitle.textContent = 'پروفایل کاربری'; break;
+                        case 'settings': settingsContent.style.display = 'block'; mainHeaderTitle.textContent = 'تنظیمات'; break;
                         case 'projects':
                             projectsContent.style.display = 'block';
-                            if (userData.role === 'employer') {
-                                renderEmployerProjects();
-                            } else {
-                                renderProjectMarketplace();
-                            }
+                            if (userData.role === 'employer') { mainHeaderTitle.textContent = 'پروژه‌های من'; renderEmployerProjects(); }
+                            else { mainHeaderTitle.textContent = 'بازار کار پروژه‌ها'; renderProjectMarketplace(); }
                             break;
-                        case 'my-activities':
-                             myActivitiesContent.style.display = 'block';
-                             renderMyActivities();
-                             break;
-                        case 'create-project':
-                            createProjectContent.style.display = 'block';
-                            mainHeaderTitle.textContent = 'ثبت / ویرایش پروژه';
-                            renderProjectForm();
-                            break;
-                        case 'create-activity':
-                            createActivityContent.style.display = 'block';
-                            mainHeaderTitle.textContent = 'ثبت / ویرایش فعالیت';
-                            renderActivityForm(); // This call is now safe
-                            break;
+                        case 'my-activities': myActivitiesContent.style.display = 'block'; mainHeaderTitle.textContent = 'فعالیت‌های من'; renderMyActivities(); break;
+                        case 'engineers': engineersContent.style.display = 'block'; mainHeaderTitle.textContent = 'لیست مهندسان'; renderEngineersPanel(); break;
+                        case 'create-project': createProjectContent.style.display = 'block'; mainHeaderTitle.textContent = 'ثبت / ویرایش پروژه'; renderProjectForm(); break;
+                        case 'create-activity': createActivityContent.style.display = 'block'; mainHeaderTitle.textContent = 'ثبت / ویرایش فعالیت'; renderActivityForm(); break;
                     }
                     e.currentTarget.classList.add('active');
                 });
@@ -1846,31 +1617,20 @@
             if (newPassword !== confirmNewPassword) return showModal('رمز عبور جدید و تکرار آن یکسان نیستند.', 'error');
             if (newPassword.length < 6) return showModal('رمز عبور جدید باید حداقل ۶ کاراکتر باشد.', 'error');
 
-            btn.disabled = true;
-            btnText.classList.add('hidden');
-            spinner.classList.remove('hidden');
-
+            btn.disabled = true; btnText.classList.add('hidden'); spinner.classList.remove('hidden');
             try {
                 const payload = { action: 'changePassword', email: userData.email, currentPassword, newPassword };
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST', mode: 'cors', cache: 'no-cache',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload)
-                });
+                const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'cors', cache: 'no-cache', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
                 if (!response.ok) throw new Error(`خطای سرور: ${response.status}`);
                 const result = await response.json();
                 if (result.status === 'success') {
                     showModal(result.message, 'success');
                     changePasswordForm.reset();
-                } else {
-                    throw new Error(result.message || 'خطای ناشناخته.');
-                }
+                } else { throw new Error(result.message || 'خطای ناشناخته.'); }
             } catch (error) {
                 showModal(error.message, 'error');
             } finally {
-                btn.disabled = false;
-                btnText.classList.remove('hidden');
-                spinner.classList.add('hidden');
+                btn.disabled = false; btnText.classList.remove('hidden'); spinner.classList.add('hidden');
             }
         }
 
@@ -1892,45 +1652,32 @@
             setupViewSwitcher();
             changePasswordForm.addEventListener('submit', handleChangePassword);
 
-            projectsContent.addEventListener('click', (e) => {
+            const contentAreaClickHandler = (e, contentId, handlers) => {
+                if (document.getElementById(contentId).style.display !== 'block') return;
                 const targetButton = e.target.closest('button');
                 if (!targetButton) return;
-
                 const action = targetButton.dataset.action;
-                const projectId = targetButton.dataset.projectId;
+                if (handlers[action]) {
+                    handlers[action](targetButton);
+                }
+            };
 
-                switch(action) {
-                    case 'apply':
-                        handleApplyForProject(projectId, targetButton);
-                        break;
-                    case 'cancel-application':
-                        handleCancelApplication(projectId, targetButton);
-                        break;
-                    case 'edit-project':
-                        handleEditProject(projectId);
-                        break;
-                    case 'close-project':
-                        handleChangeProjectStatus(projectId, 'بسته');
-                        break;
-                    case 'open-project':
-                        handleChangeProjectStatus(projectId, 'باز');
-                        break;
-                }
-            });
-            
-            myActivitiesContent.addEventListener('click', (e) => {
-                 const targetButton = e.target.closest('button');
-                if (!targetButton) return;
-                
-                const action = targetButton.dataset.action;
-                const activityId = targetButton.dataset.activityId;
-                
-                if (action === 'edit-activity') {
-                    handleEditActivity(activityId);
-                } else if (action === 'change-activity-status') {
-                    const newStatus = targetButton.dataset.newStatus;
-                    handleChangeActivityStatus(activityId, newStatus);
-                }
+            document.querySelector('.main-content-area').addEventListener('click', e => {
+                contentAreaClickHandler(e, 'projectsContent', {
+                    'apply': btn => handleApplyForProject(btn.dataset.projectId, btn),
+                    'cancel-application': btn => handleCancelApplication(btn.dataset.projectId, btn),
+                    'edit-project': btn => handleEditProject(btn.dataset.projectId),
+                    'close-project': btn => handleChangeProjectStatus(btn.dataset.projectId, 'بسته'),
+                    'open-project': btn => handleChangeProjectStatus(btn.dataset.projectId, 'باز')
+                });
+                contentAreaClickHandler(e, 'myActivitiesContent', {
+                    'edit-activity': btn => handleEditActivity(btn.dataset.activityId),
+                    'change-activity-status': btn => handleChangeActivityStatus(btn.dataset.activityId, btn.dataset.newStatus)
+                });
+                contentAreaClickHandler(e, 'engineersContent', {
+                    'request-cooperation': btn => handleRequestCooperation(btn.dataset.activityId, btn),
+                    'cancel-cooperation': btn => handleCancelCooperation(btn.dataset.activityId, btn)
+                });
             });
 
             pageLoader.style.display = 'none';
