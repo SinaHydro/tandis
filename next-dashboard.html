@@ -5,24 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ایستگاه کاری - نظام تندیس</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Leaflet (for maps) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
-    <!-- Font Awesome (for icons) -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
-    <!-- Vazirmatn Font -->
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css"/>
-    
-    <!-- Cropper.js (for image cropping) -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-    
-    <!-- Persian Datepicker -->
     <link rel="stylesheet" href="https://unpkg.com/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css"/>
     <script src="https://unpkg.com/jquery@3.5.1/dist/jquery.min.js"></script>
     <script src="https://unpkg.com/persian-date@1.1.0/dist/persian-date.min.js"></script>
@@ -30,10 +19,8 @@
 
     <style>
         :root {
-            --primary-color: #2196F3;
-            --primary-color-dark: #1976D2;
-            --special-color: #FFA000;      /* Golden Orange */
-            --special-color-dark: #F57C00;   /* Darker Golden Orange */
+            --primary-color: #2196F3; --primary-color-dark: #1976D2;
+            --special-color: #FFA000; --special-color-dark: #F57C00;
         }
         body { font-family: 'Vazirmatn', sans-serif; background-color: #f8fafc; }
         .workstation-wrapper { display: flex; height: 100vh; max-height: 100vh; overflow: hidden; }
@@ -42,7 +29,6 @@
         .sidebar { width: 288px; flex-shrink: 0; background-color: #f1f5f9; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; }
         @media (max-width: 1024px) { .sidebar { display: none; } }
         .sidebar-profile-section { display: flex; align-items: center; padding: 1rem; border-bottom: 1px solid #cbd5e1; }
-        /* [MODIFIED] Profile image size reduced */
         .sidebar-profile-image-container { position: relative; width: 60px; height: 60px; flex-shrink: 0; }
         .sidebar-profile-image { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 3px solid var(--primary-color); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .sidebar-profile-image-edit-overlay { position: absolute; inset: 0; background-color: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; opacity: 0; transition: opacity 0.3s ease; cursor: pointer; }
@@ -51,15 +37,12 @@
         .sidebar-profile-name { font-size: 1.05rem; font-weight: 700; color: #1e293b; }
         .sidebar-profile-role { font-size: 0.85rem; font-weight: 500; color: var(--primary-color); margin-top: 0.25rem; }
         .sidebar-nav { padding: 1rem; flex-grow: 1; }
-        .nav-item { display: flex; align-items: center; padding: 0.75rem 1rem; margin-bottom: 0.5rem; border-radius: 0.5rem; color: #475569; font-weight: 500; transition: all 0.2s ease; cursor: pointer; }
+        .nav-item { display: flex; align-items: center; padding: 0.75rem 1rem; margin-bottom: 0.5rem; border-radius: 0.5rem; color: #475569; font-weight: 500; transition: all 0.2s ease; cursor: pointer; position: relative; }
         .nav-item i { margin-left: 0.75rem; width: 20px; text-align: center; }
         .nav-item:hover { background-color: #e2e8f0; color: #1e293b; }
         .nav-item.active { background-color: var(--primary-color); color: white; box-shadow: 0 4px 6px -1px rgba(33, 150, 243, 0.2); }
-        
+        .notification-badge { position: absolute; top: 5px; left: 10px; min-width: 20px; height: 20px; border-radius: 50%; background-color: #ef4444; color: white; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; line-height: 1; padding: 2px; }
         .nav-item.btn-special-project { background-color: var(--special-color); color: white; font-weight: 700; justify-content: center; }
-        .nav-item.btn-special-project:hover { background-color: var(--special-color-dark); }
-        .nav-item.btn-special-project.active { background-color: var(--special-color-dark); box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
-
         .sidebar-footer { padding: 1rem; margin-top: auto; border-top: 1px solid #e2e8f0; }
         .advertisement-sidebar { width: 288px; flex-shrink: 0; background-color: #f8fafc; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; padding: 1.5rem 1rem; }
         @media (max-width: 1280px) { .advertisement-sidebar { display: none; } }
@@ -67,114 +50,72 @@
         .slide-image { width: 100%; display: none; aspect-ratio: 16/10; object-fit: cover; }
         .slide-image.active { display: block; animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0.4; } to { opacity: 1; } }
-        .slide-dots { text-align: center; padding-top: 0.75rem; }
         .dot { cursor: pointer; height: 10px; width: 10px; margin: 0 4px; background-color: #cbd5e1; border-radius: 50%; display: inline-block; transition: background-color 0.3s ease; }
         .dot.active, .dot:hover { background-color: var(--primary-color); }
         .profile-section { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.75rem; margin-bottom: 1.5rem; overflow: hidden; }
         .section-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; cursor: pointer; user-select: none; background-color: #fdfdfe; border-bottom: 1px solid #e2e8f0; }
-        .section-header.open { border-bottom-color: #e2e8f0; }
-        .section-title { font-size: 1.1rem; font-weight: 600; color: #334155; }
-        .section-title i { margin-left: 0.75rem; color: var(--primary-color); }
         .section-toggle-icon { transition: transform 0.3s ease; }
         .section-header.open .section-toggle-icon { transform: rotate(180deg); }
         .section-content { padding: 1.5rem; display: none; }
         .section-content.open { display: block; }
-        .section-actions { display: flex; justify-content: flex-end; gap: 0.75rem; }
         label.required-field::after { content: "*"; color: red; margin-right: 4px; }
-        
-        input[type="text"], input[type="date"], input[type="tel"], input[type="number"], input[type="password"], textarea, select { 
-            background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem; 
-            padding: 0.875rem 1rem; transition: all 0.2s ease; width: 100%; 
-        }
-        textarea { padding: 1rem; }
-        select { padding-top: 0.875rem; padding-bottom: 0.875rem; height: calc(2 * 0.875rem + 2 * 1rem); }
-        input:focus, textarea:focus, select:focus, input[type="password"]:focus { 
-            border-color: var(--primary-color); background-color: white; 
-            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2); outline: none; 
-        }
-        input:disabled, select:disabled, textarea:disabled { 
-            background-color: #eef2f7; color: #64748b; cursor: not-allowed; border-color: #e2e8f0; 
-        }
-        select { 
-            -webkit-appearance: none; -moz-appearance: none; appearance: none; 
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E"); 
-            background-position: left 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-left: 2.5rem;
-        }
+        .password-wrapper { position: relative; }
+        .password-toggle-icon { position: absolute; top: 50%; left: 1rem; transform: translateY(-50%); cursor: pointer; color: #64748b; }
+        input[type="text"], input[type="date"], input[type="tel"], input[type="number"], input[type="password"], textarea, select { background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.875rem 1rem; transition: all 0.2s ease; width: 100%; }
+        input[type="password"] { padding-left: 3rem; }
+        input:focus, textarea:focus, select:focus, input[type="password"]:focus { border-color: var(--primary-color); background-color: white; box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2); outline: none; }
+        select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E"); background-position: left 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-left: 2.5rem; }
         .btn { padding: 0.625rem 1.25rem; border-radius: 0.375rem; font-weight: 600; transition: all 0.2s ease-in-out; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border: none; }
-        .btn-primary { background-color: var(--primary-color); color: white; }
-        .btn-primary:hover { background-color: var(--primary-color-dark); }
-        .btn-secondary { background-color: #e2e8f0; color: #1e293b; }
-        .btn-secondary:hover { background-color: #cbd5e1; }
-        .btn-danger { background-color: #ef4444; color: white; }
-        .btn-danger:hover { background-color: #dc2626; }
-        .btn-success { background-color: #22c55e; color: white; }
-        .btn-success:hover { background-color: #16a34a; }
-        .btn-special { background-color: var(--special-color); color: white; }
-        .btn-special:hover { background-color: var(--special-color-dark); }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .map-container { height: 250px; border-radius: 0.5rem; border: 1px solid #cbd5e1; }
-        .file-preview-container { width: 100%; height: 12rem; overflow: hidden; border: 1px solid #e2e8f0; border-radius: 0.375rem; display: flex; align-items: center; justify-content: center; background-color: #f8fafc; }
-        .file-preview-container img, .file-preview-container iframe { width: 100%; height: 100%; object-fit: cover; border: none; }
-        .modal { display: none; align-items: center; justify-content: center; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); }
-        .modal-content { background-color: #ffffff; margin: auto; padding: 2rem; border: none; width: 90%; max-width: 500px; border-radius: 0.75rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
-        #cropperContainer { width: 100%; height: 400px; overflow: hidden; background: #f1f1f1; }
-        #cropperContainer img { max-width: 100%; height: auto; }
         .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 32px; height: 32px; border-radius: 50%; border-left-color: var(--primary-color); animation: spin 1s ease infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #page-loader { position: fixed; inset: 0; background-color: rgba(255,255,255,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        
-        .project-card, .activity-card { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); transition: all 0.3s ease; }
-        .project-card:hover, .activity-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
-        .price-highlight { background-color: #f0fdf4; }
-        .commission-highlight { background-color: #f8fafc; }
-        .frosode-badge { background-color: #fef2f2; color: #dc2626; }
-        /* [MODIFIED] Center align the badge */
+        #page-loader { position: fixed; inset: 0; background: linear-gradient(135deg, #FDFEFF 0%, #FCFDFF 50%, #EFF9FF 100%); z-index: 9999; display: flex; flex-direction: row; align-items: stretch; justify-content: center; }
+        .welcome-banner { width: 20vw; max-width: 220px; min-width:150px; display: none; align-items: center; justify-content: center; } 
+        .welcome-content { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
+        @media (min-width: 1024px) { .welcome-banner { display: flex; } }
+        .project-card, .activity-card { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); transition: all 0.3s ease; }
+        .project-card:hover, .activity-card:hover { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); }
         .frosode-badge-container { text-align: center; }
-        #project-list-container, #my-activities-container, #engineers-list-container {
-            display: grid;
-            grid-template-columns: repeat(1, 1fr);
-            gap: 1.5rem;
-        }
-        @media (min-width: 1024px) {
-            #project-list-container, #my-activities-container, #engineers-list-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        /* [MODIFIED] Filter layout changed to flex for single row */
-        #filter-container .grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        #filter-container .grid > div {
-            flex: 1 1 200px; /* Flex grow, shrink, and basis */
-        }
+        #project-list-container, #my-activities-container, #engineers-list-container { display: grid; grid-template-columns: repeat(1, 1fr); gap: 1.5rem; }
+        @media (min-width: 1024px) { #project-list-container, #my-activities-container, #engineers-list-container { grid-template-columns: repeat(2, 1fr); } }
+        #filter-container .grid { display: grid; grid-template-columns: repeat(1, 1fr); gap: 1rem; }
+        @media (min-width: 768px) { #filter-container .grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 1280px) { #filter-container .grid { grid-template-columns: repeat(4, 1fr); } }
         .neumorphic-card { background: #ffffff; border-radius: 20px; box-shadow: 8px 8px 16px #e0e0e0, -8px -8px 16px #ffffff; padding: 20px; margin: 20px auto; width: 100%; max-width: 800px; } 
-        .neumorphic-button { background: #ffffff; border: none; border-radius: 10px; box-shadow: 4px 4px 8px #e0e0e0, -4px -4px 8px #ffffff; padding: 8px 16px; cursor: pointer; transition: all 0.3s ease; font-size: 1rem; } 
-        .neumorphic-button:hover { box-shadow: 2px 2px 4px #e0e0e0, -2px -2px 4px #ffffff; }
         .progress-bar { height: 6px; border-radius: 3px; background-color: #e9ecef; width: 100%; } 
         .progress-fill { height: 100%; border-radius: 3px; background-color: #3b82f6; transition: width 0.3s ease; }
         .needs-help { background-color: #fee2e2; padding: 4px 8px; border-radius: 4px; color: #dc2626; font-size: 0.875rem; }
+        .notification-item { border-bottom: 1px solid #e2e8f0; padding: 1rem; transition: background-color 0.2s ease; }
+        .notification-item:last-child { border-bottom: none; }
+        .notification-item.unread { background-color: #eff6ff; font-weight: 600; }
+        .notification-item.unread .notification-title { color: #1e3a8a; }
     </style>
 </head>
 <body>
 
     <div id="page-loader">
-        <div class="flex flex-col items-center">
-            <div class="spinner"></div>
-            <p class="mt-4 text-slate-600 font-semibold">در حال بارگذاری اطلاعات کاربری...</p>
+        <div class="welcome-banner"><img src="https://tandis.shahraavand.ir/images/Tandis-L-Side.webp" alt="Banner"></div>
+        <div class="welcome-content">
+            <div class="flex items-center justify-center pb-4 w-full">
+                <img src="https://tandis.shahraavand.ir/images/new-TLogo_B.avif" alt="لوگوی تندیس" class="h-24 w-24 ml-4">
+                <div>
+                    <h1 class="font-black text-4xl text-center text-blue-800">نظام تندیس</h1>
+                    <p class="font-extrabold pt-2 text-lg text-center" style="color: #CB9214;">تدارک نیازمندی دقیق و یکپارچه ساختمان</p>
+                </div>
+            </div>
+            <div class="spinner my-6"></div>
+            <h2 id="welcomeMessageLine1" class="font-bold text-2xl text-slate-800">خوش آمدید!</h2>
+            <p id="welcomeMessageLine2" class="font-semibold mt-2 text-lg text-blue-700">پلتفرم تخصصی ارتباط مهندسان و کارفرمایان ساختمانی</p>
         </div>
+        <div class="welcome-banner"><img src="https://tandis.shahraavand.ir/images/Tandis-R-Side.webp" alt="Banner"></div>
     </div>
 
-    <div class="workstation-wrapper">
-        <!-- Main Sidebar (Right) -->
+    <div class="workstation-wrapper" style="display: none;">
+        <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-profile-section">
                 <div class="sidebar-profile-image-container">
-                    <img id="sidebarProfileImage" src="https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740" alt="عکس پروفایل" class="sidebar-profile-image">
-                    <label for="profileImageInput" class="sidebar-profile-image-edit-overlay">
-                        <i class="fas fa-camera"></i>
-                    </label>
+                    <img id="sidebarProfileImage" src="" alt="عکس پروفایل" class="sidebar-profile-image">
+                    <label for="profileImageInput" class="sidebar-profile-image-edit-overlay"><i class="fas fa-camera"></i></label>
                     <input type="file" id="profileImageInput" class="hidden" accept="image/*">
                 </div>
                 <div class="sidebar-profile-details">
@@ -182,59 +123,30 @@
                     <p id="sidebarProfileRole" class="sidebar-profile-role">...</p>
                 </div>
             </div>
-
             <nav class="sidebar-nav">
-                <a data-view="dashboard" class="nav-item active">
-                    <i class="fas fa-tachometer-alt"></i>
-                    <span>داشبورد</span>
-                </a>
-                <a data-view="profile" class="nav-item">
-                    <i class="fas fa-user-circle"></i>
-                    <span>پروفایل</span>
-                </a>
-                <a data-view="projects" class="nav-item" id="projects-nav-item" style="display: none;">
-                    <i class="fas fa-tasks"></i>
-                    <span>پروژه‌ها</span>
-                </a>
-                <a data-view="my-activities" class="nav-item" id="my-activities-nav-item" style="display: none;">
-                    <i class="fas fa-list-check"></i>
-                    <span>فعالیت‌های من</span>
-                </a>
-                <!-- [NEW] Engineers Panel Nav Item for Employers -->
-                <a data-view="engineers" class="nav-item" id="engineers-nav-item" style="display: none;">
-                    <i class="fas fa-users-cog"></i>
-                    <span>مهندسان</span>
-                </a>
-                <a data-view="create-project" class="nav-item btn-special-project mt-4" id="create-project-nav-item" style="display: none;">
-                    <i class="fas fa-plus-circle"></i>
-                    <span>ثبت پروژه جدید</span>
-                </a>
-                <a data-view="create-activity" class="nav-item btn-special-project mt-4" id="create-activity-nav-item" style="display: none;">
-                    <i class="fas fa-bullhorn"></i>
-                    <span>ثبت فعالیت جدید</span>
-                </a>
+                <a data-view="dashboard" class="nav-item active"><i class="fas fa-tachometer-alt"></i><span>داشبورد</span></a>
+                <a data-view="profile" class="nav-item"><i class="fas fa-user-circle"></i><span>پروفایل</span></a>
+                <a data-view="notifications" class="nav-item" id="notifications-nav-item"><i class="fas fa-bell"></i><span>پیام‌ها</span><span id="notification-badge" class="notification-badge hidden"></span></a>
+                <a data-view="projects" class="nav-item" id="projects-nav-item" style="display: none;"><i class="fas fa-tasks"></i><span>پروژه‌ها</span></a>
+                <a data-view="my-activities" class="nav-item" id="my-activities-nav-item" style="display: none;"><i class="fas fa-list-check"></i><span>فعالیت‌های من</span></a>
+                <a data-view="engineers" class="nav-item" id="engineers-nav-item" style="display: none;"><i class="fas fa-users-cog"></i><span>مهندسان</span></a>
+                <a data-view="create-project" class="nav-item btn-special-project mt-4" id="create-project-nav-item" style="display: none;"><i class="fas fa-plus-circle"></i><span>ثبت پروژه جدید</span></a>
+                <a data-view="create-activity" class="nav-item btn-special-project mt-4" id="create-activity-nav-item" style="display: none;"><i class="fas fa-bullhorn"></i><span>ثبت فعالیت جدید</span></a>
             </nav>
-
             <div class="sidebar-footer">
-                <a data-view="settings" class="nav-item">
-                    <i class="fas fa-cog"></i>
-                    <span>تنظیمات</span>
-                </a>
-                <a href="#" id="logoutButton" class="nav-item">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>خروج از سیستم</span>
-                </a>
+                <a data-view="settings" class="nav-item"><i class="fas fa-cog"></i><span>تنظیمات</span></a>
+                <a href="#" id="logoutButton" class="nav-item"><i class="fas fa-sign-out-alt"></i><span>خروج</span></a>
             </div>
         </aside>
 
         <!-- Main Content -->
         <main class="main-content-area">
             <header class="p-4 border-b border-slate-200 bg-white flex-shrink-0 flex justify-between items-center">
-                <h1 id="main-header-title" class="text-2xl font-bold text-slate-800">داشبورد</h1>
+                <h1 id="main-header-title" class="text-2xl font-bold text-slate-800"></h1>
             </header>
-            
             <div id="dashboardContent" class="content-body"></div>
             <div id="profileContent" class="content-body" style="display: none;"></div>
+            <div id="notificationsContent" class="content-body" style="display: none;"></div>
             <div id="projectsContent" class="content-body" style="display: none;"></div>
             <div id="myActivitiesContent" class="content-body" style="display: none;"></div>
             <div id="engineersContent" class="content-body" style="display: none;"></div>
@@ -244,27 +156,24 @@
                         <h3 class="section-title"><i class="fas fa-key"></i>تغییر رمز عبور</h3>
                     </div>
                     <div class="section-content open">
-                        <form id="changePasswordForm">
-                            <div class="space-y-4 max-w-lg mx-auto p-4">
-                                <div>
-                                    <label for="currentPassword" class="block text-sm font-medium text-slate-700 mb-1 required-field">رمز عبور فعلی</label>
-                                    <input type="password" id="currentPassword" name="currentPassword" required class="mt-1">
-                                </div>
-                                <div>
-                                    <label for="newPassword" class="block text-sm font-medium text-slate-700 mb-1 required-field">رمز عبور جدید</label>
-                                    <input type="password" id="newPassword" name="newPassword" required class="mt-1">
-                                </div>
-                                <div>
-                                    <label for="confirmNewPassword" class="block text-sm font-medium text-slate-700 mb-1 required-field">تکرار رمز عبور جدید</label>
-                                    <input type="password" id="confirmNewPassword" name="confirmNewPassword" required class="mt-1">
-                                </div>
-                                <div class="pt-4">
-                                     <button type="submit" class="btn btn-primary w-full justify-center">
-                                        <i class="fas fa-save"></i>
-                                        <span id="savePasswordBtnText">ذخیره تغییرات</span>
-                                        <div id="savePasswordSpinner" class="spinner !w-5 !h-5 !border-2 hidden"></div>
-                                     </button>
-                                </div>
+                        <form id="changePasswordForm" class="space-y-4 max-w-lg mx-auto p-4">
+                            <div class="password-wrapper">
+                                <label for="currentPassword" class="block text-sm font-medium text-slate-700 mb-1 required-field">رمز عبور فعلی</label>
+                                <input type="password" id="currentPassword" name="currentPassword" required class="mt-1 w-full">
+                                <i class="fas fa-eye password-toggle-icon"></i>
+                            </div>
+                            <div class="password-wrapper">
+                                <label for="newPassword" class="block text-sm font-medium text-slate-700 mb-1 required-field">رمز عبور جدید</label>
+                                <input type="password" id="newPassword" name="newPassword" required class="mt-1 w-full">
+                                <i class="fas fa-eye password-toggle-icon"></i>
+                            </div>
+                            <div class="password-wrapper">
+                                <label for="confirmNewPassword" class="block text-sm font-medium text-slate-700 mb-1 required-field">تکرار رمز عبور جدید</label>
+                                <input type="password" id="confirmNewPassword" name="confirmNewPassword" required class="mt-1 w-full">
+                                <i class="fas fa-eye password-toggle-icon"></i>
+                            </div>
+                            <div class="pt-4">
+                                 <button type="submit" class="btn btn-primary w-full justify-center bg-blue-500 hover:bg-blue-600"><i class="fas fa-save"></i><span id="savePasswordBtnText">ذخیره تغییرات</span><div id="savePasswordSpinner" class="spinner !w-5 !h-5 !border-2 hidden"></div></button>
                             </div>
                         </form>
                     </div>
@@ -288,69 +197,43 @@
     </div>
 
     <!-- Modals -->
-    <div id="cropperModal" class="modal">
-        <div class="modal-content">
-            <h3 class="text-xl font-bold mb-4">برش و تنظیم عکس پروفایل</h3>
-            <div id="cropperContainer">
-                <img id="imageToCrop" src="">
-            </div>
-            <div class="mt-6 flex justify-center gap-4">
-                <button id="cancelCropButton" class="btn btn-secondary"><i class="fas fa-times"></i>انصراف</button>
-                <button id="cropButton" class="btn btn-primary"><i class="fas fa-crop-alt"></i>برش و ذخیره</button>
-            </div>
-        </div>
-    </div>
-    <div id="messageModal" class="modal">
-        <div class="modal-content text-center">
-            <div id="modalIconContainer" class="mb-4 text-5xl"></div>
-            <p id="modalMessageText" class="text-slate-700 text-base"></p>
-            <div class="mt-6 flex justify-center gap-4">
-                <button id="modalConfirmBtn" class="btn btn-primary"><i class="fas fa-check"></i>تایید</button>
-                <button id="modalCancelBtn" class="btn btn-secondary"><i class="fas fa-times"></i>انصراف</button>
-            </div>
-        </div>
-    </div>
+    <div id="cropperModal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">برش و تنظیم عکس پروفایل</h3><div id="cropperContainer"><img id="imageToCrop" src=""></div><div class="mt-6 flex justify-center gap-4"><button id="cancelCropButton" class="btn btn-secondary bg-gray-200 hover:bg-gray-300">انصراف</button><button id="cropButton" class="btn btn-primary bg-blue-500 hover:bg-blue-600">برش و ذخیره</button></div></div></div>
+    <div id="messageModal" class="modal"><div class="modal-content text-center"><div id="modalIconContainer" class="mb-4 text-5xl"></div><p id="modalMessageText" class="text-slate-700 text-base"></p><div class="mt-6 flex justify-center gap-4"><button id="modalConfirmBtn" class="btn btn-primary bg-blue-500 hover:bg-blue-600">تایید</button><button id="modalCancelBtn" class="btn btn-secondary bg-gray-200 hover:bg-gray-300">انصراف</button></div></div></div>
 
     <script>
+    // Self-executing anonymous function to encapsulate the script
     (async function() {
         // --- CONFIGURATION ---
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyBG_nQOolpgmfJOqMT1Yu2m5_XUK2Bq0v9vxciJu0XGokjqjukTqRXfSEb38n16fgp/exec';
-        const SLIDESHOW_IMAGES = [
-            'https://images.unsplash.com/photo-1581092916381-6f8901ad5a33?w=500&auto=format&fit=crop&q=60',
-            'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=500&auto=format&fit=crop&q=60',
-            'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=500&auto=format&fit=crop&q=60'
-        ];
+        const SLIDESHOW_IMAGES = ['https://images.unsplash.com/photo-1581092916381-6f8901ad5a33?w=500&auto=format&fit=crop&q=60', 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=500&auto=format&fit=crop&q=60', 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=500&auto=format&fit=crop&q=60'];
         const PROVINCES = ["آذربایجان شرقی", "آذربایجان غربی", "اردبیل", "اصفهان", "البرز", "ایلام", "بوشهر", "تهران", "چهارمحال و بختیاری", "خراسان جنوبی", "خراسان رضوی", "خراسان شمالی", "خوزستان", "زنجان", "سمنان", "سیستان و بلوچستان", "فارس", "قزوین", "قم", "کردستان", "کرمان", "کرمانشاه", "کهگیلویه و بویراحمد", "گلستان", "گیلان", "لرستان", "مازندران", "مرکزی", "هرمزگان", "همدان", "یزد"];
 
         // --- STATE ---
-        let userData = null;
-        let cropper = null;
-        let currentSlide = 0;
-        let projectMap = null;
-        let projectMarker = null;
-        let fetchedProjects = [];
-        let fetchedActivities = [];
-        let fetchedEngineersActivities = [];
-        let appliedProjectIds = new Set();
-        let requestedCooperationIds = new Set();
+        let userData = null, cropper = null, currentSlide = 0, projectMap = null, projectMarker = null;
+        let fetchedProjects = [], fetchedActivities = [], fetchedEngineersActivities = [], notifications = [];
+        let appliedProjectIds = new Set(), requestedCooperationIds = new Set();
         let currentActivityData = {};
 
         // --- DOM ELEMENTS ---
         const pageLoader = document.getElementById('page-loader');
-        const dashboardContent = document.getElementById('dashboardContent');
-        const profileContent = document.getElementById('profileContent');
-        const settingsContent = document.getElementById('settingsContent');
-        const projectsContent = document.getElementById('projectsContent');
-        const myActivitiesContent = document.getElementById('myActivitiesContent');
-        const engineersContent = document.getElementById('engineersContent');
-        const createProjectContent = document.getElementById('createProjectContent');
-        const createActivityContent = document.getElementById('createActivityContent');
+        const welcomeMessageLine1 = document.getElementById('welcomeMessageLine1');
+        const workstationWrapper = document.querySelector('.workstation-wrapper');
         const mainHeaderTitle = document.getElementById('main-header-title');
         const sidebarProfileImage = document.getElementById('sidebarProfileImage');
         const sidebarProfileName = document.getElementById('sidebarProfileName');
         const sidebarProfileRole = document.getElementById('sidebarProfileRole');
-        const profileImageInput = document.getElementById('profileImageInput');
         const changePasswordForm = document.getElementById('changePasswordForm');
+        const contentDivs = {
+            dashboard: document.getElementById('dashboardContent'),
+            profile: document.getElementById('profileContent'),
+            notifications: document.getElementById('notificationsContent'),
+            projects: document.getElementById('projectsContent'),
+            myActivities: document.getElementById('myActivitiesContent'),
+            engineers: document.getElementById('engineersContent'),
+            settings: document.getElementById('settingsContent'),
+            createProject: document.getElementById('createProjectContent'),
+            createActivity: document.getElementById('createActivityContent')
+        };
         
         // --- HELPER FUNCTIONS ---
         function generateProvinceOptions(selectedValue) {
@@ -1576,82 +1459,37 @@
             navItems.forEach(item => {
                 item.addEventListener('click', (e) => {
                     const targetView = e.currentTarget.dataset.view;
-                    
-                    document.querySelectorAll('.content-body').forEach(el => el.style.display = 'none');
-                    navItems.forEach(nav => nav.classList.remove('active'));
+                    Object.values(contentDivs).forEach(div => div.style.display = 'none');
+                    document.querySelectorAll('.nav-item[data-view]').forEach(nav => nav.classList.remove('active'));
 
-                    switch(targetView) {
-                        case 'dashboard':
-                            dashboardContent.style.display = 'block';
+                    const viewHandlers = {
+                        'dashboard': () => {
                             mainHeaderTitle.textContent = 'داشبورد';
-                            if (userData.role === 'employer') renderEmployerDashboard();
-                            else renderEngineerDashboard();
-                            break;
-                        case 'profile': profileContent.style.display = 'block'; mainHeaderTitle.textContent = 'پروفایل کاربری'; break;
-                        case 'settings': settingsContent.style.display = 'block'; mainHeaderTitle.textContent = 'تنظیمات'; break;
-                        case 'projects':
-                            projectsContent.style.display = 'block';
+                            if (userData.role === 'employer') renderEmployerDashboard(); else renderEngineerDashboard();
+                        },
+                        'profile': () => { mainHeaderTitle.textContent = 'پروفایل کاربری'; },
+                        'notifications': () => { mainHeaderTitle.textContent = 'پیام‌ها'; fetchAndDisplayNotifications(); },
+                        'projects': () => {
                             if (userData.role === 'employer') { mainHeaderTitle.textContent = 'پروژه‌های من'; renderEmployerProjects(); }
                             else { mainHeaderTitle.textContent = 'بازار کار پروژه‌ها'; renderProjectMarketplace(); }
-                            break;
-                        case 'my-activities': myActivitiesContent.style.display = 'block'; mainHeaderTitle.textContent = 'فعالیت‌های من'; renderMyActivities(); break;
-                        case 'engineers': engineersContent.style.display = 'block'; mainHeaderTitle.textContent = 'لیست مهندسان'; renderEngineersPanel(); break;
-                        case 'create-project': createProjectContent.style.display = 'block'; mainHeaderTitle.textContent = 'ثبت / ویرایش پروژه'; renderProjectForm(); break;
-                        case 'create-activity': createActivityContent.style.display = 'block'; mainHeaderTitle.textContent = 'ثبت / ویرایش فعالیت'; renderActivityForm(); break;
+                        },
+                        'my-activities': () => { mainHeaderTitle.textContent = 'فعالیت‌های من'; renderMyActivities(); },
+                        'engineers': () => { mainHeaderTitle.textContent = 'لیست مهندسان'; renderEngineersPanel(); },
+                        'settings': () => { mainHeaderTitle.textContent = 'تنظیمات'; },
+                        'create-project': () => { mainHeaderTitle.textContent = 'ثبت / ویرایش پروژه'; renderProjectForm(); },
+                        'create-activity': () => { mainHeaderTitle.textContent = 'ثبت / ویرایش فعالیت'; renderActivityForm(); }
+                    };
+
+                    if (viewHandlers[targetView]) {
+                        contentDivs[targetView.replace('-', '')].style.display = 'block';
+                        viewHandlers[targetView]();
+                        e.currentTarget.classList.add('active');
                     }
-                    e.currentTarget.classList.add('active');
                 });
             });
         }
 
-        async function handleChangePassword(e) {
-            e.preventDefault();
-            const btn = e.target.querySelector('button[type="submit"]');
-            const btnText = btn.querySelector('span');
-            const spinner = btn.querySelector('.spinner');
-            const currentPassword = document.getElementById('currentPassword').value;
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmNewPassword = document.getElementById('confirmNewPassword').value;
-
-            if (!currentPassword || !newPassword || !confirmNewPassword) return showModal('لطفاً تمام فیلدها را پر کنید.', 'error');
-            if (newPassword !== confirmNewPassword) return showModal('رمز عبور جدید و تکرار آن یکسان نیستند.', 'error');
-            if (newPassword.length < 6) return showModal('رمز عبور جدید باید حداقل ۶ کاراکتر باشد.', 'error');
-
-            btn.disabled = true; btnText.classList.add('hidden'); spinner.classList.remove('hidden');
-            try {
-                const payload = { action: 'changePassword', email: userData.email, currentPassword, newPassword };
-                const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'cors', cache: 'no-cache', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
-                if (!response.ok) throw new Error(`خطای سرور: ${response.status}`);
-                const result = await response.json();
-                if (result.status === 'success') {
-                    showModal(result.message, 'success');
-                    changePasswordForm.reset();
-                } else { throw new Error(result.message || 'خطای ناشناخته.'); }
-            } catch (error) {
-                showModal(error.message, 'error');
-            } finally {
-                btn.disabled = false; btnText.classList.remove('hidden'); spinner.classList.add('hidden');
-            }
-        }
-
-        // --- INITIALIZATION ---
-        async function main() {
-            const params = new URLSearchParams(window.location.search);
-            const email = params.get('email');
-            if (!email) {
-                pageLoader.innerHTML = '<p class="text-red-600 font-bold">خطا: ایمیل کاربر مشخص نشده است.</p>';
-                return;
-            }
-            userData = await fetchUserProfile(email);
-            if (userData) {
-                userData.email = email;
-                renderProfile();
-                document.querySelector('.nav-item[data-view="dashboard"]').click();
-            }
-            initSlideshow();
-            setupViewSwitcher();
-            changePasswordForm.addEventListener('submit', handleChangePassword);
-
+        function setupEventListeners() {
             const contentAreaClickHandler = (e, contentId, handlers) => {
                 if (document.getElementById(contentId).style.display !== 'block') return;
                 const targetButton = e.target.closest('button');
@@ -1679,8 +1517,6 @@
                     'cancel-cooperation': btn => handleCancelCooperation(btn.dataset.activityId, btn)
                 });
             });
-
-            pageLoader.style.display = 'none';
         }
 
         main();
