@@ -1316,27 +1316,34 @@ function renderProjectForm(projectData = null) {
                         </div>
                     </div>
 
-<div class="space-y-4">
-    <h3 id="tariff-title" class="text-lg font-semibold text-gray-800 border-b pb-2">تعرفه پیشنهادی</h3>
-    <input type="hidden" id="unitPrice" name="unitPrice" value="${projectData?.unitPrice || '107000'}">
-    <div id="price-buttons-container" class="grid grid-cols-2 gap-3">
-        <button type="button" class="price-btn" data-price="107000">ساختمان ۱ تا ۲ طبقه<br><span class="font-bold">۱۰۷,۰۰۰ تومان</span></button>
-        <button type="button" class="price-btn" data-price="125000">ساختمان ۳ تا ۵ طبقه<br><span class="font-bold">۱۲۵,۰۰۰ تومان</span></button>
-        <button type="button" class="price-btn" data-price="127800">ساختمان ۶ تا ۷ طبقه<br><span class="font-bold">۱۲۷,۸۰۰ تومان</span></button>
-        <button type="button" class="price-btn" data-price="139500">ساختمان ۸ تا ۱۰ طبقه<br><span class="font-bold">۱۳۹,۵۰۰ تومان</span></button>
-        <button type="button" class="price-btn" data-price="142800">ساختمان ۱۱ تا ۱۲ طبقه<br><span class="font-bold">۱۴۲,۸۰۰ تومان</span></button>
-        <button type="button" class="price-btn" data-price="148800">ساختمان ۱۳ تا ۱۵ طبقه<br><span class="font-bold">۱۴۸,۸۰۰ تومان</span></button>
-        <button type="button" class="price-btn" data-price="159200">ساختمان بالای ۱۶ طبقه<br><span class="font-bold">۱۵۹,۲۰۰ تومان</span></button>
-        <div class="price-btn custom-price-container" data-price="custom">
-            <span>قیمت دلخواه (تومان)</span>
-            <input type="number" id="customPriceInput" class="custom-price-input" placeholder="مبلغ را وارد کنید">
-        </div>
-    </div>
-    </div>
-                        <div class="price-highlight p-3 rounded-lg mt-4"><div class="flex items-center"><i class="fas fa-tag text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت واحد:</span><span id="unitPricePreview" class="mr-2 font-semibold"></span></div><div class="flex items-center mt-2"><i class="fas fa-calculator text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت کل:</span><span id="totalPricePreview" class="mr-2 font-bold text-green-600"></span></div><div class="flex items-center mt-2"><i class="fas fa-hand-holding-usd text-blue-500 ml-2"></i><span class="text-gray-700 font-medium">کمیسیون (۱۵٪):</span><span id="commissionPreview" class="mr-2 font-bold" style="color: var(--primary-color)"></span></div></div>
+                    <div class="space-y-4">
+                        <h3 id="tariff-title" class="text-lg font-semibold text-gray-800 border-b pb-2">تعرفه پیشنهادی</h3>
+                        <input type="hidden" id="unitPrice" name="unitPrice" value="${projectData?.unitPrice || '107000'}">
+                        <div id="price-buttons-container" class="grid grid-cols-2 gap-3">
+                            <button type="button" class="price-btn" data-price="107000">ساختمان ۱ تا ۲ طبقه<br><span class="font-bold">۱۰۷,۰۰۰ تومان</span></button>
+                            <button type="button" class="price-btn" data-price="125000">ساختمان ۳ تا ۵ طبقه<br><span class="font-bold">۱۲۵,۰۰۰ تومان</span></button>
+                            <button type="button" class="price-btn" data-price="127800">ساختمان ۶ تا ۷ طبقه<br><span class="font-bold">۱۲۷,۸۰۰ تومان</span></button>
+                            <button type="button" class="price-btn" data-price="139500">ساختمان ۸ تا ۱۰ طبقه<br><span class="font-bold">۱۳۹,۵۰۰ تومان</span></button>
+                            <button type="button" class="price-btn" data-price="142800">ساختمان ۱۱ تا ۱۲ طبقه<br><span class="font-bold">۱۴۲,۸۰۰ تومان</span></button>
+                            <button type="button" class="price-btn" data-price="148800">ساختمان ۱۳ تا ۱۵ طبقه<br><span class="font-bold">۱۴۸,۸۰۰ تومان</span></button>
+                            <button type="button" class="price-btn" data-price="159200">ساختمان بالای ۱۶ طبقه<br><span class="font-bold">۱۵۹,۲۰۰ تومان</span></button>
+                            <div class="price-btn custom-price-container" data-price="custom">
+                                <span>قیمت دلخواه (تومان)</span>
+                                <input type="number" id="customPriceInput" class="custom-price-input" placeholder="مبلغ را وارد کنید">
+                            </div>
+                        </div>
                     </div>
-
-                    <div><label for="description" class="block text-gray-700 font-medium mb-1">توضیحات</label><textarea id="description" name="description" rows="3">${projectData?.description || ''}</textarea></div>
+                        <div class="price-highlight p-3 rounded-lg mt-4">
+                            <div class="flex items-center"><i class="fas fa-tag text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت واحد:</span><span id="unitPricePreview" class="mr-2 font-semibold"></span>
+                            </div>
+                            <div class="flex items-center mt-2"><i class="fas fa-calculator text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت کل:</span><span id="totalPricePreview" class="mr-2 font-bold text-green-600"></span>
+                            </div>
+                            <div class="flex items-center mt-2"><i class="fas fa-hand-holding-usd text-blue-500 ml-2"></i><span class="text-gray-700 font-medium">کمیسیون (۱۵٪):</span><span id="commissionPreview" class="mr-2 font-bold" style="color: var(--primary-color)"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div><label for="description" class="block text-gray-700 font-medium mb-1">توضیحات</label><textarea id="description" name="description" rows="3">${projectData?.description || ''}</textarea>
+                    </div>
                 </div>
                 <div class="border-t border-gray-200 mt-6 p-4 flex justify-end gap-4">
                     <button type="button" id="cancelProjectFormBtn" class="btn btn-secondary"><i class="fas fa-times mr-2"></i>انصراف</button>
