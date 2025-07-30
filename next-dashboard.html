@@ -1332,7 +1332,7 @@ function renderProjectForm(projectData = null) {
                                 <input type="number" id="customPriceInput" class="custom-price-input" placeholder="مبلغ را وارد کنید">
                             </div>
                         </div>
-                    </div>
+                        
                         <div class="price-highlight p-3 rounded-lg mt-4">
                             <div class="flex items-center"><i class="fas fa-tag text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت واحد:</span><span id="unitPricePreview" class="mr-2 font-semibold"></span>
                             </div>
@@ -1342,7 +1342,7 @@ function renderProjectForm(projectData = null) {
                             </div>
                         </div>
                     </div>
-                        <div><label for="description" class="block text-gray-700 font-medium mb-1">توضیحات</label><textarea id="description" name="description" rows="3">${projectData?.description || ''}</textarea>
+                    <div><label for="description" class="block text-gray-700 font-medium mb-1">توضیحات</label><textarea id="description" name="description" rows="3">${projectData?.description || ''}</textarea>
                     </div>
                 </div>
                 <div class="border-t border-gray-200 mt-6 p-4 flex justify-end gap-4">
