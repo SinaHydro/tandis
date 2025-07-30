@@ -164,6 +164,17 @@
         .sidebar-brand-footer strong { font-weight: 600; color: #1e293b; }
         .custom-price-container { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 0.5rem; /* پدینگ کمتر برای جا دادن اینپوت */ }
         .custom-price-input { margin-top: 0.5rem; border: 1px solid #cbd5e1; border-radius: 0.25rem; padding: 0.25rem 0.5rem; width: 90%; text-align: center; background-color: white; }
+        /* --- استایل‌های جدید برای فیلتر و مرتب‌سازی پیشرفته --- */
+        .filter-sort-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; padding: 0.75rem; background-color: #ffffff; border-radius: 0.75rem; border: 1px solid #e2e8f0; margin-bottom: 1.5rem; }
+        .filter-group { position: relative; }
+        .filter-btn, .sort-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 0.5rem; border: 1px solid #cbd5e1; background-color: #ffffff; color: #475569; font-weight: 500; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; }
+        .filter-btn:hover, .sort-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
+        .filter-btn.active, .sort-btn.active { background-color: var(--primary-color); border-color: var(--primary-color); color: white; }
+        .filter-btn .close-icon, .sort-btn .close-icon { font-size: 0.8em; margin-right: -0.25rem; margin-left: 0.25rem; opacity: 0.7;}
+        .filter-btn .close-icon:hover { opacity: 1; }
+        .filter-dropdown { position: absolute; top: 100%; right: 0; z-index: 10; min-width: 200px; background-color: white; border: 1px solid #e2e8f0; border-radius: 0.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-top: 0.5rem; max-height: 250px; overflow-y: auto; display: none; /* به صورت پیش‌فرض مخفی است */ }
+        .filter-dropdown-item { padding: 0.75rem 1rem; cursor: pointer; }
+        .filter-dropdown-item:hover { background-color: #f1f5f9; }
     </style>
 </head>
 <body class="hidden">
@@ -1895,27 +1906,143 @@ function renderProjectForm(projectData = null) {
             });
         }
 
-        function renderProjectsHeader(title, refreshCallback) {
-            const filterHtml = `
-                <div id="filter-container" class="bg-slate-50 p-4 rounded-lg mb-6 border border-slate-200">
-                     <div class="grid">
-                        <div><label class="block text-sm font-medium text-slate-700 mb-1">استان</label><select id="filterProvince" name="province" class="w-full text-sm">${generateProvinceOptions('')}</select></div>
-                        <div><label class="block text-sm font-medium text-slate-700 mb-1">شهر</label><input type="text" id="filterCity" name="city" class="w-full text-sm" placeholder="نام شهر را وارد کنید"></div>
-                        <div><label class="block text-sm font-medium text-slate-700 mb-1">رشته مهندس</label><select id="filterEngineerField" name="engineerField" class="w-full text-sm"><option value="">همه</option><option>معماری</option><option>عمران</option><option>مکانیک</option><option>برق</option><option>شهرسازی</option><option>ترافیک</option><option>نقشه برداری</option></select></div>
-                        <div><label class="block text-sm font-medium text-slate-700 mb-1">پایه مهندس</label><select id="filterEngineerRank" name="engineerRank" class="w-full text-sm"><option value="">همه</option><option>پایه 3</option><option>پایه 2</option><option>پایه 1</option><option>پایه ارشد</option></select></div>
-                        <div><label class="block text-sm font-medium text-slate-700 mb-1">نوع فعالیت</label><select id="filterEngineerActivity" name="engineerActivity" class="w-full text-sm"><option value="">همه</option><option>طراح</option><option>ناظر</option><option>مجری</option></select></div>
-                        <div><label class="block text-sm font-medium text-slate-700 mb-1">نوع پروانه</label><select id="filterPermitType" name="permitType" class="w-full text-sm"><option value="">همه</option><option>طراح حقوقی</option><option>ناظر حقوقی</option><option>انبوه ساز</option><option>مجری حقوقی</option><option>مهندس حقیقی</option><option>کاردان</option><option>معمارتجربی</option></select></div>
-                    </div>
-                    <div class="mt-4 flex flex-col sm:flex-row justify-end gap-3">
-                        <button id="resetFiltersBtn" class="btn btn-secondary"><i class="fas fa-undo mr-2"></i>حذف فیلترها</button>
-                        <button id="applyFiltersBtn" class="btn btn-primary"><i class="fas fa-filter mr-2"></i>اعمال فیلتر</button>
-                    </div>
+// این تابع جدید جایگزین کامل تابع renderProjectsHeader می‌شود
+function renderProjectMarketplaceHeader() {
+    const headerHtml = `
+        <div id="filter-sort-container" class="filter-sort-bar">
+            <div class="filter-group">
+                <button class="filter-btn" data-filter="province">
+                    <i class="fas fa-map-marker-alt"></i><span>استان</span>
+                </button>
+                <div class="filter-dropdown">
+                    <div class="filter-dropdown-item" data-value="">همه استان‌ها</div>
+                    ${PROVINCES.map(p => `<div class="filter-dropdown-item" data-value="${p}">${p}</div>`).join('')}
                 </div>
-            `;
-            projectsContent.innerHTML = `${filterHtml}<div id="project-list-container"></div>`;
-            document.getElementById('applyFiltersBtn').addEventListener('click', applyFilters);
-            document.getElementById('resetFiltersBtn').addEventListener('click', resetFilters);
+            </div>
+            <div class="filter-group">
+                <button class="filter-btn" data-filter="engineerField">
+                    <i class="fas fa-drafting-compass"></i><span>رشته مهندس</span>
+                </button>
+                <div class="filter-dropdown">
+                    <div class="filter-dropdown-item" data-value="">همه رشته‌ها</div>
+                    <div class="filter-dropdown-item" data-value="معماری">معماری</div>
+                    <div class="filter-dropdown-item" data-value="عمران">عمران</div>
+                    <div class="filter-dropdown-item" data-value="مکانیک">مکانیک</div>
+                    <div class="filter-dropdown-item" data-value="برق">برق</div>
+                </div>
+            </div>
+            <div class="filter-group">
+                <button class="filter-btn" data-filter="engineerRank">
+                    <i class="fas fa-star"></i><span>پایه مهندس</span>
+                </button>
+                <div class="filter-dropdown">
+                    <div class="filter-dropdown-item" data-value="">همه پایه‌ها</div>
+                    <div class="filter-dropdown-item" data-value="پایه 3">پایه 3</div>
+                    <div class="filter-dropdown-item" data-value="پایه 2">پایه 2</div>
+                    <div class="filter-dropdown-item" data-value="پایه 1">پایه 1</div>
+                    <div class="filter-dropdown-item" data-value="پایه ارشد">پایه ارشد</div>
+                </div>
+            </div>
+            <div class="flex-grow"></div> <button class="sort-btn active" data-sort="newest"><i class="fas fa-sort-amount-down"></i>جدیدترین</button>
+            <button class="sort-btn" data-sort="oldest"><i class="fas fa-sort-amount-up"></i>قدیمی‌ترین</button>
+            <button class="sort-btn" data-sort="cheapest"><i class="fas fa-dollar-sign"></i>ارزان‌ترین</button>
+            <button class="sort-btn" data-sort="mostExpensive"><i class="fas fa-dollar-sign"></i>گران‌ترین</button>
+        </div>
+        <div id="project-list-container"></div>
+    `;
+    projectsContent.innerHTML = headerHtml;
+
+    // منطق جدید برای فعال‌سازی دکمه‌های هوشمند
+    const activeFilters = {};
+    let activeSort = 'newest';
+
+    function applyFiltersAndSort() {
+        // 1. فیلتر کردن
+        let filtered = fetchedProjects.filter(p => {
+            return Object.entries(activeFilters).every(([key, value]) => {
+                return !value || p[key] === value;
+            });
+        });
+
+        // 2. مرتب‌سازی
+        filtered.sort((a, b) => {
+            switch (activeSort) {
+                case 'oldest': return new Date(a.SubmissionDate) - new Date(b.SubmissionDate);
+                case 'cheapest': return (a.area * a.unitPrice) - (b.area * b.unitPrice);
+                case 'mostExpensive': return (b.area * b.unitPrice) - (a.area * a.unitPrice);
+                case 'newest':
+                default:
+                    return new Date(b.SubmissionDate) - new Date(a.SubmissionDate);
+            }
+        });
+
+        displayProjects(filtered);
+    }
+
+    // افزودن Event Listener به دکمه‌های فیلتر
+    document.querySelectorAll('.filter-group').forEach(group => {
+        const button = group.querySelector('.filter-btn');
+        const dropdown = group.querySelector('.filter-dropdown');
+        const buttonTextSpan = button.querySelector('span');
+        const originalText = buttonTextSpan.textContent;
+
+        button.addEventListener('click', (e) => {
+            if (e.target.classList.contains('close-icon')) {
+                // حذف فیلتر
+                delete activeFilters[button.dataset.filter];
+                button.classList.remove('active');
+                buttonTextSpan.textContent = originalText;
+                button.querySelector('.close-icon')?.remove();
+                applyFiltersAndSort();
+                return;
+            }
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        });
+
+        dropdown.addEventListener('click', (e) => {
+            if (e.target.classList.contains('filter-dropdown-item')) {
+                const value = e.target.dataset.value;
+                const filterKey = button.dataset.filter;
+
+                button.querySelector('.close-icon')?.remove(); // حذف ضربدر قبلی
+
+                if (value) {
+                    activeFilters[filterKey] = value;
+                    button.classList.add('active');
+                    buttonTextSpan.textContent = value;
+                    button.insertAdjacentHTML('beforeend', `<i class="fas fa-times close-icon"></i>`);
+                } else {
+                    delete activeFilters[filterKey];
+                    button.classList.remove('active');
+                    buttonTextSpan.textContent = originalText;
+                }
+
+                applyFiltersAndSort();
+                dropdown.style.display = 'none';
+            }
+        });
+    });
+
+    // افزودن Event Listener به دکمه‌های مرتب‌سازی
+    const sortButtons = document.querySelectorAll('.sort-btn');
+    sortButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            sortButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            activeSort = button.dataset.sort;
+            applyFiltersAndSort();
+        });
+    });
+
+    // بستن منوهای کشویی با کلیک در بیرون از آن‌ها
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.filter-group')) {
+            document.querySelectorAll('.filter-dropdown').forEach(d => d.style.display = 'none');
         }
+    });
+
+    applyFiltersAndSort(); // نمایش اولیه پروژه‌ها
+}
         
         function displayProjects(projectsToDisplay) {
             const container = document.getElementById('project-list-container');
@@ -1945,23 +2072,25 @@ function renderProjectForm(projectData = null) {
             displayProjects(fetchedProjects);
         }
 
-        async function renderProjectMarketplace() {
-            projectsContent.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
-            try {
-                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getMarketplaceData&email=${encodeURIComponent(userData.email)}`);
-                const result = await response.json();
-                if (result.success && result.data) {
-                    fetchedProjects = result.data.openProjects || [];
-                    appliedProjectIds = new Set(result.data.appliedProjectIds || []);
-                    renderProjectsHeader();
-                    displayProjects(fetchedProjects);
-                } else {
-                     projectsContent.innerHTML = `<p class="text-center text-red-500">${result.message || 'خطا در دریافت اطلاعات پروژه‌ها.'}</p>`;
-                }
-            } catch (error) {
-                projectsContent.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری پروژه‌ها: ${error.message}</p>`;
-            }
+async function renderProjectMarketplace() {
+    projectsContent.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
+    try {
+        const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getMarketplaceData&email=${encodeURIComponent(userData.email)}`);
+        const result = await response.json();
+        if (result.success && result.data) {
+            fetchedProjects = result.data.openProjects || [];
+            appliedProjectIds = new Set(result.data.appliedProjectIds || []);
+
+            // اینجا به جای تابع قدیمی، تابع جدید را فراخوانی می‌کنیم
+            renderProjectMarketplaceHeader(); 
+
+        } else {
+             projectsContent.innerHTML = `<p class="text-center text-red-500">${result.message || 'خطا در دریافت اطلاعات پروژه‌ها.'}</p>`;
         }
+    } catch (error) {
+        projectsContent.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری پروژه‌ها: ${error.message}</p>`;
+    }
+}
 
         async function renderEmployerProjects() {
             projectsContent.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
