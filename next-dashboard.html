@@ -452,6 +452,7 @@
         let currentActivityData = {};
         let fetchedNotifications = [];
         let currentView = 'dashboard';
+        let projectMap, projectMarker;
 
         // --- DOM ELEMENTS ---
         const welcomeLoader = document.getElementById('welcome-loader');
@@ -1528,6 +1529,7 @@
 
         function initializeProjectMap() {
             if (projectMap) projectMap.remove();
+            setTimeout(() => {
             const lat = parseFloat(document.getElementById('latitude').value) || 38.0766;
             const lng = parseFloat(document.getElementById('longitude').value) || 46.2970;
             const initialCoords = [lat, lng];
@@ -1547,6 +1549,8 @@
                 projectMarker.setLatLng(e.latlng);
                 updateMapLocation(e.latlng.lat, e.latlng.lng);
             });
+                projectMap.invalidateSize();
+        }, 1);
         }
 
         function updatePriceCalculations() {
