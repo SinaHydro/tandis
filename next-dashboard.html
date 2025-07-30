@@ -1294,7 +1294,7 @@ function renderProjectForm(projectData = null) {
                             <span class="mr-4">عرض جغرافیایی: </span><span id="latitudeValue" class="mr-2 font-mono">...</span>
                         </div>
                         <div id="project-map" class="h-64 w-full z-10 rounded-lg border"></div>
-                        <textarea id="address" name="address" rows="2" class="w-full mt-2" required placeholder="آدرس متنی در اینجا نمایش داده می‌شود...">${projectData?.address || ''}</textarea>
+                        <textarea id="address" name="address" rows="1" class="w-full mt-2" required placeholder="آدرس متنی در اینجا نمایش داده می‌شود...">${projectData?.address || ''}</textarea>
                         <input type="hidden" id="latitude" name="latitude" value="${projectData?.latitude || ''}">
                         <input type="hidden" id="longitude" name="longitude" value="${projectData?.longitude || ''}">
                     </div>
@@ -1342,7 +1342,7 @@ function renderProjectForm(projectData = null) {
                             </div>
                         </div>
                     </div>
-                    <div><label for="description" class="block text-gray-700 font-medium mb-1">توضیحات</label><textarea id="description" name="description" rows="3">${projectData?.description || ''}</textarea>
+                    <div><label for="description" class="block text-gray-700 font-medium mb-1">توضیحات</label><textarea id="description" name="description" rows="2" class="w-full">${projectData?.description || ''}</textarea>
                     </div>
                 </div>
                 <div class="border-t border-gray-200 mt-6 p-4 flex justify-end gap-4">
