@@ -1434,68 +1434,51 @@ function renderProjectForm(projectData = null) {
             }
 
             initializeProjectMap();
-            
-            const priceOptions = document.querySelectorAll('#projectForm input[name="priceOption"]');
-            const customPriceInput = document.getElementById('customPrice');
-            const areaInput = document.getElementById('area');
-            const floorsInput = document.getElementById('floors');
-            const basementFloorsInput = document.getElementById('basementFloors');
 
-            priceOptions.forEach(option => {
-                option.addEventListener('change', function() {
-                    customPriceInput.disabled = (this.id !== 'priceOptionCustom');
-                    if (this.id === 'priceOptionCustom') customPriceInput.focus();
+            const priceButtons = document.querySelectorAll('.price-btn');
+            const unitPriceInput = document.getElementById('unitPrice');
+            const customPriceInput = document.getElementById('customPriceInput');
+
+            priceButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    priceButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    const priceType = button.dataset.price;
+                    if (priceType === 'custom') {
+                        unitPriceInput.value = customPriceInput.value || '0';
+                        customPriceInput.focus();
+                    } else {
+                        unitPriceInput.value = priceType;
+                    }
                     updatePriceCalculations();
                 });
             });
-            
-            [customPriceInput, areaInput, floorsInput, basementFloorsInput].forEach(el => {
-                el.addEventListener('input', updatePriceCalculations);
+
+            customPriceInput.addEventListener('input', () => {
+                if (document.querySelector('.custom-price-container.active')) {
+                    unitPriceInput.value = customPriceInput.value || '0';
+                    updatePriceCalculations();
+                }
             });
-            updatePriceCalculations();
-const priceButtons = document.querySelectorAll('.price-btn');
-const unitPriceInput = document.getElementById('unitPrice');
-const customPriceInput = document.getElementById('customPriceInput');
 
-priceButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        priceButtons.forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-
-        const priceType = button.dataset.price;
-        if (priceType === 'custom') {
-            unitPriceInput.value = customPriceInput.value || '0';
-            customPriceInput.focus();
-        } else {
-            unitPriceInput.value = priceType;
+            // فعال کردن دکمه پیش‌فرض در هنگام بارگذاری فرم
+            const initialPrice = unitPriceInput.value;
+            let activeButton = document.querySelector(`.price-btn[data-price="${initialPrice}"]`);
+            if (activeButton) {
+                activeButton.classList.add('active');
+            } else if (initialPrice && initialPrice !== '0') {
+                activeButton = document.querySelector('.custom-price-container');
+                if (activeButton) {
+                    activeButton.classList.add('active');
+                    customPriceInput.value = initialPrice;
+                }
+            } else {
+                const firstButton = document.querySelector('.price-btn');
+                if(firstButton) firstButton.classList.add('active');
+            }
+            updatePriceCalculations(); // محاسبه قیمت اولیه
         }
-        updatePriceCalculations();
-    });
-});
-
-customPriceInput.addEventListener('input', () => {
-    // اگر دکمه قیمت دلخواه فعال بود، مقدار را آپدیت کن
-    if (document.querySelector('.custom-price-container.active')) {
-        unitPriceInput.value = customPriceInput.value || '0';
-        updatePriceCalculations();
-    }
-});
-
-// فعال کردن دکمه پیش‌فرض
-const initialPrice = unitPriceInput.value;
-let activeButton = document.querySelector(`.price-btn[data-price="${initialPrice}"]`);
-if (activeButton) {
-    activeButton.classList.add('active');
-} else if (initialPrice) {
-    // اگر قیمت اولیه یک قیمت دلخواه بود
-    activeButton = document.querySelector('.custom-price-container');
-    activeButton.classList.add('active');
-    customPriceInput.value = initialPrice;
-} else {
-    // حالت پیش‌فرض
-    document.querySelector('.price-btn').classList.add('active');
-}
-updatePriceCalculations();
 
         async function getAddressFromLatLng(lat, lng) {
             try {
@@ -1546,27 +1529,33 @@ updatePriceCalculations();
         }, 1);
         }
 
-function updatePriceCalculations() {
-    // به جای دکمه رادیویی، مقدار را از فیلد مخفی unitPrice می‌خوانیم
-    const unitPriceInput = document.getElementById('unitPrice');
-    if (!unitPriceInput) return;
+        function updatePriceCalculations() {
+            const unitPriceInput = document.getElementById('unitPrice');
+            const customPriceInput = document.getElementById('customPriceInput');
 
-    let price = parseFloat(unitPriceInput.value) || 0;
+            // اگر دکمه قیمت دلخواه فعال است، مطمئن شویم که مقدار از فیلد متنی خوانده می‌شود
+            if (document.querySelector('.custom-price-container.active')) {
+                unitPriceInput.value = customPriceInput.value || '0';
+            }
 
-    const area = parseFloat(document.getElementById('area').value) || 0;
-    const floors = parseInt(document.getElementById('floors').value) || 0;
-    const basementFloors = parseInt(document.getElementById('basementFloors').value) || 0;
-    const totalFloors = floors + basementFloors;
+            if (!unitPriceInput) return;
+            
+            let price = parseFloat(unitPriceInput.value) || 0;
 
-    const totalPrice = area * price;
-    const commission = totalPrice * 0.15;
-    const toPersianNum = (num) => num.toLocaleString('fa-IR');
+            const area = parseFloat(document.getElementById('area').value) || 0;
+            const floors = parseInt(document.getElementById('floors').value) || 0;
+            const basementFloors = parseInt(document.getElementById('basementFloors').value) || 0;
+            const totalFloors = floors + basementFloors;
 
-    document.getElementById('tariff-title').textContent = `تعرفه پیشنهادی برای ساختمان ${toPersianNum(totalFloors)} طبقه`;
-    document.getElementById('unitPricePreview').textContent = `${toPersianNum(price)} تومان بر مترمربع`;
-    document.getElementById('totalPricePreview').textContent = `${toPersianNum(totalPrice)} تومان`;
-    document.getElementById('commissionPreview').textContent = `${toPersianNum(commission)} تومان`;
-}
+            const totalPrice = area * price;
+            const commission = totalPrice * 0.15;
+            const toPersianNum = (num) => num.toLocaleString('fa-IR');
+            
+            document.getElementById('tariff-title').textContent = `تعرفه پیشنهادی برای ساختمان ${toPersianNum(totalFloors)} طبقه`;
+            document.getElementById('unitPricePreview').textContent = `${toPersianNum(price)} تومان بر مترمربع`;
+            document.getElementById('totalPricePreview').textContent = `${toPersianNum(totalPrice)} تومان`;
+            document.getElementById('commissionPreview').textContent = `${toPersianNum(commission)} تومان`;
+        }
         
         async function submitProjectData(e) {
             e.preventDefault();
