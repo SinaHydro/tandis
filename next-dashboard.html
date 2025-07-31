@@ -1379,7 +1379,8 @@ function renderProjectForm(projectData = null) {
         function getProjectCardHTML(project, role, isApplied = false) {
             const formatNumber = (num) => num ? parseFloat(num).toLocaleString('fa-IR') : '0';
             const totalPrice = (parseFloat(project.area) || 0) * (parseFloat(project.unitPrice) || 0);
-            const commission = totalPrice * 0.05;
+            const contractMonths = parseInt(project.contractMonths) || 1;
+            const commission = Math.floor(((totalPrice * 0.05 * contractMonths) / 12) / 10000) * 10000;
 
             let starsHtml = '';
             const starsCount = { 'پایه 3': 1, 'پایه 2': 2, 'پایه 1': 3, 'پایه ارشد': 4 }[project.engineerRank] || 1;
@@ -1564,9 +1565,10 @@ function renderProjectForm(projectData = null) {
             const floors = parseInt(document.getElementById('floors').value) || 0;
             const basementFloors = parseInt(document.getElementById('basementFloors').value) || 0;
             const totalFloors = floors + basementFloors;
+            const contractMonths = parseInt(document.getElementById('contractMonths').value) || 1;
 
             const totalPrice = area * price;
-            const commission = totalPrice * 0.05;
+            const commission = Math.floor(((totalPrice * 0.05 * contractMonths) / 12) / 10000) * 10000;
             const toPersianNum = (num) => num.toLocaleString('fa-IR');
             
             document.getElementById('tariff-title').textContent = `تعرفه پیشنهادی برای ساختمان ${toPersianNum(totalFloors)} طبقه`;
