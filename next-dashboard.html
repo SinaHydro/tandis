@@ -136,7 +136,7 @@
         .commission-highlight { background-color: #f8fafc; }
         .frosode-badge { background-color: #fef2f2; color: #dc2626; }
         .frosode-badge-container { text-align: center; }
-        #project-list-container, #my-activities-container, #engineers-list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }      
+        #project-list-container, #my-activities-container, #engineers-list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; }      
         #filter-container .grid { display: grid; grid-template-columns: repeat(1, 1fr); gap: 1rem; }
         @media (min-width: 768px) { #filter-container .grid { grid-template-columns: repeat(2, 1fr); } }
         @media (min-width: 1280px) { #filter-container .grid { grid-template-columns: repeat(4, 1fr); } }
@@ -1349,8 +1349,8 @@ function renderProjectForm(projectData = null) {
                             </div>
                             <div class="flex items-center mt-2"><i class="fas fa-calculator text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت کل:</span><span id="totalPricePreview" class="mr-2 font-bold text-green-600"></span>
                             </div>
-                            //<div class="flex items-center mt-2"><i class="fas fa-hand-holding-usd text-blue-500 ml-2"></i><span class="text-gray-700 font-medium">کمیسیون (۱۵٪):</span><span id="commissionPreview" class="mr-2 font-bold" style="color: var(--primary-color)"></span>
-                            //</div>
+                            '<div class="flex items-center mt-2"><i class="fas fa-hand-holding-usd text-blue-500 ml-2"></i><span class="text-gray-700 font-medium">کمیسیون (۱۵٪):</span><span id="commissionPreview" class="mr-2 font-bold" style="color: var(--primary-color)"></span>'
+                            '</div>'
                         </div>
                     </div>
                     <div><label for="description" class="block text-gray-700 font-medium mb-1">توضیحات</label><textarea id="description" name="description" rows="2" class="w-full">${projectData?.description || ''}</textarea>
@@ -1412,7 +1412,7 @@ function renderProjectForm(projectData = null) {
             return `
             <div class="project-card bg-white rounded-lg overflow-hidden">
                 <div class="bg-white p-3 border-b">
-                    /* <h4 class="font-bold text-lg text-slate-800">${project.projectName || 'بدون نام'}</h4> */
+                    ` <h4 class="font-bold text-lg text-slate-800">${project.projectName || 'بدون نام'}</h4> 
                     <p class="text-sm text-slate-500">${formatTimeAgo(project.lastModifiedDate)}</p>
                 </div>
                 <div class="bg-green-50 grid grid-cols-3 items-center justify-between justify-items-auto p-3">
