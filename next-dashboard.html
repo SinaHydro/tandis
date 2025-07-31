@@ -1429,8 +1429,10 @@ function renderProjectForm(projectData = null) {
                     <div class="flex justify-between mb-4 mt-2"><div class="text-gray-900 font-semibold"><i class="fa-ruler-combined fas mx-2 text-gray-400"></i>${formatNumber(project.area)} مترمربع</div><div class="text-gray-900 font-semibold">${project.floors} طبقه + ${project.basementFloors} طبقه زیرزمین<i class="fa-building fas mx-2 text-gray-400"></i></div></div>
                     <div class="flex justify-between mb-4"><div class="text-gray-900 font-semibold"><i class="fa-map-marker-alt fas mx-2 text-gray-400"></i>منطقه ${project.district} ${project.city}</div><div class="text-gray-900 font-semibold">مدت قرارداد: ${project.contractMonths} ماه<i class="fa-calendar-alt far mx-2 text-gray-400"></i></div></div>
                     <div class="bg-gray-50 commission-highlight p-3 rounded-2xl">
-                        <div class="grid grid-rows-3 items-center">
+                        <div class="grid ${role === 'engineer' ? 'grid-rows-3' : 'grid-rows-2'} items-center">
                             <div class="flex items-center pb-1 pt-0 px-3"><i class="fa-tag fas ml-2 self-center text-gray-400"></i><span class="font-medium text-gray-500">قیمت واحد:</span><div class="flex-auto font-semibold text-base text-gray-500 text-left">${formatNumber(project.unitPrice)} تومان</div></div>
+                            <div class="bg-green-300 mb-0 price-highlight px-5 py-3 rounded-lg"><div class="flex items-center"><i class="fa-hand-holding-usd fas ml-2 text-green-700"></i><span class="font-medium text-green-800">قیمت کل پیشنهادی:</span><div class="flex-auto font-bold mt-1 text-green-800 text-left text-xl">${formatNumber(totalPrice)} تومان</div></div></div>
+
                             ${role === 'engineer' ? `
                             <div class="flex items-center pb-0 pt-1 px-3">
                                 <i class="fa fa-percent fas ml-2 text-gray-400"></i><span class="font-medium text-gray-500">کمیسیون:</span><div class="flex-auto font-bold mt-1 text-left text-lg" style="color: var(--primary-color)">${formatNumber(commission)} تومان</div>
