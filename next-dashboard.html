@@ -1349,8 +1349,6 @@ function renderProjectForm(projectData = null) {
                             </div>
                             <div class="flex items-center mt-2"><i class="fas fa-calculator text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت کل:</span><span id="totalPricePreview" class="mr-2 font-bold text-green-600"></span>
                             </div>
-                            `<div class="flex items-center mt-2"><i class="fas fa-hand-holding-usd text-blue-500 ml-2"></i><span class="text-gray-700 font-medium">کمیسیون (۱۵٪):</span><span id="commissionPreview" class="mr-2 font-bold" style="color: var(--primary-color)"></span>`
-                            `</div>`
                         </div>
                     </div>
                     <div><label for="description" class="block text-gray-700 font-medium mb-1">توضیحات</label><textarea id="description" name="description" rows="2" class="w-full">${projectData?.description || ''}</textarea>
@@ -1363,6 +1361,7 @@ function renderProjectForm(projectData = null) {
             </form>
         </div>
     `;
+    //<div class="flex items-center mt-2"><i class="fas fa-hand-holding-usd text-blue-500 ml-2"></i><span class="text-gray-700 font-medium">کمیسیون (۱۵٪):</span><span id="commissionPreview" class="mr-2 font-bold" style="color: var(--primary-color)"></span></div>
 
     // این بخش کد برای حالت ویرایش است تا مقادیر قبلی را در فیلدها قرار دهد
     if (isEditMode) {
@@ -1412,7 +1411,7 @@ function renderProjectForm(projectData = null) {
             return `
             <div class="project-card bg-white rounded-lg overflow-hidden">
                 <div class="bg-white p-3 border-b">
-                    ` <h4 class="font-bold text-lg text-slate-800">${project.projectName || 'بدون نام'}</h4> `
+                      
                     <p class="text-sm text-slate-500">${formatTimeAgo(project.lastModifiedDate)}</p>
                 </div>
                 <div class="bg-green-50 grid grid-cols-3 items-center justify-between justify-items-auto p-3">
@@ -1440,7 +1439,8 @@ function renderProjectForm(projectData = null) {
             </div>
             `;
         }
-
+        // <h4 class="font-bold text-lg text-slate-800">${project.projectName || 'بدون نام'}</h4>
+        
         function attachProjectFormListeners() {
             document.getElementById('projectForm').addEventListener('submit', submitProjectData);
             
