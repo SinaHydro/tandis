@@ -41,7 +41,7 @@
         .main-content-area { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
         .content-body { flex-grow: 1; overflow-y: auto; padding: 1.5rem 2rem; }
         /* --- MODIFICATION: Main sidebar width changed --- */
-        .sidebar { width: 250px; flex-shrink: 0; background-color: #f1f5f9; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; }
+        .sidebar { width: 220px; flex-shrink: 0; background-color: #f1f5f9; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; }
         @media (max-width: 1024px) { .sidebar { display: none; } }
         .sidebar-profile-section { display: flex; align-items: center; padding: 1rem; border-bottom: 1px solid #cbd5e1; }
         .sidebar-profile-image-container { position: relative; width: 60px; height: 60px; flex-shrink: 0; }
@@ -64,7 +64,7 @@
 
         .sidebar-footer { padding: 1rem; margin-top: auto; border-top: 1px solid #e2e8f0; }
         /* --- MODIFICATION: Advertisement sidebar width changed --- */
-        .advertisement-sidebar { width: 320px; flex-shrink: 0; background-color: #f8fafc; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; padding: 1.5rem 1rem; }
+        .advertisement-sidebar { width: 220px; flex-shrink: 0; background-color: #f8fafc; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; padding: 1.5rem 1rem; }
         @media (max-width: 1280px) { .advertisement-sidebar { display: none; } }
         .slideshow-container { position: relative; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .slide-image { width: 100%; display: none; aspect-ratio: 16/10; object-fit: cover; }
@@ -136,7 +136,7 @@
         .commission-highlight { background-color: #f8fafc; }
         .frosode-badge { background-color: #fef2f2; color: #dc2626; }
         .frosode-badge-container { text-align: center; }
-        #project-list-container, #my-activities-container, #engineers-list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; }      
+        #project-list-container, #my-activities-container, #engineers-list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }      
         #filter-container .grid { display: grid; grid-template-columns: repeat(1, 1fr); gap: 1rem; }
         @media (min-width: 768px) { #filter-container .grid { grid-template-columns: repeat(2, 1fr); } }
         @media (min-width: 1280px) { #filter-container .grid { grid-template-columns: repeat(4, 1fr); } }
@@ -332,8 +332,8 @@
              <div class="text-center mb-6 pb-6 border-b border-slate-300">
                 <img src="https://tandis.shahraavand.ir/images/new-TLogo_B.avif" alt="لوگوی تندیس" class="w-20 h-20 mx-auto mb-2 rounded-md object-contain">
                 <h2 class="text-xl font-bold text-blue-800">نظام تندیس</h2>
-                <p class="text-sm font-bold text-yellow-600 mt-1">تدارک نیازمندی دقیق و یکپارچه ساختمان</p>
-                <p class="text-sm text-slate-600 mt-1">پلتفرم تخصصی ارتباط مهندسان و کارفرمایان</p>
+                <p class="text-sm font-bold text-yellow-600 mt-1">تـدارک نیـازمنـدی</p>
+                <p class="text-sm font-bold text-yellow-600 mt-1">دقیق و یکپارچه ساختمان</p>
             </div>
             <div class="slideshow-container">
                 <div id="slideshow" class="slideshow-container"></div>
@@ -348,7 +348,8 @@
             <div class="sidebar-brand-footer">
                 <img src="https://shahraavand.ir/images/logoT.png" alt="لوگوی شرکت شهرآوند">
                 <div>
-                    <strong>شرکت مهندسین مشاور شهرآوند تبریز</strong><br>
+                    <strong>شرکت مهـندسین مشاور</strong><br>
+                    <strong>شـهرآوند تبـریز</strong><br>
                     طراحی و نظارت ساختمان
                 </div>
             </div>
