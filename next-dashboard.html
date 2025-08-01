@@ -680,23 +680,19 @@
         
 function getPersonalFieldsHTML(data, role) {
     const prefix = role === 'engineer' ? 'engineer' : 'employer';
-
-    // --- بخش جدید: مدیریت تاریخ شمسی ورودی ---
-    const jalaliDob = data[`${prefix}Dob`] || ''; // تاریخ شمسی دریافتی، مثلا "1404/05/11"
+    const jalaliDob = data[`${prefix}Dob`] || '';
     let gregorianDob = '';
-    // اگر تاریخ شمسی وجود داشت، آن را به میلادی تبدیل می‌کنیم
     if (jalaliDob) {
         try {
-            // تبدیل رشته شمسی به یک آبجکت تاریخ میلادی
-            const dateObj = persianDate.parse(jalaliDob, 'YYYY/MM/DD').toDate();
-            // فرمت کردن تاریخ میلادی برای ذخیره در فیلد مخفی
+            // فرمت ورودی را از 'YYYY/MM/DD' به 'YYYY-MM-DD' تغییر دادیم
+            const dateObj = persianDate.parse(jalaliDob, 'YYYY-MM-DD').toDate();
             gregorianDob = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
         } catch(e) {
             console.error("تاریخ شمسی ورودی نامعتبر است:", jalaliDob);
         }
     }
-    // --- پایان بخش جدید ---
-
+    
+    // بقیه کد این تابع بدون تغییر است
     return `<div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
         <div><label class="block text-sm font-medium text-slate-700 mb-1">نام</label><input type="text" name="${prefix}FirstName" value="${data[`${prefix}FirstName`] || ''}" disabled></div>
         <div><label class="block text-sm font-medium text-slate-700 mb-1">نام خانوادگی</label><input type="text" name="${prefix}LastName" value="${data[`${prefix}LastName`] || ''}" disabled></div>
@@ -773,7 +769,23 @@ function getPersonalFieldsHTML(data, role) {
             const disabledAttr = isDisabled ? 'disabled' : '';
             const gradeMap = { '3': 'پایه ۳', '2': 'پایه ۲', '1': 'پایه ۱', 'arshad': 'پایه ارشد' };
             const executorTypeMap = { 'individual': 'حقیقی', 'legal': 'حقوقی', 'none': 'فعالیت ندارم' };
+            
+    const jalaliToGregorian = (jalaliDate) => {
+        if (jalaliDate) {
+            try {
+                // فرمت ورودی را اینجا هم به 'YYYY-MM-DD' تغییر دادیم
+                const dateObj = persianDate.parse(jalaliDate, 'YYYY-MM-DD').toDate();
+                return `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+            } catch(e) { return ''; }
+        }
+        return '';
+    };
 
+    const jalaliFirstIssueDate = data.licenseFirstIssueDate || '';
+    const gregorianFirstIssueDate = jalaliToGregorian(jalaliFirstIssueDate);
+    const jalaliStartDate = data.licenseStartDate || '';
+    const gregorianStartDate = jalaliToGregorian(jalaliStartDate);
+            
             // --- بخش جدید برای بررسی و فرمت کردن تاریخ‌ها ---
             // 1. تاریخ اولین صدور پروانه
             const firstIssueDateValue = data.licenseFirstIssueDate;
@@ -805,23 +817,26 @@ function getPersonalFieldsHTML(data, role) {
                 return `<div class="flex flex-col space-y-1 text-xs">${radios}</div>`;
             };
             
-            return `
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1 required-field">تاریخ اولین صدور پروانه</label>
-                    <input type="text" name="licenseFirstIssueDate" class="mt-1 block w-full sm:text-sm jalali-datepicker-display" readonly value="${formattedFirstIssueDate}" ${disabledAttr}>
-                    <input type="hidden" name="licenseFirstIssueDate" class="jalali-datepicker-value" value="${firstIssueDateValue || ''}">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1 required-field">تاریخ شروع اعتبار پروانه</label>
-                    <input type="text" name="licenseStartDate" class="mt-1 block w-full sm:text-sm jalali-datepicker-display" readonly value="${formattedStartDate}" ${disabledAttr}>
-                    <input type="hidden" name="licenseStartDate" class="jalali-datepicker-value" value="${startDateValue || ''}">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1 required-field">مدت اعتبار پروانه (سال)</label>
-                    <input type="number" name="licenseValidity" min="1" required class="mt-1 block w-full sm:text-sm" value="${data.licenseValidity || ''}" ${disabledAttr}>
-                </div>
-            </div>
+    const createGradeSelect = (name, selected, disabled) => { /* ... code ... */ };
+    const createExecutorRadios = (name, selected, disabled) => { /* ... code ... */ };
+
+    return `
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6">
+        <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1 required-field">تاریخ اولین صدور پروانه</label>
+            <input type="text" class="mt-1 block w-full sm:text-sm jalali-datepicker-display" readonly value="${jalaliFirstIssueDate}" ${disabledAttr}>
+            <input type="hidden" name="licenseFirstIssueDate" class="jalali-datepicker-value" value="${gregorianFirstIssueDate}">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1 required-field">تاریخ شروع اعتبار پروانه</label>
+            <input type="text" class="mt-1 block w-full sm:text-sm jalali-datepicker-display" readonly value="${jalaliStartDate}" ${disabledAttr}>
+            <input type="hidden" name="licenseStartDate" class="jalali-datepicker-value" value="${gregorianStartDate}">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1 required-field">مدت اعتبار پروانه (سال)</label>
+            <input type="number" name="licenseValidity" min="1" required class="mt-1 block w-full sm:text-sm" value="${data.licenseValidity || ''}" ${disabledAttr}>
+        </div>
+    </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6 pt-6">
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1 required-field">شماره پروانه</label>
@@ -1041,19 +1056,19 @@ function getPersonalFieldsHTML(data, role) {
                 formEl.innerHTML = getProfessionalFieldsHTMLEditable(userData.stepsData.step3, false) + formEl.querySelector('.section-actions').outerHTML;
             }
 
-            formEl.querySelectorAll('input, select, textarea').forEach(el => {
-                el.disabled = false;
-                if (el.classList.contains('jalali-datepicker-display')) {
-                    $(el).persianDatepicker({
-                        format: 'YYYY/MM/DD',
-                        altField: $(el).next('.jalali-datepicker-value'),
-                        altFormat: 'YYYY-MM-DD',
-                        observer: true, autoClose: true
-                    });
-                } else {
-                    el.disabled = false;
-                }
+    formEl.querySelectorAll('input, select, textarea').forEach(el => {
+        el.disabled = false;
+        if (el.classList.contains('jalali-datepicker-display')) {
+            $(el).persianDatepicker({
+                format: 'YYYY-MM-DD', // فرمت را اینجا هم به خط تیره تغییر می‌دهیم
+                altField: $(el).next('.jalali-datepicker-value'),
+                altFormat: 'YYYY-MM-DD',
+                observer: true,
+                autoClose: true,
+                locale: 'fa' // این خط جدید مشکل یک روز اختلاف را حل می‌کند
             });
+        }
+    });
             
             // Re-attach listeners for dynamic professional fields
             if (sectionId === 'professional') {
