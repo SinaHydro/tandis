@@ -1037,6 +1037,7 @@ function getPersonalFieldsHTML(data, role) {
             }
 
             formEl.querySelectorAll('input, select, textarea').forEach(el => {
+                el.disabled = false;
                 if (el.classList.contains('jalali-datepicker-display')) {
                     $(el).persianDatepicker({
                         format: 'YYYY/MM/DD',
