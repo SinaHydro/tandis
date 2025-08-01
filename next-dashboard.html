@@ -680,20 +680,32 @@
         
 function getPersonalFieldsHTML(data, role) {
     const prefix = role === 'engineer' ? 'engineer' : 'employer';
-    // فقط مقدار اولیه فیلد قابل مشاهده را خالی می‌گذاریم
+
+    // --- بخش اصلاح شده ---
+    // 1. مقدار تاریخ تولد را از داده‌ها می‌خوانیم.
+    const dobValue = data[`${prefix}Dob`];
+    let formattedDob = '';
+    // 2. چک می‌کنیم که آیا تاریخ معتبر است یا خیر.
+    if (dobValue && !isNaN(new Date(dobValue))) {
+        // 3. فقط اگر معتبر بود، آن را به شمسی تبدیل می‌کنیم.
+        formattedDob = new persianDate(new Date(dobValue)).format('YYYY/MM/DD');
+    }
+    // --- پایان بخش اصلاح شده ---
+
     return `<div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
         <div><label class="block text-sm font-medium text-slate-700 mb-1">نام</label><input type="text" name="${prefix}FirstName" value="${data[`${prefix}FirstName`] || ''}" disabled></div>
         <div><label class="block text-sm font-medium text-slate-700 mb-1">نام خانوادگی</label><input type="text" name="${prefix}LastName" value="${data[`${prefix}LastName`] || ''}" disabled></div>
         <div><label class="block text-sm font-medium text-slate-700 mb-1">کدملی</label><input type="text" name="${prefix}NationalId" value="${data[`${prefix}NationalId`] || ''}" disabled></div>
         <div>
             <label class="block text-sm font-medium text-slate-700 mb-1">تاریخ تولد</label>
-            <input type="text" class="jalali-datepicker-display" value="" readonly disabled> {/* <<-- این فیلد ابتدا خالی است */}
-            <input type="hidden" name="${prefix}Dob" class="jalali-datepicker-value" value="${data[`${prefix}Dob`] || ''}">
+            <input type="text" class="jalali-datepicker-display" value="${formattedDob}" readonly disabled>
+            <input type="hidden" name="${prefix}Dob" class="jalali-datepicker-value" value="${dobValue || ''}">
         </div>
         <div><label class="block text-sm font-medium text-slate-700 mb-1">جنسیت</label><select name="${prefix}Gender" disabled><option value="مرد" ${data[`${prefix}Gender`] === 'مرد' ? 'selected' : ''}>مرد</option><option value="زن" ${data[`${prefix}Gender`] === 'زن' ? 'selected' : ''}>زن</option></select></div>
         <div><label class="block text-sm font-medium text-slate-700 mb-1">تلفن موبایل</label><input type="tel" name="${prefix}Mobile" value="${data[`${prefix}Mobile`] || ''}" disabled></div>
     </div>`;
 }
+        
         function getContactFieldsHTML(data, role) {
             const prefix = role === 'engineer' ? 'engineer' : 'employer';
             const address = data[`${prefix}ResidentialAddress`] || data[`${prefix}Address`] || '';
