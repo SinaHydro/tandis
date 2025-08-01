@@ -698,18 +698,11 @@ function getPersonalFieldsHTML(data, role) {
         <div>
             <label for="${prefix}DobDisplay" class="block text-sm font-medium text-slate-700 mb-1">تاریخ تولد</label>
             
-            {/* ورودی قابل مشاهده برای کاربر که فقط خواندنی است 
-              و تاریخ شمسی را نمایش می‌دهد.
-            */}
             <input type="text" id="${prefix}DobDisplay" 
                    class="jalali-datepicker-display" 
                    value="${data[`${prefix}Dob`] ? new persianDate(new Date(data[`${prefix}Dob`])).format('YYYY/MM/DD') : ''}" 
                    readonly disabled>
 
-            {/*
-              ورودی مخفی که تاریخ میلادی را برای ارسال به سرور نگه می‌دارد.
-              نام اصلی فیلد روی این ورودی است.
-            */}
             <input type="hidden" name="${prefix}Dob" 
                    class="jalali-datepicker-value" 
                    value="${data[`${prefix}Dob`] || ''}">
