@@ -16,11 +16,9 @@
         <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
         
-        <!-- Persian Datepicker -->
-        <link rel="stylesheet" href="https://unpkg.com/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css"/>
-        <script src="https://unpkg.com/jquery@3.5.1/dist/jquery.min.js"></script>
-        <script src="https://unpkg.com/persian-date@1.1.0/dist/persian-date.min.js"></script>
-        <script src="https://unpkg.com/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+        <script src="./jquery.min.js"></script>
+        <link rel="stylesheet" href="./kamadatepicker.min.css">
+        <script src="./kamadatepicker.min.js"></script>
 
         <style>
             body { font-family: 'Vazirmatn', 'Tahoma', sans-serif; background-color: #f8fafc; }
@@ -240,8 +238,7 @@
                                         </div>
                                         <div>
                                             <label for="engineerDob" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ تولد</label>
-                                            <input type="text" id="engineerDob" required class="mt-1 block w-full sm:text-sm jalali-datepicker-display" readonly>
-                                            <input type="hidden" name="engineerDob" class="jalali-datepicker-value">
+                                            <input type="text" id="engineerDob" name="engineerDob" required class="mt-1 block w-full sm:text-sm kama-datepicker" readonly placeholder="YYYY-MM-DD">
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-slate-700 mb-1 required">جنسیت</label>
@@ -330,13 +327,11 @@
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6 pt-4">
                                         <div>
                                             <label for="licenseFirstIssueDate" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ اولین صدور پروانه</label>
-                                            <input type="text" id="licenseFirstIssueDate" required class="mt-1 block w-full sm:text-sm jalali-datepicker-display" readonly>
-                                            <input type="hidden" name="licenseFirstIssueDate" class="jalali-datepicker-value">
+                                            <input type="text" id="licenseFirstIssueDate" required class="mt-1 block w-full sm:text-sm kama-datepicker" readonly placeholder="YYYY-MM-DD">
                                         </div>
                                         <div>
                                             <label for="licenseStartDate" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ شروع اعتبار پروانه</label>
-                                            <input type="text" id="licenseStartDate" required class="mt-1 block w-full sm:text-sm jalali-datepicker-display" readonly>
-                                            <input type="hidden" name="licenseStartDate" class="jalali-datepicker-value">
+                                            <input type="text" id="licenseStartDate" required class="mt-1 block w-full sm:text-sm kama-datepicker" readonly placeholder="YYYY-MM-DD">
                                         </div>
                                         <div>
                                             <label for="licenseValidity" class="block text-sm font-medium text-slate-700 mb-1 required">مدت اعتبار پروانه (سال)</label>
@@ -2256,42 +2251,17 @@
             });
 
             function initializeDatePickers() {
-                $(".jalali-datepicker-display").each(function() {
-                    var $displayInput = $(this);
-                    var $valueInput = $displayInput.next('.jalali-datepicker-value');
-
-                    $displayInput.persianDatepicker({
-                        format: 'YYYY/MM/DD',
-                        altField: $valueInput,
-                        altFormat: 'YYYY-MM-DD',
-                        observer: true,
-                        autoClose: true,
-                        navigator: {
-                            enabled: true,
-                            scroll: {
-                                enabled: false
-                            },
-                            text: {
-                                btnNextText: '>',
-                                btnPrevText: '<'
-                            }
-                        },
-                        toolbox: {
-                            enabled: true,
-                            calendarSwitch: {
-                                enabled: false,
-                            },
-                            todayButton: {
-                                enabled: true,
-                                text: {
-                                    fa: 'امروز',
-                                    en: 'Today'
-                                }
-                            }
-                        },
-                        onSelect: function() {
-                            $valueInput.trigger('change');
-                        }
+                $('.kama-datepicker').each(function() {
+                    kamaDatepicker(this.id, {
+                        format: 'YYYY-MM-DD',
+                        buttonsColor: "blue",
+                        forceFarsiDigits: true,
+                        disableAfterDate: 'today',
+                        highlightHolidays: true,
+                        markToday: true,
+                        gotoToday: true,
+                        sync: true,
+                        closeAfterSelect: true
                     });
                 });
             }
