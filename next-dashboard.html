@@ -756,19 +756,8 @@ function getPersonalFieldsHTML(data, role) {
             const gradeMap = { '3': 'پایه ۳', '2': 'پایه ۲', '1': 'پایه ۱', 'arshad': 'پایه ارشد' };
             const executorTypeMap = { 'individual': 'حقیقی', 'legal': 'حقوقی', 'none': 'فعالیت ندارم' };
             
-    const jalaliToGregorian = (jalaliDate) => {
-        if (jalaliDate) {
-            try {
-                // فرمت ورودی را اینجا هم به 'YYYY-MM-DD' تغییر دادیم
-                const dateObj = persianDate.parse(jalaliDate, 'YYYY-MM-DD').toDate();
-                return `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-            } catch(e) { return ''; }
-        }
-        return '';
-    };
-
-    const jalaliFirstIssueDate = data.licenseFirstIssueDate || '';
-    const jalaliStartDate = data.licenseStartDate || '';
+            const jalaliFirstIssueDate = data.licenseFirstIssueDate || '';
+            const jalaliStartDate = data.licenseStartDate || '';
                        
             const createGradeSelect = (name, selected, disabled) => {
                 let options = '<option value="">انتخاب پایه</option>';
