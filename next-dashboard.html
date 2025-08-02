@@ -695,7 +695,7 @@ function getPersonalFieldsHTML(data, role) {
             const prefix = role === 'engineer' ? 'engineer' : 'employer';
             const address = data[`${prefix}ResidentialAddress`] || data[`${prefix}Address`] || '';
             const mapId = `${prefix}LocationMap`;
-            return `<div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+            return `<div class="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-5">
                 <div><label class="block text-sm font-medium text-slate-700 mb-1">تلفن ثابت</label><input type="tel" name="${prefix}Phone" value="${data[`${prefix}Phone`] || ''}" disabled></div>
                 <div><label class="block text-sm font-medium text-slate-700 mb-1">کدپستی</label><input type="text" name="${prefix}PostalCode" value="${data[`${prefix}PostalCode`] || ''}" disabled></div>
                 <div><label class="block text-sm font-medium text-slate-700 mb-1">استان</label><select name="${prefix}Province" disabled>${generateProvinceOptions(data[`${prefix}Province`])}</select></div>
