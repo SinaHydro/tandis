@@ -1056,20 +1056,31 @@ function handleEditClick(e) {
     formEl.querySelectorAll('input, select, textarea').forEach(el => {
         el.disabled = false;
         
-        // این بخش مربوط به تقویم است که اصلاح شده
         if (el.classList.contains('jalali-datepicker-display')) {
+            // --- این بخش به طور کامل اصلاح شده است ---
+            
+            // 1. فیلد مخفی که تاریخ میلادی را نگه می‌دارد پیدا می‌کنیم.
+            const valueInput = el.nextElementSibling;
+            let initialDateValue = false; // مقدار اولیه را false در نظر می‌گیریم
+
+            // 2. اگر فیلد مخفی مقداری داشت...
+            if (valueInput.value) {
+                // 3. تاریخ را به همراه ساعت ۱۲ ظهر (برای جلوگیری از خطای منطقه زمانی) می‌سازیم.
+                // این کار باعث می‌شود تاریخ همیشه در روز صحیح باقی بماند.
+                initialDateValue = new Date(valueInput.value + "T12:00:00");
+            }
+
+            // 4. تقویم را با مقدار اولیه مشخص شده راه‌اندازی می‌کنیم.
             $(el).persianDatepicker({
-                // 1. به تقویم می‌گوییم که تاریخ را با خط تیره بخواند و ذخیره کند
-                format: 'YYYY-MM-DD', 
+                format: 'YYYY-MM-DD',
+                altField: valueInput,
                 altFormat: 'YYYY-MM-DD',
-
-                // 2. این گزینه مشکل یک روز اختلاف در تقویم را حل می‌کند
+                initialValue: initialDateValue, // <<-- از این گزینه جدید استفاده می‌کنیم
                 locale: 'fa',
-
-                altField: $(el).next('.jalali-datepicker-value'),
                 observer: true,
                 autoClose: true
             });
+            // --- پایان بخش اصلاح شده ---
         }
     });
 
