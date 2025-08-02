@@ -751,29 +751,30 @@ function getPersonalFieldsHTML(data, role) {
             return '<p class="text-slate-500">اطلاعات حرفه‌ای برای این کاربر یافت نشد.</p>';
         }
 
-        function getProfessionalFieldsHTMLEditable(data, isDisabled) {
-            const disabledAttr = isDisabled ? 'disabled' : '';
-            const gradeMap = { '3': 'پایه ۳', '2': 'پایه ۲', '1': 'پایه ۱', 'arshad': 'پایه ارشد' };
-            const executorTypeMap = { 'individual': 'حقیقی', 'legal': 'حقوقی', 'none': 'فعالیت ندارم' };
-            
-            const jalaliFirstIssueDate = data.licenseFirstIssueDate || '';
-            const jalaliStartDate = data.licenseStartDate || '';
-                       
-            const createGradeSelect = (name, selected, disabled) => {
-                let options = '<option value="">انتخاب پایه</option>';
-                for (const [key, value] of Object.entries(gradeMap)) {
-                    options += `<option value="${key}" ${key === selected ? 'selected' : ''}>${value}</option>`;
-                }
-                return `<select name="${name}" ${disabled} class="block w-full sm:text-sm bg-slate-100 mb-2">${options}</select>`;
-            };
+function getProfessionalFieldsHTMLEditable(data, isDisabled) {
+    const disabledAttr = isDisabled ? 'disabled' : '';
+    const gradeMap = { '3': 'پایه ۳', '2': 'پایه ۲', '1': 'پایه ۱', 'arshad': 'پایه ارشد' };
+    const executorTypeMap = { 'individual': 'حقیقی', 'legal': 'حقوقی', 'none': 'فعالیت ندارم' };
 
-            const createExecutorRadios = (name, selected, disabled) => {
-                let radios = '';
-                for (const [key, value] of Object.entries(executorTypeMap)) {
-                    radios += `<label class="inline-flex items-center"><input type="radio" name="${name}" value="${key}" ${key === selected ? 'checked' : ''} ${disabled} class="form-radio h-3 w-3 text-sky-600"><span class="mr-1 ml-1">${value}</span></label>`;
-                }
-                return `<div class="flex flex-col space-y-1 text-xs">${radios}</div>`;
-            };
+    // مقادیر تاریخ شمسی را مستقیماً از داده‌ها می‌خوانیم. دیگر نیازی به تبدیل نیست.
+    const jalaliFirstIssueDate = data.licenseFirstIssueDate || '';
+    const jalaliStartDate = data.licenseStartDate || '';
+
+    const createGradeSelect = (name, selected, disabled) => {
+        let options = '<option value="">انتخاب پایه</option>';
+        for (const [key, value] of Object.entries(gradeMap)) {
+            options += `<option value="${key}" ${key === selected ? 'selected' : ''}>${value}</option>`;
+        }
+        return `<select name="${name}" ${disabled} class="block w-full sm:text-sm bg-slate-100 mb-2">${options}</select>`;
+    };
+
+    const createExecutorRadios = (name, selected, disabled) => {
+        let radios = '';
+        for (const [key, value] of Object.entries(executorTypeMap)) {
+            radios += `<label class="inline-flex items-center"><input type="radio" name="${name}" value="${key}" ${key === selected ? 'checked' : ''} ${disabled} class="form-radio h-3 w-3 text-sky-600"><span class="mr-1 ml-1">${value}</span></label>`;
+        }
+        return `<div class="flex flex-col space-y-1 text-xs">${radios}</div>`;
+    };
             
     return `
     <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6">
@@ -790,113 +791,111 @@ function getPersonalFieldsHTML(data, role) {
             <input type="number" name="licenseValidity" min="1" required class="mt-1 block w-full sm:text-sm" value="${data.licenseValidity || ''}" ${disabledAttr}>
         </div>
     </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6 pt-6">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1 required-field">شماره پروانه</label>
-                    <input type="text" name="licenseNumber" required class="mt-1 block w-full sm:text-sm" placeholder="0-13-30-012345" maxlength="14" value="${data.licenseNumber || ''}" ${disabledAttr}>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1 required-field">شماره عضویت</label>
-                    <input type="text" name="membershipNumber" required class="mt-1 block w-full sm:text-sm" value="${data.membershipNumber || ''}" ${disabledAttr}>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1 required-field">استان فعالیت پروانه</label>
-                    <select name="licenseActivityProvince" required class="mt-1 block w-full sm:text-sm" ${disabledAttr}>
-                        ${generateProvinceOptions(data.licenseActivityProvince, true)}
-                    </select>
-                </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6 pt-6">
+        <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1 required-field">شماره پروانه</label>
+            <input type="text" name="licenseNumber" required class="mt-1 block w-full sm:text-sm" placeholder="0-13-30-012345" maxlength="14" value="${data.licenseNumber || ''}" ${disabledAttr}>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1 required-field">شماره عضویت</label>
+            <input type="text" name="membershipNumber" required class="mt-1 block w-full sm:text-sm" value="${data.membershipNumber || ''}" ${disabledAttr}>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1 required-field">استان فعالیت پروانه</label>
+            <select name="licenseActivityProvince" required class="mt-1 block w-full sm:text-sm" ${disabledAttr}>
+                ${generateProvinceOptions(data.licenseActivityProvince, true)}
+            </select>
+        </div>
+    </div>
+    <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-5">
+        <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
+            <div class="flex items-center space-x-2 space-x-reverse mb-1">
+                <input type="checkbox" name="hasDesignLicense" class="h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500" ${data.hasDesignLicense ? 'checked' : ''} ${disabledAttr}>
+                <label class="text-sm font-medium text-slate-700">پروانه طراحی</label>
             </div>
-            
-            <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-5">
-                <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
-                    <div class="flex items-center space-x-2 space-x-reverse mb-1">
-                        <input type="checkbox" name="hasDesignLicense" class="h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500" ${data.hasDesignLicense ? 'checked' : ''} ${disabledAttr}>
-                        <label class="text-sm font-medium text-slate-700">پروانه طراحی</label>
-                    </div>
-                    <div>${createGradeSelect('designLicenseGrade', data.designLicenseGrade, disabledAttr || !data.hasDesignLicense)}</div>
-                    <div><label class="block text-xs font-medium text-slate-600 mb-1 mt-2">نوع صلاحیت طراحی:</label>${createExecutorRadios('designExecutorType', data.designExecutorType || 'none', disabledAttr)}</div>
-                </div>
-                <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
-                    <div class="flex items-center space-x-2 space-x-reverse mb-1">
-                        <input type="checkbox" name="hasSupervisionLicense" class="h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500" ${data.hasSupervisionLicense ? 'checked' : ''} ${disabledAttr}>
-                        <label class="text-sm font-medium text-slate-700">پروانه نظارت</label>
-                    </div>
-                    <div>${createGradeSelect('supervisionLicenseGrade', data.supervisionLicenseGrade, disabledAttr || !data.hasSupervisionLicense)}</div>
-                    <div><label class="block text-xs font-medium text-slate-600 mb-1 mt-2">نوع صلاحیت نظارت:</label>${createExecutorRadios('supervisionExecutorType', data.supervisionExecutorType || 'none', disabledAttr)}</div>
-                </div>
-                <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
-                    <div class="flex items-center space-x-2 space-x-reverse mb-1">
-                        <input type="checkbox" name="hasExecutionLicense" class="h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500" ${data.hasExecutionLicense ? 'checked' : ''} ${disabledAttr}>
-                        <label class="text-sm font-medium text-slate-700">پروانه اجرا</label>
-                    </div>
-                    <div>${createGradeSelect('executionLicenseGrade', data.executionLicenseGrade, disabledAttr || !data.hasExecutionLicense)}</div>
-                    <div><label class="block text-xs font-medium text-slate-600 mb-1 mt-2">نوع صلاحیت اجرا:</label>${createExecutorRadios('executionExecutorType', data.executionExecutorType || 'none', disabledAttr)}</div>
-                </div>
+            <div>${createGradeSelect('designLicenseGrade', data.designLicenseGrade, disabledAttr || !data.hasDesignLicense)}</div>
+            <div><label class="block text-xs font-medium text-slate-600 mb-1 mt-2">نوع صلاحیت طراحی:</label>${createExecutorRadios('designExecutorType', data.designExecutorType || 'none', disabledAttr)}</div>
+        </div>
+        <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
+            <div class="flex items-center space-x-2 space-x-reverse mb-1">
+                <input type="checkbox" name="hasSupervisionLicense" class="h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500" ${data.hasSupervisionLicense ? 'checked' : ''} ${disabledAttr}>
+                <label class="text-sm font-medium text-slate-700">پروانه نظارت</label>
             </div>
-            
-            <div id="legalExecutorFields" class="mt-8 space-y-6 bg-slate-100 p-5 rounded-lg border border-slate-200">
-                <h3 class="text-md font-semibold">اطلاعات شرکت حقوقی</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+            <div>${createGradeSelect('supervisionLicenseGrade', data.supervisionLicenseGrade, disabledAttr || !data.hasSupervisionLicense)}</div>
+            <div><label class="block text-xs font-medium text-slate-600 mb-1 mt-2">نوع صلاحیت نظارت:</label>${createExecutorRadios('supervisionExecutorType', data.supervisionExecutorType || 'none', disabledAttr)}</div>
+        </div>
+        <div class="flex flex-col space-y-1 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
+            <div class="flex items-center space-x-2 space-x-reverse mb-1">
+                <input type="checkbox" name="hasExecutionLicense" class="h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500" ${data.hasExecutionLicense ? 'checked' : ''} ${disabledAttr}>
+                <label class="text-sm font-medium text-slate-700">پروانه اجرا</label>
+            </div>
+            <div>${createGradeSelect('executionLicenseGrade', data.executionLicenseGrade, disabledAttr || !data.hasExecutionLicense)}</div>
+            <div><label class="block text-xs font-medium text-slate-600 mb-1 mt-2">نوع صلاحیت اجرا:</label>${createExecutorRadios('executionExecutorType', data.executionExecutorType || 'none', disabledAttr)}</div>
+        </div>
+    </div>
+    <div id="legalExecutorFields" class="mt-8 space-y-6 bg-slate-100 p-5 rounded-lg border border-slate-200">
+        <h3 class="text-md font-semibold">اطلاعات شرکت حقوقی</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1 required-field">نام شرکت حقوقی</label>
+                <input type="text" name="companyName" class="mt-1 block w-full sm:text-sm" value="${data.companyName || ''}" ${disabledAttr}>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">شماره ثبت شرکت</label>
+                <input type="text" name="companyRegNumber" class="mt-1 block w-full sm:text-sm" value="${data.companyRegNumber || ''}" ${disabledAttr}>
+            </div>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">آدرس دفتر شرکت</label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                <textarea name="companyOfficeAddress" rows="4" class="mt-1 block w-full sm:text-sm min-h-[220px]" ${disabledAttr}>${data.companyOfficeAddress || ''}</textarea>
+                <div id="companyOfficeMap" class="map-container min-h-[220px]"></div>
+            </div>
+            <div id="companyOfficeMapInfo" class="mt-2 map-info-display">${data.companyOfficeMapNeighborhood || 'موقعیت مکانی روی نقشه مشخص نشده است.'}</div>
+            <input type="hidden" name="companyOfficeMapLat" value="${data.companyOfficeMapLat || ''}">
+            <input type="hidden" name="companyOfficeMapLng" value="${data.companyOfficeMapLng || ''}">
+            <input type="hidden" name="companyOfficeMapNeighborhood" value="${data.companyOfficeMapNeighborhood || ''}">
+        </div>
+    </div>
+    <div id="individualExecutorFieldsContainer">
+        <div id="individualExecutorFields" class="mt-8 bg-slate-100 p-5 rounded-lg border border-slate-200">
+            <h3 class="text-md font-semibold mb-2">اطلاعات مهندس حقیقی (اجرا)</h3>
+            <div class="flex items-center">
+                <input type="checkbox" name="isAssistantExecutor" class="h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500" ${data.isAssistantExecutor ? 'checked' : ''} ${disabledAttr}>
+                <label class="ml-2 mr-2 block text-sm text-slate-700">فقط کمک مجری هستم</label>
+            </div>
+        </div>
+        <div class="mt-8"> 
+            <div class="flex items-center mb-4">
+                <input type="checkbox" name="engineerHasOfficeInfo" class="h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500" ${data.engineerHasOfficeInfo ? 'checked' : ''} ${disabledAttr}>
+                <label class="ml-2 mr-2 block text-sm text-slate-700">دفتر کار دارم</label>
+            </div>
+            <div id="engineerOfficeInfoFields" class="space-y-6 bg-slate-100 p-5 rounded-lg border border-slate-200">
+                <h3 class="text-lg font-semibold">اطلاعات دفتر کار</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 mb-4">
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1 required-field">نام شرکت حقوقی</label>
-                        <input type="text" name="companyName" class="mt-1 block w-full sm:text-sm" value="${data.companyName || ''}" ${disabledAttr}>
+                        <label class="block text-sm font-medium text-slate-700 mb-1 required-field">نام دفتر کار مهندسی</label>
+                        <input type="text" name="officeName" class="mt-1 block w-full sm:text-sm" value="${data.officeName || ''}" ${disabledAttr}>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">شماره ثبت شرکت</label>
-                        <input type="text" name="companyRegNumber" class="mt-1 block w-full sm:text-sm" value="${data.companyRegNumber || ''}" ${disabledAttr}>
+                        <label class="block text-sm font-medium text-slate-700 mb-1 required-field">تلفن دفتر کار</label>
+                        <input type="tel" name="officePhone" class="mt-1 block w-full sm:text-sm" value="${data.officePhone || ''}" ${disabledAttr}>
                     </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">آدرس دفتر شرکت</label>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
-                        <textarea name="companyOfficeAddress" rows="4" class="mt-1 block w-full sm:text-sm min-h-[220px]" ${disabledAttr}>${data.companyOfficeAddress || ''}</textarea>
-                        <div id="companyOfficeMap" class="map-container min-h-[220px]"></div>
-                    </div>
-                    <div id="companyOfficeMapInfo" class="mt-2 map-info-display">${data.companyOfficeMapNeighborhood || 'موقعیت مکانی روی نقشه مشخص نشده است.'}</div>
-                    <input type="hidden" name="companyOfficeMapLat" value="${data.companyOfficeMapLat || ''}">
-                    <input type="hidden" name="companyOfficeMapLng" value="${data.companyOfficeMapLng || ''}">
-                    <input type="hidden" name="companyOfficeMapNeighborhood" value="${data.companyOfficeMapNeighborhood || ''}">
+                <label class="block text-sm font-medium text-slate-700 mb-1">آدرس دفتر کار</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                    <textarea name="officeAddress" rows="4" class="mt-1 block w-full sm:text-sm min-h-[220px]" ${disabledAttr}>${data.officeAddress || ''}</textarea>
+                    <div id="officeMap" class="map-container min-h-[220px]"></div>
                 </div>
+                <div id="officeMapInfo" class="mt-2 map-info-display">${data.officeMapNeighborhood || 'موقعیت مکانی روی نقشه مشخص نشده است.'}</div>
+                <input type="hidden" name="officeMapLat" value="${data.officeMapLat || ''}">
+                <input type="hidden" name="officeMapLng" value="${data.officeMapLng || ''}">
+                <input type="hidden" name="officeMapNeighborhood" value="${data.officeMapNeighborhood || ''}">
             </div>
-            <div id="individualExecutorFieldsContainer">
-                <div id="individualExecutorFields" class="mt-8 bg-slate-100 p-5 rounded-lg border border-slate-200">
-                    <h3 class="text-md font-semibold mb-2">اطلاعات مهندس حقیقی (اجرا)</h3>
-                    <div class="flex items-center">
-                        <input type="checkbox" name="isAssistantExecutor" class="h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500" ${data.isAssistantExecutor ? 'checked' : ''} ${disabledAttr}>
-                        <label class="ml-2 mr-2 block text-sm text-slate-700">فقط کمک مجری هستم</label>
-                    </div>
-                </div>
-                <div class="mt-8"> 
-                    <div class="flex items-center mb-4">
-                        <input type="checkbox" name="engineerHasOfficeInfo" class="h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500" ${data.engineerHasOfficeInfo ? 'checked' : ''} ${disabledAttr}>
-                        <label class="ml-2 mr-2 block text-sm text-slate-700">دفتر کار دارم</label>
-                    </div>
-                    <div id="engineerOfficeInfoFields" class="space-y-6 bg-slate-100 p-5 rounded-lg border border-slate-200">
-                        <h3 class="text-lg font-semibold">اطلاعات دفتر کار</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 mb-4">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1 required-field">نام دفتر کار مهندسی</label>
-                                <input type="text" name="officeName" class="mt-1 block w-full sm:text-sm" value="${data.officeName || ''}" ${disabledAttr}>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1 required-field">تلفن دفتر کار</label>
-                                <input type="tel" name="officePhone" class="mt-1 block w-full sm:text-sm" value="${data.officePhone || ''}" ${disabledAttr}>
-                            </div>
-                        </div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">آدرس دفتر کار</label>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
-                            <textarea name="officeAddress" rows="4" class="mt-1 block w-full sm:text-sm min-h-[220px]" ${disabledAttr}>${data.officeAddress || ''}</textarea>
-                            <div id="officeMap" class="map-container min-h-[220px]"></div>
-                        </div>
-                        <div id="officeMapInfo" class="mt-2 map-info-display">${data.officeMapNeighborhood || 'موقعیت مکانی روی نقشه مشخص نشده است.'}</div>
-                        <input type="hidden" name="officeMapLat" value="${data.officeMapLat || ''}">
-                        <input type="hidden" name="officeMapLng" value="${data.officeMapLng || ''}">
-                        <input type="hidden" name="officeMapNeighborhood" value="${data.officeMapNeighborhood || ''}">
-                    </div>
-                </div>
-            </div>
-            `;
-        }
+        </div>
+    </div>
+    `;
+}
         
         function getDocumentsHTML(data, role) {
             const nationalIdKey = role === 'engineer' ? 'nationalIdCardImageEngineer' : 'employerNationalIdCardImage';
