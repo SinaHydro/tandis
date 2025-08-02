@@ -1033,6 +1033,11 @@ function handleEditClick(e) {
         }
     });
 
+    formEl.querySelectorAll('.map-container').forEach(mapDiv => {
+        // و به تابع سازنده نقشه دستور می‌دهد آنها را در حالت قابل ویرایش (true) بازسازی کند
+        initializeProfileMap(mapDiv.id, true);
+    });    
+
     if (sectionId === 'professional') {
         attachProfessionalFieldsListeners(formEl);
         updateProfessionalInfoVisibility(formEl);
