@@ -22,10 +22,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     
-    <script src="./jquery.min.js"></script>
-    <script src="./persian-date.min.js"></script>
-    <link rel="stylesheet" href="./persian-datepicker.min.css"/>
-    <script src="./persian-datepicker.min.js"></script>
+    <link rel="stylesheet" href="./kamadatepicker.min.css">
+    <script src="./kamadatepicker.min.js"></script>
     
     <style>
         :root {
@@ -680,13 +678,14 @@
 function getPersonalFieldsHTML(data, role) {
     const prefix = role === 'engineer' ? 'engineer' : 'employer';
     const jalaliDob = data[`${prefix}Dob`] || '';
+
     return `<div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
         <div><label class="block text-sm font-medium text-slate-700 mb-1">نام</label><input type="text" name="${prefix}FirstName" value="${data[`${prefix}FirstName`] || ''}" disabled></div>
         <div><label class="block text-sm font-medium text-slate-700 mb-1">نام خانوادگی</label><input type="text" name="${prefix}LastName" value="${data[`${prefix}LastName`] || ''}" disabled></div>
         <div><label class="block text-sm font-medium text-slate-700 mb-1">کدملی</label><input type="text" name="${prefix}NationalId" value="${data[`${prefix}NationalId`] || ''}" disabled></div>
         <div>
             <label class="block text-sm font-medium text-slate-700 mb-1">تاریخ تولد</label>
-            <input type="text" id="${prefix}Dob" name="${prefix}Dob" value="${jalaliDob}" class="persian-datepicker-input" disabled>
+            <input type="text" id="${prefix}Dob" name="${prefix}Dob" value="${jalaliDob}" class="kama-datepicker" placeholder="YYYY-MM-DD" disabled>
         </div>
         <div><label class="block text-sm font-medium text-slate-700 mb-1">جنسیت</label><select name="${prefix}Gender" disabled><option value="مرد" ${data[`${prefix}Gender`] === 'مرد' ? 'selected' : ''}>مرد</option><option value="زن" ${data[`${prefix}Gender`] === 'زن' ? 'selected' : ''}>زن</option></select></div>
         <div><label class="block text-sm font-medium text-slate-700 mb-1">تلفن موبایل</label><input type="tel" name="${prefix}Mobile" value="${data[`${prefix}Mobile`] || ''}" disabled></div>
@@ -780,11 +779,11 @@ function getProfessionalFieldsHTMLEditable(data, isDisabled) {
     <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6">
         <div>
             <label for="licenseFirstIssueDate" class="block text-sm font-medium text-slate-700 mb-1 required-field">تاریخ اولین صدور پروانه</label>
-            <input type="text" id="licenseFirstIssueDate" name="licenseFirstIssueDate" value="${jalaliFirstIssueDate}" class="persian-datepicker-input" ${disabledAttr}>
+            <input type="text" id="licenseFirstIssueDate" name="licenseFirstIssueDate" value="${jalaliFirstIssueDate}" class="kama-datepicker" placeholder="YYYY-MM-DD" ${disabledAttr}>
         </div>
         <div>
             <label for="licenseStartDate" class="block text-sm font-medium text-slate-700 mb-1 required-field">تاریخ شروع اعتبار پروانه</label>
-            <input type="text" id="licenseStartDate" name="licenseStartDate" value="${jalaliStartDate}" class="persian-datepicker-input" ${disabledAttr}>
+            <input type="text" id="licenseStartDate" name="licenseStartDate" value="${jalaliStartDate}" class="kama-datepicker" placeholder="YYYY-MM-DD" ${disabledAttr}>
         </div>
         <div>
             <label class="block text-sm font-medium text-slate-700 mb-1 required-field">مدت اعتبار پروانه (سال)</label>
@@ -1011,29 +1010,18 @@ function handleEditClick(e) {
     // فعال‌سازی همه فیلدهای فرم
     formEl.querySelectorAll('input, select, textarea').forEach(el => {
         el.disabled = false;
-    });
 
-    // فعال‌سازی تقویم جدید با استفاده از jQuery
-    const today = new persianDate([1404, 5, 11]);
-    $(".persian-datepicker-input", formEl).persianDatepicker({
-        format: 'YYYY/MM/DD',
-        autoClose: true,
-        observer: true,
-        calendar: {
-                    persian: {
-                        locale: 'fa', // زبان فارسی
-                        showHint: true, // نمایش راهنما
-                        leapYearMode: "algorithmic" // محاسبه سال کبیسه
-                    }
-                },
-        toolbox: {
-                    calendarSwitch: {
-                        enabled: false // غیرفعال کردن تغییر به تقویم میلادی
-                    }
-                },
-                maxDate: today, // محدود کردن به تاریخ امروز
-                persianDigit: true // نمایش اعداد به‌صورت فارسی
-
+        // فعال‌سازی تقویم KamaDatePicker
+        if (el.classList.contains('kama-datepicker')) {
+            kamaDatepicker(el.id, {
+                buttonsColor: "blue",
+                forceFarsiDigits: true,
+                markToday: true,
+                gotoToday: true,
+                sync: true, // تاریخ انتخاب شده را در فیلد قرار می‌دهد
+                closeAfterSelect: true // پس از انتخاب، تقویم بسته می‌شود
+            });
+        }
     });
 
     if (sectionId === 'professional') {
