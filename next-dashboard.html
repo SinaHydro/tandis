@@ -1009,12 +1009,11 @@ function handleEditClick(e) {
 
     formEl.querySelectorAll('input, select, textarea').forEach(el => {
         el.disabled = false;
-        
-        // فعال‌سازی تقویم جدید DatePickerX
+
         if (el.classList.contains('date-picker-x')) {
             new DatepickerX(el, {
-                calendar: 'jalali', 
-                format: 'yyyy/mm/dd'  
+                calendar: 'jalali',
+                format: 'yyyy/mm/dd'
             });
         }
     });
