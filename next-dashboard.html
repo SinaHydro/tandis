@@ -1075,15 +1075,14 @@ function handleEditClick(e) {
                 format: 'YYYY-MM-DD',
                 altField: valueInput,
                 altFormat: 'YYYY-MM-DD',
-                initialValue: initialDateValue, // <<-- از این گزینه جدید استفاده می‌کنیم
+                initialValue: initialDateValue,
                 locale: 'fa',
                 observer: true,
-                autoClose: true
+                autoClose: true,
                 dayPicker: {
-                    weekStart: 6 // 6 به معنی شروع هفته از شنبه است
+                    weekStart: 6
                 }
             });
-            // --- پایان بخش اصلاح شده ---
         }
     });
 
