@@ -698,7 +698,7 @@ function getContactFieldsHTML(data, role) {
     const prefix = role === 'engineer' ? 'engineer' : 'employer';
     const address = data[`${prefix}ResidentialAddress`] || data[`${prefix}Address`] || '';
     const mapId = `${prefix}LocationMap`;
-    return `<div class="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-5">
+    return `<div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
         <div><label class="block text-sm font-medium text-slate-700 mb-1">تلفن ثابت</label><input type="text" name="${prefix}Phone" value="${data[`${prefix}Phone`] || ''}" disabled></div>
         <div><label class="block text-sm font-medium text-slate-700 mb-1">کدپستی</label><input type="text" name="${prefix}PostalCode" value="${data[`${prefix}PostalCode`] || ''}" disabled></div>
         <div><label class="block text-sm font-medium text-slate-700 mb-1">استان</label><select name="${prefix}Province" disabled>${generateProvinceOptions(data[`${prefix}Province`])}</select></div>
@@ -710,11 +710,9 @@ function getContactFieldsHTML(data, role) {
             <textarea name="${prefix}ResidentialAddress" rows="4" class="min-h-[250px]" disabled>${address}</textarea>
             <div id="${mapId}" class="map-container"></div>
         </div>
-        
         <div id="${mapId}Info" class="mt-2 map-info-display">
             ${data[`${prefix}ResidentialNeighborhood`] ? `<p>${data[`${prefix}ResidentialNeighborhood`]}</p>` : `<span class="text-slate-500 italic">موقعیت مکانی روی نقشه مشخص نشده است.</span>`}
         </div>
-        
         <input type="hidden" name="${prefix}LocationLat" value="${data[`${prefix}ResidentialLat`] || ''}">
         <input type="hidden" name="${prefix}LocationLng" value="${data[`${prefix}ResidentialLng`] || ''}">
         <input type="hidden" name="${prefix}LocationNeighborhood" value="${data[`${prefix}ResidentialNeighborhood`] || ''}">
@@ -739,11 +737,11 @@ function getProfessionalFieldsHTML(data, role) {
                     <div id="employerCompanyMap" class="map-container"></div>
                 </div>
                 <div id="employerCompanyMapInfo" class="mt-2 map-info-display">
-                    ${data.employerCompanyNeighborhood ? `<p>${data.employerCompanyNeighborhood}</p>` : `<span class="text-slate-500 italic">موقعیت مکانی روی نقشه مشخص نشده است.</span>`}
+                    ${data.companyOfficeMapNeighborhood ? `<p>${data.companyOfficeMapNeighborhood}</p>` : `<span class="text-slate-500 italic">موقعیت مکانی روی نقشه مشخص نشده است.</span>`}
                 </div>
-                <input type="hidden" name="employerCompanyLat" value="${data.employerCompanyLat || ''}">
-                <input type="hidden" name="employerCompanyLng" value="${data.employerCompanyLng || ''}">
-                <input type="hidden" name="employerCompanyNeighborhood" value="${data.employerCompanyNeighborhood || ''}">
+                <input type="hidden" name="employerCompanyLat" value="${data.companyOfficeMapLat || ''}">
+                <input type="hidden" name="employerCompanyLng" value="${data.companyOfficeMapLng || ''}">
+                <input type="hidden" name="employerCompanyNeighborhood" value="${data.companyOfficeMapNeighborhood || ''}">
             </div>
         `;
     }
