@@ -1040,48 +1040,49 @@ function getPersonalFieldsHTML(data, role) {
             if (mapInfoDiv) mapInfoDiv.innerHTML = `<p>${address}</p>`;
         }
         
-        function handleEditClick(e) {
-            const sectionId = e.currentTarget.dataset.section;
-            const sectionEl = document.getElementById(`section-${sectionId}`);
-            if (sectionId === 'documents') {
-                showModal('ویرایش مدارک در این بخش پشتیبانی نمی‌شود. لطفاً برای تغییر مدارک با پشتیبانی تماس بگیرید.', 'info');
-                return;
-            }
-            
-            const formEl = sectionEl.querySelector('form');
-            if (sectionId === 'professional' && userData.role === 'engineer') {
-                formEl.innerHTML = getProfessionalFieldsHTMLEditable(userData.stepsData.step3, false) + formEl.querySelector('.section-actions').outerHTML;
-            }
+function handleEditClick(e) {
+    const sectionId = e.currentTarget.dataset.section;
+    const sectionEl = document.getElementById(`section-${sectionId}`);
+    if (sectionId === 'documents') {
+        showModal('ویرایش مدارک در این بخش پشتیبانی نمی‌شود. لطفاً برای تغییر مدارک با پشتیبانی تماس بگیرید.', 'info');
+        return;
+    }
+
+    const formEl = sectionEl.querySelector('form');
+    if (sectionId === 'professional' && userData.role === 'engineer') {
+        formEl.innerHTML = getProfessionalFieldsHTMLEditable(userData.stepsData.step3, false) + formEl.querySelector('.section-actions').outerHTML;
+    }
 
     formEl.querySelectorAll('input, select, textarea').forEach(el => {
         el.disabled = false;
+        
+        // این بخش مربوط به تقویم است که اصلاح شده
         if (el.classList.contains('jalali-datepicker-display')) {
             $(el).persianDatepicker({
-                format: 'YYYY-MM-DD', // فرمت را اینجا هم به خط تیره تغییر می‌دهیم
-                altField: $(el).next('.jalali-datepicker-value'),
+                // 1. به تقویم می‌گوییم که تاریخ را با خط تیره بخواند و ذخیره کند
+                format: 'YYYY-MM-DD', 
                 altFormat: 'YYYY-MM-DD',
+
+                // 2. این گزینه مشکل یک روز اختلاف در تقویم را حل می‌کند
+                locale: 'fa',
+
+                altField: $(el).next('.jalali-datepicker-value'),
                 observer: true,
-                autoClose: true,
-                locale: 'fa' // این خط جدید مشکل یک روز اختلاف را حل می‌کند
+                autoClose: true
             });
         }
     });
-            
-            // Re-attach listeners for dynamic professional fields
-            if (sectionId === 'professional') {
-                attachProfessionalFieldsListeners(formEl);
-                updateProfessionalInfoVisibility(formEl);
-            }
 
-            formEl.querySelectorAll('.map-container').forEach(mapDiv => {
-                initializeProfileMap(mapDiv.id, true);
-            });
+    if (sectionId === 'professional') {
+        attachProfessionalFieldsListeners(formEl);
+        updateProfessionalInfoVisibility(formEl);
+    }
 
-            sectionEl.querySelector('.section-actions').classList.remove('hidden');
-            e.currentTarget.classList.add('hidden');
-            sectionEl.querySelector('button[data-action="cancel"]').addEventListener('click', handleCancelClick);
-            sectionEl.querySelector('button[data-action="save"]').addEventListener('click', handleSaveClick);
-        }
+    sectionEl.querySelector('.section-actions').classList.remove('hidden');
+    e.currentTarget.classList.add('hidden');
+    sectionEl.querySelector('button[data-action="cancel"]').addEventListener('click', handleCancelClick);
+    sectionEl.querySelector('button[data-action="save"]').addEventListener('click', handleSaveClick);
+}
         
         function handleCancelClick(e) { renderProfile(); }
         
