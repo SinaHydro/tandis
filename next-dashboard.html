@@ -1017,7 +1017,8 @@ function handleEditClick(e) {
     $(".persian-datepicker-input", formEl).persianDatepicker({
         format: 'YYYY/MM/DD',
         autoClose: true,
-        observer: true
+        observer: true,
+        calendarType: 'persian'
     });
 
     if (sectionId === 'professional') {
