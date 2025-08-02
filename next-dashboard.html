@@ -741,10 +741,6 @@ function getProfessionalFieldsHTML(data, role) {
                 <div id="employerCompanyMapInfo" class="mt-2 map-info-display">
                     ${data.employerCompanyNeighborhood ? `<p>${data.employerCompanyNeighborhood}</p>` : `<span class="text-slate-500 italic">موقعیت مکانی روی نقشه مشخص نشده است.</span>`}
                 </div>
-                
-                {/* تغییرات اصلی در سه خط زیر است.
-                  کلمه Address از نام فیلدها حذف شده و از داده صحیح خوانده می‌شود.
-                */}
                 <input type="hidden" name="employerCompanyLat" value="${data.employerCompanyLat || ''}">
                 <input type="hidden" name="employerCompanyLng" value="${data.employerCompanyLng || ''}">
                 <input type="hidden" name="employerCompanyNeighborhood" value="${data.employerCompanyNeighborhood || ''}">
@@ -1047,8 +1043,6 @@ function handleEditClick(e) {
         updateProfessionalInfoVisibility(formEl);
     }
 
-    sectionEl.querySelector('.section-actions').classList.remove('hidden');
-    e.currentTarget.classList.add('hidden');
     sectionEl.querySelector('button[data-action="cancel"]').addEventListener('click', handleCancelClick);
     sectionEl.querySelector('button[data-action="save"]').addEventListener('click', handleSaveClick);
 }
