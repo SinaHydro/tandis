@@ -1014,6 +1014,7 @@ function handleEditClick(e) {
     });
 
     // فعال‌سازی تقویم جدید با استفاده از jQuery
+    const today = new persianDate([1404, 5, 11]);
     $(".persian-datepicker-input", formEl).persianDatepicker({
         format: 'YYYY/MM/DD',
         autoClose: true,
@@ -1030,7 +1031,7 @@ function handleEditClick(e) {
                         enabled: false // غیرفعال کردن تغییر به تقویم میلادی
                     }
                 },
-                maxDate: new persianDate(), // محدود کردن به تاریخ امروز
+                maxDate: today, // محدود کردن به تاریخ امروز
                 persianDigit: true // نمایش اعداد به‌صورت فارسی
 
     });
