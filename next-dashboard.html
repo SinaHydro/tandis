@@ -22,9 +22,11 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     
-<script src="https://unpkg.com/jquery@3.5.1/dist/jquery.min.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css"/>
-<script src="https://unpkg.com/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Mds92/MD.BootstrapPersianDateTimePicker@master/dist/jquery.md.bootstrap.datetimepicker.style.css" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Mds92/MD.BootstrapPersianDateTimePicker@master/dist/jquery.md.bootstrap.datetimepicker.js"></script>
 
     <style>
         :root {
@@ -685,8 +687,12 @@ function getPersonalFieldsHTML(data, role) {
         <div><label class="block text-sm font-medium text-slate-700 mb-1">نام خانوادگی</label><input type="text" name="${prefix}LastName" value="${data[`${prefix}LastName`] || ''}" disabled></div>
         <div><label class="block text-sm font-medium text-slate-700 mb-1">کدملی</label><input type="text" name="${prefix}NationalId" value="${data[`${prefix}NationalId`] || ''}" disabled></div>
         <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">تاریخ تولد</label>
-            <input type="text" id="${prefix}Dob" name="${prefix}Dob" value="${jalaliDob}" class="pwt-datepicker" disabled>
+            <label for="${prefix}Dob-text" class="block text-sm font-medium text-slate-700 mb-1">تاریخ تولد</label>
+            <div id="${prefix}Dob-container" class="input-group mds-dtp-container">
+                 <input type="text" id="${prefix}Dob-text" class="form-control" value="${jalaliDob}" placeholder="YYYY-MM-DD" disabled />
+                 <span class="input-group-addon" style="padding: 6px 12px; cursor: pointer;"><i class="fas fa-calendar"></i></span>
+                 <input type="hidden" id="${prefix}Dob-value" name="${prefix}Dob" value="${jalaliDob}" />
+            </div>
         </div>
         <div><label class="block text-sm font-medium text-slate-700 mb-1">جنسیت</label><select name="${prefix}Gender" disabled><option value="مرد" ${data[`${prefix}Gender`] === 'مرد' ? 'selected' : ''}>مرد</option><option value="زن" ${data[`${prefix}Gender`] === 'زن' ? 'selected' : ''}>زن</option></select></div>
         <div><label class="block text-sm font-medium text-slate-700 mb-1">تلفن موبایل</label><input type="tel" name="${prefix}Mobile" value="${data[`${prefix}Mobile`] || ''}" disabled></div>
@@ -779,12 +785,20 @@ function getProfessionalFieldsHTMLEditable(data, isDisabled) {
     return `
     <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6">
         <div>
-            <label for="licenseFirstIssueDate" class="block text-sm font-medium text-slate-700 mb-1 required-field">تاریخ اولین صدور پروانه</label>
-            <input type="text" id="licenseFirstIssueDate" name="licenseFirstIssueDate" value="${jalaliFirstIssueDate}" class="pwt-datepicker" ${disabledAttr}>
+            <label for="licenseFirstIssueDate-text" class="block text-sm font-medium text-slate-700 mb-1 required-field">تاریخ اولین صدور پروانه</label>
+            <div id="licenseFirstIssueDate-container" class="input-group mds-dtp-container">
+                <input type="text" id="licenseFirstIssueDate-text" class="form-control" value="${jalaliFirstIssueDate}" placeholder="YYYY-MM-DD" ${disabledAttr} />
+                <span class="input-group-addon" style="padding: 6px 12px; cursor: pointer;"><i class="fas fa-calendar"></i></span>
+                <input type="hidden" id="licenseFirstIssueDate-value" name="licenseFirstIssueDate" value="${jalaliFirstIssueDate}" />
+        </div>
         </div>
         <div>
-            <label for="licenseStartDate" class="block text-sm font-medium text-slate-700 mb-1 required-field">تاریخ شروع اعتبار پروانه</label>
-            <input type="text" id="licenseStartDate" name="licenseStartDate" value="${jalaliStartDate}" class="pwt-datepicker" ${disabledAttr}>
+            <label for="licenseStartDate-text" class="block text-sm font-medium text-slate-700 mb-1 required-field">تاریخ شروع اعتبار پروانه</label>
+            <div id="licenseStartDate-container" class="input-group mds-dtp-container">
+                 <input type="text" id="licenseStartDate-text" class="form-control" value="${jalaliStartDate}" placeholder="YYYY-MM-DD" ${disabledAttr} />
+                 <span class="input-group-addon" style="padding: 6px 12px; cursor: pointer;"><i class="fas fa-calendar"></i></span>
+                 <input type="hidden" id="licenseStartDate-value" name="licenseStartDate" value="${jalaliStartDate}" />
+        </div>
         </div>
         <div>
             <label class="block text-sm font-medium text-slate-700 mb-1 required-field">مدت اعتبار پروانه (سال)</label>
@@ -1008,15 +1022,24 @@ function handleEditClick(e) {
         formEl.innerHTML = getProfessionalFieldsHTMLEditable(userData.stepsData.step3, false) + formEl.querySelector('.section-actions').outerHTML;
     }
 
+    // فعال‌سازی همه فیلدهای فرم
     formEl.querySelectorAll('input, select, textarea').forEach(el => {
         el.disabled = false;
     });
 
-    // فعال‌سازی تقویم جدید pwt.datepicker با استفاده از jQuery
-    $(".pwt-datepicker", formEl).persianDatepicker({
-        format: 'YYYY-MM-DD',
-        autoClose: true,
-        observer: true // این گزینه باعث می‌شود تاریخ در فیلد نمایش داده شود
+    // فعال‌سازی تقویم‌های جدید
+    $('.mds-dtp-container', formEl).each(function() {
+        const container = $(this);
+        const textInput = container.find('input[type="text"]');
+        const valueInput = container.find('input[type="hidden"]');
+
+        container.MdPersianDateTimePicker({
+            targetTextSelector: '#' + textInput.attr('id'),
+            targetDateSelector: '#' + valueInput.attr('id'),
+            dateFormat: 'yyyy-MM-dd',
+            isGregorian: false, // <<-- تقویم شمسی خواهد بود
+            enableTimePicker: false // <<-- انتخاب ساعت غیرفعال است
+        });
     });
 
     if (sectionId === 'professional') {
