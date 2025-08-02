@@ -1018,7 +1018,21 @@ function handleEditClick(e) {
         format: 'YYYY/MM/DD',
         autoClose: true,
         observer: true,
-        calendarType: 'persian'
+        calendar: {
+                    persian: {
+                        locale: 'fa', // زبان فارسی
+                        showHint: true, // نمایش راهنما
+                        leapYearMode: "algorithmic" // محاسبه سال کبیسه
+                    }
+                },
+        toolbox: {
+                    calendarSwitch: {
+                        enabled: false // غیرفعال کردن تغییر به تقویم میلادی
+                    }
+                },
+                maxDate: new persianDate(), // محدود کردن به تاریخ امروز
+                persianDigit: true // نمایش اعداد به‌صورت فارسی
+
     });
 
     if (sectionId === 'professional') {
