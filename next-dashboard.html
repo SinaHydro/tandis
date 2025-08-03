@@ -75,8 +75,8 @@
         .dot { cursor: pointer; height: 10px; width: 10px; margin: 0 4px; background-color: #cbd5e1; border-radius: 50%; display: inline-block; transition: background-color 0.3s ease; }
         .dot.active, .dot:hover { background-color: var(--primary-color); }
         .profile-section { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.75rem; margin-bottom: 1.5rem; /*overflow: hidden;*/ }
-        .section-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; cursor: pointer; user-select: none; background-color: #fdfdfe; border-bottom: 1px solid #e2e8f0; }
-        .section-header.open { border-bottom-color: #e2e8f0; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; cursor: pointer; user-select: none; background-color: #fdfdfe; border-bottom: 1px solid #e2e8f0; border-top-left-radius: 0.75rem; border-top-right-radius: 0.75rem; }
+        .section-header.open { border-bottom-color: #e2e8f0; border-bottom-left-radius: 0.75rem; border-bottom-right-radius: 0.75rem; border-bottom: none;}
         .section-title { font-size: 1.1rem; font-weight: 600; color: #334155; }
         .section-title i { margin-left: 0.75rem; color: var(--primary-color); }
         .section-toggle-icon { transition: transform 0.3s ease; }
