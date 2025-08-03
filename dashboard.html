@@ -67,7 +67,8 @@
             .form-content::-webkit-scrollbar-thumb:hover { background: #64748b; }
             .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(15, 23, 42, 0.6); }
             .modal-content { background-color: #ffffff; margin: 12% auto; padding: 2rem 2.5rem; border: none; width: 90%; max-width: 480px; border-radius: 0.75rem; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
-            input[type="text"], input[type="date"], input[type="tel"], input[type="number"], textarea, select { background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.625rem 0.875rem; transition: border-color 0.2s ease, box-shadow 0.2s ease; line-height: 1.5; height: calc(1.5em + 0.75rem + 2px + 0.5rem); }
+            input[type="text"], input[type="date"], input[type="tel"], input[type="number"], select { background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.625rem 0.875rem; transition: border-color 0.2s ease, box-shadow 0.2s ease; line-height: 1.5; height: calc(1.5em + 0.75rem + 2px + 0.5rem); }
+            textarea { background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 1rem; transition: border-color 0.2s ease, box-shadow 0.2s ease; line-height: 1.5; }
             select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E"); background-position: left 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-left: 2.5rem; padding-right: 0.875rem; }
             input[type="text"]:focus, input[type="date"]:focus, input[type="tel"]:focus, input[type="number"]:focus, textarea:focus, select:focus { border-color: #0ea5e9; background-color: white; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2); outline: none; }
             input[type="file"] { background-color: #f8fafc; border: 2px dashed #cbd5e1; padding: 0.75rem; border-radius: 0.5rem; transition: border-color 0.2s ease; }
@@ -550,7 +551,7 @@
                                     <div id="stepDescriptionContainer-engineer-5" class="step-description-box"></div>
                                     <div class="pt-4">
                                         <div id="summaryContainerEngineer" class="bg-slate-100 p-5 sm:p-6 rounded-lg shadow border border-slate-200">
-</div>
+                                    </div>
                                     </div>
                                 </div>
                             </form>
@@ -559,7 +560,7 @@
                             <form id="employerForm">
                                 <div id="employer-step-1" class="form-step">
                                     <div id="stepDescriptionContainer-employer-1" class="step-description-box"></div>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 pt-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6 pt-4">
                                         <div>
                                             <label for="employerFirstName" class="block text-sm font-medium text-slate-700 mb-1 required">نام</label>
                                             <input type="text" id="employerFirstName" name="employerFirstName" required class="mt-1 block w-full sm:text-sm">
@@ -574,15 +575,14 @@
                                         </div>
                                         <div>
                                             <label for="employerDob" class="block text-sm font-medium text-slate-700 mb-1 required">تاریخ تولد</label>
-                                            <input type="text" id="employerDob" required class="mt-1 block w-full sm:text-sm jalali-datepicker-display" readonly>
-                                            <input type="hidden" name="employerDob" class="jalali-datepicker-value">
+                                            <input type="text" id="employerDob" name="employerDob" required class="mt-1 block w-full sm:text-sm kama-datepicker" readonly placeholder="YYYY-MM-DD">
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-slate-700 mb-1 required">جنسیت</label>
                                             <div class="mt-1">
                                                 <button type="button" id="employerGenderToggle" data-value="مرد" class="w-full text-right p-2 border border-slate-300 rounded-md bg-slate-50 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-sm">
                                                     مرد
-</button>
+                                                </button>
                                                 <input type="hidden" id="employerGender" name="employerGender" value="مرد">
                                             </div>
                                         </div>
@@ -594,7 +594,7 @@
                                 </div>
                                 <div id="employer-step-2" class="form-step">
                                     <div id="stepDescriptionContainer-employer-2" class="step-description-box"></div>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 pt-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-6 pt-4">
                                         <div>
                                             <label for="employerPhone" class="block text-sm font-medium text-slate-700 mb-1 required">شماره تماس</label>
                                             <input type="tel" id="employerPhone" name="employerPhone" required pattern="0\d{9}|0\d{10}" title="شماره تماس معتبر وارد کنید (مثال: 02112345678 یا 09123456789)" class="mt-1 block w-full sm:text-sm">
