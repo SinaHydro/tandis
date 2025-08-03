@@ -699,7 +699,7 @@ function getPersonalFieldsHTML(data, role) {
 function getContactFieldsHTML(data, role) {
     const prefix = role === 'engineer' ? 'engineer' : 'employer';
     const address = (role === 'employer' ? data.employerAddress : data.engineerResidentialAddress) || '';
-    const mapId = `${prefix}LocationMap`;
+    const mapId = `${prefix}LocationMap`; // شناسه نقشه: engineerLocationMap یا employerLocationMap
 
     return `<div class="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-5">
         <div><label class="block text-sm font-medium text-slate-700 mb-1">تلفن ثابت</label><input type="text" name="${prefix}Phone" value="${data[`${prefix}Phone`] || ''}" disabled></div>
@@ -716,9 +716,9 @@ function getContactFieldsHTML(data, role) {
         <div id="${mapId}Info" class="mt-2 map-info-display">
             ${(role === 'employer' ? data.employerAddressNeighborhood : data.engineerResidentialNeighborhood) ? `<p>${(role === 'employer' ? data.employerAddressNeighborhood : data.engineerResidentialNeighborhood)}</p>` : `<span class="text-slate-500 italic">موقعیت مکانی روی نقشه مشخص نشده است.</span>`}
         </div>
-        <input type="hidden" name="${prefix}LocationLat" value="${(role === 'employer' ? data.employerAddressLat : data.engineerResidentialLat) || ''}">
-        <input type="hidden" name="${prefix}LocationLng" value="${(role === 'employer' ? data.employerAddressLng : data.engineerResidentialLng) || ''}">
-        <input type="hidden" name="${prefix}LocationNeighborhood" value="${(role === 'employer' ? data.employerAddressNeighborhood : data.engineerResidentialNeighborhood) || ''}">
+        <input type="hidden" name="${mapId}Lat" value="${(role === 'employer' ? data.employerAddressLat : data.engineerResidentialLat) || ''}">
+        <input type="hidden" name="${mapId}Lng" value="${(role === 'employer' ? data.employerAddressLng : data.engineerResidentialLng) || ''}">
+        <input type="hidden" name="${mapId}Neighborhood" value="${(role === 'employer' ? data.employerAddressNeighborhood : data.engineerResidentialNeighborhood) || ''}">
     </div>`;
 }
         
@@ -728,6 +728,7 @@ function getProfessionalFieldsHTML(data, role) {
         if (!hasCompany) {
             return '<p class="text-slate-500">این کارفرما به عنوان شخص حقیقی فعالیت می‌کند.</p>';
         }
+        const mapId = 'employerCompanyMap'; // شناسه نقشه
         return `
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
                 <div><label class="block text-sm font-medium text-slate-700 mb-1">نام شرکت</label><input type="text" name="employerCompanyName" value="${data.employerCompanyName || ''}" disabled></div>
@@ -737,14 +738,14 @@ function getProfessionalFieldsHTML(data, role) {
                 <label class="block text-sm font-medium text-slate-700 mb-1">آدرس شرکت</label>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <textarea name="employerCompanyAddress" rows="4" class="min-h-[250px]" disabled>${data.employerCompanyAddress || ''}</textarea>
-                    <div id="employerCompanyMap" class="map-container"></div>
+                    <div id="${mapId}" class="map-container"></div>
                 </div>
-                <div id="employerCompanyMapInfo" class="mt-2 map-info-display">
+                <div id="${mapId}Info" class="mt-2 map-info-display">
                     ${data.employerCompanyAddressNeighborhood ? `<p>${data.employerCompanyAddressNeighborhood}</p>` : `<span class="text-slate-500 italic">موقعیت مکانی روی نقشه مشخص نشده است.</span>`}
                 </div>
-                <input type="hidden" name="employerCompanyLat" value="${data.employerCompanyAddressLat || ''}">
-                <input type="hidden" name="employerCompanyLng" value="${data.employerCompanyAddressLng || ''}">
-                <input type="hidden" name="employerCompanyNeighborhood" value="${data.employerCompanyAddressNeighborhood || ''}">
+                <input type="hidden" name="${mapId}Lat" value="${data.employerCompanyAddressLat || ''}">
+                <input type="hidden" name="${mapId}Lng" value="${data.employerCompanyAddressLng || ''}">
+                <input type="hidden" name="${mapId}Neighborhood" value="${data.employerCompanyAddressNeighborhood || ''}">
             </div>
         `;
     }
@@ -948,14 +949,17 @@ function initializeProfileMap(mapId, isEditable) {
     const form = mapContainer.closest('form');
     if (!form) return;
 
-    // پیشوند نام فیلد را بر اساس شناسه نقشه می‌سازیم
-    const namePrefix = mapId.replace('Map', '');
-    const latInput = form.querySelector(`input[name="${namePrefix}Lat"]`);
-    const lngInput = form.querySelector(`input[name="${namePrefix}Lng"]`);
-    const neighborhoodInput = form.querySelector(`input[name="${namePrefix}Neighborhood"]`);
+    // نام دقیق فیلدها را بر اساس شناسه نقشه می‌سازیم
+    const latInputName = mapId + 'Lat';
+    const lngInputName = mapId + 'Lng';
+    const neighborhoodInputName = mapId + 'Neighborhood';
+
+    const latInput = form.querySelector(`input[name="${latInputName}"]`);
+    const lngInput = form.querySelector(`input[name="${lngInputName}"]`);
+    const neighborhoodInput = form.querySelector(`input[name="${neighborhoodInputName}"]`);
 
     if (!latInput || !lngInput) {
-        console.error(`Inputs for map ${mapId} not found.`);
+        console.error(`Inputs for map ${mapId} not found. Looked for names: ${latInputName}, ${lngInputName}`);
         return;
     };
     
