@@ -581,10 +581,6 @@ function getProfileHeaderHTML(userData) {
                     <i class="fas fa-camera"></i>
                 </div>
             </label>
-            <button onclick="document.getElementById('profileImageInput').click();" class="btn btn-primary">
-                <i class="fas fa-sync-alt"></i>
-                <span>تعویض عکس پروفایل</span>
-            </button>
         </div>
     `;
 }
@@ -2618,6 +2614,7 @@ async function renderProjectMarketplace() {
             initSlideshow();
             setupViewSwitcher();
             setupPasswordToggle();
+            initializeCropper();
             changePasswordForm.addEventListener('submit', handleChangePassword);
 
             const contentAreaClickHandler = (e, contentId, handlers) => {
