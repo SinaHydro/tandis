@@ -93,13 +93,12 @@
         .price-btn.active { border-color: #2563eb; /* blue-600 */ background-color: #dbeafe; /* blue-100 */ color: #1e3a8a; /* blue-900 */ font-weight: 600; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);}
         /* استایل جدید برای کادرهای متنی بلند (توضیحات و آدرس) */
         textarea#address, textarea#description { border: 1px solid #cbd5e1; /* slate-300 */ padding: 0.75rem 1rem; border-radius: 0.375rem; }
-        textarea#address:focus, textarea#description:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2); outline: none;}
+        textarea#address:focus, textarea#description:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2); outline: none; padding: 0.75rem; }
         /* مرحله ۱: استایل برای فیلدهای متنی (با ارتفاع و حاشیه استاندارد) */
         input[type="text"], input[type="date"], input[type="tel"], input[type="number"], input[type="password"] { background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem;  padding: 0.875rem 1rem; /* حاشیه داخلی استاندارد */ transition: all 0.2s ease; width: 100%; height: 2.75rem; /* ارتفاع استاندارد */}
         /* مرحله ۲: استایل اختصاصی فقط برای دکمه‌های کشویی (با حاشیه داخلی بیشتر) */
         select { background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0 1.25rem; /* حاشیه داخلی بیشتر فقط برای چپ و راست */ transition: all 0.2s ease; width: 100%; height: 2.75rem; /* ارتفاع را با بقیه یکسان نگه می‌داریم */ -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E"); background-position: left 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; }
         input[type="password"] { padding-left: 2.5rem; }
-        textarea { padding: 1.5rem; }
         input:focus, textarea:focus, select:focus, input[type="password"]:focus { border-color: var(--primary-color); background-color: white; box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2); outline: none; }
         input:disabled, select:disabled, textarea:disabled { background-color: #eef2f7; color: #64748b; cursor: not-allowed; border-color: #e2e8f0; } 
         .btn { padding: 0.625rem 1.25rem; border-radius: 0.375rem; font-weight: 600; transition: all 0.2s ease-in-out; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border: none; }
@@ -708,13 +707,13 @@ function getContactFieldsHTML(data, role) {
         <div><label class="block text-sm font-medium text-slate-700 mb-1">شهر</label><input type="text" name="${prefix}City" value="${data[`${prefix}City`] || ''}" disabled></div>
     </div>
     <div class="mt-6">
-        <label class="block text-sm font-medium text-slate-700 mb-1">آدرس و موقعیت مکانی</label>
+        <label class="block text-sm font-medium text-slate-700 mb-1">آدرس سکونت</label>
+        <div id="${mapId}" class="map-container w-full mb-2"></div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <textarea name="${prefix}Address" rows="4" class="min-h-[250px]" disabled>${address}</textarea>
-            <div id="${mapId}" class="map-container"></div>
-        </div>
-        <div id="${mapId}Info" class="mt-2 map-info-display">
-            ${(role === 'employer' ? data.employerAddressNeighborhood : data.engineerResidentialNeighborhood) ? `<p>${(role === 'employer' ? data.employerAddressNeighborhood : data.engineerResidentialNeighborhood)}</p>` : `<span class="text-slate-500 italic">موقعیت مکانی روی نقشه مشخص نشده است.</span>`}
+            <textarea name="${prefix}Address" rows="3" class="w-full" disabled>${address}</textarea>
+            <div id="${mapId}Info" class="map-info-display p-3 rounded-md">
+                ${(role === 'employer' ? data.employerAddressNeighborhood : data.engineerResidentialNeighborhood) ? `<p>${(role === 'employer' ? data.employerAddressNeighborhood : data.engineerResidentialNeighborhood)}</p>` : `<span class="text-slate-500 italic">موقعیت مکانی روی نقشه مشخص نشده است.</span>`}
+            </div>
         </div>
         <input type="hidden" name="${mapId}Lat" value="${(role === 'employer' ? data.employerAddressLat : data.engineerResidentialLat) || ''}">
         <input type="hidden" name="${mapId}Lng" value="${(role === 'employer' ? data.employerAddressLng : data.engineerResidentialLng) || ''}">
@@ -736,12 +735,12 @@ function getProfessionalFieldsHTML(data, role) {
             </div>
             <div class="mt-6">
                 <label class="block text-sm font-medium text-slate-700 mb-1">آدرس شرکت</label>
+                <div id="${mapId}" class="map-container w-full mb-2"></div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <textarea name="employerCompanyAddress" rows="4" class="min-h-[250px]" disabled>${data.employerCompanyAddress || ''}</textarea>
-                    <div id="${mapId}" class="map-container"></div>
-                </div>
-                <div id="${mapId}Info" class="mt-2 map-info-display">
-                    ${data.employerCompanyAddressNeighborhood ? `<p>${data.employerCompanyAddressNeighborhood}</p>` : `<span class="text-slate-500 italic">موقعیت مکانی روی نقشه مشخص نشده است.</span>`}
+                    <textarea name="employerCompanyAddress" rows="3" class="w-full" disabled>${data.employerCompanyAddress || ''}</textarea>
+                    <div id="${mapId}Info" class="map-info-display p-3 rounded-md">
+                        ${data.employerCompanyAddressNeighborhood ? `<p>${data.employerCompanyAddressNeighborhood}</p>` : `<span class="text-slate-500 italic">موقعیت مکانی روی نقشه مشخص نشده است.</span>`}
+                    </div>
                 </div>
                 <input type="hidden" name="${mapId}Lat" value="${data.employerCompanyAddressLat || ''}">
                 <input type="hidden" name="${mapId}Lng" value="${data.employerCompanyAddressLng || ''}">
@@ -852,11 +851,13 @@ function getProfessionalFieldsHTMLEditable(data, isDisabled) {
         </div>
         <div>
             <label class="block text-sm font-medium text-slate-700 mb-1">آدرس دفتر شرکت</label>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
-                <textarea name="companyOfficeAddress" rows="4" class="mt-1 block w-full sm:text-sm min-h-[220px]" ${disabledAttr}>${data.companyOfficeAddress || ''}</textarea>
-                <div id="companyOfficeMap" class="map-container min-h-[220px]"></div>
+            <div id="companyOfficeMap" class="map-container w-full mb-2 min-h-[220px]"></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <textarea name="companyOfficeAddress" rows="3" class="mt-1 block w-full sm:text-sm" ${disabledAttr}>${data.companyOfficeAddress || ''}</textarea>
+                <div id="companyOfficeMapInfo" class="map-info-display p-3 rounded-md">
+                    ${data.companyOfficeMapNeighborhood || 'موقعیت مکانی روی نقشه مشخص نشده است.'}
+                </div>
             </div>
-            <div id="companyOfficeMapInfo" class="mt-2 map-info-display">${data.companyOfficeMapNeighborhood || 'موقعیت مکانی روی نقشه مشخص نشده است.'}</div>
             <input type="hidden" name="companyOfficeMapLat" value="${data.companyOfficeMapLat || ''}">
             <input type="hidden" name="companyOfficeMapLng" value="${data.companyOfficeMapLng || ''}">
             <input type="hidden" name="companyOfficeMapNeighborhood" value="${data.companyOfficeMapNeighborhood || ''}">
