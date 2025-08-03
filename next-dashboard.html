@@ -1234,47 +1234,6 @@ function handleEditClick(e) {
             }
         }
 
-        function setupViewSwitcher() {
-            const navItems = document.querySelectorAll('.nav-item[data-view]');
-            const viewInfo = {
-                dashboard: 'از این بخش می‌توانید آمار کلی و خلاصه‌ای از فعالیت‌های خود را مشاهده کنید.',
-                profile: 'اطلاعات کاربری خود را در این بخش مشاهده و ویرایش کنید. کامل بودن پروفایل به اعتبار شما می‌افزاید.',
-                notifications: 'اطلاعیه‌ها، درخواست‌های همکاری و پیام‌های سیستمی در این قسمت نمایش داده می‌شوند.',
-                projects: userData.role === 'employer' ? 'پروژه‌هایی که ثبت کرده‌اید را مدیریت کنید، وضعیت آن‌ها را تغییر دهید یا ویرایش کنید.' : 'لیست پروژه‌های باز کارفرمایان در اینجا نمایش داده می‌شود. می‌توانید برای همکاری درخواست ارسال کنید.',
-                'my-activities': 'فعالیت‌های ثبت شده شما برای نمایش به کارفرمایان در این بخش مدیریت می‌شوند.',
-                engineers: 'لیست مهندسان فعال را مشاهده کرده و برای پروژه‌های خود درخواست همکاری ارسال نمایید.',
-                settings: 'تنظیمات حساب کاربری خود، مانند تغییر رمز عبور را از این بخش انجام دهید.',
-                'create-project': 'یک پروژه جدید با تمام جزئیات ثبت کنید تا مهندسان متخصص برای آن درخواست همکاری ارسال کنند.',
-                'create-activity': 'با ثبت یک فعالیت جدید، آمادگی خود را برای دریافت پروژه‌های جدید به کارفرمایان اعلام کنید.'
-            };
-
-            navItems.forEach(item => {
-                item.addEventListener('click', (e) => {
-                    currentView = e.currentTarget.dataset.view;
-                    
-                    allContentBodies.forEach(el => el.style.display = 'none');
-                    navItems.forEach(nav => nav.classList.remove('active'));
-
-                    const contentEl = document.getElementById(`${currentView.replace(/-/g, '')}Content`);
-                    if (contentEl) contentEl.style.display = 'block';
-                    mainHeaderTitle.textContent = e.currentTarget.querySelector('span').textContent;
-                    infoBoxText.textContent = viewInfo[currentView] || 'اطلاعات این بخش در اینجا نمایش داده می‌شود.';
-                    
-                    switch(currentView) {
-                        case 'dashboard': (userData.role === 'employer' ? renderEmployerDashboard : renderEngineerDashboard)(); break;
-                        case 'profile': renderProfile(); break;
-                        case 'notifications': renderNotifications(); break;
-                        case 'projects': (userData.role === 'employer' ? renderEmployerProjects : renderProjectMarketplace)(); break;
-                        case 'my-activities': renderMyActivities(); break;
-                        case 'engineers': renderEngineersPanel(); break;
-                        case 'create-project': renderProjectForm(); break;
-                        case 'create-activity': renderActivityForm(); break;
-                    }
-                    e.currentTarget.classList.add('active');
-                });
-            });
-        }
-
         async function refreshCurrentView() {
             const activeNavItem = document.querySelector('.nav-item.active');
             if (activeNavItem) {
@@ -2519,40 +2478,6 @@ async function renderProjectMarketplace() {
             });
         }
 
-        function setupViewSwitcher() {
-            const navItems = document.querySelectorAll('.nav-item[data-view]');
-            navItems.forEach(item => {
-                item.addEventListener('click', (e) => {
-                    const targetView = e.currentTarget.dataset.view;
-                    
-                    document.querySelectorAll('.content-body').forEach(el => el.style.display = 'none');
-                    navItems.forEach(nav => nav.classList.remove('active'));
-
-                    switch(targetView) {
-                        case 'dashboard':
-                            dashboardContent.style.display = 'block';
-                            mainHeaderTitle.textContent = 'داشبورد';
-                            if (userData.role === 'employer') renderEmployerDashboard();
-                            else renderEngineerDashboard();
-                            break;
-                        case 'profile': profileContent.style.display = 'block'; mainHeaderTitle.textContent = 'پروفایل کاربری'; break;
-                        case 'settings': settingsContent.style.display = 'block'; mainHeaderTitle.textContent = 'تنظیمات'; break;
-                        case 'notifications': notificationsContent.style.display = 'block'; mainHeaderTitle.textContent = 'پیام‌ها و اعلان‌ها'; renderNotifications(); break;
-                        case 'projects':
-                            projectsContent.style.display = 'block';
-                            if (userData.role === 'employer') { mainHeaderTitle.textContent = 'پروژه‌های من'; renderEmployerProjects(); }
-                            else { mainHeaderTitle.textContent = 'جستجوی پروژه‌'; renderProjectMarketplace(); }
-                            break;
-                        case 'my-activities': myActivitiesContent.style.display = 'block'; mainHeaderTitle.textContent = 'فعالیت‌های من'; renderMyActivities(); break;
-                        case 'engineers': engineersContent.style.display = 'block'; mainHeaderTitle.textContent = 'جستجوی مهندس'; renderEngineersPanel(); break;
-                        case 'create-project': createProjectContent.style.display = 'block'; mainHeaderTitle.textContent = 'ثبت / ویرایش پروژه'; renderProjectForm(); break;
-                        case 'create-activity': createActivityContent.style.display = 'block'; mainHeaderTitle.textContent = 'ثبت / ویرایش فعالیت'; renderActivityForm(); break;
-                    }
-                    e.currentTarget.classList.add('active');
-                });
-            });
-        }
-
         async function handleChangePassword(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
@@ -2601,18 +2526,6 @@ async function renderProjectMarketplace() {
             });
         }
 
-function logoutUser() {
-    showModal('آیا برای خروج از حساب کاربری خود مطمئن هستید؟', 'confirm', () => {
-        // در یک برنامه واقعی، اطلاعات نشست کاربر پاک می‌شود
-        // در اینجا ما با یک پیام و انتقال به صفحه دیگر، آن را شبیه‌سازی می‌کنیم
-        showModal('شما با موفقیت خارج شدید.', 'success');
-        setTimeout(() => {
-            // فرض می‌کنیم یک صفحه ورود به نام login.html وجود دارد
-            window.location.href = "login.html"; 
-        }, 1500);
-    });
-}
-
         // --- INITIALIZATION ---
 async function main() {
     document.body.classList.remove('hidden');
@@ -2623,17 +2536,29 @@ async function main() {
         return;
     }
     userData = await fetchUserProfile(email);
+
+    // آبجکت متن‌های راهنما را در اینجا تعریف می‌کنیم تا به دیتا کاربر دسترسی داشته باشد
+    const viewInfo = {
+        dashboard: 'از این بخش می‌توانید آمار کلی و خلاصه‌ای از فعالیت‌های خود را مشاهده کنید.',
+        profile: 'اطلاعات کاربری خود را در این بخش مشاهده و ویرایش کنید. کامل بودن پروفایل به اعتبار شما می‌افزاید.',
+        notifications: 'اطلاعیه‌ها، درخواست‌های همکاری و پیام‌های سیستمی در این قسمت نمایش داده می‌شوند.',
+        projects: userData.role === 'employer' ? 'پروژه‌هایی که ثبت کرده‌اید را مدیریت کنید.' : 'لیست پروژه‌های باز را مشاهده و برای همکاری درخواست ارسال کنید.',
+        'my-activities': 'فعالیت‌های ثبت شده شما برای نمایش به کارفرمایان در این بخش مدیریت می‌شوند.',
+        engineers: 'لیست مهندسان فعال را مشاهده کرده و برای پروژه‌های خود درخواست همکاری ارسال نمایید.',
+        settings: 'تنظیمات حساب کاربری خود، مانند تغییر رمز عبور را از این بخش انجام دهید.',
+        'create-project': 'یک پروژه جدید با تمام جزئیات ثبت کنید تا مهندسان متخصص برای آن درخواست همکاری ارسال کنند.',
+        'create-activity': 'با ثبت یک فعالیت جدید، آمادگی خود را برای دریافت پروژه‌های جدید به کارفرمایان اعلام کنید.'
+    };
+
     if (userData) {
         userData.email = email;
         welcomeMessage.textContent = `${userData.stepsData.step1.engineerFirstName || userData.stepsData.step1.employerFirstName || 'کاربر'} عزیز، خوش آمدید!`;
-        
         setTimeout(() => {
             welcomeLoader.style.opacity = '0';
             setTimeout(() => {
                 welcomeLoader.style.display = 'none';
-                renderProfile();
                 document.querySelector('.nav-item[data-view="dashboard"]').click();
-                renderNotifications(); // Fetch notifications on load
+                renderNotifications();
             }, 500);
         }, 1500);
     }
@@ -2641,33 +2566,40 @@ async function main() {
     initSlideshow();
     setupPasswordToggle();
     changePasswordForm.addEventListener('submit', handleChangePassword);
-    initializeCropper(); // مطمئن شوید این خط از قبل وجود دارد
+    initializeCropper();
 
     // --- شنونده رویداد هوشمند و جامع برای مدیریت تمام کلیک‌ها ---
     document.body.addEventListener('click', (e) => {
         const target = e.target;
         
         // بخش اول: مدیریت جابجایی بین صفحات (View Switching)
-        const navItem = target.closest('.nav-item[data-view]');
+        const navItem = target.closest('.nav-item[data-view], a[data-view]');
         if (navItem) {
             e.preventDefault();
             const targetView = navItem.dataset.view;
             
-            document.querySelectorAll('.nav-item[data-view]').forEach(nav => nav.classList.remove('active'));
+            document.querySelectorAll('.nav-item[data-view], a[data-view]').forEach(nav => nav.classList.remove('active'));
             allContentBodies.forEach(el => el.style.display = 'none');
             
             const contentEl = document.getElementById(`${targetView.replace(/-/g, '')}Content`);
             if (contentEl) contentEl.style.display = 'block';
             
-            mainHeaderTitle.textContent = navItem.querySelector('span').textContent;
-            
-            // فعال کردن آیتم منوی کلیک شده (در هر دو سایدبار)
-            document.querySelectorAll(`.nav-item[data-view="${targetView}"]`).forEach(nav => nav.classList.add('active'));
+            const span = navItem.querySelector('span');
+            if(span) {
+                mainHeaderTitle.textContent = span.textContent;
+            } else if (targetView === 'profile') {
+                mainHeaderTitle.textContent = 'پروفایل';
+            }
 
-            // اجرای توابع مربوط به هر صفحه
+            // به‌روزرسانی متن راهنمای مربوط به هر بخش
+            infoBoxText.textContent = viewInfo[targetView] || 'اطلاعات این بخش در اینجا نمایش داده می‌شود.';
+
+            document.querySelectorAll(`.nav-item[data-view="${targetView}"], a[data-view="${targetView}"]`).forEach(nav => nav.classList.add('active'));
+
             switch(targetView) {
                 case 'dashboard': (userData.role === 'employer' ? renderEmployerDashboard : renderEngineerDashboard)(); break;
                 case 'profile': renderProfile(); break;
+                case 'settings': break; // صفحه تنظیمات محتوای خاصی برای رندر شدن ندارد
                 case 'notifications': renderNotifications(); break;
                 case 'projects': (userData.role === 'employer' ? renderEmployerProjects : renderProjectMarketplace)(); break;
                 case 'my-activities': renderMyActivities(); break;
@@ -2690,7 +2622,7 @@ async function main() {
             refreshCurrentView();
         }
 
-        // بخش چهارم: مدیریت کلیک‌های داخلی صفحات (مانند درخواست همکاری و...)
+        // بخش چهارم: مدیریت کلیک‌های داخلی صفحات
         const actionButton = target.closest('button[data-action]');
         if (actionButton) {
             const handlers = {
@@ -2717,6 +2649,12 @@ async function main() {
             }
         }
     });
+
+    function logoutUser() {
+        showModal('آیا برای خروج از حساب کاربری خود مطمئن هستید؟', 'confirm', () => {
+            showModal('شما با موفقیت خارج شدید.', 'success');
+        });
+    }
 }
         main();
     })();
