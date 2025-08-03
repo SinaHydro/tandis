@@ -174,53 +174,11 @@
         .filter-dropdown { position: absolute; top: 100%; right: 0; z-index: 10; min-width: 200px; background-color: white; border: 1px solid #e2e8f0; border-radius: 0.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-top: 0.5rem; max-height: 250px; overflow-y: auto; display: none; /* به صورت پیش‌فرض مخفی است */ }
         .filter-dropdown-item { padding: 0.75rem 1rem; cursor: pointer; }
         .filter-dropdown-item:hover { background-color: #f1f5f9; }
-        .profile-header-container {
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.75rem;
-    padding: 2rem 1rem;
-    margin-bottom: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-}
-
-.profile-header-image-wrapper {
-    position: relative;
-    width: 128px;
-    height: 128px;
-    cursor: pointer;
-}
-
-.profile-header-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-    border: 4px solid white;
-    box-shadow: 0 0 0 4px var(--primary-color), 0 10px 25px -5px rgba(0,0,0,0.2);
-}
-
-.profile-header-edit-icon {
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    background-color: white;
-    color: var(--primary-color);
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    transition: transform 0.2s ease;
-}
-
-.profile-header-image-wrapper:hover .profile-header-edit-icon {
-    transform: scale(1.1);
-}
+        .profile-header-container { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 2rem 1rem; margin-bottom: 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+        .profile-header-image-wrapper { position: relative; width: 128px; height: 128px; cursor: pointer; }
+        .profile-header-image { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 4px solid white; box-shadow: 0 0 0 4px var(--primary-color), 0 10px 25px -5px rgba(0,0,0,0.2); }
+        .profile-header-edit-icon {position: absolute; bottom: 5px; right: 5px; background-color: white; color: var(--primary-color); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.15); transition: transform 0.2s ease;}
+        .profile-header-image-wrapper:hover .profile-header-edit-icon { transform: scale(1.1); }
     </style>
 </head>
 <body class="hidden">
@@ -680,10 +638,11 @@ function getProfileHeaderHTML(userData) {
             const name = `${userData.stepsData.step1.engineerFirstName || userData.stepsData.step1.employerFirstName || ''} ${userData.stepsData.step1.engineerLastName || userData.stepsData.step1.employerLastName || ''}`;
             sidebarProfileName.textContent = name.trim() ? name : 'کاربر';
             sidebarProfileRole.textContent = userData.role === 'engineer' ? 'مهندس' : 'کارفرما';
-            
+    
             const directImageUrl = getDirectDriveLink(userData.files.applicantImage.fileUrl);
             sidebarProfileImage.src = directImageUrl || 'https://placehold.co/80x80/2196F3/FFFFFF?text=U';
             sidebarProfileImage.onerror = () => { sidebarProfileImage.src = 'https://placehold.co/80x80/2196F3/FFFFFF?text=U'; };
+
 
             const projectsNavItem = document.getElementById('projects-nav-item');
             const createProjectNavItem = document.getElementById('create-project-nav-item');
@@ -710,15 +669,6 @@ if (userData.role === 'employer') {
 }
 
             profileContent.innerHTML = '';
-            const sections = [
-                { id: 'personal', title: 'مشخصات فردی', icon: 'fa-user-circle', content: getPersonalFieldsHTML(userData.stepsData.step1, userData.role) },
-                { id: 'contact', title: 'اطلاعات تماس', icon: 'fa-address-card', content: getContactFieldsHTML(userData.stepsData.step2, userData.role) },
-                { id: 'professional', title: 'اطلاعات حرفه‌ای', icon: 'fa-briefcase', content: getProfessionalFieldsHTML(userData.stepsData.step3, userData.role) },
-                { id: 'documents', title: 'مدارک', icon: 'fa-file-alt', content: getDocumentsHTML(userData.files, userData.role) }
-            ];
-            sections.forEach(section => {
-                profileContent.insertAdjacentHTML('beforeend', getSectionHTML(section.id, section.title, section.icon, section.content));
-            });
             // --- بخش اصلاح شده ---
             // ابتدا HTML بخش جدید عکس را می‌سازیم و سپس بقیه بخش‌ها را به آن اضافه می‌کنیم
             let profileHtml = getProfileHeaderHTML(userData);
