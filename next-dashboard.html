@@ -75,8 +75,8 @@
         .dot { cursor: pointer; height: 10px; width: 10px; margin: 0 4px; background-color: #cbd5e1; border-radius: 50%; display: inline-block; transition: background-color 0.3s ease; }
         .dot.active, .dot:hover { background-color: var(--primary-color); }
         .profile-section { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.75rem; margin-bottom: 1.5rem; /*overflow: hidden;*/ }
-        .section-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; cursor: pointer; user-select: none; background-color: #fdfdfe; border-bottom: 1px solid #e2e8f0; border-top-left-radius: 0.75rem; border-top-right-radius: 0.75rem; }
-        .section-header.open { border-bottom-color: #e2e8f0; border-bottom-left-radius: 0.75rem; border-bottom-right-radius: 0.75rem; border-bottom: none;}
+        .section-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; cursor: pointer; user-select: none; background-color: #fdfdfe; border-bottom: none; border-radius: 0.75rem; transition: all 0.2s ease; }
+        .section-header.open { border-bottom-color: #e2e8f0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: none; border-bottom: 1px solid #e2e8f0;}
         .section-title { font-size: 1.1rem; font-weight: 600; color: #334155; }
         .section-title i { margin-left: 0.75rem; color: var(--primary-color); }
         .section-toggle-icon { transition: transform 0.3s ease; }
@@ -174,6 +174,53 @@
         .filter-dropdown { position: absolute; top: 100%; right: 0; z-index: 10; min-width: 200px; background-color: white; border: 1px solid #e2e8f0; border-radius: 0.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-top: 0.5rem; max-height: 250px; overflow-y: auto; display: none; /* به صورت پیش‌فرض مخفی است */ }
         .filter-dropdown-item { padding: 0.75rem 1rem; cursor: pointer; }
         .filter-dropdown-item:hover { background-color: #f1f5f9; }
+        .profile-header-container {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 2rem 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.profile-header-image-wrapper {
+    position: relative;
+    width: 128px;
+    height: 128px;
+    cursor: pointer;
+}
+
+.profile-header-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid white;
+    box-shadow: 0 0 0 4px var(--primary-color), 0 10px 25px -5px rgba(0,0,0,0.2);
+}
+
+.profile-header-edit-icon {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background-color: white;
+    color: var(--primary-color);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transition: transform 0.2s ease;
+}
+
+.profile-header-image-wrapper:hover .profile-header-edit-icon {
+    transform: scale(1.1);
+}
     </style>
 </head>
 <body class="hidden">
@@ -563,6 +610,26 @@
                  setTimeout(() => { welcomeLoader.style.display = 'none'; }, 500);
             }
         }
+
+function getProfileHeaderHTML(userData) {
+    const directImageUrl = getDirectDriveLink(userData.files.applicantImage.fileUrl);
+    const imgSrc = directImageUrl || 'https://placehold.co/128x128/2196F3/FFFFFF?text=U';
+
+    return `
+        <div class="profile-header-container">
+            <label for="profileImageInput" class="profile-header-image-wrapper">
+                <img id="mainProfileImage" src="${imgSrc}" alt="عکس پروفایل" class="profile-header-image" onerror="this.src='https://placehold.co/128x128/2196F3/FFFFFF?text=U';">
+                <div class="profile-header-edit-icon">
+                    <i class="fas fa-camera"></i>
+                </div>
+            </label>
+            <button onclick="document.getElementById('profileImageInput').click();" class="btn btn-primary">
+                <i class="fas fa-sync-alt"></i>
+                <span>تعویض عکس پروفایل</span>
+            </button>
+        </div>
+    `;
+}
         
         function initSlideshow() {
             const slideshowContainer = document.getElementById('slideshow');
@@ -652,7 +719,22 @@ if (userData.role === 'employer') {
             sections.forEach(section => {
                 profileContent.insertAdjacentHTML('beforeend', getSectionHTML(section.id, section.title, section.icon, section.content));
             });
-            
+            // --- بخش اصلاح شده ---
+            // ابتدا HTML بخش جدید عکس را می‌سازیم و سپس بقیه بخش‌ها را به آن اضافه می‌کنیم
+            let profileHtml = getProfileHeaderHTML(userData);
+    
+            const sections = [
+                { id: 'personal', title: 'مشخصات فردی', icon: 'fa-user-circle', content: getPersonalFieldsHTML(userData.stepsData.step1, userData.role) },
+                { id: 'contact', title: 'اطلاعات تماس', icon: 'fa-address-card', content: getContactFieldsHTML(userData.stepsData.step2, userData.role) },
+                { id: 'professional', title: 'اطلاعات حرفه‌ای', icon: 'fa-briefcase', content: getProfessionalFieldsHTML(userData.stepsData.step3, userData.role) },
+                { id: 'documents', title: 'مدارک', icon: 'fa-file-alt', content: getDocumentsHTML(userData.files, userData.role) }
+            ];
+            sections.forEach(section => {
+                profileHtml += getSectionHTML(section.id, section.title, section.icon, section.content);
+            });
+
+            profileContent.innerHTML = profileHtml;
+            // --- پایان بخش اصلاح شده ---            
             attachSectionEventListeners();
         }
         
@@ -1171,7 +1253,13 @@ function handleEditClick(e) {
                 if (result.status === 'success' && result.newUrl) {
                     showModal('عکس پروفایل با موفقیت به‌روز شد.', 'success');
                     const newImageUrl = getDirectDriveLink(result.newUrl);
+    
+                    // آپدیت عکس کوچک سایدبار
                     sidebarProfileImage.src = newImageUrl;
+    
+                    // این خط جدید، عکس بزرگ پروفایل را نیز آپدیت می‌کند
+                    document.getElementById('mainProfileImage').src = newImageUrl;
+
                     userData.files.applicantImage.fileUrl = result.newUrl;
                 } else {
                     throw new Error(result.message || "Failed to upload image.");
