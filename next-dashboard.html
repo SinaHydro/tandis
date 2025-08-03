@@ -741,13 +741,9 @@ function getProfessionalFieldsHTML(data, role) {
                     <textarea name="employerCompanyAddress" rows="4" class="min-h-[250px]" disabled>${data.employerCompanyAddress || ''}</textarea>
                     <div id="employerCompanyMap" class="map-container"></div>
                 </div>
-                
-                {/* در اینجا از نام صحیح employerCompanyAddressNeighborhood برای خواندن داده استفاده می‌کنیم */}
                 <div id="employerCompanyMapInfo" class="mt-2 map-info-display">
                     ${data.employerCompanyAddressNeighborhood ? `<p>${data.employerCompanyAddressNeighborhood}</p>` : `<span class="text-slate-500 italic">موقعیت مکانی روی نقشه مشخص نشده است.</span>`}
                 </div>
-                
-                {/* در اینجا مقادیر value را از نام‌های صحیح employerCompanyAddress می‌خوانیم */}
                 <input type="hidden" name="employerCompanyLat" value="${data.employerCompanyAddressLat || ''}">
                 <input type="hidden" name="employerCompanyLng" value="${data.employerCompanyAddressLng || ''}">
                 <input type="hidden" name="employerCompanyNeighborhood" value="${data.employerCompanyAddressNeighborhood || ''}">
@@ -948,52 +944,60 @@ function getProfessionalFieldsHTMLEditable(data, isDisabled) {
             document.querySelectorAll('button[data-action="save"]').forEach(b => b.addEventListener('click', handleSaveClick));
         }
 
-        function initializeProfileMap(mapId, isEditable) {
-            const mapContainer = document.getElementById(mapId);
-            if (!mapContainer) return;
-            const form = mapContainer.closest('form');
-            if (!form) return;
+function initializeProfileMap(mapId, isEditable) {
+    const mapContainer = document.getElementById(mapId);
+    if (!mapContainer) return;
+    const form = mapContainer.closest('form');
+    if (!form) return;
 
-            const namePrefix = mapId.replace('Map', '');
-            const latInput = form.querySelector(`input[name*="${namePrefix}Lat"]`);
-            const lngInput = form.querySelector(`input[name*="${namePrefix}Lng"]`);
-            const neighborhoodInput = form.querySelector(`input[name*="${namePrefix}Neighborhood"]`);
-            const mapInfoDiv = document.getElementById(`${mapId}Info`);
+    // --- بخش اصلاح شده ---
+    // به جای حدس زدن نام، نام دقیق فیلدها را می‌سازیم
+    const latInputName = mapId + 'Lat';
+    const lngInputName = mapId + 'Lng';
+    const neighborhoodInputName = mapId + 'Neighborhood';
 
-            if (!latInput || !lngInput) {
-                console.error(`Inputs for map ${mapId} not found.`);
-                return;
-            };
-            
-            if (activeMaps[mapId]) {
-                activeMaps[mapId].remove();
-                delete activeMaps[mapId];
-            }
-            
-            const lat = parseFloat(latInput.value) || 38.08;
-            const lng = parseFloat(lngInput.value) || 46.29;
-            
-            const map = L.map(mapId).setView([lat, lng], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-            
-            let marker;
-            if (isEditable) {
-                marker = L.marker([lat, lng], { draggable: true }).addTo(map);
-                map.on('click', (e) => {
-                    marker.setLatLng(e.latlng);
-                    updateMapLocationUI(e.latlng.lat, e.latlng.lng, latInput, lngInput, neighborhoodInput, mapInfoDiv);
-                });
-                marker.on('dragend', () => {
-                    const ll = marker.getLatLng();
-                    updateMapLocationUI(ll.lat, ll.lng, latInput, lngInput, neighborhoodInput, mapInfoDiv);
-                });
-            } else {
-                marker = L.marker([lat, lng]).addTo(map);
-            }
-            activeMaps[mapId] = map;
-            
-            setTimeout(() => map.invalidateSize(), 100);
-        }
+    // و با استفاده از نام دقیق، فیلدها را پیدا می‌کنیم
+    const latInput = form.querySelector(`input[name="${latInputName}"]`);
+    const lngInput = form.querySelector(`input[name="${lngInputName}"]`);
+    const neighborhoodInput = form.querySelector(`input[name="${neighborhoodInputName}"]`);
+    // --- پایان بخش اصلاح شده ---
+
+    if (!latInput || !lngInput) {
+        console.error(`Inputs for map ${mapId} not found. Looked for names: ${latInputName}, ${lngInputName}`);
+        return;
+    };
+    
+    const mapInfoDiv = document.getElementById(`${mapId}Info`);
+    
+    if (activeMaps[mapId]) {
+        activeMaps[mapId].remove();
+        delete activeMaps[mapId];
+    }
+    
+    const lat = parseFloat(latInput.value) || 38.08;
+    const lng = parseFloat(lngInput.value) || 46.29;
+    
+    const map = L.map(mapId).setView([lat, lng], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    
+    let marker;
+    if (isEditable) {
+        marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+        map.on('click', (e) => {
+            marker.setLatLng(e.latlng);
+            updateMapLocationUI(e.latlng.lat, e.latlng.lng, latInput, lngInput, neighborhoodInput, mapInfoDiv);
+        });
+        marker.on('dragend', () => {
+            const ll = marker.getLatLng();
+            updateMapLocationUI(ll.lat, ll.lng, latInput, lngInput, neighborhoodInput, mapInfoDiv);
+        });
+    } else {
+        marker = L.marker([lat, lng]).addTo(map);
+    }
+    activeMaps[mapId] = map;
+    
+    setTimeout(() => map.invalidateSize(), 100);
+}
 
         async function updateMapLocationUI(lat, lng, latInput, lngInput, neighborhoodInput, mapInfoDiv) {
             latInput.value = lat.toFixed(6);
