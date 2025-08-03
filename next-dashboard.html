@@ -626,21 +626,23 @@
             const myActivitiesNavItem = document.getElementById('my-activities-nav-item');
             const engineersNavItem = document.getElementById('engineers-nav-item');
 
-            if (userData.role === 'employer') {
-                projectsNavItem.style.display = 'flex';
-                createProjectNavItem.style.display = 'flex';
-                engineersNavItem.style.display = 'flex';
-                createActivityNavItem.style.display = 'none';
-                myActivitiesNavItem.style.display = 'none';
-                projectsNavItem.querySelector('span').textContent = 'پروژه‌های من';
-            } else if (userData.role === 'engineer') {
-                projectsNavItem.style.display = 'flex';
-                myActivitiesNavItem.style.display = 'flex';
-                createActivityNavItem.style.display = 'flex';
-                createProjectNavItem.style.display = 'none';
-                engineersNavItem.style.display = 'none';
-                projectsNavItem.querySelector('span').textContent = 'جستجوی پروژه‌';
-            }
+if (userData.role === 'employer') {
+    projectsNavItem.style.display = 'flex';
+    createProjectNavItem.style.display = 'flex';
+    engineersNavItem.style.display = 'flex';
+    createActivityNavItem.style.display = 'none';
+    myActivitiesNavItem.style.display = 'none';
+    projectsNavItem.querySelector('i').className = 'fas fa-briefcase';
+    projectsNavItem.querySelector('span').textContent = 'پروژه‌های من';
+} else if (userData.role === 'engineer') {
+    projectsNavItem.style.display = 'flex';
+    myActivitiesNavItem.style.display = 'flex';
+    createActivityNavItem.style.display = 'flex';
+    createProjectNavItem.style.display = 'none';
+    engineersNavItem.style.display = 'none';
+    projectsNavItem.querySelector('i').className = 'fas fa-search';
+    projectsNavItem.querySelector('span').textContent = 'جستجوی پروژه';
+}
 
             profileContent.innerHTML = '';
             const sections = [
@@ -713,12 +715,9 @@ function getContactFieldsHTML(data, role) {
             <textarea name="${prefix}Address" rows="4" class="min-h-[250px]" disabled>${address}</textarea>
             <div id="${mapId}" class="map-container"></div>
         </div>
-        
-        {/* در اینجا نام‌های صحیح برای خواندن داده‌ها استفاده شده است */}
         <div id="${mapId}Info" class="mt-2 map-info-display">
             ${(role === 'employer' ? data.employerAddressNeighborhood : data.engineerResidentialNeighborhood) ? `<p>${(role === 'employer' ? data.employerAddressNeighborhood : data.engineerResidentialNeighborhood)}</p>` : `<span class="text-slate-500 italic">موقعیت مکانی روی نقشه مشخص نشده است.</span>`}
         </div>
-        
         <input type="hidden" name="${prefix}LocationLat" value="${(role === 'employer' ? data.employerAddressLat : data.engineerResidentialLat) || ''}">
         <input type="hidden" name="${prefix}LocationLng" value="${(role === 'employer' ? data.employerAddressLng : data.engineerResidentialLng) || ''}">
         <input type="hidden" name="${prefix}LocationNeighborhood" value="${(role === 'employer' ? data.employerAddressNeighborhood : data.engineerResidentialNeighborhood) || ''}">
@@ -742,12 +741,16 @@ function getProfessionalFieldsHTML(data, role) {
                     <textarea name="employerCompanyAddress" rows="4" class="min-h-[250px]" disabled>${data.employerCompanyAddress || ''}</textarea>
                     <div id="employerCompanyMap" class="map-container"></div>
                 </div>
+                
+                {/* در اینجا از نام صحیح employerCompanyAddressNeighborhood برای خواندن داده استفاده می‌کنیم */}
                 <div id="employerCompanyMapInfo" class="mt-2 map-info-display">
-                    ${data.companyOfficeMapNeighborhood ? `<p>${data.companyOfficeMapNeighborhood}</p>` : `<span class="text-slate-500 italic">موقعیت مکانی روی نقشه مشخص نشده است.</span>`}
+                    ${data.employerCompanyAddressNeighborhood ? `<p>${data.employerCompanyAddressNeighborhood}</p>` : `<span class="text-slate-500 italic">موقعیت مکانی روی نقشه مشخص نشده است.</span>`}
                 </div>
-                <input type="hidden" name="employerCompanyLat" value="${data.companyOfficeMapLat || ''}">
-                <input type="hidden" name="employerCompanyLng" value="${data.companyOfficeMapLng || ''}">
-                <input type="hidden" name="employerCompanyNeighborhood" value="${data.companyOfficeMapNeighborhood || ''}">
+                
+                {/* در اینجا مقادیر value را از نام‌های صحیح employerCompanyAddress می‌خوانیم */}
+                <input type="hidden" name="employerCompanyLat" value="${data.employerCompanyAddressLat || ''}">
+                <input type="hidden" name="employerCompanyLng" value="${data.employerCompanyAddressLng || ''}">
+                <input type="hidden" name="employerCompanyNeighborhood" value="${data.employerCompanyAddressNeighborhood || ''}">
             </div>
         `;
     }
