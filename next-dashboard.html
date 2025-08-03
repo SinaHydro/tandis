@@ -607,44 +607,43 @@ function getProfileHeaderHTML(userData) {
             currentSlide = index;
         }
 
+function setupRoleSpecificUI(userData) {
+    if (!userData || !userData.role) return;
+
+    const projectsNavItem = document.getElementById('projects-nav-item');
+    const createProjectNavItem = document.getElementById('create-project-nav-item');
+    const createActivityNavItem = document.getElementById('create-activity-nav-item');
+    const myActivitiesNavItem = document.getElementById('my-activities-nav-item');
+    const engineersNavItem = document.getElementById('engineers-nav-item');
+
+    if (userData.role === 'employer') {
+        projectsNavItem.style.display = 'flex';
+        createProjectNavItem.style.display = 'flex';
+        engineersNavItem.style.display = 'flex';
+        createActivityNavItem.style.display = 'none';
+        myActivitiesNavItem.style.display = 'none';
+        projectsNavItem.querySelector('i').className = 'fas fa-briefcase';
+        projectsNavItem.querySelector('span').textContent = 'پروژه‌های من';
+    } else if (userData.role === 'engineer') {
+        projectsNavItem.style.display = 'flex';
+        myActivitiesNavItem.style.display = 'flex';
+        createActivityNavItem.style.display = 'flex';
+        createProjectNavItem.style.display = 'none';
+        engineersNavItem.style.display = 'none';
+        projectsNavItem.querySelector('i').className = 'fas fa-search';
+        projectsNavItem.querySelector('span').textContent = 'جستجوی پروژه';
+    }
+}
+
         function renderProfile() {
             if (!userData) return;
             const profileContent = document.getElementById('profileContent');
 
             const name = `${userData.stepsData.step1.engineerFirstName || userData.stepsData.step1.employerFirstName || ''} ${userData.stepsData.step1.engineerLastName || userData.stepsData.step1.employerLastName || ''}`;
-            sidebarProfileName.textContent = name.trim() ? name : 'کاربر';
-            sidebarProfileRole.textContent = userData.role === 'engineer' ? 'مهندس' : 'کارفرما';
-    
             const directImageUrl = getDirectDriveLink(userData.files.applicantImage.fileUrl);
             sidebarProfileImage.src = directImageUrl || 'https://placehold.co/80x80/2196F3/FFFFFF?text=U';
             sidebarProfileImage.onerror = () => { sidebarProfileImage.src = 'https://placehold.co/80x80/2196F3/FFFFFF?text=U'; };
 
-
-            const projectsNavItem = document.getElementById('projects-nav-item');
-            const createProjectNavItem = document.getElementById('create-project-nav-item');
-            const createActivityNavItem = document.getElementById('create-activity-nav-item');
-            const myActivitiesNavItem = document.getElementById('my-activities-nav-item');
-            const engineersNavItem = document.getElementById('engineers-nav-item');
-
-if (userData.role === 'employer') {
-    projectsNavItem.style.display = 'flex';
-    createProjectNavItem.style.display = 'flex';
-    engineersNavItem.style.display = 'flex';
-    createActivityNavItem.style.display = 'none';
-    myActivitiesNavItem.style.display = 'none';
-    projectsNavItem.querySelector('i').className = 'fas fa-briefcase';
-    projectsNavItem.querySelector('span').textContent = 'پروژه‌های من';
-} else if (userData.role === 'engineer') {
-    projectsNavItem.style.display = 'flex';
-    myActivitiesNavItem.style.display = 'flex';
-    createActivityNavItem.style.display = 'flex';
-    createProjectNavItem.style.display = 'none';
-    engineersNavItem.style.display = 'none';
-    projectsNavItem.querySelector('i').className = 'fas fa-search';
-    projectsNavItem.querySelector('span').textContent = 'جستجوی پروژه';
-}
-
-            profileContent.innerHTML = ` `;
             // --- بخش اصلاح شده ---
     const profileHeaderHtml = `
         <div class="profile-header-container text-center">
@@ -2552,6 +2551,7 @@ async function main() {
 
     if (userData) {
         userData.email = email;
+        setupRoleSpecificUI(userData);
         welcomeMessage.textContent = `${userData.stepsData.step1.engineerFirstName || userData.stepsData.step1.employerFirstName || 'کاربر'} عزیز، خوش آمدید!`;
         setTimeout(() => {
             welcomeLoader.style.opacity = '0';
