@@ -408,8 +408,6 @@
         const allContentBodies = document.querySelectorAll('.content-body');
         const mainHeaderTitle = document.getElementById('main-header-title');
         const sidebarProfileImage = document.getElementById('sidebarProfileImage');
-        const sidebarProfileName = document.getElementById('sidebarProfileName');
-        const sidebarProfileRole = document.getElementById('sidebarProfileRole');
         const profileImageInput = document.getElementById('profileImageInput');
         const changePasswordForm = document.getElementById('changePasswordForm');
         const infoBoxText = document.getElementById('info-box-text');
@@ -635,16 +633,21 @@ function setupRoleSpecificUI(userData) {
     }
 }
 
-        function renderProfile() {
-            if (!userData) return;
-            const profileContent = document.getElementById('profileContent');
+function renderProfile() {
+    if (!userData) return;
+    const profileContent = document.getElementById('profileContent');
 
-            const name = `${userData.stepsData.step1.engineerFirstName || userData.stepsData.step1.employerFirstName || ''} ${userData.stepsData.step1.engineerLastName || userData.stepsData.step1.employerLastName || ''}`;
-            const directImageUrl = getDirectDriveLink(userData.files.applicantImage.fileUrl);
-            sidebarProfileImage.src = directImageUrl || 'https://placehold.co/80x80/2196F3/FFFFFF?text=U';
-            sidebarProfileImage.onerror = () => { sidebarProfileImage.src = 'https://placehold.co/80x80/2196F3/FFFFFF?text=U'; };
-
-            // --- بخش اصلاح شده ---
+    // به‌روزرسانی عکس کوچک سایدبار (این بخش صحیح است)
+    const directImageUrl = getDirectDriveLink(userData.files.applicantImage.fileUrl);
+    sidebarProfileImage.src = directImageUrl || 'https://placehold.co/80x80/2196F3/FFFFFF?text=U';
+    sidebarProfileImage.onerror = () => { sidebarProfileImage.src = 'https://placehold.co/80x80/2196F3/FFFFFF?text=U'; };
+    
+    // --- ساختار جدید دو ستونه برای پنل پروفایل ---
+    
+    // در اینجا، نام و نقش کاربر را مستقیماً از دیتا می‌خوانیم و در HTML قرار می‌دهیم
+    const name = `${userData.stepsData.step1.engineerFirstName || userData.stepsData.step1.employerFirstName || ''} ${userData.stepsData.step1.engineerLastName || userData.stepsData.step1.employerLastName || ''}`;
+    const roleText = userData.role === 'engineer' ? 'مهندس' : 'کارفرما';
+    
     const profileHeaderHtml = `
         <div class="profile-header-container text-center">
             <label for="profileImageInput" class="profile-header-image-wrapper">
@@ -655,7 +658,7 @@ function setupRoleSpecificUI(userData) {
             </label>
             <div class="mt-4">
                 <h2 class="text-2xl font-bold text-slate-800">${name.trim() ? name : 'کاربر'}</h2>
-                <p class="text-md font-semibold text-sky-600">${sidebarProfileRole.textContent}</p>
+                <p class="text-md font-semibold text-sky-600">${roleText}</p>
                 <p class="text-sm text-slate-500 mt-2">${userData.email}</p>
             </div>
             <div class="mt-6 pt-6 border-t border-slate-200 w-full flex flex-col items-center gap-2">
@@ -688,15 +691,14 @@ function setupRoleSpecificUI(userData) {
             <div class="lg:col-span-1">${profileHeaderHtml}</div>
         </div>
     `;
-            // --- پایان بخش اصلاح شده ---            
-            attachSectionEventListeners();
+    
+    attachSectionEventListeners();
 
-            // باز کردن بخش اول پروفایل به صورت پیش‌فرض
     const firstSectionHeader = profileContent.querySelector('.section-header');
-    if (firstSectionHeader) {
+    if (firstSectionHeader && !firstSectionHeader.classList.contains('open')) {
         firstSectionHeader.click();
     }
-        }
+}
         
         function getSectionHTML(id, title, icon, content) {
             return `
