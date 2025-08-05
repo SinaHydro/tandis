@@ -700,12 +700,10 @@ function renderProfile() {
         firstSectionHeader.click();
     }
     
-    // حالا به دکمه‌های جدیدی که ساختیم گوش می‌دهیم
     const settingsButton = profileContent.querySelector('a[data-view="settings"]');
     if (settingsButton) {
         settingsButton.addEventListener('click', (e) => {
             e.preventDefault();
-            // به سادگی کار را به تابع مرکزی می‌سپاریم
             switchToView('settings', e.currentTarget);
         });
     }
@@ -715,7 +713,6 @@ function renderProfile() {
         logoutButton.addEventListener('click', (e) => {
             e.preventDefault();
             showModal('آیا می‌خواهید از حساب کاربری خود خارج شوید؟', 'confirm', () => {
-                // به صفحه اصلی بدون پارامتر ایمیل می‌رویم
                 window.location.href = window.location.pathname; 
             });
         });
@@ -1257,6 +1254,7 @@ function handleEditClick(e) {
             }
         }
 
+        // تابع شماره ۱: متخصص مرکزی (راهنمای تور)
         function switchToView(view, clickedElement) {
             const viewInfo = {
                 dashboard: 'از این بخش می‌توانید آمار کلی و خلاصه‌ای از فعالیت‌های خود را مشاهده کنید.',
@@ -1272,29 +1270,25 @@ function handleEditClick(e) {
 
             currentView = view;
             
-            // 1. همه محتواها و دکمه‌ها را غیرفعال کن
             allContentBodies.forEach(el => el.style.display = 'none');
             document.querySelectorAll('.nav-item[data-view]').forEach(nav => nav.classList.remove('active'));
 
-            // 2. محتوای مربوطه را نمایش بده
             const contentEl = document.getElementById(`${view.replace(/-/g, '')}Content`);
             if (contentEl) contentEl.style.display = 'block';
 
-            // 3. عنوان اصلی صفحه و متن راهنما را آپدیت کن
-            // برای دکمه‌هایی که متن داخل تگ span دارند (مثل منوی اصلی)
-            let title = clickedElement.querySelector('span')?.textContent;
-            // اگر نداشت (مثل دکمه آیکن تنظیمات)، یک عنوان پیش‌فرض بده
-            if (!title) {
-                const titleMap = { 'settings': 'تنظیمات', 'notifications': 'پیام‌ها', 'profile': 'پروفایل کاربری' };
-                title = titleMap[view] || 'داشبورد';
+            let title;
+            if (clickedElement && clickedElement.querySelector('span')) {
+                 title = clickedElement.querySelector('span').textContent;
+            } else {
+                const titleMap = { 'settings': 'تنظیمات', 'notifications': 'پیام‌ها', 'profile': 'پروفایل کاربری', 'dashboard': 'داشبورد' };
+                title = titleMap[view] || 'تندیس';
             }
             mainHeaderTitle.textContent = title;
             infoBoxText.textContent = viewInfo[view] || 'اطلاعات این بخش در اینجا نمایش داده می‌شود.';
             
-            // 4. محتوای تخصصی هر صفحه را در صورت نیاز رندر کن
             switch(view) {
                 case 'dashboard': (userData.role === 'employer' ? renderEmployerDashboard : renderEngineerDashboard)(); break;
-                case 'profile': renderProfile(); break;
+                case 'profile': if (!document.getElementById('profileContent').innerHTML.includes('profile-header-container')) renderProfile(); break;
                 case 'notifications': renderNotifications(); break;
                 case 'projects': (userData.role === 'employer' ? renderEmployerProjects : renderProjectMarketplace)(); break;
                 case 'my-activities': renderMyActivities(); break;
@@ -1303,15 +1297,14 @@ function handleEditClick(e) {
                 case 'create-activity': renderActivityForm(); break;
             }
 
-            // 5. دکمه کلیک‌شده را فعال (آبی) کن
             if (clickedElement) {
                 clickedElement.classList.add('active');
             }
         }
 
+        // تابع شماره ۲: مدیر (فقط به دکمه‌های منوی اصلی گوش می‌دهد)
         function setupViewSwitcher() {
-            const navItems = document.querySelectorAll('.sidebar .nav-item[data-view]'); // فقط دکمه‌های منوی اصلی
-
+            const navItems = document.querySelectorAll('.sidebar .nav-item[data-view]');
             navItems.forEach(item => {
                 item.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -1320,7 +1313,6 @@ function handleEditClick(e) {
                 });
             });
         }
-
         
         async function refreshCurrentView() {
             const activeNavItem = document.querySelector('.nav-item.active');
