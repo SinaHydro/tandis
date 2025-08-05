@@ -2607,6 +2607,7 @@ async function renderProjectMarketplace() {
             userData = await fetchUserProfile(email);
             if (userData) {
                 userData.email = email;
+                setupRoleSpecificUI(userData);
                 welcomeMessage.textContent = `${userData.stepsData.step1.engineerFirstName || userData.stepsData.step1.employerFirstName || 'کاربر'} عزیز، خوش آمدید!`;
                 
                 setTimeout(() => {
