@@ -45,7 +45,7 @@
         .sidebar { width: 220px; flex-shrink: 0; background-color: #f1f5f9; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; }
         @media (max-width: 1024px) { .sidebar { display: none; } }
         .sidebar-profile-section { display: flex; align-items: center; padding: 1rem; border-bottom: 1px solid #cbd5e1; }
-        .sidebar-profile-image-container { position: relative; width: 35px; height: 35px; flex-shrink: 0; }
+        .sidebar-profile-image-container { position: relative; width: 60px; height: 60px; flex-shrink: 0; }
         .sidebar-profile-image { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 3px solid var(--primary-color); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .sidebar-profile-image-edit-overlay { position: absolute; inset: 0; background-color: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; opacity: 0; transition: opacity 0.3s ease; cursor: pointer; }
         .sidebar-profile-image-container:hover .sidebar-profile-image-edit-overlay { opacity: 1; }
@@ -75,8 +75,8 @@
         .dot { cursor: pointer; height: 10px; width: 10px; margin: 0 4px; background-color: #cbd5e1; border-radius: 50%; display: inline-block; transition: background-color 0.3s ease; }
         .dot.active, .dot:hover { background-color: var(--primary-color); }
         .profile-section { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.75rem; margin-bottom: 1.5rem; /*overflow: hidden;*/ }
-        .section-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; cursor: pointer; user-select: none; background-color: #fdfdfe; border-bottom: none; border-radius: 0.75rem; transition: all 0.2s ease; }
-        .section-header.open { border-bottom-color: #e2e8f0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: none; border-bottom: 1px solid #e2e8f0;}
+        .section-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; cursor: pointer; user-select: none; background-color: #fdfdfe; border-bottom: 1px solid #e2e8f0; }
+        .section-header.open { border-bottom-color: #e2e8f0; }
         .section-title { font-size: 1.1rem; font-weight: 600; color: #334155; }
         .section-title i { margin-left: 0.75rem; color: var(--primary-color); }
         .section-toggle-icon { transition: transform 0.3s ease; }
@@ -174,11 +174,6 @@
         .filter-dropdown { position: absolute; top: 100%; right: 0; z-index: 10; min-width: 200px; background-color: white; border: 1px solid #e2e8f0; border-radius: 0.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-top: 0.5rem; max-height: 250px; overflow-y: auto; display: none; /* به صورت پیش‌فرض مخفی است */ }
         .filter-dropdown-item { padding: 0.75rem 1rem; cursor: pointer; }
         .filter-dropdown-item:hover { background-color: #f1f5f9; }
-        .profile-header-container { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 2rem 1rem; margin-bottom: 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
-        .profile-header-image-wrapper { position: relative; width: 128px; height: 128px; cursor: pointer; }
-        .profile-header-image { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 4px solid white; box-shadow: 0 0 0 4px var(--primary-color), 0 10px 25px -5px rgba(0,0,0,0.2); }
-        .profile-header-edit-icon {position: absolute; bottom: 5px; right: 5px; background-color: white; color: var(--primary-color); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.15); transition: transform 0.2s ease;}
-        .profile-header-image-wrapper:hover .profile-header-edit-icon { transform: scale(1.1); }
     </style>
 </head>
 <body class="hidden">
@@ -209,18 +204,28 @@
     <div class="workstation-wrapper">
         <!-- Main Sidebar (Right) -->
         <aside class="sidebar">
-            <a data-view="profile" class="sidebar-profile-section cursor-pointer hover:bg-slate-200 transition-colors duration-200">
+            <div class="sidebar-profile-section">
                 <div class="sidebar-profile-image-container">
                     <img id="sidebarProfileImage" src="https://placehold.co/80x80/2196F3/FFFFFF?text=U" alt="عکس پروفایل" class="sidebar-profile-image">
-                    <div class="sidebar-profile-image-edit-overlay !opacity-100 bg-transparent">
-                    </div>
+                    <label for="profileImageInput" class="sidebar-profile-image-edit-overlay">
+                        <i class="fas fa-camera"></i>
+                    </label>
+                    <input type="file" id="profileImageInput" class="hidden" accept="image/*">
                 </div>
-            </a>
+                <div class="sidebar-profile-details">
+                    <h2 id="sidebarProfileName" class="sidebar-profile-name">...</h2>
+                    <p id="sidebarProfileRole" class="sidebar-profile-role">...</p>
+                </div>
+            </div>
 
             <nav class="sidebar-nav">
                 <a data-view="dashboard" class="nav-item active">
                     <i class="fas fa-tachometer-alt"></i>
                     <span>داشبورد</span>
+                </a>
+                <a data-view="profile" class="nav-item">
+                    <i class="fas fa-user-circle"></i>
+                    <span>پروفایل</span>
                 </a>
                 <a data-view="notifications" class="nav-item">
                     <i class="fas fa-bell"></i>
@@ -249,6 +254,16 @@
                 </a>
             </nav>
 
+            <div class="sidebar-footer">
+                <a data-view="settings" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>تنظیمات</span>
+                </a>
+                <a href="#" id="logoutButton" class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>خروج از سیستم</span>
+                </a>
+            </div>
         </aside>
 
         <!-- Main Content -->
@@ -548,22 +563,6 @@
                  setTimeout(() => { welcomeLoader.style.display = 'none'; }, 500);
             }
         }
-
-function getProfileHeaderHTML(userData) {
-    const directImageUrl = getDirectDriveLink(userData.files.applicantImage.fileUrl);
-    const imgSrc = directImageUrl || 'https://placehold.co/128x128/2196F3/FFFFFF?text=U';
-
-    return `
-        <div class="profile-header-container">
-            <label for="profileImageInput" class="profile-header-image-wrapper">
-                <img id="mainProfileImage" src="${imgSrc}" alt="عکس پروفایل" class="profile-header-image" onerror="this.src='https://placehold.co/128x128/2196F3/FFFFFF?text=U';">
-                <div class="profile-header-edit-icon">
-                    <i class="fas fa-camera"></i>
-                </div>
-            </label>
-        </div>
-    `;
-}
         
         function initSlideshow() {
             const slideshowContainer = document.getElementById('slideshow');
@@ -614,11 +613,10 @@ function getProfileHeaderHTML(userData) {
             const name = `${userData.stepsData.step1.engineerFirstName || userData.stepsData.step1.employerFirstName || ''} ${userData.stepsData.step1.engineerLastName || userData.stepsData.step1.employerLastName || ''}`;
             sidebarProfileName.textContent = name.trim() ? name : 'کاربر';
             sidebarProfileRole.textContent = userData.role === 'engineer' ? 'مهندس' : 'کارفرما';
-    
+            
             const directImageUrl = getDirectDriveLink(userData.files.applicantImage.fileUrl);
             sidebarProfileImage.src = directImageUrl || 'https://placehold.co/80x80/2196F3/FFFFFF?text=U';
             sidebarProfileImage.onerror = () => { sidebarProfileImage.src = 'https://placehold.co/80x80/2196F3/FFFFFF?text=U'; };
-
 
             const projectsNavItem = document.getElementById('projects-nav-item');
             const createProjectNavItem = document.getElementById('create-project-nav-item');
@@ -644,59 +642,18 @@ if (userData.role === 'employer') {
     projectsNavItem.querySelector('span').textContent = 'جستجوی پروژه';
 }
 
+            profileContent.innerHTML = '';
+            const sections = [
+                { id: 'personal', title: 'مشخصات فردی', icon: 'fa-user-circle', content: getPersonalFieldsHTML(userData.stepsData.step1, userData.role) },
+                { id: 'contact', title: 'اطلاعات تماس', icon: 'fa-address-card', content: getContactFieldsHTML(userData.stepsData.step2, userData.role) },
+                { id: 'professional', title: 'اطلاعات حرفه‌ای', icon: 'fa-briefcase', content: getProfessionalFieldsHTML(userData.stepsData.step3, userData.role) },
+                { id: 'documents', title: 'مدارک', icon: 'fa-file-alt', content: getDocumentsHTML(userData.files, userData.role) }
+            ];
+            sections.forEach(section => {
+                profileContent.insertAdjacentHTML('beforeend', getSectionHTML(section.id, section.title, section.icon, section.content));
+            });
             
-            // --- بخش اصلاح شده ---
-    const profileHeaderHtml = `
-        <div class="profile-header-container text-center">
-            <label for="profileImageInput" class="profile-header-image-wrapper">
-                <img id="mainProfileImage" src="${sidebarProfileImage.src}" alt="عکس پروفایل" class="profile-header-image" onerror="this.src='https://placehold.co/128x128/2196F3/FFFFFF?text=U';">
-                <div class="profile-header-edit-icon">
-                    <i class="fas fa-camera"></i>
-                </div>
-            </label>
-            <div class="mt-4">
-                <h2 class="text-2xl font-bold text-slate-800">${name.trim() ? name : 'کاربر'}</h2>
-                <p class="text-md font-semibold text-sky-600">${sidebarProfileRole.textContent}</p>
-                <p class="text-sm text-slate-500 mt-2">${userData.email}</p>
-            </div>
-            <div class="mt-6 pt-6 border-t border-slate-200 w-full flex flex-col items-center gap-2">
-                <a data-view="settings" class="nav-item justify-center w-full max-w-xs">
-                    <i class="fas fa-cog"></i>
-                    <span>تنظیمات</span>
-                </a>
-                <a href="#" id="logoutButton" class="nav-item justify-center w-full max-w-xs">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>خروج از سیستم</span>
-                </a>
-            </div>
-        </div>`;
-
-    const sections = [
-        { id: 'personal', title: 'مشخصات فردی', icon: 'fa-user-circle', content: getPersonalFieldsHTML(userData.stepsData.step1, userData.role) },
-        { id: 'contact', title: 'اطلاعات تماس', icon: 'fa-address-card', content: getContactFieldsHTML(userData.stepsData.step2, userData.role) },
-        { id: 'professional', title: 'اطلاعات حرفه‌ای', icon: 'fa-briefcase', content: getProfessionalFieldsHTML(userData.stepsData.step3, userData.role) },
-        { id: 'documents', title: 'مدارک', icon: 'fa-file-alt', content: getDocumentsHTML(userData.files, userData.role) }
-    ];
-
-    let sectionsHtml = '';
-    sections.forEach(section => {
-        sectionsHtml += getSectionHTML(section.id, section.title, section.icon, section.content);
-    });
-
-    profileContent.innerHTML = `
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 space-y-6">${sectionsHtml}</div>
-            <div class="lg:col-span-1">${profileHeaderHtml}</div>
-        </div>
-    `;
-            // --- پایان بخش اصلاح شده ---            
             attachSectionEventListeners();
-
-            // باز کردن بخش اول پروفایل به صورت پیش‌فرض
-    const firstSectionHeader = profileContent.querySelector('.section-header');
-    if (firstSectionHeader) {
-        firstSectionHeader.click();
-    }
         }
         
         function getSectionHTML(id, title, icon, content) {
@@ -1214,13 +1171,7 @@ function handleEditClick(e) {
                 if (result.status === 'success' && result.newUrl) {
                     showModal('عکس پروفایل با موفقیت به‌روز شد.', 'success');
                     const newImageUrl = getDirectDriveLink(result.newUrl);
-    
-                    // آپدیت عکس کوچک سایدبار
                     sidebarProfileImage.src = newImageUrl;
-    
-                    // این خط جدید، عکس بزرگ پروفایل را نیز آپدیت می‌کند
-                    document.getElementById('mainProfileImage').src = newImageUrl;
-
                     userData.files.applicantImage.fileUrl = result.newUrl;
                 } else {
                     throw new Error(result.message || "Failed to upload image.");
@@ -2601,123 +2552,73 @@ async function renderProjectMarketplace() {
             });
         }
 
-function logoutUser() {
-    showModal('آیا برای خروج از حساب کاربری خود مطمئن هستید؟', 'confirm', () => {
-        // در یک برنامه واقعی، اطلاعات نشست کاربر پاک می‌شود
-        // در اینجا ما با یک پیام و انتقال به صفحه دیگر، آن را شبیه‌سازی می‌کنیم
-        showModal('شما با موفقیت خارج شدید.', 'success');
-        setTimeout(() => {
-            // فرض می‌کنیم یک صفحه ورود به نام login.html وجود دارد
-            window.location.href = "login.html"; 
-        }, 1500);
-    });
-}
-
         // --- INITIALIZATION ---
-async function main() {
-    document.body.classList.remove('hidden');
-    const params = new URLSearchParams(window.location.search);
-    const email = params.get('email');
-    if (!email) {
-        welcomeLoader.innerHTML = '<p class="text-red-600 font-bold p-8">خطا: ایمیل کاربر مشخص نشده است.</p>';
-        return;
-    }
-    userData = await fetchUserProfile(email);
-    if (userData) {
-        userData.email = email;
-        welcomeMessage.textContent = `${userData.stepsData.step1.engineerFirstName || userData.stepsData.step1.employerFirstName || 'کاربر'} عزیز، خوش آمدید!`;
-        
-        setTimeout(() => {
-            welcomeLoader.style.opacity = '0';
-            setTimeout(() => {
-                welcomeLoader.style.display = 'none';
-                renderProfile();
-                document.querySelector('.nav-item[data-view="dashboard"]').click();
-                renderNotifications(); // Fetch notifications on load
-            }, 500);
-        }, 1500);
-    }
-    
-    initSlideshow();
-    setupPasswordToggle();
-    changePasswordForm.addEventListener('submit', handleChangePassword);
-    initializeCropper(); // مطمئن شوید این خط از قبل وجود دارد
-
-    // --- شنونده رویداد هوشمند و جامع برای مدیریت تمام کلیک‌ها ---
-    document.body.addEventListener('click', (e) => {
-        const target = e.target;
-        
-        // بخش اول: مدیریت جابجایی بین صفحات (View Switching)
-        const navItem = target.closest('.nav-item[data-view]');
-        if (navItem) {
-            e.preventDefault();
-            const targetView = navItem.dataset.view;
-            
-            document.querySelectorAll('.nav-item[data-view]').forEach(nav => nav.classList.remove('active'));
-            allContentBodies.forEach(el => el.style.display = 'none');
-            
-            const contentEl = document.getElementById(`${targetView.replace(/-/g, '')}Content`);
-            if (contentEl) contentEl.style.display = 'block';
-            
-            mainHeaderTitle.textContent = navItem.querySelector('span').textContent;
-            
-            // فعال کردن آیتم منوی کلیک شده (در هر دو سایدبار)
-            document.querySelectorAll(`.nav-item[data-view="${targetView}"]`).forEach(nav => nav.classList.add('active'));
-
-            // اجرای توابع مربوط به هر صفحه
-            switch(targetView) {
-                case 'dashboard': (userData.role === 'employer' ? renderEmployerDashboard : renderEngineerDashboard)(); break;
-                case 'profile': renderProfile(); break;
-                case 'notifications': renderNotifications(); break;
-                case 'projects': (userData.role === 'employer' ? renderEmployerProjects : renderProjectMarketplace)(); break;
-                case 'my-activities': renderMyActivities(); break;
-                case 'engineers': renderEngineersPanel(); break;
-                case 'create-project': renderProjectForm(); break;
-                case 'create-activity': renderActivityForm(); break;
+        async function main() {
+            document.body.classList.remove('hidden');
+            const params = new URLSearchParams(window.location.search);
+            const email = params.get('email');
+            if (!email) {
+                welcomeLoader.innerHTML = '<p class="text-red-600 font-bold p-8">خطا: ایمیل کاربر مشخص نشده است.</p>';
+                return;
             }
-        }
+            userData = await fetchUserProfile(email);
+            if (userData) {
+                userData.email = email;
+                welcomeMessage.textContent = `${userData.stepsData.step1.engineerFirstName || userData.stepsData.step1.employerFirstName || 'کاربر'} عزیز، خوش آمدید!`;
+                
+                setTimeout(() => {
+                    welcomeLoader.style.opacity = '0';
+                    setTimeout(() => {
+                        welcomeLoader.style.display = 'none';
+                        renderProfile();
+                        document.querySelector('.nav-item[data-view="dashboard"]').click();
+                        renderNotifications(); // Fetch notifications on load
+                    }, 500);
+                }, 1500);
 
-        // بخش دوم: مدیریت دکمه خروج از سیستم
-        const logoutButton = target.closest('#logoutButton');
-        if (logoutButton) {
-            e.preventDefault();
-            logoutUser();
-        }
+            }
+            initSlideshow();
+            setupViewSwitcher();
+            setupPasswordToggle();
+            changePasswordForm.addEventListener('submit', handleChangePassword);
 
-        // بخش سوم: مدیریت دکمه بروزرسانی
-        const refreshButton = target.closest('#refresh-button');
-        if (refreshButton) {
-            refreshCurrentView();
-        }
+            const contentAreaClickHandler = (e, contentId, handlers) => {
+                if (document.getElementById(contentId).style.display !== 'block') return;
+                const targetButton = e.target.closest('button');
+                if (targetButton && targetButton.dataset.action) {
+                    const action = targetButton.dataset.action;
+                    if (handlers[action]) {
+                        handlers[action](targetButton);
+                    }
+                }
+                const notificationItem = e.target.closest('.notification-item');
+                if (notificationItem && notificationItem.dataset.messageId) {
+                    openNotificationModal(notificationItem.dataset.messageId);
+                }
+            };
 
-        // بخش چهارم: مدیریت کلیک‌های داخلی صفحات (مانند درخواست همکاری و...)
-        const actionButton = target.closest('button[data-action]');
-        if (actionButton) {
-            const handlers = {
-                'projectsContent': {
+            document.querySelector('.main-content-area').addEventListener('click', e => {
+                contentAreaClickHandler(e, 'projectsContent', {
                     'apply': btn => handleApplyForProject(btn.dataset.projectId, btn),
                     'cancel-application': btn => handleCancelApplication(btn.dataset.projectId, btn),
                     'edit-project': btn => handleEditProject(btn.dataset.projectId),
                     'close-project': btn => handleChangeProjectStatus(btn.dataset.projectId, 'بسته'),
                     'open-project': btn => handleChangeProjectStatus(btn.dataset.projectId, 'باز')
-                },
-                'myActivitiesContent': {
+                });
+                contentAreaClickHandler(e, 'myActivitiesContent', {
                     'edit-activity': btn => handleEditActivity(btn.dataset.activityId),
                     'change-activity-status': btn => handleChangeActivityStatus(btn.dataset.activityId, btn.dataset.newStatus)
-                },
-                'engineersContent': {
+                });
+                contentAreaClickHandler(e, 'engineersContent', {
                     'request-cooperation': btn => handleRequestCooperation(btn.dataset.activityId, btn),
                     'cancel-cooperation': btn => handleCancelCooperation(btn.dataset.activityId, btn)
-                }
-            };
-
-            const contentId = actionButton.closest('.content-body')?.id;
-            if (contentId && handlers[contentId] && handlers[contentId][actionButton.dataset.action]) {
-                handlers[contentId][actionButton.dataset.action](actionButton);
-            }
+                });
+                contentAreaClickHandler(e, 'notificationsContent', {});
+            });
+            
+            document.getElementById('refresh-button').addEventListener('click', refreshCurrentView);
         }
-    });
-}
+
         main();
     })();
     </script>
