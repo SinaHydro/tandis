@@ -640,6 +640,7 @@ function renderProfile() {
     if (!userData) return;
     const profileContent = document.getElementById('profileContent');
 
+    // ... (تمام کدهای مربوط به ساختن متغیرهای name, roleText, imgSrc و ... دست نخورده باقی می‌مانند)
     const name = `${userData.stepsData.step1.engineerFirstName || userData.stepsData.step1.employerFirstName || ''} ${userData.stepsData.step1.engineerLastName || userData.stepsData.step1.employerLastName || ''}`;
     const roleText = userData.role === 'engineer' ? 'مهندس' : 'کارفرما';
     const directImageUrl = getDirectDriveLink(userData.files.applicantImage.fileUrl);
@@ -648,6 +649,7 @@ function renderProfile() {
     sidebarProfileImage.src = imgSrc.replace('128x128', '80x80');
     sidebarProfileImage.onerror = () => { sidebarProfileImage.src = 'https://placehold.co/80x80/2196F3/FFFFFF?text=U'; };
 
+    // ===== شروع بخش حیاتی: افزودن دکمه مخفی آپلود عکس به HTML =====
     const profileSideColumnHtml = `
         <div class="profile-header-container text-center">
             <label for="profileImageInput" class="profile-header-image-wrapper">
@@ -656,6 +658,7 @@ function renderProfile() {
                     <i class="fas fa-camera"></i>
                 </div>
             </label>
+            <input type="file" id="profileImageInput" accept="image/*" style="display: none;">
             <div class="mt-4">
                 <h2 class="text-2xl font-bold text-slate-800">${name.trim() ? name : 'کاربر'}</h2>
                 <p class="text-md font-semibold text-sky-600">${roleText}</p>
@@ -673,6 +676,7 @@ function renderProfile() {
                 </a>
             </div>
         </div>`;
+    // ===== پایان بخش حیاتی =====
 
     const sections = [
         { id: 'personal', title: 'مشخصات فردی', icon: 'fa-user-circle', content: getPersonalFieldsHTML(userData.stepsData.step1, userData.role) },
@@ -700,6 +704,7 @@ function renderProfile() {
         firstSectionHeader.click();
     }
     
+    // ===== فعال‌سازی دکمه‌ها پس از ساخته شدن صفحه پروفایل =====
     const settingsButton = profileContent.querySelector('a[data-view="settings"]');
     if (settingsButton) {
         settingsButton.addEventListener('click', (e) => {
@@ -717,6 +722,9 @@ function renderProfile() {
             });
         });
     }
+
+    // حالا که صفحه پروفایل و دکمه آپلود ساخته شده، تابع برش عکس را فعال می‌کنیم
+    initializeCropper();
 }
         
         function getSectionHTML(id, title, icon, content) {
@@ -1162,7 +1170,11 @@ function handleEditClick(e) {
             formEl.querySelector('select[name="executionLicenseGrade"]').disabled = !isChecked('hasExecutionLicense');
         }
         
-        function initializeCropper() {
+function initializeCropper() {
+            // این تابع حالا خودش دکمه را پیدا می‌کند و دیگر به متغیر سراسری وابسته نیست
+            const profileImageInput = document.getElementById('profileImageInput');
+            if (!profileImageInput) return; // اگر دکمه نبود، بی‌صدا خارج شو
+
             profileImageInput.addEventListener('change', (e) => {
                 const files = e.target.files;
                 if (files && files.length > 0) {
@@ -2635,7 +2647,6 @@ async function renderProjectMarketplace() {
             initSlideshow();
             setupViewSwitcher();
             setupPasswordToggle();
-            initializeCropper();
             changePasswordForm.addEventListener('submit', handleChangePassword);
 
             const contentAreaClickHandler = (e, contentId, handlers) => {
