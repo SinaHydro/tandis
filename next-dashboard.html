@@ -44,7 +44,7 @@
         /* --- MODIFICATION: Main sidebar width changed --- */
         .sidebar { width: 220px; flex-shrink: 0; background-color: #f1f5f9; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; }
         @media (max-width: 1024px) { .sidebar { display: none; } }
-        .sidebar-profile-section { display: flex; align-items: center; padding: 1rem; border-bottom: 1px solid #cbd5e1; }
+        .sidebar-profile-section { display: flex; align-items: center; padding: 0.5rem; border-bottom: 1px solid #cbd5e1; }
         .sidebar-profile-image-container { position: relative; width: 35px; height: 35px; flex-shrink: 0; }
         .sidebar-profile-image { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 3px solid var(--primary-color); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .sidebar-profile-image-edit-overlay { position: absolute; inset: 0; background-color: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; opacity: 0; transition: opacity 0.3s ease; cursor: pointer; }
@@ -57,7 +57,7 @@
         .nav-item i { margin-left: 0.75rem; width: 20px; text-align: center; }
         .nav-item:hover { background-color: #e2e8f0; color: #1e293b; }
         .nav-item.active { background-color: var(--primary-color); color: white; box-shadow: 0 4px 6px -1px rgba(33, 150, 243, 0.2); }
-        .notification-badge { position: absolute; top: 5px; left: 10px; background-color: var(--notification-badge-color); color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .notification-badge { position: absolute; top: 0; right: 0; background-color: var(--notification-badge-color); color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
         
         .nav-item.btn-special-project { background-color: var(--special-color); color: white; font-weight: 700; justify-content: center; }
         .nav-item.btn-special-project:hover { background-color: var(--special-color-dark); }
@@ -209,10 +209,18 @@
     <div class="workstation-wrapper">
         <!-- Main Sidebar (Right) -->
         <aside class="sidebar">
-            <div class="sidebar-profile-section">
-                <a data-view="profile" class="nav-item sidebar-profile-section cursor-pointer hover:bg-slate-200 transition-colors duration-200">
+            <div class="sidebar-profile-section !p-2 flex items-center justify-between">
+                <a data-view="profile" class="nav-item !p-1 rounded-full">
                     <div class="sidebar-profile-image-container">
                         <img id="sidebarProfileImage" src="https://placehold.co/80x80/2196F3/FFFFFF?text=U" alt="عکس پروفایل" class="sidebar-profile-image">
+                    </div>
+                </a>
+
+                <a data-view="notifications" class="nav-item relative !p-2 rounded-full group">
+                    <i class="fas fa-bell"></i>
+                    <span id="notification-badge" class="notification-badge !top-0 !left-auto !right-0 hidden"></span>
+                    <div class="absolute top-full right-0 mt-2 p-2 px-3 text-xs font-semibold text-white bg-slate-700 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap">
+                        پیام‌ها
                     </div>
                 </a>
             </div>
@@ -221,11 +229,6 @@
                 <a data-view="dashboard" class="nav-item active">
                     <i class="fas fa-tachometer-alt"></i>
                     <span>داشبورد</span>
-                </a>
-                <a data-view="notifications" class="nav-item">
-                    <i class="fas fa-bell"></i>
-                    <span>پیام‌ها</span>
-                    <span id="notification-badge" class="notification-badge hidden"></span>
                 </a>
                 <a data-view="projects" class="nav-item" id="projects-nav-item" style="display: none;">
                     <i class="fas fa-search"></i>
