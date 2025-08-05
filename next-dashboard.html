@@ -535,7 +535,7 @@
                     const updatedData = await fetchUserProfile(userData.email);
                     if (updatedData) {
                         userData = { ...updatedData, email: userData.email };
-                        renderProfile();
+                        ();
                     }
                     return true;
                 }
@@ -668,11 +668,11 @@ function renderProfile() {
             <div class="mt-6 pt-6 border-t border-slate-200 w-full flex items-center justify-center gap-4">
                 <a data-view="settings" class="nav-item relative !p-3 rounded-full group">
                     <i class="fas fa-cog"></i>
-                    <div class="absolute top-full mt-2 p-2 px-3 text-xs font-semibold text-white bg-slate-700 rounded-md shadow-lg opacity-0 group-hover:opacity-100">تنظیمات</div>
+                    <div class="absolute top-full mt-2 p-2 px-3 text-xs font-semibold text-white bg-slate-700 rounded-md shadow-lg opacity-0 group-hover:opacity-100 left-1/2 -translate-x-1/2 whitespace-nowrap">تنظیمات</div>
                 </a>
                 <a href="#" id="logoutButton" class="nav-item relative !p-3 rounded-full group">
                     <i class="fas fa-sign-out-alt"></i>
-                    <div class="absolute top-full mt-2 p-2 px-3 text-xs font-semibold text-white bg-slate-700 rounded-md shadow-lg opacity-0 group-hover:opacity-100">خروج</div>
+                    <div class="absolute top-full mt-2 p-2 px-3 text-xs font-semibold text-white bg-slate-700 rounded-md shadow-lg opacity-0 group-hover:opacity-100 left-1/2 -translate-x-1/2 whitespace-nowrap">خروج</div>
                 </a>
             </div>
         </div>`;
@@ -702,6 +702,31 @@ function renderProfile() {
     const firstSectionHeader = profileContent.querySelector('.section-header');
     if (firstSectionHeader && !firstSectionHeader.classList.contains('open')) {
         firstSectionHeader.click();
+    }
+    
+    // ================== شروع بخش اضافه‌شده ==================
+
+    // به دکمه تنظیمات گوش می‌دهیم
+    const settingsButton = profileContent.querySelector('a[data-view="settings"]');
+    if (settingsButton) {
+        settingsButton.addEventListener('click', (e) => {
+            e.preventDefault(); // از جابجایی صفحه جلوگیری می‌کند
+            // ما کلیک روی دکمه اصلی "تنظیمات" در منوی اصلی را شبیه‌سازی می‌کنیم
+            document.querySelector('.nav-item[data-view="settings"]').click();
+        });
+    }
+
+    // به دکمه خروج گوش می‌دهیم
+    const logoutButton = profileContent.querySelector('#logoutButton');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', (e) => {
+            e.preventDefault(); // از جابجایی صفحه جلوگیری می‌کند
+            // نمایش یک پیام تایید برای خروج
+            showModal('آیا می‌خواهید از حساب کاربری خود خارج شوید؟', 'confirm', () => {
+                // پاک کردن اطلاعات کاربر از آدرس و بازگشت به صفحه اصلی
+                window.location.href = window.location.pathname; 
+            });
+        });
     }
 }        
         function getSectionHTML(id, title, icon, content) {
