@@ -2557,18 +2557,19 @@ async function main() {
 
     if (userData) {
         userData.email = email;
-        setupRoleSpecificUI(userData);
+        setupRoleSpecificUI(userData); // این تابع منوی کناری را بر اساس نقش کاربر تنظیم می‌کند
         welcomeMessage.textContent = `${userData.stepsData.step1.engineerFirstName || userData.stepsData.step1.employerFirstName || 'کاربر'} عزیز، خوش آمدید!`;
         setTimeout(() => {
             welcomeLoader.style.opacity = '0';
             setTimeout(() => {
                 welcomeLoader.style.display = 'none';
-                document.querySelector('.nav-item[data-view="dashboard"]').click();
+                document.querySelector('.nav-item[data-view="dashboard"]').click(); // صفحه داشبورد را به عنوان پیش‌فرض باز می‌کند
                 renderNotifications();
             }, 500);
         }, 1500);
     }
     
+    // راه‌اندازی توابع اولیه
     initSlideshow();
     setupPasswordToggle();
     changePasswordForm.addEventListener('submit', handleChangePassword);
@@ -2632,7 +2633,7 @@ async function main() {
             refreshCurrentView();
         }
 
-        // بخش چهارم: مدیریت کلیک‌های داخلی صفحات
+        // بخش چهارم: مدیریت کلیک‌های داخلی صفحات (مانند درخواست همکاری و...)
         const actionButton = target.closest('button[data-action]');
         if (actionButton) {
              const handlers = {
