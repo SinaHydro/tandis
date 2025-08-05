@@ -640,17 +640,14 @@ function renderProfile() {
     if (!userData) return;
     const profileContent = document.getElementById('profileContent');
 
-    // اطلاعات کاربر را آماده می‌کنیم
     const name = `${userData.stepsData.step1.engineerFirstName || userData.stepsData.step1.employerFirstName || ''} ${userData.stepsData.step1.engineerLastName || userData.stepsData.step1.employerLastName || ''}`;
     const roleText = userData.role === 'engineer' ? 'مهندس' : 'کارفرما';
     const directImageUrl = getDirectDriveLink(userData.files.applicantImage.fileUrl);
     const imgSrc = directImageUrl || 'https://placehold.co/128x128/2196F3/FFFFFF?text=U';
 
-    // عکس کوچک سایدبار را هم به‌روز می‌کنیم
     sidebarProfileImage.src = imgSrc.replace('128x128', '80x80');
     sidebarProfileImage.onerror = () => { sidebarProfileImage.src = 'https://placehold.co/80x80/2196F3/FFFFFF?text=U'; };
 
-    // --- HTML جدید برای ستون کناری پروفایل ---
     const profileSideColumnHtml = `
         <div class="profile-header-container text-center">
             <label for="profileImageInput" class="profile-header-image-wrapper">
@@ -689,7 +686,6 @@ function renderProfile() {
         sectionsHtml += getSectionHTML(section.id, section.title, section.icon, section.content);
     });
 
-    // چیدمان نهایی دو ستونه با جای تعویض شده
     profileContent.innerHTML = `
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-1">${profileSideColumnHtml}</div>
@@ -704,31 +700,28 @@ function renderProfile() {
         firstSectionHeader.click();
     }
     
-    // ================== شروع بخش اضافه‌شده ==================
-
-    // به دکمه تنظیمات گوش می‌دهیم
+    // حالا به دکمه‌های جدیدی که ساختیم گوش می‌دهیم
     const settingsButton = profileContent.querySelector('a[data-view="settings"]');
     if (settingsButton) {
         settingsButton.addEventListener('click', (e) => {
-            e.preventDefault(); // از جابجایی صفحه جلوگیری می‌کند
-            // ما کلیک روی دکمه اصلی "تنظیمات" در منوی اصلی را شبیه‌سازی می‌کنیم
-            document.querySelector('.nav-item[data-view="settings"]').click();
+            e.preventDefault();
+            // به سادگی کار را به تابع مرکزی می‌سپاریم
+            switchToView('settings', e.currentTarget);
         });
     }
 
-    // به دکمه خروج گوش می‌دهیم
     const logoutButton = profileContent.querySelector('#logoutButton');
     if (logoutButton) {
         logoutButton.addEventListener('click', (e) => {
-            e.preventDefault(); // از جابجایی صفحه جلوگیری می‌کند
-            // نمایش یک پیام تایید برای خروج
+            e.preventDefault();
             showModal('آیا می‌خواهید از حساب کاربری خود خارج شوید؟', 'confirm', () => {
-                // پاک کردن اطلاعات کاربر از آدرس و بازگشت به صفحه اصلی
+                // به صفحه اصلی بدون پارامتر ایمیل می‌رویم
                 window.location.href = window.location.pathname; 
             });
         });
     }
-}        
+}
+        
         function getSectionHTML(id, title, icon, content) {
             return `
                 <div id="section-${id}" class="profile-section">
@@ -1264,8 +1257,7 @@ function handleEditClick(e) {
             }
         }
 
-        function setupViewSwitcher() {
-            const navItems = document.querySelectorAll('.nav-item[data-view]');
+        function switchToView(view, clickedElement) {
             const viewInfo = {
                 dashboard: 'از این بخش می‌توانید آمار کلی و خلاصه‌ای از فعالیت‌های خود را مشاهده کنید.',
                 profile: 'اطلاعات کاربری خود را در این بخش مشاهده و ویرایش کنید. کامل بودن پروفایل به اعتبار شما می‌افزاید.',
@@ -1278,33 +1270,58 @@ function handleEditClick(e) {
                 'create-activity': 'با ثبت یک فعالیت جدید، آمادگی خود را برای دریافت پروژه‌های جدید به کارفرمایان اعلام کنید.'
             };
 
+            currentView = view;
+            
+            // 1. همه محتواها و دکمه‌ها را غیرفعال کن
+            allContentBodies.forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.nav-item[data-view]').forEach(nav => nav.classList.remove('active'));
+
+            // 2. محتوای مربوطه را نمایش بده
+            const contentEl = document.getElementById(`${view.replace(/-/g, '')}Content`);
+            if (contentEl) contentEl.style.display = 'block';
+
+            // 3. عنوان اصلی صفحه و متن راهنما را آپدیت کن
+            // برای دکمه‌هایی که متن داخل تگ span دارند (مثل منوی اصلی)
+            let title = clickedElement.querySelector('span')?.textContent;
+            // اگر نداشت (مثل دکمه آیکن تنظیمات)، یک عنوان پیش‌فرض بده
+            if (!title) {
+                const titleMap = { 'settings': 'تنظیمات', 'notifications': 'پیام‌ها', 'profile': 'پروفایل کاربری' };
+                title = titleMap[view] || 'داشبورد';
+            }
+            mainHeaderTitle.textContent = title;
+            infoBoxText.textContent = viewInfo[view] || 'اطلاعات این بخش در اینجا نمایش داده می‌شود.';
+            
+            // 4. محتوای تخصصی هر صفحه را در صورت نیاز رندر کن
+            switch(view) {
+                case 'dashboard': (userData.role === 'employer' ? renderEmployerDashboard : renderEngineerDashboard)(); break;
+                case 'profile': renderProfile(); break;
+                case 'notifications': renderNotifications(); break;
+                case 'projects': (userData.role === 'employer' ? renderEmployerProjects : renderProjectMarketplace)(); break;
+                case 'my-activities': renderMyActivities(); break;
+                case 'engineers': renderEngineersPanel(); break;
+                case 'create-project': renderProjectForm(); break;
+                case 'create-activity': renderActivityForm(); break;
+            }
+
+            // 5. دکمه کلیک‌شده را فعال (آبی) کن
+            if (clickedElement) {
+                clickedElement.classList.add('active');
+            }
+        }
+
+        function setupViewSwitcher() {
+            const navItems = document.querySelectorAll('.sidebar .nav-item[data-view]'); // فقط دکمه‌های منوی اصلی
+
             navItems.forEach(item => {
                 item.addEventListener('click', (e) => {
-                    currentView = e.currentTarget.dataset.view;
-                    
-                    allContentBodies.forEach(el => el.style.display = 'none');
-                    navItems.forEach(nav => nav.classList.remove('active'));
-
-                    const contentEl = document.getElementById(`${currentView.replace(/-/g, '')}Content`);
-                    if (contentEl) contentEl.style.display = 'block';
-                    mainHeaderTitle.textContent = e.currentTarget.querySelector('span').textContent;
-                    infoBoxText.textContent = viewInfo[currentView] || 'اطلاعات این بخش در اینجا نمایش داده می‌شود.';
-                    
-                    switch(currentView) {
-                        case 'dashboard': (userData.role === 'employer' ? renderEmployerDashboard : renderEngineerDashboard)(); break;
-                        case 'profile': renderProfile(); break;
-                        case 'notifications': renderNotifications(); break;
-                        case 'projects': (userData.role === 'employer' ? renderEmployerProjects : renderProjectMarketplace)(); break;
-                        case 'my-activities': renderMyActivities(); break;
-                        case 'engineers': renderEngineersPanel(); break;
-                        case 'create-project': renderProjectForm(); break;
-                        case 'create-activity': renderActivityForm(); break;
-                    }
-                    e.currentTarget.classList.add('active');
+                    e.preventDefault();
+                    const view = e.currentTarget.dataset.view;
+                    switchToView(view, e.currentTarget);
                 });
             });
         }
 
+        
         async function refreshCurrentView() {
             const activeNavItem = document.querySelector('.nav-item.active');
             if (activeNavItem) {
@@ -2546,40 +2563,6 @@ async function renderProjectMarketplace() {
                     welcomeLoader.style.opacity = '0';
                     setTimeout(() => { welcomeLoader.style.display = 'none'; }, 500);
                 }
-            });
-        }
-
-        function setupViewSwitcher() {
-            const navItems = document.querySelectorAll('.nav-item[data-view]');
-            navItems.forEach(item => {
-                item.addEventListener('click', (e) => {
-                    const targetView = e.currentTarget.dataset.view;
-                    
-                    document.querySelectorAll('.content-body').forEach(el => el.style.display = 'none');
-                    navItems.forEach(nav => nav.classList.remove('active'));
-
-                    switch(targetView) {
-                        case 'dashboard':
-                            dashboardContent.style.display = 'block';
-                            mainHeaderTitle.textContent = 'داشبورد';
-                            if (userData.role === 'employer') renderEmployerDashboard();
-                            else renderEngineerDashboard();
-                            break;
-                        case 'profile': profileContent.style.display = 'block'; mainHeaderTitle.textContent = 'پروفایل کاربری'; break;
-                        case 'settings': settingsContent.style.display = 'block'; mainHeaderTitle.textContent = 'تنظیمات'; break;
-                        case 'notifications': notificationsContent.style.display = 'block'; mainHeaderTitle.textContent = 'پیام‌ها و اعلان‌ها'; renderNotifications(); break;
-                        case 'projects':
-                            projectsContent.style.display = 'block';
-                            if (userData.role === 'employer') { mainHeaderTitle.textContent = 'پروژه‌های من'; renderEmployerProjects(); }
-                            else { mainHeaderTitle.textContent = 'جستجوی پروژه‌'; renderProjectMarketplace(); }
-                            break;
-                        case 'my-activities': myActivitiesContent.style.display = 'block'; mainHeaderTitle.textContent = 'فعالیت‌های من'; renderMyActivities(); break;
-                        case 'engineers': engineersContent.style.display = 'block'; mainHeaderTitle.textContent = 'جستجوی مهندس'; renderEngineersPanel(); break;
-                        case 'create-project': createProjectContent.style.display = 'block'; mainHeaderTitle.textContent = 'ثبت / ویرایش پروژه'; renderProjectForm(); break;
-                        case 'create-activity': createActivityContent.style.display = 'block'; mainHeaderTitle.textContent = 'ثبت / ویرایش فعالیت'; renderActivityForm(); break;
-                    }
-                    e.currentTarget.classList.add('active');
-                });
             });
         }
 
