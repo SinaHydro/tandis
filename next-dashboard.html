@@ -656,57 +656,24 @@ if (userData.role === 'employer') {
     projectsNavItem.querySelector('span').textContent = 'جستجوی پروژه';
 }
 
-    const profileHeaderHtml = `
-        <div class="profile-header-container text-center">
-            <label for="profileImageInput" class="profile-header-image-wrapper">
-                <img id="mainProfileImage" src="${sidebarProfileImage.src}" alt="عکس پروفایل" class="profile-header-image" onerror="this.src='https://placehold.co/128x128/2196F3/FFFFFF?text=U';">
-                <div class="profile-header-edit-icon">
-                    <i class="fas fa-camera"></i>
-                </div>
-            </label>
-            <div class="mt-4">
-                <h2 class="text-2xl font-bold text-slate-800">${name.trim() ? name : 'کاربر'}</h2>
-                <p class="text-md font-semibold text-sky-600">${roleText}</p>
-                <p class="text-sm text-slate-500 mt-2">${userData.email}</p>
-            </div>
-            <div class="mt-6 pt-6 border-t border-slate-200 w-full flex flex-col items-center gap-2">
-                <a data-view="settings" class="nav-item justify-center w-full max-w-xs">
-                    <i class="fas fa-cog"></i>
-                    <span>تنظیمات</span>
-                </a>
-                <a href="#" id="logoutButton" class="nav-item justify-center w-full max-w-xs">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>خروج از سیستم</span>
-                </a>
-            </div>
-        </div>`;
-
-    const sections = [
-        { id: 'personal', title: 'مشخصات فردی', icon: 'fa-user-circle', content: getPersonalFieldsHTML(userData.stepsData.step1, userData.role) },
-        { id: 'contact', title: 'اطلاعات تماس', icon: 'fa-address-card', content: getContactFieldsHTML(userData.stepsData.step2, userData.role) },
-        { id: 'professional', title: 'اطلاعات حرفه‌ای', icon: 'fa-briefcase', content: getProfessionalFieldsHTML(userData.stepsData.step3, userData.role) },
-        { id: 'documents', title: 'مدارک', icon: 'fa-file-alt', content: getDocumentsHTML(userData.files, userData.role) }
-    ];
-
-    let sectionsHtml = '';
-    sections.forEach(section => {
-        sectionsHtml += getSectionHTML(section.id, section.title, section.icon, section.content);
-    });
-
-    profileContent.innerHTML = `
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 space-y-6">${sectionsHtml}</div>
-            <div class="lg:col-span-1">${profileHeaderHtml}</div>
-        </div>
-    `;
+            profileContent.innerHTML = '';
+            // --- بخش اصلاح شده ---
+            // ابتدا HTML بخش جدید عکس را می‌سازیم و سپس بقیه بخش‌ها را به آن اضافه می‌کنیم
+            let profileHtml = getProfileHeaderHTML(userData);
     
-    attachSectionEventListeners();
+            const sections = [
+                { id: 'personal', title: 'مشخصات فردی', icon: 'fa-user-circle', content: getPersonalFieldsHTML(userData.stepsData.step1, userData.role) },
+                { id: 'contact', title: 'اطلاعات تماس', icon: 'fa-address-card', content: getContactFieldsHTML(userData.stepsData.step2, userData.role) },
+                { id: 'professional', title: 'اطلاعات حرفه‌ای', icon: 'fa-briefcase', content: getProfessionalFieldsHTML(userData.stepsData.step3, userData.role) },
+                { id: 'documents', title: 'مدارک', icon: 'fa-file-alt', content: getDocumentsHTML(userData.files, userData.role) }
+            ];
+            sections.forEach(section => {
+                profileHtml += getSectionHTML(section.id, section.title, section.icon, section.content);
+            });
 
-    // باز کردن بخش اول پروفایل به صورت پیش‌فرض
-    const firstSectionHeader = profileContent.querySelector('.section-header');
-    if (firstSectionHeader && !firstSectionHeader.classList.contains('open')) {
-        firstSectionHeader.click();
-    }
+            profileContent.innerHTML = profileHtml;
+            // --- پایان بخش اصلاح شده ---            
+            attachSectionEventListeners();
         }
         
         function getSectionHTML(id, title, icon, content) {
