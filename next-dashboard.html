@@ -209,19 +209,11 @@
     <div class="workstation-wrapper">
         <!-- Main Sidebar (Right) -->
         <aside class="sidebar">
-            <div class="sidebar-profile-section">
+            <a data-view="profile" class="sidebar-profile-section cursor-pointer hover:bg-slate-200 transition-colors duration-200">
                 <div class="sidebar-profile-image-container">
                     <img id="sidebarProfileImage" src="https://placehold.co/80x80/2196F3/FFFFFF?text=U" alt="عکس پروفایل" class="sidebar-profile-image">
-                    <label for="profileImageInput" class="sidebar-profile-image-edit-overlay">
-                        <i class="fas fa-camera"></i>
-                    </label>
-                    <input type="file" id="profileImageInput" class="hidden" accept="image/*">
                 </div>
-                <div class="sidebar-profile-details">
-                    <h2 id="sidebarProfileName" class="sidebar-profile-name">...</h2>
-                    <p id="sidebarProfileRole" class="sidebar-profile-role">...</p>
-                </div>
-            </div>
+            </a>
 
             <nav class="sidebar-nav">
                 <a data-view="dashboard" class="nav-item active">
@@ -428,8 +420,6 @@
         const allContentBodies = document.querySelectorAll('.content-body');
         const mainHeaderTitle = document.getElementById('main-header-title');
         const sidebarProfileImage = document.getElementById('sidebarProfileImage');
-        const sidebarProfileName = document.getElementById('sidebarProfileName');
-        const sidebarProfileRole = document.getElementById('sidebarProfileRole');
         const profileImageInput = document.getElementById('profileImageInput');
         const changePasswordForm = document.getElementById('changePasswordForm');
         const infoBoxText = document.getElementById('info-box-text');
@@ -614,6 +604,34 @@ function getProfileHeaderHTML(userData) {
             }, 5000);
         }
 
+function setupRoleSpecificUI(userData) {
+    if (!userData || !userData.role) return;
+
+    const projectsNavItem = document.getElementById('projects-nav-item');
+    const createProjectNavItem = document.getElementById('create-project-nav-item');
+    const createActivityNavItem = document.getElementById('create-activity-nav-item');
+    const myActivitiesNavItem = document.getElementById('my-activities-nav-item');
+    const engineersNavItem = document.getElementById('engineers-nav-item');
+
+    if (userData.role === 'employer') {
+        projectsNavItem.style.display = 'flex';
+        createProjectNavItem.style.display = 'flex';
+        engineersNavItem.style.display = 'flex';
+        createActivityNavItem.style.display = 'none';
+        myActivitiesNavItem.style.display = 'none';
+        projectsNavItem.querySelector('i').className = 'fas fa-briefcase';
+        projectsNavItem.querySelector('span').textContent = 'پروژه‌های من';
+    } else if (userData.role === 'engineer') {
+        projectsNavItem.style.display = 'flex';
+        myActivitiesNavItem.style.display = 'flex';
+        createActivityNavItem.style.display = 'flex';
+        createProjectNavItem.style.display = 'none';
+        engineersNavItem.style.display = 'none';
+        projectsNavItem.querySelector('i').className = 'fas fa-search';
+        projectsNavItem.querySelector('span').textContent = 'جستجوی پروژه';
+    }
+}
+
         function showSlide(index) {
            const slides = document.querySelectorAll('.slide-image');
             const dots = document.querySelectorAll('.dot');
@@ -627,62 +645,53 @@ function getProfileHeaderHTML(userData) {
             currentSlide = index;
         }
 
-        function renderProfile() {
-            if (!userData) return;
-            const profileContent = document.getElementById('profileContent');
+function renderProfile() {
+    if (!userData) return;
+    const profileContent = document.getElementById('profileContent');
 
-            const name = `${userData.stepsData.step1.engineerFirstName || userData.stepsData.step1.employerFirstName || ''} ${userData.stepsData.step1.engineerLastName || userData.stepsData.step1.employerLastName || ''}`;
-            sidebarProfileName.textContent = name.trim() ? name : 'کاربر';
-            sidebarProfileRole.textContent = userData.role === 'engineer' ? 'مهندس' : 'کارفرما';
+    // اطلاعات کاربر را برای نمایش آماده می‌کنیم
+    const name = `${userData.stepsData.step1.engineerFirstName || userData.stepsData.step1.employerFirstName || ''} ${userData.stepsData.step1.engineerLastName || userData.stepsData.step1.employerLastName || ''}`;
+    const roleText = userData.role === 'engineer' ? 'مهندس' : 'کارفرما';
+    const directImageUrl = getDirectDriveLink(userData.files.applicantImage.fileUrl);
+    const imgSrc = directImageUrl || 'https://placehold.co/128x128/2196F3/FFFFFF?text=U';
+
+    // عکس کوچک سایدبار را به‌روز می‌کنیم
+    sidebarProfileImage.src = imgSrc.replace('128x128', '80x80'); // Use smaller placeholder
+    sidebarProfileImage.onerror = () => { sidebarProfileImage.src = 'https://placehold.co/80x80/2196F3/FFFFFF?text=U'; };
+
+    // بخش جدید هدر پروفایل را با اطلاعات کاربر می‌سازیم
+    const profileHeaderHtml = `
+        <div class="profile-header-container text-center">
+            <label for="profileImageInput" class="profile-header-image-wrapper">
+                <img id="mainProfileImage" src="${imgSrc}" alt="عکس پروفایل" class="profile-header-image" onerror="this.src='https://placehold.co/128x128/2196F3/FFFFFF?text=U';">
+                <div class="profile-header-edit-icon">
+                    <i class="fas fa-camera"></i>
+                </div>
+            </label>
+            <div class="mt-4">
+                <h2 class="text-2xl font-bold text-slate-800">${name.trim() ? name : 'کاربر'}</h2>
+                <p class="text-md font-semibold text-sky-600">${roleText}</p>
+                <p class="text-sm text-slate-500 mt-2">${userData.email}</p>
+            </div>
+        </div>`;
+
+    const sections = [
+        { id: 'personal', title: 'مشخصات فردی', icon: 'fa-user-circle', content: getPersonalFieldsHTML(userData.stepsData.step1, userData.role) },
+        { id: 'contact', title: 'اطلاعات تماس', icon: 'fa-address-card', content: getContactFieldsHTML(userData.stepsData.step2, userData.role) },
+        { id: 'professional', title: 'اطلاعات حرفه‌ای', icon: 'fa-briefcase', content: getProfessionalFieldsHTML(userData.stepsData.step3, userData.role) },
+        { id: 'documents', title: 'مدارک', icon: 'fa-file-alt', content: getDocumentsHTML(userData.files, userData.role) }
+    ];
+
+    let sectionsHtml = '';
+    sections.forEach(section => {
+        sectionsHtml += getSectionHTML(section.id, section.title, section.icon, section.content);
+    });
+
+    // محتوای نهایی پروفایل را با قرار دادن هدر در بالا و بخش‌ها در پایین، ایجاد می‌کنیم
+    profileContent.innerHTML = profileHeaderHtml + sectionsHtml;
     
-            const directImageUrl = getDirectDriveLink(userData.files.applicantImage.fileUrl);
-            sidebarProfileImage.src = directImageUrl || 'https://placehold.co/80x80/2196F3/FFFFFF?text=U';
-            sidebarProfileImage.onerror = () => { sidebarProfileImage.src = 'https://placehold.co/80x80/2196F3/FFFFFF?text=U'; };
-
-
-            const projectsNavItem = document.getElementById('projects-nav-item');
-            const createProjectNavItem = document.getElementById('create-project-nav-item');
-            const createActivityNavItem = document.getElementById('create-activity-nav-item');
-            const myActivitiesNavItem = document.getElementById('my-activities-nav-item');
-            const engineersNavItem = document.getElementById('engineers-nav-item');
-
-if (userData.role === 'employer') {
-    projectsNavItem.style.display = 'flex';
-    createProjectNavItem.style.display = 'flex';
-    engineersNavItem.style.display = 'flex';
-    createActivityNavItem.style.display = 'none';
-    myActivitiesNavItem.style.display = 'none';
-    projectsNavItem.querySelector('i').className = 'fas fa-briefcase';
-    projectsNavItem.querySelector('span').textContent = 'پروژه‌های من';
-} else if (userData.role === 'engineer') {
-    projectsNavItem.style.display = 'flex';
-    myActivitiesNavItem.style.display = 'flex';
-    createActivityNavItem.style.display = 'flex';
-    createProjectNavItem.style.display = 'none';
-    engineersNavItem.style.display = 'none';
-    projectsNavItem.querySelector('i').className = 'fas fa-search';
-    projectsNavItem.querySelector('span').textContent = 'جستجوی پروژه';
+    attachSectionEventListeners();
 }
-
-            profileContent.innerHTML = '';
-            // --- بخش اصلاح شده ---
-            // ابتدا HTML بخش جدید عکس را می‌سازیم و سپس بقیه بخش‌ها را به آن اضافه می‌کنیم
-            let profileHtml = getProfileHeaderHTML(userData);
-    
-            const sections = [
-                { id: 'personal', title: 'مشخصات فردی', icon: 'fa-user-circle', content: getPersonalFieldsHTML(userData.stepsData.step1, userData.role) },
-                { id: 'contact', title: 'اطلاعات تماس', icon: 'fa-address-card', content: getContactFieldsHTML(userData.stepsData.step2, userData.role) },
-                { id: 'professional', title: 'اطلاعات حرفه‌ای', icon: 'fa-briefcase', content: getProfessionalFieldsHTML(userData.stepsData.step3, userData.role) },
-                { id: 'documents', title: 'مدارک', icon: 'fa-file-alt', content: getDocumentsHTML(userData.files, userData.role) }
-            ];
-            sections.forEach(section => {
-                profileHtml += getSectionHTML(section.id, section.title, section.icon, section.content);
-            });
-
-            profileContent.innerHTML = profileHtml;
-            // --- پایان بخش اصلاح شده ---            
-            attachSectionEventListeners();
-        }
         
         function getSectionHTML(id, title, icon, content) {
             return `
