@@ -1285,7 +1285,10 @@ function initializeCropper() {
             allContentBodies.forEach(el => el.style.display = 'none');
             document.querySelectorAll('.nav-item[data-view]').forEach(nav => nav.classList.remove('active'));
 
-            const contentEl = document.getElementById(`${view.replace(/-/g, '')}Content`);
+            const toCamelCase = str => str.replace(/-./g, s => s[1].toUpperCase());
+            const viewId = toCamelCase(view) + 'Content';
+            const contentEl = document.getElementById(viewId);
+            
             if (contentEl) contentEl.style.display = 'block';
 
             let title;
@@ -1307,6 +1310,7 @@ function initializeCropper() {
                 case 'engineers': renderEngineersPanel(); break;
                 case 'create-project': renderProjectForm(); break;
                 case 'create-activity': renderActivityForm(); break;
+                case 'settings': break;
             }
 
             if (clickedElement) {
