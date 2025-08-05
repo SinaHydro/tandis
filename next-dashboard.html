@@ -640,17 +640,17 @@ function renderProfile() {
     if (!userData) return;
     const profileContent = document.getElementById('profileContent');
 
-    // اطلاعات کاربر را آماده می‌کنیم
+    // اطلاعات کاربر را برای نمایش آماده می‌کنیم
     const name = `${userData.stepsData.step1.engineerFirstName || userData.stepsData.step1.employerFirstName || ''} ${userData.stepsData.step1.engineerLastName || userData.stepsData.step1.employerLastName || ''}`;
     const roleText = userData.role === 'engineer' ? 'مهندس' : 'کارفرما';
     const directImageUrl = getDirectDriveLink(userData.files.applicantImage.fileUrl);
     const imgSrc = directImageUrl || 'https://placehold.co/128x128/2196F3/FFFFFF?text=U';
 
-    // عکس کوچک سایدبار را هم به‌روز می‌کنیم
+    // فقط عکس کوچک سایدبار را به‌روز می‌کنیم
     sidebarProfileImage.src = imgSrc.replace('128x128', '80x80');
     sidebarProfileImage.onerror = () => { sidebarProfileImage.src = 'https://placehold.co/80x80/2196F3/FFFFFF?text=U'; };
 
-    // --- HTML جدید برای ستون کناری پروفایل ---
+    // HTML ستون سمت راست (عکس و اطلاعات) را می‌سازیم
     const profileSideColumnHtml = `
         <div class="profile-header-container text-center">
             <label for="profileImageInput" class="profile-header-image-wrapper">
@@ -664,7 +664,6 @@ function renderProfile() {
                 <p class="text-md font-semibold text-sky-600">${roleText}</p>
                 <p class="text-sm text-slate-500 mt-2">${userData.email}</p>
             </div>
-            
             <div class="mt-6 pt-6 border-t border-slate-200 w-full flex items-center justify-center gap-4">
                 <a data-view="settings" class="nav-item relative !p-3 rounded-full group">
                     <i class="fas fa-cog"></i>
@@ -689,11 +688,11 @@ function renderProfile() {
         sectionsHtml += getSectionHTML(section.id, section.title, section.icon, section.content);
     });
 
-    // چیدمان نهایی دو ستونه با جای تعویض شده
+    // چیدمان نهایی دو ستونه
     profileContent.innerHTML = `
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-1">${profileSideColumnHtml}</div>
             <div class="lg:col-span-2 space-y-6">${sectionsHtml}</div>
+            <div class="lg:col-span-1">${profileSideColumnHtml}</div>
         </div>
     `;
     
@@ -703,7 +702,7 @@ function renderProfile() {
     if (firstSectionHeader && !firstSectionHeader.classList.contains('open')) {
         firstSectionHeader.click();
     }
-}        
+}
         function getSectionHTML(id, title, icon, content) {
             return `
                 <div id="section-${id}" class="profile-section">
