@@ -179,6 +179,76 @@
         .profile-header-image { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 4px solid white; box-shadow: 0 0 0 4px var(--primary-color), 0 10px 25px -5px rgba(0,0,0,0.2); }
         .profile-header-edit-icon {position: absolute; bottom: 5px; right: 5px; background-color: white; color: var(--primary-color); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.15); transition: transform 0.2s ease;}
         .profile-header-image-wrapper:hover .profile-header-edit-icon { transform: scale(1.1); }
+                #bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px; /* ارتفاع نوار */
+            z-index: 1000;
+            display: flex; /* برای چیدمان در تمام اندازه‌ها */
+            justify-content: center;
+            align-items: center;
+            padding: 0 1rem;
+        }
+
+        .nav-icon-btn {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            color: #475569; /* slate-600 */
+            transition: all 0.2s ease-in-out;
+            font-size: 1.25rem; /* اندازه آیکن */
+        }
+
+        .nav-icon-btn:hover {
+            background-color: #e2e8f0; /* slate-200 */
+            color: var(--primary-color);
+        }
+        
+        /* استایل برای دکمه‌های فعال */
+        .nav-icon-btn.active {
+            color: white;
+            background-color: var(--primary-color);
+        }
+
+        /* استایل خاص برای دکمه بزرگ ثبت پروژه/فعالیت */
+        .nav-icon-btn.special-btn {
+            width: 56px;
+            height: 56px;
+            font-size: 1.5rem;
+            color: white;
+            background-color: var(--special-color); /* رنگ نارنجی خاص */
+            transform: translateY(-10px); /* کمی بالاتر از بقیه */
+            box-shadow: 0 4px 12px rgba(255, 160, 0, 0.4);
+        }
+        .nav-icon-btn.special-btn:hover {
+            background-color: var(--special-color-dark);
+        }
+        
+        .nav-tooltip {
+            position: absolute;
+            bottom: 110%; /* بالای دکمه */
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #334155; /* slate-700 */
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+        
+        .nav-icon-btn.group:hover .nav-tooltip {
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="hidden">
@@ -207,62 +277,9 @@
     </div>
 
     <div class="workstation-wrapper">
-        <!-- Main Sidebar (Right) -->
-        <aside class="sidebar">
-            <div class="sidebar-profile-section !p-2 flex items-center justify-start gap-3">
-                <a data-view="profile" class="nav-item !p-1 rounded-full">
-                    <div class="sidebar-profile-image-container">
-                        <img id="sidebarProfileImage" src="https://placehold.co/80x80/2196F3/FFFFFF?text=U" alt="عکس پروفایل" class="sidebar-profile-image">
-                    </div>
-                </a>
-
-                <a data-view="notifications" class="nav-item relative !p-2 rounded-full group">
-                    <i class="fas fa-bell !ml-0"></i>
-                    <span id="notification-badge" class="notification-badge !top-0 !left-auto !right-0 hidden"></span>
-                    <div class="absolute top-full right-0 mt-2 p-2 px-3 text-xs font-semibold text-white bg-slate-700 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap">
-                        پیام‌ها
-                    </div>
-                </a>
-            </div>
-
-            <nav class="sidebar-nav">
-                <a data-view="dashboard" class="nav-item active">
-                    <i class="fas fa-tachometer-alt"></i>
-                    <span>داشبورد</span>
-                </a>
-                <a data-view="projects" class="nav-item" id="projects-nav-item" style="display: none;">
-                    <i class="fas fa-search"></i>
-                    <span>جستجوی پروژه‌</span>
-                </a>
-                <a data-view="my-activities" class="nav-item" id="my-activities-nav-item" style="display: none;">
-                    <i class="fas fa-list-check"></i>
-                    <span>فعالیت‌های من</span>
-                </a>
-                <a data-view="engineers" class="nav-item" id="engineers-nav-item" style="display: none;">
-                    <i class="fas fa-search"></i>
-                    <span>جستجوی مهندس</span>
-                </a>
-                <a data-view="create-project" class="nav-item btn-special-project mt-4" id="create-project-nav-item" style="display: none;">
-                    <i class="fas fa-plus-circle"></i>
-                    <span>ثبت پروژه جدید</span>
-                </a>
-                <a data-view="create-activity" class="nav-item btn-special-project mt-4" id="create-activity-nav-item" style="display: none;">
-                    <i class="fas fa-bullhorn"></i>
-                    <span>ثبت فعالیت جدید</span>
-                </a>
-            </nav>
-
-        </aside>
 
         <!-- Main Content -->
         <main class="main-content-area">
-            <header class="p-4 border-b border-slate-200 bg-white flex-shrink-0 flex justify-between items-center">
-                <h1 id="main-header-title" class="text-2xl font-bold text-slate-800">داشبورد</h1>
-                <!-- --- NEW: Refresh Button --- -->
-                <button id="refresh-button" class="btn btn-secondary !p-2 text-sm" title="بروزرسانی صفحه">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
-            </header>
             
             <div id="dashboardContent" class="content-body"></div>
             <div id="profileContent" class="content-body" style="display: none;"></div>
@@ -343,6 +360,67 @@
                 </div>
             </div>
         </aside>
+
+        <footer id="bottom-nav" class="bg-white/80 backdrop-blur-sm shadow-[0_-4px_12px_rgba(0,0,0,0.08)]">
+            <div class="flex justify-center items-center gap-x-4 h-full">
+
+                <a href="#" id="home-nav-item" data-view="dashboard" class="nav-icon-btn group">
+                    <i class="fas fa-home"></i>
+                    <div class="nav-tooltip">خانه</div>
+                </a>
+                
+                <a href="#" id="projects-nav-item" data-view="projects" class="nav-icon-btn group" style="display: none;">
+                    <i class="fas fa-briefcase"></i>
+                    <div class="nav-tooltip">پروژه‌های من</div>
+                </a>
+
+                <a href="#" id="my-activities-nav-item" data-view="my-activities" class="nav-icon-btn group" style="display: none;">
+                    <i class="fas fa-list-check"></i>
+                    <div class="nav-tooltip">فعالیت‌های من</div>
+                </a>
+                
+                <a href="#" id="engineers-nav-item" data-view="engineers" class="nav-icon-btn group" style="display: none;">
+                    <i class="fas fa-search"></i>
+                    <div class="nav-tooltip">جستجوی مهندس</div>
+                </a>
+
+                <a href="#" id="create-project-nav-item" data-view="create-project" class="nav-icon-btn special-btn group" style="display: none;">
+                    <i class="fas fa-plus"></i>
+                    <div class="nav-tooltip">ثبت پروژه جدید</div>
+                </a>
+                <a href="#" id="create-activity-nav-item" data-view="create-activity" class="nav-icon-btn special-btn group" style="display: none;">
+                    <i class="fas fa-bullhorn"></i>
+                    <div class="nav-tooltip">ثبت فعالیت جدید</div>
+                </a>
+
+                <a href="#" id="profile-nav-item" data-view="profile" class="nav-icon-btn group">
+                    <i class="fas fa-user-circle"></i>
+                    <div class="nav-tooltip">پروفایل</div>
+                </a>
+
+                <a href="#" id="notifications-nav-item" data-view="notifications" class="nav-icon-btn group relative">
+                    <i class="fas fa-bell"></i>
+                    <span id="notification-badge" class="notification-badge !-top-1 !-right-1"></span>
+                    <div class="nav-tooltip">پیام‌ها</div>
+                </a>
+                
+                 <a href="#" id="settings-nav-item" data-view="settings" class="nav-icon-btn group">
+                    <i class="fas fa-cog"></i>
+                    <div class="nav-tooltip">تنظیمات</div>
+                </a>
+                
+                <a href="#" id="refresh-nav-item" class="nav-icon-btn group">
+                    <i class="fas fa-sync-alt"></i>
+                    <div class="nav-tooltip">بروزرسانی</div>
+                </a>
+
+                <a href="#" id="logout-nav-item" class="nav-icon-btn group">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <div class="nav-tooltip">خروج</div>
+                </a>
+            </div>
+        </footer>
+        
     </div>
 
     <!-- Modals -->
@@ -604,22 +682,23 @@ function setupRoleSpecificUI(userData) {
     const myActivitiesNavItem = document.getElementById('my-activities-nav-item');
     const engineersNavItem = document.getElementById('engineers-nav-item');
 
+    // پیدا کردن تولتیپ مربوط به دکمه پروژه‌ها
+    const projectsTooltip = projectsNavItem.querySelector('.nav-tooltip');
+
     if (userData.role === 'employer') {
         projectsNavItem.style.display = 'flex';
         createProjectNavItem.style.display = 'flex';
         engineersNavItem.style.display = 'flex';
         createActivityNavItem.style.display = 'none';
         myActivitiesNavItem.style.display = 'none';
-        projectsNavItem.querySelector('i').className = 'fas fa-briefcase';
-        projectsNavItem.querySelector('span').textContent = 'پروژه‌های من';
+        if (projectsTooltip) projectsTooltip.textContent = 'پروژه‌های من';
     } else if (userData.role === 'engineer') {
         projectsNavItem.style.display = 'flex';
         myActivitiesNavItem.style.display = 'flex';
         createActivityNavItem.style.display = 'flex';
         createProjectNavItem.style.display = 'none';
         engineersNavItem.style.display = 'none';
-        projectsNavItem.querySelector('i').className = 'fas fa-search';
-        projectsNavItem.querySelector('span').textContent = 'جستجوی پروژه';
+        if (projectsTooltip) projectsTooltip.textContent = 'جستجوی پروژه';
     }
 }
 
@@ -2687,7 +2766,24 @@ async function renderProjectMarketplace() {
                 contentAreaClickHandler(e, 'notificationsContent', {});
             });
             
-            document.getElementById('refresh-button').addEventListener('click', refreshCurrentView);
+            // document.getElementById('refresh-button').addEventListener('click', refreshCurrentView);
+            document.getElementById('refresh-nav-item').addEventListener('click', (e) => {
+        e.preventDefault();
+        refreshCurrentView();
+    });
+
+    document.getElementById('logout-nav-item').addEventListener('click', (e) => {
+        e.preventDefault();
+        showModal('آیا می‌خواهید از حساب کاربری خود خارج شوید؟', 'confirm', () => {
+            window.location.href = window.location.pathname; 
+        });
+    });
+
+    // چون دکمه‌ها دیگر در سایدبار نیستند، این خط را اصلاح می‌کنیم
+    // document.querySelector('.nav-item[data-view="dashboard"]').click();
+    document.getElementById('home-nav-item').click(); // اولین دکمه فعال، خانه باشد
+}
+        
         }
 
         main();
