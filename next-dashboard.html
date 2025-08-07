@@ -490,6 +490,7 @@
         // const mainHeaderTitle = document.getElementById('main-header-title');
         // const sidebarProfileImage = document.getElementById('sidebarProfileImage');
         // const profileImageInput = document.getElementById('profileImageInput');
+        const dashboardContent = document.getElementById('dashboardContent');
         const changePasswordForm = document.getElementById('changePasswordForm');
         const infoBoxText = document.getElementById('info-box-text');
         
@@ -2405,7 +2406,8 @@ async function renderProjectMarketplace() {
                         </div>
                         <div class="md:col-span-2 bg-white p-6 rounded-lg shadow"><h3 class="text-lg font-bold text-slate-800 mb-4">آخرین پروژه‌های شما</h3><div class="space-y-3">${projectsListHtml}</div></div>
                     </div>`;
-                document.getElementById('dashboardCreateProjectBtn').addEventListener('click', () => document.querySelector('.nav-item[data-view="create-project"]').click());
+                // این خط اصلاح شده تا به دکمه جدید در نوار پایین اشاره کند
+                document.getElementById('dashboardCreateProjectBtn').addEventListener('click', () => document.getElementById('create-project-nav-item').click());
             } catch (error) {
                 dashboardContent.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری داشبورد: ${error.message}</p>`;
             }
@@ -2432,7 +2434,8 @@ async function renderProjectMarketplace() {
                         </div>
                         <div class="md:col-span-2 bg-white p-6 rounded-lg shadow"><h3 class="text-lg font-bold text-slate-800 mb-4">آخرین فعالیت‌های شما</h3><div class="space-y-3">${activitiesListHtml}</div></div>
                     </div>`;
-                document.getElementById('dashboardCreateActivityBtn').addEventListener('click', () => document.querySelector('.nav-item[data-view="create-activity"]').click());
+                // این خط اصلاح شده تا به دکمه جدید در نوار پایین اشاره کند
+                document.getElementById('dashboardCreateActivityBtn').addEventListener('click', () => document.getElementById('create-activity-nav-item').click());
             } catch (error) {
                 dashboardContent.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری داشبورد: ${error.message}</p>`;
             }
