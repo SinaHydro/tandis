@@ -57,7 +57,7 @@
         .nav-item i { margin-left: 0.75rem; width: 20px; text-align: center; }
         .nav-item:hover { background-color: #e2e8f0; color: #1e293b; }
         .nav-item.active { background-color: var(--primary-color); color: white; box-shadow: 0 4px 6px -1px rgba(33, 150, 243, 0.2); }
-        .notification-badge { position: absolute; top: 0; right: 0; background-color: var(--notification-badge-color); color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .notification-badge { position: absolute; top: 0; right: 0; background-color: var(--notification-badge-color); color: white; border-radius: 50%; width: 10px; height: 10px; font-size: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
         .sidebar-profile-section .nav-item i { margin-left: 0; }
         .nav-item.btn-special-project { background-color: var(--special-color); color: white; font-weight: 700; justify-content: center; }
         .nav-item.btn-special-project:hover { background-color: var(--special-color-dark); }
@@ -207,12 +207,11 @@
 
         /* استایل خاص برای دکمه بزرگ ثبت پروژه/فعالیت */
         .nav-icon-btn.special-btn {
-            width: 56px;
-            height: 56px;
+            width: 40px;
+            height: 40px;
             font-size: 1.5rem;
             color: white;
             background-color: var(--special-color); /* رنگ نارنجی خاص */
-            transform: translateY(-10px); /* کمی بالاتر از بقیه */
             box-shadow: 0 4px 12px rgba(255, 160, 0, 0.4);
         }
         .nav-icon-btn.special-btn:hover {
@@ -1371,11 +1370,15 @@ function handleEditClick(e) {
             const homeButtons = document.querySelectorAll('.nav-btn-home');
 
             if (view === 'dashboard') { // اگر در صفحه خانه هستیم
-                pageButtons.forEach(btn => btn.classList.add('hidden'));
-                homeButtons.forEach(btn => btn.classList.remove('hidden'));
+                // دکمه‌های مخصوص صفحات داخلی را با استایل خطی مخفی کن
+                pageButtons.forEach(btn => btn.style.display = 'none');
+                // دکمه‌های مخصوص خانه را نمایش بده (البته آنهایی که از قبل display:none ندارند)
+                homeButtons.forEach(btn => btn.style.display = 'flex');
             } else { // اگر در صفحات داخلی هستیم
-                pageButtons.forEach(btn => btn.classList.remove('hidden'));
-                homeButtons.forEach(btn => btn.classList.add('hidden'));
+                // دکمه‌های مخصوص صفحات داخلی را بر اساس نقش کاربر نمایش بده
+                setupRoleSpecificUI(userData); // این تابع دکمه‌های درست را flex می‌کند
+                // دکمه‌های مخصوص خانه را مخفی کن
+                homeButtons.forEach(btn => btn.style.display = 'none');
             }
             
             switch(view) {
