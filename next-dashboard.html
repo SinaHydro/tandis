@@ -715,6 +715,33 @@ function setupRoleSpecificUI(userData) {
             currentSlide = index;
         }
 
+        function updateBottomNavProfileIcon(userData) {
+            // آدرس عکس پروفایل کاربر را از اطلاعات دریافتی می‌خوانیم
+            const profileImageUrl = getDirectDriveLink(userData.files?.applicantImage?.fileUrl);
+            const profileBtn = document.getElementById('profile-nav-item');
+
+            // اگر آدرس عکس وجود داشت و دکمه پروفایل هم در صفحه بود
+            if (profileImageUrl && profileBtn) {
+                const icon = profileBtn.querySelector('i'); // آیکن فعلی را پیدا می‌کنیم
+                
+                if (icon) {
+                    const img = document.createElement('img'); // یک تگ عکس جدید می‌سازیم
+                    img.src = profileImageUrl;
+                    img.alt = 'عکس پروفایل';
+                    // با این کلاس‌ها، عکس به شکل دایره و هم‌اندازه دکمه در می‌آید
+                    img.className = 'w-full h-full object-cover rounded-full';
+                    
+                    // اگر عکس به هر دلیلی لود نشد، دوباره آیکن را نمایش بده
+                    img.onerror = () => {
+                        img.replaceWith(icon);
+                    };
+
+                    // عکس جدید را جایگزین آیکن می‌کنیم
+                    icon.replaceWith(img);
+                }
+            }
+        }
+
 function renderProfile() {
     if (!userData) return;
     const profileContent = document.getElementById('profileContent');
@@ -725,8 +752,8 @@ function renderProfile() {
     const directImageUrl = getDirectDriveLink(userData.files.applicantImage.fileUrl);
     const imgSrc = directImageUrl || 'https://placehold.co/128x128/2196F3/FFFFFF?text=U';
 
-    sidebarProfileImage.src = imgSrc.replace('128x128', '80x80');
-    sidebarProfileImage.onerror = () => { sidebarProfileImage.src = 'https://placehold.co/80x80/2196F3/FFFFFF?text=U'; };
+    // sidebarProfileImage.src = imgSrc.replace('128x128', '80x80');
+    // sidebarProfileImage.onerror = () => { sidebarProfileImage.src = 'https://placehold.co/80x80/2196F3/FFFFFF?text=U'; };
 
     // ===== شروع بخش حیاتی: افزودن دکمه مخفی آپلود عکس به HTML =====
     const profileSideColumnHtml = `
@@ -2715,6 +2742,7 @@ async function renderProjectMarketplace() {
                 userData.email = email;
                 setupRoleSpecificUI(userData);
                 welcomeMessage.textContent = `${userData.stepsData.step1.engineerFirstName || userData.stepsData.step1.employerFirstName || 'کاربر'} عزیز، خوش آمدید!`;
+                updateBottomNavProfileIcon(userData);
                 
                 setTimeout(() => {
                     welcomeLoader.style.opacity = '0';
