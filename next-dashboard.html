@@ -487,7 +487,7 @@
         const welcomeLoader = document.getElementById('welcome-loader');
         const welcomeMessage = document.getElementById('welcome-message');
         const allContentBodies = document.querySelectorAll('.content-body');
-        const mainHeaderTitle = document.getElementById('main-header-title');
+        // const mainHeaderTitle = document.getElementById('main-header-title');
         const sidebarProfileImage = document.getElementById('sidebarProfileImage');
         const profileImageInput = document.getElementById('profileImageInput');
         const changePasswordForm = document.getElementById('changePasswordForm');
@@ -1404,7 +1404,7 @@ function initializeCropper() {
                 const titleMap = { 'settings': 'تنظیمات', 'notifications': 'پیام‌ها', 'profile': 'پروفایل کاربری', 'dashboard': 'داشبورد' };
                 title = titleMap[view] || 'تندیس';
             }
-            mainHeaderTitle.textContent = title;
+            
             infoBoxText.textContent = viewInfo[view] || 'اطلاعات این بخش در اینجا نمایش داده می‌شود.';
             
             switch(view) {
