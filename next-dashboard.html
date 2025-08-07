@@ -207,8 +207,8 @@
 
         /* استایل خاص برای دکمه بزرگ ثبت پروژه/فعالیت */
         .nav-icon-btn.special-btn {
-            width: 40px;
-            height: 40px;
+            width: 48px;
+            height: 48px;
             font-size: 1.5rem;
             color: white;
             background-color: var(--special-color); /* رنگ نارنجی خاص */
@@ -337,19 +337,16 @@
                         <div class="flex-grow"></div>
 
                         <div class="flex items-center justify-center gap-x-1">
-                            <a href="#" id="home-nav-item" data-view="dashboard" class="nav-icon-btn group nav-btn-page"><i class="fas fa-home"></i><div class="nav-tooltip">خانه</div></a>
-                            <a href="#" id="search-nav-item" data-view="" class="nav-icon-btn group nav-btn-page" style="display: none;"><i class="fas fa-search"></i><div class="nav-tooltip"></div></a>
-
-                            <a href="#" id="create-project-nav-item" data-view="create-project" class="nav-icon-btn special-btn group nav-btn-page" style="display: none;"><i class="fas fa-plus"></i><div class="nav-tooltip">ثبت پروژه جدید</div></a>
-                            <a href="#" id="create-activity-nav-item" data-view="create-activity" class="nav-icon-btn special-btn group nav-btn-page" style="display: none;"><i class="fas fa-plus"></i><div class="nav-tooltip">ثبت فعالیت جدید</div></a>
+                            <a href="#" id="home-nav-item" data-view="dashboard" class="nav-icon-btn group"><i class="fas fa-home"></i><div class="nav-tooltip">خانه</div></a>
+                            <a href="#" id="search-nav-item" data-view="" class="nav-icon-btn group" style="display: none;"><i class="fas fa-search"></i><div class="nav-tooltip"></div></a>
+                            <a href="#" id="create-project-nav-item" data-view="create-project" class="nav-icon-btn special-btn group" style="display: none;"><i class="fas fa-plus"></i><div class="nav-tooltip">ثبت پروژه جدید</div></a>
+                            <a href="#" id="create-activity-nav-item" data-view="create-activity" class="nav-icon-btn special-btn group" style="display: none;"><i class="fas fa-plus"></i><div class="nav-tooltip">ثبت فعالیت جدید</div></a>
+                            <a href="#" id="my-items-nav-item" data-view="" class="nav-icon-btn group" style="display: none;"><i class="fas fa-briefcase"></i><div class="nav-tooltip"></div></a>
+                            <a href="#" id="profile-nav-item" data-view="profile" class="nav-icon-btn group"><i class="fas fa-user-circle"></i><div class="nav-tooltip">پروفایل</div></a>
                             
-                            <a href="#" id="my-items-nav-item" data-view="" class="nav-icon-btn group nav-btn-page" style="display: none;"><i class="fas fa-briefcase"></i><div class="nav-tooltip"></div></a>
-                            <a href="#" id="profile-nav-item" data-view="profile" class="nav-icon-btn group nav-btn-page"><i class="fas fa-user-circle"></i><div class="nav-tooltip">پروفایل</div></a>
-                            
-                            
-                            <a href="#" id="notifications-nav-item" data-view="notifications" class="nav-icon-btn group nav-btn-home relative"><i class="fas fa-bell"></i><span id="notification-badge" class="notification-badge !-top-1 !-right-1"></span><div class="nav-tooltip">پیام‌ها</div></a>
-                            <a href="#" id="settings-nav-item" data-view="settings" class="nav-icon-btn group nav-btn-home"><i class="fas fa-cog"></i><div class="nav-tooltip">تنظیمات</div></a>
-                            <a href="#" id="logout-nav-item" class="nav-icon-btn group nav-btn-home"><i class="fas fa-sign-out-alt"></i><div class="nav-tooltip">خروج</div></a>
+                            <a href="#" id="notifications-nav-item" data-view="notifications" class="nav-icon-btn group relative"><i class="fas fa-bell"></i><span id="notification-badge" class="notification-badge !-top-1 !-right-1"></span><div class="nav-tooltip">پیام‌ها</div></a>
+                            <a href="#" id="settings-nav-item" data-view="settings" class="nav-icon-btn group"><i class="fas fa-cog"></i><div class="nav-tooltip">تنظیمات</div></a>
+                            <a href="#" id="logout-nav-item" class="nav-icon-btn group"><i class="fas fa-sign-out-alt"></i><div class="nav-tooltip">خروج</div></a>
                         </div>
                         
                         <div class="flex-grow"></div>
@@ -1365,20 +1362,42 @@ function handleEditClick(e) {
 
             infoBoxText.textContent = viewInfo[view] || 'اطلاعات این بخش در اینجا نمایش داده می‌شود.';
             
-            // مدیریت هوشمند نمایش دکمه‌ها بر اساس کلاس‌های جدید
-            const pageButtons = document.querySelectorAll('.nav-btn-page');
-            const homeButtons = document.querySelectorAll('.nav-btn-home');
+            // --- شروع منطق جدید و دقیق برای نمایش/مخفی‌سازی دکمه‌ها ---
+            const homeBtn = document.getElementById('home-nav-item');
+            const profileBtn = document.getElementById('profile-nav-item');
+            const myItemsBtn = document.getElementById('my-items-nav-item');
+            const searchBtn = document.getElementById('search-nav-item');
+            const createProjectBtn = document.getElementById('create-project-nav-item');
+            const createActivityBtn = document.getElementById('create-activity-nav-item');
+            const notificationsBtn = document.getElementById('notifications-nav-item');
+            const settingsBtn = document.getElementById('settings-nav-item');
+            const logoutBtn = document.getElementById('logout-nav-item');
 
             if (view === 'dashboard') { // اگر در صفحه خانه هستیم
-                // دکمه‌های مخصوص صفحات داخلی را با استایل خطی مخفی کن
-                pageButtons.forEach(btn => btn.style.display = 'none');
-                // دکمه‌های مخصوص خانه را نمایش بده (البته آنهایی که از قبل display:none ندارند)
-                homeButtons.forEach(btn => btn.style.display = 'flex');
+                // این دکمه‌ها مخفی شوند
+                homeBtn.style.display = 'none';
+                profileBtn.style.display = 'none';
+                myItemsBtn.style.display = 'none';
+                searchBtn.style.display = 'none';
+                createProjectBtn.style.display = 'none';
+                createActivityBtn.style.display = 'none';
+                
+                // این دکمه‌ها نمایش داده شوند
+                notificationsBtn.style.display = 'flex';
+                settingsBtn.style.display = 'flex';
+                logoutBtn.style.display = 'flex';
+
             } else { // اگر در صفحات داخلی هستیم
-                // دکمه‌های مخصوص صفحات داخلی را بر اساس نقش کاربر نمایش بده
-                setupRoleSpecificUI(userData); // این تابع دکمه‌های درست را flex می‌کند
-                // دکمه‌های مخصوص خانه را مخفی کن
-                homeButtons.forEach(btn => btn.style.display = 'none');
+                // این دکمه‌ها نمایش داده شوند
+                homeBtn.style.display = 'flex';
+                profileBtn.style.display = 'flex';
+                // این تابع دکمه‌های مخصوص نقش کاربر را نمایش می‌دهد
+                setupRoleSpecificUI(userData); 
+
+                // این دکمه‌ها مخفی شوند
+                notificationsBtn.style.display = 'none';
+                settingsBtn.style.display = 'none';
+                logoutBtn.style.display = 'none';
             }
             
             switch(view) {
