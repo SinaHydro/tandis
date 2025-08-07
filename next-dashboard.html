@@ -1409,12 +1409,30 @@ function handleEditClick(e) {
 
         // تابع شماره ۲: مدیر (فقط به دکمه‌های منوی اصلی گوش می‌دهد)
         function setupViewSwitcher() {
-            const navItems = document.querySelectorAll('.sidebar .nav-item[data-view]');
+            // آدرس قدیمی: '.sidebar .nav-item[data-view]'
+            // آدرس جدید به دکمه‌های داخل نوار فوتر اشاره می‌کند
+            const navItems = document.querySelectorAll('#bottom-nav .nav-icon-btn[data-view]');
+
             navItems.forEach(item => {
                 item.addEventListener('click', (e) => {
                     e.preventDefault();
-                    const view = e.currentTarget.dataset.view;
-                    switchToView(view, e.currentTarget);
+                    // از نزدیکترین تگ a والد استفاده می‌کنیم تا مطمئن شویم خود دکمه انتخاب شده
+                    const button = e.target.closest('a');
+                    const view = button.dataset.view;
+                    switchToView(view, button);
+                });
+            });
+
+            // این دو دکمه چون data-view ندارند، جداگانه فعال می‌شوند
+            document.getElementById('refresh-nav-item').addEventListener('click', (e) => {
+                e.preventDefault();
+                refreshCurrentView();
+            });
+
+            document.getElementById('logout-nav-item').addEventListener('click', (e) => {
+                e.preventDefault();
+                showModal('آیا می‌خواهید از حساب کاربری خود خارج شوید؟', 'confirm', () => {
+                    window.location.href = window.location.pathname; 
                 });
             });
         }
