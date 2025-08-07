@@ -334,7 +334,8 @@
             </div>
             <div id="createProjectContent" class="content-body" style="display: none;"></div>
             <div id="createActivityContent" class="content-body" style="display: none;"></div>
-            <div id="bottom-nav" class="w-full mt-auto pt-6"> <div class="bg-white rounded-2xl p-1 shadow-lg max-w-3xl mx-auto">
+            <div id="bottom-nav" class="w-full mt-auto pt-6">
+                <div class="bg-white rounded-2xl p-1 shadow-lg max-w-3xl mx-auto">
                     <div class="rounded-xl p-2 h-full w-full flex items-center justify-between text-slate-700 font-semibold">
                         
                         <span id="desktop-date" class="text-sm hidden sm:block"></span>
@@ -343,36 +344,38 @@
                             <a href="#" id="home-nav-item" data-view="dashboard" class="nav-icon-btn group active">
                                 <i class="fas fa-home"></i><div class="nav-tooltip">خانه</div>
                             </a>
-                            <a href="#" id="projects-nav-item" data-view="projects" class="nav-icon-btn group" style="display: none;">
-                                <i class="fas fa-briefcase"></i><div class="nav-tooltip">پروژه‌ها</div>
+                            
+                            <a href="#" id="my-items-nav-item" data-view="" class="nav-icon-btn group" style="display: none;">
+                                <i class="fas fa-briefcase"></i><div class="nav-tooltip"></div>
                             </a>
-                            <a href="#" id="my-activities-nav-item" data-view="my-activities" class="nav-icon-btn group" style="display: none;">
-                                <i class="fas fa-list-check"></i><div class="nav-tooltip">فعالیت‌ها</div>
+
+                            <a href="#" id="search-nav-item" data-view="" class="nav-icon-btn group" style="display: none;">
+                                <i class="fas fa-search"></i><div class="nav-tooltip"></div>
                             </a>
-                            <a href="#" id="engineers-nav-item" data-view="engineers" class="nav-icon-btn group" style="display: none;">
-                                <i class="fas fa-search"></i><div class="nav-tooltip">جستجوی مهندس</div>
-                            </a>
+
                             <a href="#" id="create-project-nav-item" data-view="create-project" class="nav-icon-btn special-btn group" style="display: none;">
                                 <i class="fas fa-plus"></i><div class="nav-tooltip">ثبت پروژه</div>
                             </a>
                             <a href="#" id="create-activity-nav-item" data-view="create-activity" class="nav-icon-btn special-btn group" style="display: none;">
                                 <i class="fas fa-bullhorn"></i><div class="nav-tooltip">ثبت فعالیت</div>
                             </a>
+
                             <a href="#" id="profile-nav-item" data-view="profile" class="nav-icon-btn group">
                                 <i class="fas fa-user-circle"></i><div class="nav-tooltip">پروفایل</div>
                             </a>
-                            <a href="#" id="notifications-nav-item" data-view="notifications" class="nav-icon-btn group relative">
+                            
+                            <a href="#" id="notifications-nav-item" data-view="notifications" class="nav-icon-btn group home-only-btn relative">
                                 <i class="fas fa-bell"></i>
                                 <span id="notification-badge" class="notification-badge !-top-1 !-right-1"></span>
                                 <div class="nav-tooltip">پیام‌ها</div>
                             </a>
-                            <a href="#" id="settings-nav-item" data-view="settings" class="nav-icon-btn group">
+                            <a href="#" id="settings-nav-item" data-view="settings" class="nav-icon-btn group home-only-btn">
                                 <i class="fas fa-cog"></i><div class="nav-tooltip">تنظیمات</div>
                             </a>
-                             <a href="#" id="refresh-nav-item" class="nav-icon-btn group">
+                             <a href="#" id="refresh-nav-item" class="nav-icon-btn group home-only-btn">
                                 <i class="fas fa-sync-alt"></i><div class="nav-tooltip">بروزرسانی</div>
                             </a>
-                             <a href="#" id="logout-nav-item" class="nav-icon-btn group">
+                             <a href="#" id="logout-nav-item" class="nav-icon-btn group home-only-btn">
                                 <i class="fas fa-sign-out-alt"></i><div class="nav-tooltip">خروج</div>
                             </a>
                         </div>
@@ -380,8 +383,7 @@
                         <span id="desktop-time" class="text-sm hidden sm:block"></span>
                     </div>
                 </div>
-            </div>
-            
+            </div>            
         </main>
         
         <aside class="advertisement-sidebar">
@@ -666,34 +668,50 @@ function getProfileHeaderHTML(userData) {
             }, 5000);
         }
 
-function setupRoleSpecificUI(userData) {
-    if (!userData || !userData.role) return;
+        function setupRoleSpecificUI(userData) {
+            if (!userData || !userData.role) return;
 
-    const projectsNavItem = document.getElementById('projects-nav-item');
-    const createProjectNavItem = document.getElementById('create-project-nav-item');
-    const createActivityNavItem = document.getElementById('create-activity-nav-item');
-    const myActivitiesNavItem = document.getElementById('my-activities-nav-item');
-    const engineersNavItem = document.getElementById('engineers-nav-item');
+            // دکمه‌های عمومی جدید
+            const myItemsBtn = document.getElementById('my-items-nav-item');
+            const searchBtn = document.getElementById('search-nav-item');
+            const myItemsTooltip = myItemsBtn.querySelector('.nav-tooltip');
+            const searchTooltip = searchBtn.querySelector('.nav-tooltip');
 
-    // پیدا کردن تولتیپ مربوط به دکمه پروژه‌ها
-    const projectsTooltip = projectsNavItem.querySelector('.nav-tooltip');
+            // دکمه‌های مخصوص هر نقش
+            const createProjectNavItem = document.getElementById('create-project-nav-item');
+            const createActivityNavItem = document.getElementById('create-activity-nav-item');
 
-    if (userData.role === 'employer') {
-        projectsNavItem.style.display = 'flex';
-        createProjectNavItem.style.display = 'flex';
-        engineersNavItem.style.display = 'flex';
-        createActivityNavItem.style.display = 'none';
-        myActivitiesNavItem.style.display = 'none';
-        if (projectsTooltip) projectsTooltip.textContent = 'پروژه‌های من';
-    } else if (userData.role === 'engineer') {
-        projectsNavItem.style.display = 'flex';
-        myActivitiesNavItem.style.display = 'flex';
-        createActivityNavItem.style.display = 'flex';
-        createProjectNavItem.style.display = 'none';
-        engineersNavItem.style.display = 'none';
-        if (projectsTooltip) projectsTooltip.textContent = 'جستجوی پروژه';
-    }
-}
+            if (userData.role === 'employer') {
+                // تنظیم دکمه "آیتم‌های من" برای کارفرما
+                myItemsBtn.style.display = 'flex';
+                myItemsBtn.dataset.view = 'projects';
+                if (myItemsTooltip) myItemsTooltip.textContent = 'پروژه‌های من';
+
+                // تنظیم دکمه "جستجو" برای کارفرما
+                searchBtn.style.display = 'flex';
+                searchBtn.dataset.view = 'engineers';
+                if (searchTooltip) searchTooltip.textContent = 'جستجوی مهندس';
+
+                // نمایش دکمه ثبت پروژه
+                createProjectNavItem.style.display = 'flex';
+                createActivityNavItem.style.display = 'none';
+
+            } else if (userData.role === 'engineer') {
+                // تنظیم دکمه "آیتم‌های من" برای مهندس
+                myItemsBtn.style.display = 'flex';
+                myItemsBtn.dataset.view = 'my-activities';
+                if (myItemsTooltip) myItemsTooltip.textContent = 'فعالیت‌های من';
+
+                // تنظیم دکمه "جستجو" برای مهندس
+                searchBtn.style.display = 'flex';
+                searchBtn.dataset.view = 'projects';
+                if (searchTooltip) searchTooltip.textContent = 'جستجوی پروژه';
+
+                // نمایش دکمه ثبت فعالیت
+                createProjectNavItem.style.display = 'none';
+                createActivityNavItem.style.display = 'flex';
+            }
+        }
 
         function showSlide(index) {
            const slides = document.querySelectorAll('.slide-image');
@@ -1371,16 +1389,15 @@ function handleEditClick(e) {
             const contentEl = document.getElementById(viewId);
             
             if (contentEl) contentEl.style.display = 'block';
-
-            let title;
-            if (clickedElement && clickedElement.querySelector('span')) {
-                 title = clickedElement.querySelector('span').textContent;
-            } else {
-                const titleMap = { 'settings': 'تنظیمات', 'notifications': 'پیام‌ها', 'profile': 'پروفایل کاربری', 'dashboard': 'داشبورد' };
-                title = titleMap[view] || 'تندیس';
-            }
             
             infoBoxText.textContent = viewInfo[view] || 'اطلاعات این بخش در اینجا نمایش داده می‌شود.';
+
+            const homeOnlyButtons = document.querySelectorAll('.home-only-btn');
+            if (view === 'dashboard') {
+                homeOnlyButtons.forEach(btn => btn.classList.remove('hidden'));
+            } else {
+                homeOnlyButtons.forEach(btn => btn.classList.add('hidden'));
+            }
             
             switch(view) {
                 case 'dashboard': (userData.role === 'employer' ? renderEmployerDashboard : renderEngineerDashboard)(); break;
