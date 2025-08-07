@@ -1688,7 +1688,7 @@ function renderProjectForm(projectData = null) {
             const cancelBtn = document.getElementById('cancelProjectFormBtn');
             if (cancelBtn) {
                 cancelBtn.addEventListener('click', () => {
-                    document.querySelector('.nav-item[data-view="dashboard"]').click();
+                    document.getElementById('home-nav-item').click(); 
                 });
             }
 
@@ -1854,7 +1854,7 @@ function renderProjectForm(projectData = null) {
                 const result = await response.json();
                 if (result.status === 'success') {
                     showModal(result.message, 'success');
-                    document.querySelector('.nav-item[data-view="dashboard"]').click();
+                    document.getElementById('home-nav-item').click(); 
                 } else {
                     throw new Error(result.message || 'خطای ناشناخته.');
                 }
@@ -2749,7 +2749,7 @@ async function renderProjectMarketplace() {
                     setTimeout(() => {
                         welcomeLoader.style.display = 'none';
                         renderProfile();
-                        document.querySelector('.nav-item[data-view="dashboard"]').click();
+                        document.getElementById('home-nav-item').click(); 
                         renderNotifications(); // Fetch notifications on load
                     }, 500);
                 }, 1500);
