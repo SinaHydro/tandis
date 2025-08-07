@@ -249,6 +249,10 @@
         .nav-icon-btn.group:hover .nav-tooltip {
             opacity: 1;
         }
+                .nav-icon-btn:focus {
+            outline: none;
+            box-shadow: none;
+        }
     </style>
 </head>
 <body class="hidden">
@@ -330,6 +334,54 @@
             </div>
             <div id="createProjectContent" class="content-body" style="display: none;"></div>
             <div id="createActivityContent" class="content-body" style="display: none;"></div>
+            <div class="w-full mt-auto pt-6"> <div class="bg-white rounded-2xl p-1 shadow-lg max-w-3xl mx-auto">
+                    <div class="rounded-xl p-2 h-full w-full flex items-center justify-between text-slate-700 font-semibold">
+                        
+                        <span id="desktop-date" class="text-sm hidden sm:block"></span>
+
+                        <div class="flex items-center justify-center flex-grow sm:flex-grow-0 gap-x-1">
+                            <a href="#" id="home-nav-item" data-view="dashboard" class="nav-icon-btn group active">
+                                <i class="fas fa-home"></i><div class="nav-tooltip">خانه</div>
+                            </a>
+                            <a href="#" id="projects-nav-item" data-view="projects" class="nav-icon-btn group" style="display: none;">
+                                <i class="fas fa-briefcase"></i><div class="nav-tooltip">پروژه‌ها</div>
+                            </a>
+                            <a href="#" id="my-activities-nav-item" data-view="my-activities" class="nav-icon-btn group" style="display: none;">
+                                <i class="fas fa-list-check"></i><div class="nav-tooltip">فعالیت‌ها</div>
+                            </a>
+                            <a href="#" id="engineers-nav-item" data-view="engineers" class="nav-icon-btn group" style="display: none;">
+                                <i class="fas fa-search"></i><div class="nav-tooltip">جستجوی مهندس</div>
+                            </a>
+                            <a href="#" id="create-project-nav-item" data-view="create-project" class="nav-icon-btn special-btn group" style="display: none;">
+                                <i class="fas fa-plus"></i><div class="nav-tooltip">ثبت پروژه</div>
+                            </a>
+                            <a href="#" id="create-activity-nav-item" data-view="create-activity" class="nav-icon-btn special-btn group" style="display: none;">
+                                <i class="fas fa-bullhorn"></i><div class="nav-tooltip">ثبت فعالیت</div>
+                            </a>
+                            <a href="#" id="profile-nav-item" data-view="profile" class="nav-icon-btn group">
+                                <i class="fas fa-user-circle"></i><div class="nav-tooltip">پروفایل</div>
+                            </a>
+                            <a href="#" id="notifications-nav-item" data-view="notifications" class="nav-icon-btn group relative">
+                                <i class="fas fa-bell"></i>
+                                <span id="notification-badge" class="notification-badge !-top-1 !-right-1"></span>
+                                <div class="nav-tooltip">پیام‌ها</div>
+                            </a>
+                            <a href="#" id="settings-nav-item" data-view="settings" class="nav-icon-btn group">
+                                <i class="fas fa-cog"></i><div class="nav-tooltip">تنظیمات</div>
+                            </a>
+                             <a href="#" id="refresh-nav-item" class="nav-icon-btn group">
+                                <i class="fas fa-sync-alt"></i><div class="nav-tooltip">بروزرسانی</div>
+                            </a>
+                             <a href="#" id="logout-nav-item" class="nav-icon-btn group">
+                                <i class="fas fa-sign-out-alt"></i><div class="nav-tooltip">خروج</div>
+                            </a>
+                        </div>
+                        
+                        <span id="desktop-time" class="text-sm hidden sm:block"></span>
+                    </div>
+                </div>
+            </div>
+            
         </main>
         
         <aside class="advertisement-sidebar">
@@ -360,66 +412,6 @@
                 </div>
             </div>
         </aside>
-
-        <footer id="bottom-nav" class="bg-white/80 backdrop-blur-sm shadow-[0_-4px_12px_rgba(0,0,0,0.08)]">
-            <div class="flex justify-center items-center gap-x-4 h-full">
-
-                <a href="#" id="home-nav-item" data-view="dashboard" class="nav-icon-btn group">
-                    <i class="fas fa-home"></i>
-                    <div class="nav-tooltip">خانه</div>
-                </a>
-                
-                <a href="#" id="projects-nav-item" data-view="projects" class="nav-icon-btn group" style="display: none;">
-                    <i class="fas fa-briefcase"></i>
-                    <div class="nav-tooltip">پروژه‌های من</div>
-                </a>
-
-                <a href="#" id="my-activities-nav-item" data-view="my-activities" class="nav-icon-btn group" style="display: none;">
-                    <i class="fas fa-list-check"></i>
-                    <div class="nav-tooltip">فعالیت‌های من</div>
-                </a>
-                
-                <a href="#" id="engineers-nav-item" data-view="engineers" class="nav-icon-btn group" style="display: none;">
-                    <i class="fas fa-search"></i>
-                    <div class="nav-tooltip">جستجوی مهندس</div>
-                </a>
-
-                <a href="#" id="create-project-nav-item" data-view="create-project" class="nav-icon-btn special-btn group" style="display: none;">
-                    <i class="fas fa-plus"></i>
-                    <div class="nav-tooltip">ثبت پروژه جدید</div>
-                </a>
-                <a href="#" id="create-activity-nav-item" data-view="create-activity" class="nav-icon-btn special-btn group" style="display: none;">
-                    <i class="fas fa-bullhorn"></i>
-                    <div class="nav-tooltip">ثبت فعالیت جدید</div>
-                </a>
-
-                <a href="#" id="profile-nav-item" data-view="profile" class="nav-icon-btn group">
-                    <i class="fas fa-user-circle"></i>
-                    <div class="nav-tooltip">پروفایل</div>
-                </a>
-
-                <a href="#" id="notifications-nav-item" data-view="notifications" class="nav-icon-btn group relative">
-                    <i class="fas fa-bell"></i>
-                    <span id="notification-badge" class="notification-badge !-top-1 !-right-1"></span>
-                    <div class="nav-tooltip">پیام‌ها</div>
-                </a>
-                
-                 <a href="#" id="settings-nav-item" data-view="settings" class="nav-icon-btn group">
-                    <i class="fas fa-cog"></i>
-                    <div class="nav-tooltip">تنظیمات</div>
-                </a>
-                
-                <a href="#" id="refresh-nav-item" class="nav-icon-btn group">
-                    <i class="fas fa-sync-alt"></i>
-                    <div class="nav-tooltip">بروزرسانی</div>
-                </a>
-
-                <a href="#" id="logout-nav-item" class="nav-icon-btn group">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <div class="nav-tooltip">خروج</div>
-                </a>
-            </div>
-        </footer>
         
     </div>
 
