@@ -323,30 +323,33 @@
             </div>
             <div id="createProjectContent" class="content-body" style="display: none;"></div>
             <div id="createActivityContent" class="content-body" style="display: none;"></div>
-        <div class="w-full lg:block fixed bottom-4 right-0 left-0 px-4 z-50">
-            <div id="bottom-nav" class="bg-white/80 backdrop-blur-sm rounded-2xl p-1 shadow-lg max-w-md mx-auto">
-                <div class="rounded-xl p-2 h-full w-full flex items-center justify-between text-slate-700 font-semibold">
-                    
-                    <span id="desktop-date" class="text-sm"></span>
-
-                    <div class="flex items-center justify-center gap-x-1">
-                        <a href="#" id="home-nav-item" data-view="dashboard" class="nav-icon-btn group active"><i class="fas fa-home"></i><div class="nav-tooltip">خانه</div></a>
-                        <a href="#" id="my-items-nav-item" data-view="" class="nav-icon-btn group" style="display: none;"><i class="fas fa-briefcase"></i><div class="nav-tooltip"></div></a>
-                        <a href="#" id="search-nav-item" data-view="" class="nav-icon-btn group" style="display: none;"><i class="fas fa-search"></i><div class="nav-tooltip"></div></a>
-                        <a href="#" id="create-project-nav-item" data-view="create-project" class="nav-icon-btn special-btn group" style="display: none;"><i class="fas fa-plus"></i><div class="nav-tooltip">ثبت پروژه</div></a>
-                        <a href="#" id="create-activity-nav-item" data-view="create-activity" class="nav-icon-btn special-btn group" style="display: none;"><i class="fas fa-bullhorn"></i><div class="nav-tooltip">ثبت فعالیت</div></a>
-                        <a href="#" id="profile-nav-item" data-view="profile" class="nav-icon-btn group"><i class="fas fa-user-circle"></i><div class="nav-tooltip">پروفایل</div></a>
+            <div id="bottom-nav" class="w-full mt-auto pt-6">
+                <div class="bg-white rounded-2xl p-1 shadow-lg max-w-4xl mx-auto"> <div class="rounded-xl p-2 h-full w-full flex items-center text-slate-700 font-semibold">
                         
-                        <a href="#" id="notifications-nav-item" data-view="notifications" class="nav-icon-btn group home-only-btn relative"><i class="fas fa-bell"></i><span id="notification-badge" class="notification-badge !-top-1 !-right-1"></span><div class="nav-tooltip">پیام‌ها</div></a>
-                        <a href="#" id="settings-nav-item" data-view="settings" class="nav-icon-btn group home-only-btn"><i class="fas fa-cog"></i><div class="nav-tooltip">تنظیمات</div></a>
-                        <a href="#" id="refresh-nav-item" class="nav-icon-btn group home-only-btn"><i class="fas fa-sync-alt"></i><div class="nav-tooltip">بروزرسانی</div></a>
-                        <a href="#" id="logout-nav-item" class="nav-icon-btn group home-only-btn"><i class="fas fa-sign-out-alt"></i><div class="nav-tooltip">خروج</div></a>
+                        <span id="desktop-date" class="text-sm hidden sm:block"></span>
+                        
+                        <div class="flex-grow"></div>
+
+                        <div class="flex items-center justify-center gap-x-1">
+                            <a href="#" id="home-nav-item" data-view="dashboard" class="nav-icon-btn group page-only-btn"><i class="fas fa-home"></i><div class="nav-tooltip">خانه</div></a>
+                            <a href="#" id="my-items-nav-item" data-view="" class="nav-icon-btn group page-only-btn" style="display: none;"><i class="fas fa-briefcase"></i><div class="nav-tooltip"></div></a>
+                            <a href="#" id="create-project-nav-item" data-view="create-project" class="nav-icon-btn special-btn group page-only-btn" style="display: none;"><i class="fas fa-plus"></i><div class="nav-tooltip">ثبت پروژه</div></a>
+                            <a href="#" id="create-activity-nav-item" data-view="create-activity" class="nav-icon-btn special-btn group page-only-btn" style="display: none;"><i class="fas fa-bullhorn"></i><div class="nav-tooltip">ثبت فعالیت</div></a>
+                            <a href="#" id="search-nav-item" data-view="" class="nav-icon-btn group page-only-btn" style="display: none;"><i class="fas fa-search"></i><div class="nav-tooltip"></div></a>
+                            <a href="#" id="profile-nav-item" data-view="profile" class="nav-icon-btn group page-only-btn"><i class="fas fa-user-circle"></i><div class="nav-tooltip">پروفایل</div></a>
+                            
+                            <a href="#" id="notifications-nav-item" data-view="notifications" class="nav-icon-btn group home-only-btn relative"><i class="fas fa-bell"></i><span id="notification-badge" class="notification-badge !-top-1 !-right-1"></span><div class="nav-tooltip">پیام‌ها</div></a>
+                            <a href="#" id="settings-nav-item" data-view="settings" class="nav-icon-btn group home-only-btn"><i class="fas fa-cog"></i><div class="nav-tooltip">تنظیمات</div></a>
+                            <a href="#" id="refresh-nav-item" class="nav-icon-btn group home-only-btn"><i class="fas fa-sync-alt"></i><div class="nav-tooltip">بروزرسانی</div></a>
+                            <a href="#" id="logout-nav-item" class="nav-icon-btn group home-only-btn"><i class="fas fa-sign-out-alt"></i><div class="nav-tooltip">خروج</div></a>
+                        </div>
+                        
+                        <div class="flex-grow"></div>
+
+                        <span id="desktop-time" class="text-sm hidden sm:block"></span>
                     </div>
-                    
-                    <span id="desktop-time" class="text-sm"></span>
                 </div>
             </div>
-        </div>   
         </main>
         
         <aside class="advertisement-sidebar">
@@ -1355,11 +1358,16 @@ function handleEditClick(e) {
             
             infoBoxText.textContent = viewInfo[view] || 'اطلاعات این بخش در اینجا نمایش داده می‌شود.';
 
+            // مدیریت نمایش دکمه‌ها بر اساس صفحه فعلی
             const homeOnlyButtons = document.querySelectorAll('.home-only-btn');
-            if (view === 'dashboard') {
+            const pageOnlyButtons = document.querySelectorAll('.page-only-btn');
+
+            if (view === 'dashboard') { // اگر در صفحه خانه هستیم
                 homeOnlyButtons.forEach(btn => btn.classList.remove('hidden'));
-            } else {
+                pageOnlyButtons.forEach(btn => btn.classList.add('hidden'));
+            } else { // اگر در صفحات داخلی هستیم
                 homeOnlyButtons.forEach(btn => btn.classList.add('hidden'));
+                pageOnlyButtons.forEach(btn => btn.classList.remove('hidden'));
             }
             
             switch(view) {
