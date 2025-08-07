@@ -194,15 +194,16 @@
             font-size: 1.25rem; /* اندازه آیکن */
         }
 
+/* نسخه جدید استایل هاور: پس‌زمینه تغییر نمی‌کند و یک درخشش نارنجی به آیکن اضافه می‌شود */
         .nav-icon-btn:hover {
-            background-color: #e2e8f0; /* slate-200 */
             color: var(--primary-color);
+            filter: drop-shadow(0 0 4px var(--special-color));
         }
         
-        /* استایل برای دکمه‌های فعال */
+        /* نسخه جدید استایل فعال: پس‌زمینه حذف شده و فقط رنگ آیکن آبی می‌شود */
         .nav-icon-btn.active {
-            color: white;
-            background-color: var(--primary-color);
+            color: var(--primary-color);
+            background-color: transparent; /* پس‌زمینه شفاف می‌شود */
         }
 
         /* استایل خاص برای دکمه بزرگ ثبت پروژه/فعالیت */
@@ -339,8 +340,8 @@
                         <div class="flex items-center justify-center gap-x-1">
                             <a href="#" id="home-nav-item" data-view="dashboard" class="nav-icon-btn group"><i class="fas fa-home"></i><div class="nav-tooltip">خانه</div></a>
                             <a href="#" id="search-nav-item" data-view="" class="nav-icon-btn group" style="display: none;"><i class="fas fa-search"></i><div class="nav-tooltip"></div></a>
-                            <a href="#" id="create-project-nav-item" data-view="create-project" class="nav-icon-btn special-btn group" style="display: none;"><i class="fas fa-plus"></i><div class="nav-tooltip">ثبت پروژه جدید</div></a>
-                            <a href="#" id="create-activity-nav-item" data-view="create-activity" class="nav-icon-btn special-btn group" style="display: none;"><i class="fas fa-plus"></i><div class="nav-tooltip">ثبت فعالیت جدید</div></a>
+                            <a href="#" id="create-project-nav-item" data-view="create-project" class="nav-icon-btn special-btn group" style="display: none;"><i class="fas fa-square-plus"></i><div class="nav-tooltip">ثبت پروژه جدید</div></a>
+                            <a href="#" id="create-activity-nav-item" data-view="create-activity" class="nav-icon-btn special-btn group" style="display: none;"><i class="fas fa-square-plus"></i><div class="nav-tooltip">ثبت فعالیت جدید</div></a>
                             <a href="#" id="my-items-nav-item" data-view="" class="nav-icon-btn group" style="display: none;"><i class="fas fa-briefcase"></i><div class="nav-tooltip"></div></a>
                             <a href="#" id="profile-nav-item" data-view="profile" class="nav-icon-btn group"><i class="fas fa-user-circle"></i><div class="nav-tooltip">پروفایل</div></a>
                             
@@ -710,7 +711,7 @@ function getProfileHeaderHTML(userData) {
                     img.src = profileImageUrl;
                     img.alt = 'عکس پروفایل';
                     // با این کلاس‌ها، عکس به شکل دایره و هم‌اندازه دکمه در می‌آید
-                    img.className = 'w-full h-full object-cover rounded-full';
+                    img.className = 'w-7 h-7 object-cover rounded-full';
                     
                     // اگر عکس به هر دلیلی لود نشد، دوباره آیکن را نمایش بده
                     img.onerror = () => {
