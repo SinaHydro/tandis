@@ -2801,6 +2801,23 @@ async function main() {
             });
         }
 
+        function updateTime() {
+            const dateElement = document.getElementById('desktop-date');
+            const timeElement = document.getElementById('desktop-time');
+
+            if (dateElement && timeElement) {
+                const now = new Date();
+                const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+                const timeOptions = { weekday: 'long', hour: '2-digit', minute: '2-digit' };
+                const persianDate = now.toLocaleDateString('fa-IR', dateOptions);
+                const persianTime = now.toLocaleTimeString('fa-IR', timeOptions).replace('،', ' |');
+                dateElement.innerText = persianDate;
+                timeElement.innerText = persianTime;
+            }
+        }
+        updateTime();
+        setInterval(updateTime, 1000); // آپدیت در هر ثانیه
+        
 
         main();
     })();
