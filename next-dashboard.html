@@ -2212,7 +2212,10 @@ function renderProjectForm(projectData = null) {
             <div class="activity-card bg-white rounded-lg overflow-hidden ${!isActive && !forEmployer ? 'opacity-60 bg-slate-50' : ''}">
                 <div class="p-4 border-b">
                      <div class="flex justify-between items-start">
-                         <div class="flex flex-col"><h4 class="font-bold text-lg text-slate-800">${data.engineerActivity} ${data.engineerLevel} ${data.engineerField}</h4><div class="flex mt-1">${starsHtml}</div></div>
+                     <div class="flex flex-col">
+                         <div class="flex">${starsHtml}</div>
+                         <h4 class="font-bold text-lg text-slate-800 mt-1">${data.engineerActivity} ${data.engineerLevel} ${data.engineerField}</h4>
+                     </div>
                          ${!forEmployer ? `<span class="px-3 py-1 text-sm font-semibold rounded-full ${isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${data.Status}</span>` : `<p class="text-sm text-slate-500 text-left">آخرین ویرایش:<br>${formatTimeAgo(data.LastModifiedDate)}</p>`}
                      </div>
                 </div>
