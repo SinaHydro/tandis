@@ -286,7 +286,7 @@
                 display: block; /* برای نمایش بهتر متن‌های طولانی */
             }
         }
-        /* --- استایل‌های جدید برای لیست پروژه‌های کارفرما --- */
+/* --- استایل‌های جدید برای لیست پروژه‌های کارفرما --- */
         .project-accordion .project-row {
             border: 1px solid #e2e8f0;
             border-radius: 0.75rem;
@@ -306,14 +306,9 @@
         .project-accordion .project-header:hover {
             background-color: #f8fafc;
         }
-        .project-accordion .header-item > span {
-            font-size: 0.75rem; /* 12px */
-            color: #64748b; /* slate-500 */
-        }
-        .project-accordion .accordion-icon {
-            transition: transform 0.3s ease;
-            font-size: 1rem;
-            color: #94a3b8; /* slate-400 */
+        .project-accordion .header-item {
+            font-size: 0.875rem;
+            color: #475569;
         }
         .project-accordion .header-item strong {
             color: #1e293b;
@@ -342,7 +337,19 @@
         .applicant-row:last-child {
             border-bottom: none;
         }
-        
+        .project-accordion .header-item > span {
+            font-size: 0.75rem; /* 12px */
+            color: #64748b; /* slate-500 */
+        }
+        .project-accordion .accordion-icon {
+            transition: transform 0.3s ease;
+            font-size: 1rem;
+            color: #94a3b8; /* slate-400 */
+        }
+        .project-row.open .accordion-icon {
+            transform: rotate(180deg);
+        }
+
     </style>
 </head>
 <body class="hidden">
