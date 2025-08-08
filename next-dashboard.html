@@ -306,9 +306,14 @@
         .project-accordion .project-header:hover {
             background-color: #f8fafc;
         }
-        .project-accordion .header-item {
-            font-size: 0.875rem;
-            color: #475569;
+        .project-accordion .header-item > span {
+            font-size: 0.75rem; /* 12px */
+            color: #64748b; /* slate-500 */
+        }
+        .project-accordion .accordion-icon {
+            transition: transform 0.3s ease;
+            font-size: 1rem;
+            color: #94a3b8; /* slate-400 */
         }
         .project-accordion .header-item strong {
             color: #1e293b;
@@ -329,11 +334,10 @@
             border-top: 1px solid #e2e8f0;
         }
         .applicant-row {
-            display: flex;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr) auto; /* 4 ستون برای مشخصات و 1 ستون برای دکمه‌ها */
+            gap: 1rem;
             align-items: center;
-            padding: 0.75rem 1.5rem;
-            border-bottom: 1px solid #e2e8f0;
         }
         .applicant-row:last-child {
             border-bottom: none;
@@ -555,7 +559,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbweWj9uenuLwq3lcuiCuPXErKw1Fn56ELedS5BEmu51A14YNwc6r75SZ734VbCYROY/exec'; // Please replace with your actual script URL
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyY9GqQpwopHAlZ-3SyRwtF3ugAsEYBa3vRQxOHwX_YExjxip7eZkvL9SGDDQY7oU0m/exec'; // Please replace with your actual script URL
 
         const SLIDESHOW_CONTENT_R = [
             { 
@@ -2564,18 +2568,20 @@ async function renderEmployerProjects() {
                         projectsHtml += `
                             <div class="project-row" data-project-id="${p.ProjectID}">
                                 <div class="project-header">
-                                    <div class="header-item"><strong>${p.projectName}</strong><br>${p.city}، منطقه ${p.district}</div>
-                                    <div class="header-item"><strong>وضعیت:</strong> ${p.Status}</div>
-                                    <div class="header-item"><strong>نیاز پروژه:</strong><br>${p.engineerActivity} ${p.engineerRank} ${p.engineerField}</div>
-                                    <div class="header-item"><strong>زیربنا:</strong> ${p.area} مترمربع</div>
-                                    <div class="header-item"><strong>مدت قرارداد:</strong> ${p.contractMonths} ماه</div>
+                                    <div class="header-item"><i class="fas fa-chevron-down accordion-icon"></i></div>
+                                    <div class="header-item"><span>نام پروژه</span><strong>${p.projectName}</strong></div>
+                                    <div class="header-item"><span>وضعیت</span><strong>${p.Status}</strong></div>
+                                    <div class="header-item"><span>نیاز پروژه</span><strong>${p.engineerActivity} ${p.engineerRank}</strong></div>
+                                    <div class="header-item"><span>طبقات</span><strong>${p.floors} روی همکف + ${p.basementFloors} زیرزمین</strong></div>
+                                    <div class="header-item"><span>زیربنا</span><strong>${p.area} مترمربع</strong></div>
+                                    <div class="header-item"><span>تعرفه شما</span><strong>${parseFloat(p.unitPrice).toLocaleString('fa-IR')} تومان</strong></div>
                                     <div class="header-actions">
-                                        <button class="btn ${isOpen ? 'btn-danger' : 'btn-success'} !p-2" data-action="${isOpen ? 'close-project' : 'open-project'}"><i class="fas ${isOpen ? 'fa-lock' : 'fa-lock-open'}"></i></button>
-                                        <button class="btn btn-secondary !p-2" data-action="edit-project"><i class="fas fa-edit"></i></button>
+                                        <button class="btn ${isOpen ? 'btn-danger' : 'btn-success'} !p-2" title="${isOpen ? 'بستن پروژه' : 'باز کردن پروژه'}" data-action="${isOpen ? 'close-project' : 'open-project'}"><i class="fas ${isOpen ? 'fa-lock' : 'fa-lock-open'}"></i></button>
+                                        <button class="btn btn-secondary !p-2" title="ویرایش پروژه" data-action="edit-project"><i class="fas fa-edit"></i></button>
                                     </div>
                                 </div>
                                 <div class="project-body">
-                                    <div class="p-4 text-center text-slate-500">در حال بارگذاری درخواست‌ها...</div>
+                                    <div class="p-4 text-center text-slate-500">برای مشاهده درخواست‌ها کلیک کنید</div>
                                 </div>
                             </div>`;
                     });
@@ -2591,29 +2597,39 @@ async function renderEmployerProjects() {
         }
 
         function attachProjectRowListeners() {
-            document.querySelectorAll('.project-header').forEach(header => {
+            const allProjectRows = document.querySelectorAll('.project-row');
+            allProjectRows.forEach(row => {
+                const header = row.querySelector('.project-header');
                 header.addEventListener('click', async (e) => {
-                    if (e.target.closest('button')) return; // اگر روی دکمه کلیک شد، باز نشود
+                    if (e.target.closest('button')) return;
 
-                    const row = header.closest('.project-row');
                     const projectId = row.dataset.projectId;
                     const body = row.querySelector('.project-body');
+                    const isOpen = row.classList.contains('open');
+
+                    // بستن تمام ردیف‌های باز دیگر
+                    allProjectRows.forEach(otherRow => {
+                        if (otherRow !== row) {
+                            otherRow.classList.remove('open');
+                        }
+                    });
 
                     // اگر برای اولین بار باز می‌شود، اطلاعات را واکشی کن
-                    if (!row.classList.contains('open') && !body.dataset.loaded) {
+                    if (!isOpen && !body.dataset.loaded) {
+                        body.innerHTML = '<div class="p-4 text-center text-slate-500">در حال بارگذاری درخواست‌ها...</div>';
                         try {
                             const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getApplicantsForProject&projectId=${projectId}`);
                             const result = await response.json();
                             if (result.success) {
                                 renderApplicants(result.data, body);
                                 body.dataset.loaded = 'true';
-                            } else {
-                                body.innerHTML = `<div class="p-4 text-center text-red-500">${result.message}</div>`;
-                            }
+                            } else { throw new Error(result.message); }
                         } catch (error) {
-                            body.innerHTML = `<div class="p-4 text-center text-red-500">خطا در اتصال.</div>`;
+                            body.innerHTML = `<div class="p-4 text-center text-red-500">خطا در بارگذاری.</div>`;
                         }
                     }
+                    
+                    // باز/بسته کردن ردیف فعلی
                     row.classList.toggle('open');
                 });
             });
@@ -2627,8 +2643,11 @@ async function renderEmployerProjects() {
             let applicantsHtml = '';
             applicants.forEach(app => {
                 applicantsHtml += `
-                    <div class="applicant-row" data-email="${app.email}">
-                        <div class="font-semibold text-slate-800">${app.firstName} ${app.lastName} (${app.licenseNumber})</div>
+                    <div class="applicant-row p-4" data-email="${app.email}">
+                        <div class="header-item"><span>شهر</span><strong>${app.city || '-'}</strong></div>
+                        <div class="header-item"><span>مشخصات</span><strong>${app.spec || 'تعیین نشده'}</strong></div>
+                        <div class="header-item"><span>کارهای جاری</span><strong>- / -</strong></div>
+                        <div class="header-item"><span>پیشنهاد مهندس</span><strong>- تومان</strong></div>
                         <div class="flex gap-x-2">
                             <button class="btn btn-danger !py-1 !px-3" data-action="reject">رد</button>
                             <button class="btn btn-success !py-1 !px-3" data-action="accept">پذیرش</button>
