@@ -759,10 +759,6 @@ function getProfileHeaderHTML(userData) {
                 showSlide(slideIndex + 1);
             }, 5000 + Math.random() * 1000); // افزودن یک تاخیر تصادفی کوچک برای عدم هماهنگی
         }
-
-        // در تابع main یا در بخش INITIALIZATION، تابع initSlideshow قدیمی را حذف کرده و این دو خط را اضافه کنید:
-        createSlideshow('slideshow', 'slide-dots-container', 'info-box-text', SLIDESHOW_CONTENT_L);
-        createSlideshow('slideshow-R', 'slide-dots-container-R', 'info-box-text-R', SLIDESHOW_CONTENT_R);
         
         function setupRoleSpecificUI(userData) {
             if (!userData || !userData.role) return;
@@ -3074,6 +3070,9 @@ async function main() {
         }
         updateTime();
         setInterval(updateTime, 1000); // آپدیت در هر ثانیه
+
+        createSlideshow('slideshow', 'slide-dots-container', 'info-box-text', SLIDESHOW_CONTENT_L);
+        createSlideshow('slideshow-R', 'slide-dots-container-R', 'info-box-text-R', SLIDESHOW_CONTENT_R);
         
 
         main();
