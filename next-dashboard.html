@@ -306,10 +306,6 @@
         .project-accordion .project-header:hover {
             background-color: #f8fafc;
         }
-        .project-accordion .header-item {
-            font-size: 0.875rem;
-            color: #475569;
-        }
         .project-accordion .header-item strong {
             color: #1e293b;
             font-weight: 600;
@@ -337,17 +333,21 @@
         .applicant-row:last-child {
             border-bottom: none;
         }
+        .project-accordion .header-item {
+            font-size: 0.875rem; /* اندازه فونت پایه برای آیتم‌ها */
+            color: #1e293b;     /* رنگ پیش‌فرض برای مقادیر */
+        }
+
         .project-accordion .header-item > span {
-            font-size: 0.75rem; /* 12px */
-            color: #64748b; /* slate-500 */
+            font-size: 0.75rem;  /* اندازه فونت کوچکتر برای لیبل */
+            color: #64748b;      /* رنگ خاکستری برای لیبل */
         }
-        .project-accordion .accordion-icon {
-            transition: transform 0.3s ease;
-            font-size: 1rem;
-            color: #94a3b8; /* slate-400 */
-        }
-        .project-row.open .accordion-icon {
-            transform: rotate(180deg);
+
+        /* --- این بخش اصلی‌ترین قسمت برای حل مشکل است --- */
+        .project-accordion .header-item > span,
+        .project-accordion .header-item > strong {
+            display: block;      /* هر کدام را به یک بلوک تمام-عرض تبدیل می‌کند */
+            line-height: 1.4;    /* فاصله بین دو سطر را تنظیم می‌کند */
         }
 
     </style>
@@ -2603,7 +2603,7 @@ async function renderEmployerProjects() {
             }
         }
 
-        function attachProjectRowListeners() {
+function attachProjectRowListeners() {
             const allProjectRows = document.querySelectorAll('.project-row');
             allProjectRows.forEach(row => {
                 const header = row.querySelector('.project-header');
