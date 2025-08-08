@@ -66,6 +66,10 @@
         .sidebar-footer { padding: 1rem; margin-top: auto; border-top: 1px solid #e2e8f0; }
         /* --- MODIFICATION: Advertisement sidebar width changed --- */
         .advertisement-sidebar {
+            width: 270px;                  /* ۱. عرض سایدبار ثابت می‌شود */
+            flex-shrink: 0;                /* ۲. از کوچک شدن سایدبار جلوگیری می‌کند */
+            margin: 1rem 0 1rem 1rem;      /* ۳. حاشیه بیرونی (بالا، راست، پایین، چپ) */
+            height: calc(100vh - 2rem);    /* ۴. ارتفاع برای جا دادن حاشیه عمودی تنظیم می‌شود */
             background-color: white;
             border-radius: 1rem; /* 16px */
             padding: 1.5rem; /* 24px */
@@ -360,7 +364,7 @@
             <div id="createProjectContent" class="content-body" style="display: none;"></div>
             <div id="createActivityContent" class="content-body" style="display: none;"></div>
             
-            <div id="bottom-nav" class="w-full mt-auto pt-6">
+            <div id="bottom-nav" class="w-full mt-auto pt-4 mb-4">
                 <div class="bg-white rounded-2xl p-1 shadow-lg max-w-4xl mx-auto">
                     <div class="rounded-xl p-2 h-full w-full flex items-center text-slate-700 font-semibold">
                         
