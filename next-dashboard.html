@@ -73,8 +73,8 @@
         .advertisement-sidebar {
             width: 270px;                  /* ۱. عرض سایدبار ثابت می‌شود */
             flex-shrink: 0;                /* ۲. از کوچک شدن سایدبار جلوگیری می‌کند */
-            margin: 1rem 0 1rem 1rem;      /* ۳. حاشیه بیرونی (بالا، راست، پایین، چپ) */
-            height: calc(100vh - 2rem);    /* ۴. ارتفاع برای جا دادن حاشیه عمودی تنظیم می‌شود */
+            margin: 2rem 0 2rem 2rem;      /* ۳. حاشیه بیرونی (بالا، راست، پایین، چپ) */
+            height: calc(100vh - 4rem);    /* ۴. ارتفاع برای جا دادن حاشیه عمودی تنظیم می‌شود */
             background-color: white;
             border-radius: 1rem; /* 16px */
             padding: 1.5rem; /* 24px */
@@ -419,7 +419,7 @@
                 </div>
             </div>
             <!-- --- NEW: Info Box --- -->
-            <div id="info-box-container" class="info-box mb-4"> <i class="fas fa-info-circle"></i>
+            <div id="info-box-container" class="info-box mb-4">
                 <p id="info-box-text">توضیحات اسلاید در اینجا نمایش داده می‌شود.</p>
             </div>
             <!-- --- NEW: slide show --- -->
@@ -480,15 +480,15 @@
 
         const SLIDESHOW_CONTENT = [
             { 
-                imageUrl: 'https://images.unsplash.com/photo-1581092446347-a85c4bafc42e?w=800&auto=format&fit=crop', 
+                imageUrl: 'https://images.unsplash.com/photo-1739467561973-e5015d7f9561?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDI4M3xNOGpWYkxiVFJ3c3x8ZW58MHx8fHx8', 
                 caption: 'طراحی دقیق و مهندسی‌ساز با جدیدترین متدهای روز دنیا.' 
             },
             { 
-                imageUrl: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800&auto=format&fit=crop', 
+                imageUrl: 'https://images.unsplash.com/photo-1751908934325-5be793566bcc?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDQyfE04alZiTGJUUndzfHxlbnwwfHx8fHw%3D', 
                 caption: 'نظارت کامل بر پروژه‌های ساختمانی شما از صفر تا صد.' 
             },
             { 
-                imageUrl: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop', 
+                imageUrl: 'https://images.unsplash.com/photo-1746444342182-fc6679dd3b4d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDE0OXxNOGpWYkxiVFJ3c3x8ZW58MHx8fHx8', 
                 caption: 'با تندیس، ملک رویایی خود را بسازید. ارتباط مستقیم با بهترین مهندسان.' 
             }
         ];        
@@ -1423,17 +1423,6 @@ function handleEditClick(e) {
 
         // تابع شماره ۱: متخصص مرکزی (راهنمای تور)
         function switchToView(view, clickedElement) {
-            const viewInfo = {
-                dashboard: 'از این بخش می‌توانید آمار کلی و خلاصه‌ای از فعالیت‌های خود را مشاهده کنید.',
-                profile: 'اطلاعات کاربری خود را در این بخش مشاهده و ویرایش کنید. کامل بودن پروفایل به اعتبار شما می‌افزاید.',
-                notifications: 'اطلاعیه‌ها، درخواست‌های همکاری و پیام‌های سیستمی در این قسمت نمایش داده می‌شوند.',
-                projects: userData.role === 'employer' ? 'پروژه‌هایی که ثبت کرده‌اید را مدیریت کنید، وضعیت آن‌ها را تغییر دهید یا ویرایش کنید.' : 'لیست پروژه‌های باز کارفرمایان در اینجا نمایش داده می‌شود. می‌توانید برای همکاری درخواست ارسال کنید.',
-                'my-activities': 'فعالیت‌های ثبت شده شما برای نمایش به کارفرمایان در این بخش مدیریت می‌شوند.',
-                engineers: 'لیست مهندسان فعال را مشاهده کرده و برای پروژه‌های خود درخواست همکاری ارسال نمایید.',
-                settings: 'تنظیمات حساب کاربری خود، مانند تغییر رمز عبور را از این بخش انجام دهید.',
-                'create-project': 'یک پروژه جدید با تمام جزئیات ثبت کنید تا مهندسان متخصص برای آن درخواست همکاری ارسال کنند.',
-                'create-activity': 'با ثبت یک فعالیت جدید، آمادگی خود را برای دریافت پروژه‌های جدید به کارفرمایان اعلام کنید.'
-            };
 
             currentView = view;
             
