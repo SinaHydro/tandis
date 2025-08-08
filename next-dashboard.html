@@ -43,9 +43,6 @@
             height: 100vh;
             max-height: 100vh;
             overflow: hidden;
-            align-items: center;      /* این خط برای وسط‌چین عمودی اضافه شد */
-            justify-content: center;  /* این خط برای وسط‌چین افقی اضافه شد */
-            gap: 2rem;                /* یک فاصله بین محتوای اصلی و سایدبار */
         }
         .main-content-area { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
         .content-body { flex-grow: 1; overflow-y: auto; padding: 1.5rem 2rem; }
@@ -85,6 +82,8 @@
             height: 100%;
             display: flex;
             flex-direction: column;
+            align-self: center;
+            justify-content: center;
         }
         @media (max-width: 1280px) { .advertisement-sidebar { display: none; } }
         .slideshow-container { position: relative; border-radius: 0.5rem; overflow: hidden; }
@@ -420,8 +419,8 @@
                 </div>
             </div>
             <!-- --- NEW: Info Box --- -->
-            <div id="info-box-container" class="info-box">
-                <p id="info-box-text">به ایستگاه کاری خود خوش آمدید. از منوی سمت راست برای دسترسی به بخش‌های مختلف استفاده کنید.</p>
+            <div id="info-box-container" class="info-box mb-4"> <i class="fas fa-info-circle"></i>
+                <p id="info-box-text">توضیحات اسلاید در اینجا نمایش داده می‌شود.</p>
             </div>
             <!-- --- NEW: slide show --- -->
             <div class="slideshow-container">
@@ -478,11 +477,21 @@
     (async function() {
         // --- CONFIGURATION ---
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyX4wAA8HryxvmHPq1XgGPRZKbopHfdUr1DgP8uZw532kbmhFJXB_GFL_UtnzAVxlEE/exec'; // Please replace with your actual script URL
-        const SLIDESHOW_IMAGES = [
-            'https://images.unsplash.com/photo-1739467561973-e5015d7f9561?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDI4M3xNOGpWYkxiVFJ3c3x8ZW58MHx8fHx8',
-            'https://images.unsplash.com/photo-1751908934325-5be793566bcc?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDQyfE04alZiTGJUUndzfHxlbnwwfHx8fHw%3D',
-            'https://images.unsplash.com/photo-1746444342182-fc6679dd3b4d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDE0OXxNOGpWYkxiVFJ3c3x8ZW58MHx8fHx8'
-        ];
+
+        const SLIDESHOW_CONTENT = [
+            { 
+                imageUrl: 'https://images.unsplash.com/photo-1581092446347-a85c4bafc42e?w=800&auto=format&fit=crop', 
+                caption: 'طراحی دقیق و مهندسی‌ساز با جدیدترین متدهای روز دنیا.' 
+            },
+            { 
+                imageUrl: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800&auto=format&fit=crop', 
+                caption: 'نظارت کامل بر پروژه‌های ساختمانی شما از صفر تا صد.' 
+            },
+            { 
+                imageUrl: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop', 
+                caption: 'با تندیس، ملک رویایی خود را بسازید. ارتباط مستقیم با بهترین مهندسان.' 
+            }
+        ];        
         const PROVINCES = ["آذربایجان شرقی", "آذربایجان غربی", "اردبیل", "اصفهان", "البرز", "ایلام", "بوشهر", "تهران", "چهارمحال و بختیاری", "خراسان جنوبی", "خراسان رضوی", "خراسان شمالی", "خوزستان", "زنجان", "سمنان", "سیستان و بلوچستان", "فارس", "قزوین", "قم", "کردستان", "کرمان", "کرمانشاه", "کهگیلویه و بویراحمد", "گلستان", "گیلان", "لرستان", "مازندران", "مرکزی", "هرمزگان", "همدان", "یزد"];
 
         // --- STATE ---
@@ -670,9 +679,10 @@ function getProfileHeaderHTML(userData) {
             slideshowContainer.innerHTML = '';
             dotsContainer.innerHTML = '';
 
-            SLIDESHOW_IMAGES.forEach((src, index) => {
+            // از ساختار جدید SLIDESHOW_CONTENT استفاده می‌کند
+            SLIDESHOW_CONTENT.forEach((content, index) => {
                 const img = document.createElement('img');
-                img.src = src;
+                img.src = content.imageUrl;
                 img.alt = `Slide ${index + 1}`;
                 img.className = 'slide-image';
                 slideshowContainer.appendChild(img);
@@ -684,11 +694,34 @@ function getProfileHeaderHTML(userData) {
                 dotsContainer.appendChild(dot);
             });
 
-            showSlide(0);
-            setInterval(() => {
-                currentSlide = (currentSlide + 1) % SLIDESHOW_IMAGES.length;
-                showSlide(currentSlide);
-            }, 5000);
+            if (SLIDESHOW_CONTENT.length > 0) {
+                showSlide(0);
+                setInterval(() => {
+                    currentSlide = (currentSlide + 1) % SLIDESHOW_CONTENT.length;
+                    showSlide(currentSlide);
+                }, 5000); // زمان تعویض اسلاید
+            }
+        }
+
+        function showSlide(index) {
+           const slides = document.querySelectorAll('.slide-image');
+            const dots = document.querySelectorAll('.dot');
+            const infoBoxText = document.getElementById('info-box-text'); // عنصر اینفوباکس
+
+            if (slides.length === 0) return;
+            
+            slides.forEach(slide => slide.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+            
+            if (slides[index]) slides[index].classList.add('active');
+            if (dots[index]) dots[index].classList.add('active');
+            
+            // متن اینفوباکس با کپشن اسلاید فعلی آپدیت می‌شود
+            if (infoBoxText && SLIDESHOW_CONTENT[index]) {
+                infoBoxText.textContent = SLIDESHOW_CONTENT[index].caption;
+            }
+            
+            currentSlide = index;
         }
 
         function setupRoleSpecificUI(userData) {
@@ -1413,7 +1446,7 @@ function handleEditClick(e) {
 
             if (contentEl) contentEl.style.display = 'block';
 
-            infoBoxText.textContent = viewInfo[view] || 'اطلاعات این بخش در اینجا نمایش داده می‌شود.';
+            // infoBoxText.textContent = viewInfo[view] || 'اطلاعات این بخش در اینجا نمایش داده می‌شود.';
             
             // --- شروع منطق جدید و دقیق برای نمایش/مخفی‌سازی دکمه‌ها ---
             const homeBtn = document.getElementById('home-nav-item');
