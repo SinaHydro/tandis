@@ -296,7 +296,7 @@
         .project-accordion .project-header {
             display: grid;
             /* ستون اول (آیکن) خودکار، ۴ ستون بعدی مساوی، ستون آخر (دکمه‌ها) خودکار */
-            grid-template-columns: auto repeat(4, 1fr) auto;
+            grid-template-columns: auto repeat(5, 1fr) auto;
             align-items: center;
             padding: 1rem 1.5rem;
             cursor: pointer;
@@ -324,6 +324,10 @@
         .project-accordion .project-row.open .project-body {
             max-height: 500px; /* ارتفاع تقریبی برای نمایش محتوا */
             border-top: 1px solid #e2e8f0;
+        }
+        .project-row.closed-project {
+            opacity: 0.6;
+            background-color: #f8fafc; /* رنگ پس‌زمینه کمی متفاوت */
         }
         .applicant-row {
             display: grid;
@@ -2572,30 +2576,33 @@ async function renderEmployerProjects() {
                 if (fetchedProjects.length > 0) {
                     let projectsHtml = '<div class="project-accordion">';
                     fetchedProjects.forEach(p => {
-                        const isOpen = p.Status === 'باز';
-                        // منطق جدید برای نمایش طبقات
-                        const floorsText = `${p.floors} روی زمین ${parseInt(p.basementFloors) > 0 ? `+ ${p.basementFloors} زیرزمین` : ''}`;
+                        const isClosed = p.Status === 'بسته';
                         
+                        // --- بخش جدید برای نمایش طبقات ---
+                        const basementFloorsHtml = parseInt(p.basementFloors) > 0 ? `<strong>${p.basementFloors} زیرزمین</strong>` : '';
+
                         projectsHtml += `
-                            <div class="project-row" data-project-id="${p.ProjectID}">
+                            <div class="project-row ${isClosed ? 'closed-project' : ''}" data-status="${p.Status}" data-project-id="${p.ProjectID}">
                                 <div class="project-header">
                                     <div class="header-item"><i class="fas fa-chevron-down accordion-icon"></i></div>
                                     <div class="header-item"><span>نام پروژه</span><strong>${p.projectName}</strong></div>
-                                    
                                     <div class="header-item"><span>نیاز پروژه</span><strong>${p.engineerActivity} ${p.engineerRank} ${p.engineerField}</strong></div>
                                     
-                                    <div class="header-item"><span>طبقات</span><strong>${floorsText}</strong></div>
+                                    <div class="header-item">
+                                        <strong>${p.floors} طبقه </strong>
+                                        ${basementFloorsHtml}
+                                    </div>
                                     
                                     <div class="header-item"><span>زیربنا</span><strong>${p.area} مترمربع</strong></div>
                                     <div class="header-item"><span>تعرفه شما</span><strong>${parseFloat(p.unitPrice).toLocaleString('fa-IR')} تومان</strong></div>
                                     <div class="header-actions">
-                                        <button class="btn ${isOpen ? 'btn-danger' : 'btn-success'} !p-2" title="${isOpen ? 'بستن پروژه' : 'باز کردن پروژه'}" data-action="${isOpen ? 'close-project' : 'open-project'}"><i class="fas ${isOpen ? 'fa-lock' : 'fa-lock-open'}"></i></button>
+                                        <button class="btn ${!isClosed ? 'btn-danger' : 'btn-success'} !p-2" title="${!isClosed ? 'بستن پروژه' : 'باز کردن پروژه'}" data-action="${!isClosed ? 'close-project' : 'open-project'}"><i class="fas ${!isClosed ? 'fa-lock' : 'fa-lock-open'}"></i></button>
                                         <button class="btn btn-secondary !p-2" title="ویرایش پروژه" data-action="edit-project"><i class="fas fa-edit"></i></button>
                                     </div>
                                 </div>
                                 <div class="project-body">
                                     <div class="p-4 text-center text-slate-500">برای مشاهده درخواست‌ها کلیک کنید</div>
-                                </div>
+                                overscroll-behavior-y: </div>
                             </div>`;
                     });
                     projectsHtml += '</div>';
@@ -2614,20 +2621,28 @@ function attachProjectRowListeners() {
             allProjectRows.forEach(row => {
                 const header = row.querySelector('.project-header');
                 header.addEventListener('click', async (e) => {
-                    if (e.target.closest('button')) return;
+                    if (e.target.closest('button')) return; 
+
+                    const status = row.dataset.status;
+
+                    // --- بخش جدید برای بررسی وضعیت پروژه ---
+                    if (status === 'بسته') {
+                        const message = `برای مشاهده درخواست همکاری مهندسان، نخست باید وضعیت پروژه را با دکمه <i class="fas fa-lock-open text-green-500 mx-1"></i> به حالت باز تبدیل کنید.`;
+                        showModal(message, 'info');
+                        return; // از ادامه اجرای کد جلوگیری می‌کند
+                    }
+                    // --- پایان بخش جدید ---
 
                     const projectId = row.dataset.projectId;
                     const body = row.querySelector('.project-body');
                     const isOpen = row.classList.contains('open');
 
-                    // بستن تمام ردیف‌های باز دیگر
                     allProjectRows.forEach(otherRow => {
                         if (otherRow !== row) {
                             otherRow.classList.remove('open');
                         }
                     });
 
-                    // اگر برای اولین بار باز می‌شود، اطلاعات را واکشی کن
                     if (!isOpen && !body.dataset.loaded) {
                         body.innerHTML = '<div class="p-4 text-center text-slate-500">در حال بارگذاری درخواست‌ها...</div>';
                         try {
@@ -2642,12 +2657,11 @@ function attachProjectRowListeners() {
                         }
                     }
                     
-                    // باز/بسته کردن ردیف فعلی
                     row.classList.toggle('open');
                 });
             });
         }
-
+        
         function renderApplicants(applicants, bodyElement) {
             if (applicants.length === 0) {
                 bodyElement.innerHTML = '<div class="p-4 text-center text-slate-500">هیچ درخواستی برای این پروژه ثبت نشده است.</div>';
