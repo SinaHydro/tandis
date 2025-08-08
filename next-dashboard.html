@@ -295,7 +295,8 @@
         }
         .project-accordion .project-header {
             display: grid;
-            grid-template-columns: repeat(5, 1fr) auto;
+            /* ستون اول (آیکن) خودکار، ۴ ستون بعدی مساوی، ستون آخر (دکمه‌ها) خودکار */
+            grid-template-columns: auto repeat(4, 1fr) auto;
             align-items: center;
             padding: 1rem 1.5rem;
             cursor: pointer;
@@ -2572,14 +2573,19 @@ async function renderEmployerProjects() {
                     let projectsHtml = '<div class="project-accordion">';
                     fetchedProjects.forEach(p => {
                         const isOpen = p.Status === 'باز';
+                        // منطق جدید برای نمایش طبقات
+                        const floorsText = `${p.floors} روی زمین ${parseInt(p.basementFloors) > 0 ? `+ ${p.basementFloors} زیرزمین` : ''}`;
+                        
                         projectsHtml += `
                             <div class="project-row" data-project-id="${p.ProjectID}">
                                 <div class="project-header">
                                     <div class="header-item"><i class="fas fa-chevron-down accordion-icon"></i></div>
                                     <div class="header-item"><span>نام پروژه</span><strong>${p.projectName}</strong></div>
-                                    <div class="header-item"><span>وضعیت</span><strong>${p.Status}</strong></div>
-                                    <div class="header-item"><span>نیاز پروژه</span><strong>${p.engineerActivity} ${p.engineerRank}</strong></div>
-                                    <div class="header-item"><span>طبقات</span><strong>${p.floors} روی همکف + ${p.basementFloors} زیرزمین</strong></div>
+                                    
+                                    <div class="header-item"><span>نیاز پروژه</span><strong>${p.engineerActivity} ${p.engineerRank} ${p.engineerField}</strong></div>
+                                    
+                                    <div class="header-item"><span>طبقات</span><strong>${floorsText}</strong></div>
+                                    
                                     <div class="header-item"><span>زیربنا</span><strong>${p.area} مترمربع</strong></div>
                                     <div class="header-item"><span>تعرفه شما</span><strong>${parseFloat(p.unitPrice).toLocaleString('fa-IR')} تومان</strong></div>
                                     <div class="header-actions">
