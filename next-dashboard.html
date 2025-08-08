@@ -73,7 +73,7 @@
         .advertisement-sidebar {
             width: 270px;                  /* ۱. عرض سایدبار ثابت می‌شود */
             flex-shrink: 0;                /* ۲. از کوچک شدن سایدبار جلوگیری می‌کند */
-            margin: 2rem 0 2rem 2rem;      /* ۳. حاشیه بیرونی (بالا، راست، پایین، چپ) */
+            margin: 2rem 2rem 2rem 2rem;      /* ۳. حاشیه بیرونی (بالا، راست، پایین، چپ) */
             height: calc(100vh - 4rem);    /* ۴. ارتفاع برای جا دادن حاشیه عمودی تنظیم می‌شود */
             background-color: white;
             border-radius: 1rem; /* 16px */
@@ -3006,7 +3006,7 @@ async function main() {
                 }, 1500);
 
             }
-            initSlideshow();
+           
             setupViewSwitcher();
             setupPasswordToggle();
             changePasswordForm.addEventListener('submit', handleChangePassword);
