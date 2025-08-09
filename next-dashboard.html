@@ -571,7 +571,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyY9GqQpwopHAlZ-3SyRwtF3ugAsEYBa3vRQxOHwX_YExjxip7eZkvL9SGDDQY7oU0m/exec'; // Please replace with your actual script URL
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxDMi_OhENAJ7raysOL_uttxx5sw6IrJRYnddEnZSrL_xOH9lNJyRsEiafvCXzI7bRg/exec'; // Please replace with your actual script URL
 
         const SLIDESHOW_CONTENT_R = [
             { 
@@ -2584,28 +2584,36 @@ async function renderProjectMarketplace() {
             return engineerValue >= projectValue; // اگر پایه مهندس بهتر یا مساوی بود، true برمی‌گرداند
         }
 
-        function checkApplicationPrerequisites(projectId, button) {
+function checkApplicationPrerequisites(projectId, button) {
             const project = fetchedProjects.find(p => p.ProjectID === projectId);
             if (!project) return;
 
-            // جستجو برای یافتن یک فعالیت واجد شرایط
-            const qualifiedActivity = engineerActivities.find(activity => 
-                activity.Status === 'فعال' &&
-                activity.engineerField === project.engineerField &&
-                activity.engineerActivity === project.engineerActivity &&
-                compareGrades(activity.engineerLevel, project.engineerRank)
-            );
+            const qualifiedActivity = engineerActivities.find(activity => {
+                // بررسی شرط‌های اصلی
+                const isActive = activity.Status === 'فعال';
+                const isActivityTypeMatch = activity.engineerActivity === project.engineerActivity;
+                const isGradeSufficient = compareGrades(activity.engineerLevel, project.engineerRank);
+
+                // بررسی شرط رشته با در نظر گرفتن استثنا
+                let isFieldMatch = activity.engineerField === project.engineerField;
+                if (
+                    project.engineerActivity === 'مجری' &&
+                    (project.engineerField === 'معماری' && activity.engineerField === 'عمران') ||
+                    (project.engineerField === 'عمران' && activity.engineerField === 'معماری')
+                ) {
+                    isFieldMatch = true;
+                }
+                
+                return isActive && isActivityTypeMatch && isGradeSufficient && isFieldMatch;
+            });
 
             if (qualifiedActivity) {
-                // اگر شرایط احراز شد، درخواست ارسال می‌شود
                 handleApplyForProject(projectId, button);
             } else {
-                // اگر شرایط احراز نشد، پیام راهنما نمایش داده می‌شود
                 const message = 'شما فعالیت ثبت‌شده و فعالی که با نیازمندی‌های این پروژه (رشته، نوع فعالیت و پایه) مطابقت داشته باشد، ندارید. لطفاً ابتدا از بخش "فعالیت‌های من" یک فعالیت مرتبط ثبت کرده یا فعالیت موجود خود را فعال نمایید.';
                 showModal(message, 'info');
             }
         }
-
 async function renderEmployerProjects() {
             projectsContent.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
             try {
@@ -2618,32 +2626,23 @@ async function renderEmployerProjects() {
                     let projectsHtml = '<div class="project-accordion">';
                     fetchedProjects.forEach(p => {
                         const isClosed = p.Status === 'بسته';
+                        const floorsText = `${p.floors} روی همکف ${parseInt(p.basementFloors) > 0 ? `+ ${p.basementFloors} زیرزمین` : ''}`;
                         
-                        // --- بخش جدید برای نمایش طبقات ---
-                        const basementFloorsHtml = parseInt(p.basementFloors) > 0 ? `<strong>${p.basementFloors} زیرزمین</strong>` : '';
-
                         projectsHtml += `
                             <div class="project-row ${isClosed ? 'closed-project' : ''}" data-status="${p.Status}" data-project-id="${p.ProjectID}">
                                 <div class="project-header">
                                     <div class="header-item"><i class="fas fa-chevron-down accordion-icon"></i></div>
                                     <div class="header-item"><span>نام پروژه</span><strong>${p.projectName}</strong></div>
+                                    <div class="header-item"><span>کل درخواست‌ها</span><strong>${p.applicantCount} نفر</strong></div>
                                     <div class="header-item"><span>نیاز پروژه</span><strong>${p.engineerActivity} ${p.engineerRank} ${p.engineerField}</strong></div>
-                                    
-                                    <div class="header-item">
-                                        <strong>${p.floors} طبقه </strong>
-                                        ${basementFloorsHtml}
-                                    </div>
-                                    
-                                    <div class="header-item"><span>زیربنا</span><strong>${p.area} مترمربع</strong></div>
+                                    <div class="header-item"><span>طبقات</span><strong>${floorsText}</strong></div>
                                     <div class="header-item"><span>تعرفه شما</span><strong>${parseFloat(p.unitPrice).toLocaleString('fa-IR')} تومان</strong></div>
                                     <div class="header-actions">
                                         <button class="btn ${!isClosed ? 'btn-danger' : 'btn-success'} !p-2" title="${!isClosed ? 'بستن پروژه' : 'باز کردن پروژه'}" data-action="${!isClosed ? 'close-project' : 'open-project'}"><i class="fas ${!isClosed ? 'fa-lock' : 'fa-lock-open'}"></i></button>
                                         <button class="btn btn-secondary !p-2" title="ویرایش پروژه" data-action="edit-project"><i class="fas fa-edit"></i></button>
                                     </div>
                                 </div>
-                                <div class="project-body">
-                                    <div class="p-4 text-center text-slate-500">برای مشاهده درخواست‌ها کلیک کنید</div>
-                                overscroll-behavior-y: </div>
+                                <div class="project-body">...</div>
                             </div>`;
                     });
                     projectsHtml += '</div>';
@@ -2709,13 +2708,13 @@ function attachProjectRowListeners() {
                 return;
             }
             let applicantsHtml = '';
-            applicants.forEach(app => {
+            applicants.forEach((app, index) => {
                 applicantsHtml += `
                     <div class="applicant-row p-4" data-email="${app.email}">
+                        <div class="header-item"><span>ردیف</span><strong>${index + 1}</strong></div>
                         <div class="header-item"><span>شهر</span><strong>${app.city || '-'}</strong></div>
                         <div class="header-item"><span>مشخصات</span><strong>${app.spec || 'تعیین نشده'}</strong></div>
-                        <div class="header-item"><span>کارهای جاری</span><strong>- / -</strong></div>
-                        <div class="header-item"><span>پیشنهاد مهندس</span><strong>- تومان</strong></div>
+                        <div class="header-item"><span>کارهای جاری</span><strong>${app.workload || '- / -'}</strong></div>
                         <div class="flex gap-x-2">
                             <button class="btn btn-danger !py-1 !px-3" data-action="reject">رد</button>
                             <button class="btn btn-success !py-1 !px-3" data-action="accept">پذیرش</button>
