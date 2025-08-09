@@ -295,8 +295,8 @@
         }
         .project-accordion .project-header {
             display: grid;
-            /* ستون اول (آیکن) خودکار، ۴ ستون بعدی مساوی، ستون آخر (دکمه‌ها) خودکار */
-            grid-template-columns: auto repeat(5, 1fr) auto;
+            /* ستون‌ها برای جای دادن "مدت قرارداد" آپدیت شد */
+            grid-template-columns: auto repeat(6, 1fr) auto;
             align-items: center;
             padding: 1rem 1.5rem;
             cursor: pointer;
@@ -331,7 +331,8 @@
         }
         .applicant-row {
             display: grid;
-            grid-template-columns: repeat(4, 1fr) auto; /* 4 ستون برای مشخصات و 1 ستون برای دکمه‌ها */
+            /* چیدمان جدید برای مشخصات مهندس */
+            grid-template-columns: 40px repeat(5, 1fr) auto;
             gap: 1rem;
             align-items: center;
         }
@@ -571,7 +572,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxDMi_OhENAJ7raysOL_uttxx5sw6IrJRYnddEnZSrL_xOH9lNJyRsEiafvCXzI7bRg/exec'; // Please replace with your actual script URL
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxP4UkA-Fw0XFg-vSyun0AvkluSyCf6eL83NgtQdTyWjtzXRkY6ipbiD911SfKfhkRu/exec'; // Please replace with your actual script URL
 
         const SLIDESHOW_CONTENT_R = [
             { 
@@ -2626,23 +2627,29 @@ async function renderEmployerProjects() {
                     let projectsHtml = '<div class="project-accordion">';
                     fetchedProjects.forEach(p => {
                         const isClosed = p.Status === 'بسته';
-                        const floorsText = `${p.floors} روی همکف ${parseInt(p.basementFloors) > 0 ? `+ ${p.basementFloors} زیرزمین` : ''}`;
-                        
+                        const floorsText = `<strong>${p.floors} طبقه</strong>` + (parseInt(p.basementFloors) > 0 ? `<strong>${p.basementFloors} طبقه زیرزمین</strong>` : '');
+
                         projectsHtml += `
                             <div class="project-row ${isClosed ? 'closed-project' : ''}" data-status="${p.Status}" data-project-id="${p.ProjectID}">
                                 <div class="project-header">
                                     <div class="header-item"><i class="fas fa-chevron-down accordion-icon"></i></div>
-                                    <div class="header-item"><span>نام پروژه</span><strong>${p.projectName}</strong></div>
-                                    <div class="header-item"><span>کل درخواست‌ها</span><strong>${p.applicantCount} نفر</strong></div>
+                                    <div class="header-item">
+                                        <strong>${p.projectName}</strong>
+                                        <span class="text-xs text-slate-500">منطقه ${p.district} ${p.city}</span>
+                                    </div>
                                     <div class="header-item"><span>نیاز پروژه</span><strong>${p.engineerActivity} ${p.engineerRank} ${p.engineerField}</strong></div>
-                                    <div class="header-item"><span>طبقات</span><strong>${floorsText}</strong></div>
+                                    <div class="header-item">${floorsText}</div>
+                                    <div class="header-item"><span>زیربنا</span><strong>${p.area} مترمربع</strong></div>
+                                    <div class="header-item"><span>مدت قرارداد</span><strong>${p.contractMonths} ماه</strong></div>
                                     <div class="header-item"><span>تعرفه شما</span><strong>${parseFloat(p.unitPrice).toLocaleString('fa-IR')} تومان</strong></div>
                                     <div class="header-actions">
                                         <button class="btn ${!isClosed ? 'btn-danger' : 'btn-success'} !p-2" title="${!isClosed ? 'بستن پروژه' : 'باز کردن پروژه'}" data-action="${!isClosed ? 'close-project' : 'open-project'}"><i class="fas ${!isClosed ? 'fa-lock' : 'fa-lock-open'}"></i></button>
                                         <button class="btn btn-secondary !p-2" title="ویرایش پروژه" data-action="edit-project"><i class="fas fa-edit"></i></button>
                                     </div>
                                 </div>
-                                <div class="project-body">...</div>
+                                <div class="project-body">
+                                    <div class="p-4 text-center text-slate-500">برای مشاهده درخواست‌ها کلیک کنید</div>
+                                </div>
                             </div>`;
                     });
                     projectsHtml += '</div>';
@@ -2711,10 +2718,15 @@ function attachProjectRowListeners() {
             applicants.forEach((app, index) => {
                 applicantsHtml += `
                     <div class="applicant-row p-4" data-email="${app.email}">
-                        <div class="header-item"><span>ردیف</span><strong>${index + 1}</strong></div>
-                        <div class="header-item"><span>شهر</span><strong>${app.city || '-'}</strong></div>
-                        <div class="header-item"><span>مشخصات</span><strong>${app.spec || 'تعیین نشده'}</strong></div>
-                        <div class="header-item"><span>کارهای جاری</span><strong>${app.workload || '- / -'}</strong></div>
+                        <strong>${index + 1}</strong>
+                        <div class="header-item"><span>استان</span><strong>${app.province || '-'}</strong></div>
+                        <div class="header-item">
+                            <strong>${app.activity || ''} ${app.level || ''}</strong>
+                            <span class="text-xs text-slate-500">${app.field || ''}</span>
+                        </div>
+                        <div class="header-item"><span>کار باقیمانده</span><strong>${app.remainingWork} عدد</strong></div>
+                        <div class="header-item"><span>متراژ باقیمانده</span><strong>${app.remainingArea.toLocaleString('fa-IR')} متر</strong></div>
+                        <div class="header-item"><span>پیشنهاد مهندس</span><strong>- تومان</strong></div>
                         <div class="flex gap-x-2">
                             <button class="btn btn-danger !py-1 !px-3" data-action="reject">رد</button>
                             <button class="btn btn-success !py-1 !px-3" data-action="accept">پذیرش</button>
