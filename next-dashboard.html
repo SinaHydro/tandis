@@ -2226,12 +2226,18 @@ function renderProjectForm(projectData = null) {
                 if (result.status === 'success') {
                     showModal(result.message, 'success');
                     currentActivityData = {};
-                    document.querySelector('.nav-item[data-view="my-activities"]').click();
+                    
+                    // --- این خط اصلاح شده است ---
+                    // به جای جستجوی کلاس قدیمی، مستقیماً از ID دکمه جدید استفاده می‌کنیم
+                    document.getElementById('my-items-nav-item').click();
+
                 } else { throw new Error(result.message || 'خطای ناشناخته.'); }
             } catch (error) {
                  showModal(`خطا در ثبت فعالیت: ${error.message}`, 'error');
                  button.disabled = false;
-                 button.innerHTML = `<i class="fas fa-paper-plane mr-2"></i>${isUpdate ? 'ذخیره تغییرات' : 'ارسال معرفی فعالیت'}`;
+                 // فراموش نکنید که متن دکمه باید به حالت اول برگردد
+                 const buttonText = isUpdate ? 'ذخیره تغییرات' : 'ارسال معرفی فعالیت';
+                 button.innerHTML = `<i class="fas fa-paper-plane mr-2"></i> ${buttonText}`;
             }
         }
         
