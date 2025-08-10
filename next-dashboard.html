@@ -353,6 +353,21 @@
             display: block;      /* هر کدام را به یک بلوک تمام-عرض تبدیل می‌کند */
             line-height: 1.4;    /* فاصله بین دو سطر را تنظیم می‌کند */
         }
+                /* --- کد جدید برای اصلاح گوشه‌های گرد --- */
+        .project-accordion .project-header {
+            /* در حالت بسته، همه گوشه‌ها گرد هستند */
+            border-radius: 0.75rem;
+        }
+        .project-row.open .project-header {
+            /* در حالت باز، فقط گوشه‌های بالایی گرد هستند */
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        .project-row.open .project-body {
+            /* در حالت باز، فقط گوشه‌های پایینی گرد هستند */
+            border-bottom-left-radius: 0.75rem;
+            border-bottom-right-radius: 0.75rem;
+        }
         .action-btn-container {
             position: relative;
         }
@@ -612,7 +627,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyH34RTxwptAt6HSXgWy0XyCC4ErYT5lsdwcCH6XHSCb8172ELF2jx0A3mK731yVCjH/exec'; // Please replace with your actual script URL
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzqOPVbc5R6dgEd_puvu0vXmqObJ6iPfDEz8_xQDaFJebpDdzvCY6vXtOjclje7ckeq/exec'; // Please replace with your actual script URL
 
         const SLIDESHOW_CONTENT_R = [
             { 
@@ -2288,25 +2303,144 @@ function renderProjectForm(projectData = null) {
             }
         }
         
-        async function renderMyActivities() {
-            myActivitiesContent.innerHTML = `<div id="my-activities-container"><div class="spinner mx-auto mt-10"></div></div>`;
+async function renderMyActivities() {
+            myActivitiesContent.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
             try {
-                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getActivitiesByEngineer&email=${encodeURIComponent(userData.email)}`);
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getActivitiesWithRequestCounts&email=${encodeURIComponent(userData.email)}`);
                 const result = await response.json();
-                if (result.success && result.data) {
-                    fetchedActivities = result.data.sort((a,b) => new Date(b.LastModifiedDate) - new Date(a.LastModifiedDate));
-                    const container = document.getElementById('my-activities-container');
-                    if (fetchedActivities.length > 0) {
-                        container.innerHTML = fetchedActivities.map(act => getActivityCardHTML(act)).join('');
-                    } else {
-                        container.innerHTML = '<p class="text-center text-slate-500 col-span-full">شما هنوز فعالیتی ثبت نکرده‌اید.</p>';
-                    }
+                if (!result.success) throw new Error(result.message);
+
+                const activities = result.data.sort((a,b) => new Date(b.LastModifiedDate) - new Date(a.LastModifiedDate));
+                if (activities.length > 0) {
+                    let activitiesHtml = '<div class="project-accordion">'; // استفاده از همان استایل
+                    activities.forEach(act => {
+                        const isActive = act.Status === 'فعال';
+                        activitiesHtml += `
+                            <div class="project-row ${!isActive ? 'closed-project' : ''}" data-activity-id="${act.ActivityID}" data-status="${act.Status}">
+                                <div class="project-header">
+                                    <div class="header-item">
+                                        <i class="fas fa-chevron-down accordion-icon"></i>
+                                    </div>
+                                    <div class="header-item">
+                                        <strong>${act.province}، ${act.city}</strong>
+                                        <span>استان و شهر</span>
+                                    </div>
+                                    <div class="header-item">
+                                        <strong>${act.engineerActivity} ${act.engineerLevel}</strong>
+                                        <span class="text-xs text-slate-500">مهندس ${act.engineerField}</span>
+                                    </div>
+                                    <div class="header-item">
+                                        <strong>${(act.maxProjects - act.currentProjects)} / ${act.maxProjects} عدد</strong>
+                                        <span>کار باقیمانده</span>
+                                    </div>
+                                    <div class="header-item">
+                                        <strong>${toPersianNum(act.maxArea - act.occupiedArea)} متر</strong>
+                                        <span>متراژ باقیمانده</span>
+                                    </div>
+                                    <div class="header-item">
+                                        <strong>${act.licenseType}</strong>
+                                        <span>نوع پروانه</span>
+                                    </div>
+                                    <div class="header-item">
+                                        <strong>${toPersianNum(act.requestCount)} نفر</strong>
+                                        <span>تعداد درخواست</span>
+                                    </div>
+                                    <div class="header-actions">
+                                        <button class="btn ${isActive ? 'btn-danger' : 'btn-success'} !p-2" data-action="change-activity-status" data-new-status="${isActive ? 'غیرفعال' : 'فعال'}">
+                                            <i class="fas ${isActive ? 'fa-eye-slash' : 'fa-eye'}"></i>
+                                        </button>
+                                        <button class="btn btn-secondary !p-2" data-action="edit-activity">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="project-body">
+                                    <div class="p-4 text-center text-slate-500">برای مشاهده درخواست‌ها کلیک کنید</div>
+                                </div>
+                            </div>`;
+                    });
+                    activitiesHtml += '</div>';
+                    myActivitiesContent.innerHTML = activitiesHtml;
+                    attachActivityRowListeners();
                 } else {
-                     myActivitiesContent.innerHTML = `<p class="text-center text-red-500">${result.message || 'خطا در دریافت اطلاعات فعالیت‌ها.'}</p>`;
+                    myActivitiesContent.innerHTML = '<p class="text-center text-slate-500">شما هنوز فعالیتی ثبت نکرده‌اید.</p>';
                 }
             } catch (error) {
-                myActivitiesContent.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری فعالیت‌ها: ${error.message}</p>`;
+                myActivitiesContent.innerHTML = `<p class="text-center text-red-500">خطا: ${error.message}</p>`;
             }
+        }
+
+        function attachActivityRowListeners() {
+            document.querySelectorAll('#myActivitiesContent .project-row').forEach(row => {
+                const header = row.querySelector('.project-header');
+                header.addEventListener('click', async (e) => {
+                    if (e.target.closest('button')) return;
+                    
+                    if(row.dataset.status !== 'فعال') {
+                        showModal('برای مشاهده درخواست‌ها، ابتدا باید وضعیت فعالیت را به "فعال" تغییر دهید.', 'info');
+                        return;
+                    }
+                    
+                    const activityId = row.dataset.activityId;
+                    const body = row.querySelector('.project-body');
+                    const isOpen = row.classList.contains('open');
+
+                    document.querySelectorAll('#myActivitiesContent .project-row').forEach(otherRow => {
+                        if (otherRow !== row) otherRow.classList.remove('open');
+                    });
+
+                    if (!isOpen && !body.dataset.loaded) {
+                        body.innerHTML = '<div class="p-4 text-center text-slate-500">در حال بارگذاری درخواست‌ها...</div>';
+                        const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getRequestersForActivity&activityId=${activityId}`);
+                        const result = await response.json();
+                        if (result.success) {
+                            renderRequesters(result.data, body);
+                            body.dataset.loaded = 'true';
+                        }
+                    }
+                    row.classList.toggle('open');
+                });
+            });
+        }
+
+        function renderRequesters(requesters, bodyElement) {
+            if (requesters.length === 0) {
+                bodyElement.innerHTML = '<div class="p-4 text-center text-slate-500">هنوز درخواستی برای این فعالیت ثبت نشده است.</div>';
+                return;
+            }
+            let html = '';
+            requesters.forEach((req, index) => {
+                 html += `
+                    <div class="applicant-row p-4">
+                        <strong>${toPersianNum(index + 1)}</strong>
+                        <div class="header-item">
+                            <span>نام کارفرما</span>
+                            <strong>${req.name}</strong>
+                        </div>
+                        <div class="header-item">
+                            <span>استان</span>
+                            <strong>-</strong>
+                        </div>
+                        <div class="header-item">
+                            <span>طبقات</span>
+                            <strong>-</strong>
+                        </div>
+                        <div class="header-item">
+                            <span>مدت قرارداد</span>
+                            <strong>-</strong>
+                        </div>
+                        <div class="header-item">
+                            <span>تعرفه</span>
+                            <strong>-</strong>
+                        </div>
+                        <div class="action-btn-container">
+                            <button class="btn btn-secondary !py-1 !px-3" data-action="toggle-options">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>`;
+            });
+            bodyElement.innerHTML = html;
         }
         
         function getActivityCardHTML(data, forEmployer = false) {
@@ -3316,10 +3450,17 @@ async function renderEngineerDashboard() {
             });
         }
         async function updateAppStatus(projectId, engineerEmail, newStatus, container) {
-            showLoader(); // << نمایش لودر
+            showLoader();
             try {
+                // اطمینان از ارسال اکشن صحیح
                 const payload = { action: 'updateApplicationStatus', projectId, engineerEmail, newStatus };
-                const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const response = await fetch(GOOGLE_SCRIPT_URL, { 
+                    method: 'POST', 
+                    mode: 'cors',
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload) 
+                });
                 const result = await response.json();
                 showModal(result.message, result.status);
 
@@ -3334,7 +3475,7 @@ async function renderEngineerDashboard() {
             } catch (error) {
                  showModal('خطای اتصال به سرور.', 'error');
             } finally {
-                hideLoader(); // << مخفی کردن لودر در هر صورت
+                hideLoader();
             }
         }
 
