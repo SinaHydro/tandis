@@ -333,7 +333,7 @@
         .applicant-row {
             display: grid;
             /* چیدمان جدید برای مشخصات مهندس */
-            grid-template-columns: 40px repeat(5, 1fr) auto;
+            grid-template-columns: 40px repeat(6, 1fr) auto;
             gap: 1rem;
             align-items: center;
         }
@@ -2782,7 +2782,9 @@ function attachProjectRowListeners() {
             applicants.forEach((app, index) => {
                 applicantsHtml += `
                     <div class="applicant-row p-4" data-email="${app.email}">
-                        <strong>${toPersianNum(index + 1)}</strong>
+                        <div class="header-item">
+                            <strong>${toPersianNum(index + 1)}</strong>
+                        </div>
                         <div class="header-item">
                             <strong>${app.province || '-'}</strong>
                             <span>استان فعالیت</span>
@@ -2803,8 +2805,12 @@ function attachProjectRowListeners() {
                             <strong>- تومان</strong>
                             <span>پیشنهاد مهندس</span>
                         </div>
+                        <div class="header-item">
+                            <strong>2 روز پیش</strong>
+                            <span>زمان پیشنهاد</span>
+                        </div>
                         <div class="action-btn-container">
-                            <button class="btn btn-secondary !py-1 !px-3" data-action="toggle-options"><i class="fas fa-ellipsis-v"></i></button>
+                            <button class="btn btn-secondary !py-1 !px-3" data-action="toggle-options"><span>تعیین تکلیف</span></button>
                             <div class="action-options hidden">
                                 <a href="#" data-action="set-status" data-status="Accepted"><i class="fas fa-check-circle text-green-500"></i> پذیرش</a>
                                 <a href="#" data-action="set-status" data-status="Rejected"><i class="fas fa-times-circle text-red-500"></i> عدم پذیرش</a>
