@@ -324,6 +324,7 @@
         .project-accordion .project-row.open .project-body {
             max-height: 500px; /* ارتفاع تقریبی برای نمایش محتوا */
             border-top: 1px solid #e2e8f0;
+            overflow: visible;
         }
         .project-row.closed-project {
             opacity: 0.6;
@@ -357,19 +358,18 @@
         }
         .action-options {
             position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 100%; /* << این خط از bottom تغییر کرد */
+            right: 0;  /* << این خط برای باز شدن از سمت راست دکمه اضافه شد */
             background-color: white;
             border: 1px solid #e2e8f0;
             border-radius: 0.5rem;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             z-index: 10;
-            margin-bottom: 0.5rem;
+            margin-top: 0.5rem; /* << یک فاصله کوچک از بالا */
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            width: 150px; /* عرض منوی بازشونده */
+            width: 150px;
         }
         .action-options a {
             padding: 0.75rem;
@@ -381,6 +381,9 @@
         }
         .action-options a:hover {
             background-color: #f1f5f9;
+        }
+        #loading-overlay {
+            z-index: 9999; /* بالاتر از همه چیز قرار می‌گیرد */
         }
 
     </style>
@@ -596,6 +599,15 @@
         </div>
     </div>
 
+    <div id="loading-overlay" class="modal" style="display: none;">
+        <div class="bg-white/80 backdrop-blur-sm rounded-xl p-8 flex flex-col items-center gap-y-4">
+            <img src="https://tandis.shahraavand.ir/images/new-TLogo_B.avif" alt="لوگوی تندیس" class="h-20 w-20">
+            <h3 class="text-xl font-bold text-blue-800">نظام تندیس</h3>
+            <p class="text-slate-600">لطفاً کمی صبر کنید...</p>
+            <div class="spinner"></div>
+        </div>
+    </div>
+
     <script>
     (async function() {
         // --- CONFIGURATION ---
@@ -661,6 +673,12 @@
         const infoBoxText = document.getElementById('info-box-text');
         
         // --- HELPER FUNCTIONS ---
+        function showLoader() {
+            document.getElementById('loading-overlay').style.display = 'flex';
+        }
+        function hideLoader() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
         function generateProvinceOptions(selectedValue, addSarasari = false) {
             let options = '<option value="">انتخاب استان</option>';
             if (addSarasari) {
@@ -2661,7 +2679,9 @@ function checkApplicationPrerequisites(projectId, button) {
                         projectsHtml += `
                             <div class="project-row ${isClosed ? 'closed-project' : ''}" data-status="${p.Status}" data-project-id="${p.ProjectID}">
                                 <div class="project-header">
-                                    <div class="header-item"><i class="fas fa-chevron-down accordion-icon"></i></div>
+                                    <div class="header-item">
+                                        <i class="fas fa-chevron-down accordion-icon"></i>
+                                    </div>
                                     <div class="header-item">
                                         <strong>${p.projectName}</strong>
                                         <span class="text-xs text-slate-500">منطقه ${toPersianNum(p.district)} ${p.city}</span>
@@ -2674,9 +2694,18 @@ function checkApplicationPrerequisites(projectId, button) {
                                         <strong>${toPersianNum(p.floors)} طبقه</strong>
                                         ${parseInt(p.basementFloors) > 0 ? `<strong>${toPersianNum(p.basementFloors)} زیرزمین</strong>` : ''}
                                     </div>
-                                    <div class="header-item"><span>مدت قرارداد</span><strong>${toPersianNum(p.contractMonths)} ماه</strong></div>
-                                    <div class="header-item"><span>تعرفه شما</span><strong>${toPersianNum(parseFloat(p.unitPrice))} تومان</strong></div>
-                                    <div class="header-item"><span>درخواست‌ها</span><strong>${toPersianNum(p.applicantCount)} نفر</strong></div>
+                                    <div class="header-item">
+                                        <strong>${toPersianNum(p.contractMonths)} ماه</strong>
+                                        <span>مدت قرارداد</span>
+                                    </div>
+                                    <div class="header-item">
+                                        <strong>${toPersianNum(parseFloat(p.unitPrice))} تومان</strong>
+                                        <span>تعرفه شما</span>
+                                    </div>
+                                    <div class="header-item">
+                                        <strong>${toPersianNum(p.applicantCount)} نفر</strong>
+                                        <span>درخواست‌ها</span>
+                                    </div>
                                     <div class="header-actions">
                                         <button class="btn ${!isClosed ? 'btn-danger' : 'btn-success'} !p-2" title="${!isClosed ? 'بستن پروژه' : 'باز کردن پروژه'}" data-action="${!isClosed ? 'close-project' : 'open-project'}"><i class="fas ${!isClosed ? 'fa-lock' : 'fa-lock-open'}"></i></button>
                                         <button class="btn btn-secondary !p-2" title="ویرایش پروژه" data-action="edit-project"><i class="fas fa-edit"></i></button>
@@ -2701,7 +2730,7 @@ function attachProjectRowListeners() {
             allProjectRows.forEach(row => {
                 const header = row.querySelector('.project-header');
                 header.addEventListener('click', async (e) => {
-                    if (e.target.closest('button')) return; 
+                    if (e.target.closest('button')) return;
 
                     const status = row.dataset.status;
 
@@ -2724,7 +2753,7 @@ function attachProjectRowListeners() {
                     });
 
                     if (!isOpen && !body.dataset.loaded) {
-                        body.innerHTML = '<div class="p-4 text-center text-slate-500">در حال بارگذاری درخواست‌ها...</div>';
+                        showLoader(); // << نمایش لودر
                         try {
                             const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getApplicantsForProject&projectId=${projectId}`);
                             const result = await response.json();
@@ -2734,9 +2763,10 @@ function attachProjectRowListeners() {
                             } else { throw new Error(result.message); }
                         } catch (error) {
                             body.innerHTML = `<div class="p-4 text-center text-red-500">خطا در بارگذاری.</div>`;
+                        } finally {
+                            hideLoader(); // << مخفی کردن لودر در هر صورت
                         }
                     }
-                    
                     row.classList.toggle('open');
                 });
             });
@@ -2752,14 +2782,26 @@ function attachProjectRowListeners() {
                 applicantsHtml += `
                     <div class="applicant-row p-4" data-email="${app.email}">
                         <strong>${toPersianNum(index + 1)}</strong>
-                        <strong>${app.province || '-'}</strong>
+                        <div class="header-item">
+                            <strong>${app.province || '-'}</strong>
+                            <span>استان فعالیت</span>
+                        </div>
                         <div class="header-item">
                             <strong>${app.activity || ''} ${app.level || ''}</strong>
                             <span class="text-xs text-slate-500">مهندس ${app.field || ''}</span>
                         </div>
-                        <div class="header-item"><span>کار باقیمانده</span><strong>${toPersianNum(app.remainingWork)} عدد</strong></div>
-                        <div class="header-item"><span>متراژ باقیمانده</span><strong>${toPersianNum(app.remainingArea)} مترمربع</strong></div>
-                        <div class="header-item"><span>پیشنهاد مهندس</span><strong>- تومان</strong></div>
+                        <div class="header-item">
+                            <strong>${toPersianNum(app.remainingWork)} عدد</strong>
+                            <span>کار باقیمانده</span>
+                        </div>
+                        <div class="header-item">
+                            <strong>${toPersianNum(app.remainingArea)} مترمربع</strong>
+                            <span>متراژ باقیمانده</span>
+                        </div>
+                        <div class="header-item">
+                            <strong>- تومان</strong>
+                            <span>پیشنهاد مهندس</span>
+                        </div>
                         <div class="action-btn-container">
                             <button class="btn btn-secondary !py-1 !px-3" data-action="toggle-options"><i class="fas fa-ellipsis-v"></i></button>
                             <div class="action-options hidden">
@@ -2773,7 +2815,6 @@ function attachProjectRowListeners() {
             bodyElement.innerHTML = applicantsHtml;
         }
 
-        // این دو تابع را به مجموعه توابع کمکی خود اضافه کنید
         async function handleAccept(button) {
             const row = button.closest('.applicant-row');
             const projectRow = button.closest('.project-row');
@@ -3268,19 +3309,25 @@ async function renderEngineerDashboard() {
             });
         }
         async function updateAppStatus(projectId, engineerEmail, newStatus, container) {
-            const payload = { action: 'updateApplicationStatus', projectId, engineerEmail, newStatus };
-            const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-            const result = await response.json();
-            showModal(result.message, result.status);
+            showLoader(); // << نمایش لودر
+            try {
+                const payload = { action: 'updateApplicationStatus', projectId, engineerEmail, newStatus };
+                const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const result = await response.json();
+                showModal(result.message, result.status);
 
-            if (result.status === 'success') {
-                const mainButtonIcon = container.querySelector('button i');
-                const options = container.querySelector('.action-options');
-                options.classList.add('hidden');
-                // تغییر آیکن دکمه اصلی بر اساس وضعیت جدید
-                if (newStatus === 'Accepted') mainButtonIcon.className = 'fas fa-check-circle text-green-500';
-                else if (newStatus === 'Rejected') mainButtonIcon.className = 'fas fa-times-circle text-red-500';
-                else if (newStatus === 'Reviewing') mainButtonIcon.className = 'fas fa-clock text-yellow-500';
+                if (result.status === 'success') {
+                    const mainButtonIcon = container.querySelector('button i');
+                    const options = container.querySelector('.action-options');
+                    options.classList.add('hidden');
+                    if (newStatus === 'Accepted') mainButtonIcon.className = 'fas fa-check-circle text-green-500';
+                    else if (newStatus === 'Rejected') mainButtonIcon.className = 'fas fa-times-circle text-red-500';
+                    else if (newStatus === 'Reviewing') mainButtonIcon.className = 'fas fa-clock text-yellow-500';
+                }
+            } catch (error) {
+                 showModal('خطای اتصال به سرور.', 'error');
+            } finally {
+                hideLoader(); // << مخفی کردن لودر در هر صورت
             }
         }
 
