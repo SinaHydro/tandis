@@ -395,12 +395,13 @@
             font-size: 0.875rem;
             transition: background-color 0.2s ease;
         }
-        .action-options a:hover {
-            background-color: #f1f5f9;
-        }
-        #loading-overlay {
-            z-index: 9999; /* بالاتر از همه چیز قرار می‌گیرد */
-        }
+        .action-options a:hover { background-color: #f1f5f9; }
+        #loading-overlay { z-index: 9999; }
+        
+        .interaction-list { padding: 0.5rem; }
+        .interaction-list h5 { font-weight: 600; color: #1e293b; background-color: #e2e8f0; padding: 0.5rem 1rem; border-radius: 0.5rem; margin-top: 1rem; }
+        .interaction-row { display: grid; grid-template-columns: repeat(6, 1fr) auto; gap: 1rem; align-items: center; padding: 1rem; border-bottom: 1px solid #e2e8f0; }
+        .interaction-row:last-child { border-bottom: none; }
 
     </style>
 </head>
@@ -624,10 +625,21 @@
         </div>
     </div>
 
+    <div id="selectionModal" class="modal">
+        <div class="modal-content">
+            <h3 id="selectionModalTitle" class="text-xl font-bold mb-4"></h3>
+            <div id="selectionModalBody" class="max-h-96 overflow-y-auto">
+                </div>
+            <div class="mt-6 flex justify-center">
+                <button id="selectionModalCloseBtn" class="btn btn-secondary"><i class="fas fa-times mr-2"></i>انصراف</button>
+            </div>
+        </div>
+    </div>
+
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzqOPVbc5R6dgEd_puvu0vXmqObJ6iPfDEz8_xQDaFJebpDdzvCY6vXtOjclje7ckeq/exec'; // Please replace with your actual script URL
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxCP2w9XTBJSxtIT1TNO3g3CJl3fZirXl9I5_4VFHkFFV_tpjUBro4JrXOivLU6z4_9/exec'; // Please replace with your actual script URL
 
         const SLIDESHOW_CONTENT_R = [
             { 
@@ -2303,7 +2315,7 @@ function renderProjectForm(projectData = null) {
             }
         }
         
-async function renderMyActivities() {
+        async function renderMyActivities() {
             myActivitiesContent.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
             try {
                 const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getActivitiesWithRequestCounts&email=${encodeURIComponent(userData.email)}`);
@@ -2799,6 +2811,23 @@ function checkApplicationPrerequisites(projectId, button) {
             if (num === null || num === undefined) return '-';
             return num.toLocaleString('fa-IR');
         }
+        // --- تابع جدید بررسی پیش‌نیاز برای کارفرما ---
+async function checkCooperationPrerequisites(activity) {
+    showLoader();
+    // ۱. ابتدا از بک‌اند لیست پروژه‌های واجد شرایط را درخواست می‌کنیم
+    const response = await fetch(GOOGLE_SCRIPT_URL + `?func=getMatchingProjectsForActivity&payload=${JSON.stringify({employerEmail: userData.email, activity})}`);
+    const result = await response.json();
+    hideLoader();
+
+    if (result.success && result.data.length > 0) {
+        // ۲. اگر پروژه واجد شرایطی بود، یک مودال برای انتخاب پروژه نمایش می‌دهیم
+        // renderMatchingProjectsModal(result.data, activity.ActivityID);
+        showModal('پروژه واجد شرایط یافت شد! (پیاده‌سازی مودال انتخاب پروژه)', 'success');
+    } else {
+        // ۳. در غیر این صورت، پیام راهنما نمایش داده می‌شود
+        showModal('شما پروژه فعال و مرتبطی برای ارسال درخواست به این مهندس ندارید. لطفاً ابتدا یک پروژه مرتبط ثبت کرده یا پروژه موجود خود را فعال نمایید.', 'info');
+    }
+}
         async function renderEmployerProjects() {
             projectsContent.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
             try {
@@ -2846,7 +2875,14 @@ function checkApplicationPrerequisites(projectId, button) {
                                         <button class="btn btn-secondary !p-2" title="ویرایش پروژه" data-action="edit-project"><i class="fas fa-edit"></i></button>
                                     </div>
                                 </div>
-                                <div class="project-body">...</div>
+                                    <div class="project-body">
+                                        <div class="interaction-list">
+                                            <h5><i class="fas fa-arrow-down text-blue-500"></i> درخواست‌های دریافتی از مهندسان</h5>
+                                            <div id="incoming-apps-${p.ProjectID}"></div>
+                                            <h5><i class="fas fa-arrow-up text-green-500"></i> درخواست‌های ارسالی توسط شما</h5>
+                                            <div id="outgoing-reqs-${p.ProjectID}"></div>
+                                        </div>
+                                    </div>
                             </div>`;
                     });
                     projectsHtml += '</div>';
@@ -2860,6 +2896,76 @@ function checkApplicationPrerequisites(projectId, button) {
             }
         }
 
+                // --- تابع جدید بررسی پیش‌نیازها برای ارسال درخواست توسط کارفرما ---
+        async function checkCooperationPrerequisites(activity, button) {
+            showLoader();
+            try {
+                const payload = { employerEmail: userData.email, activity: activity };
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getMatchingProjectsForActivity&payload=${encodeURIComponent(JSON.stringify(payload))}`);
+                const result = await response.json();
+                
+                if (result.success && result.data.length > 0) {
+                    renderMatchingProjectsModal(result.data, activity.ActivityID, activity.EngineerEmail);
+                } else {
+                    showModal('شما پروژه فعال و واجد شرایطی برای ارسال درخواست به این مهندس ندارید. لطفاً ابتدا یک پروژه مرتبط ثبت کرده یا پروژه موجود خود را فعال نمایید.', 'info');
+                }
+            } catch (error) {
+                showModal('خطا در بررسی پروژه‌های واجد شرایط.', 'error');
+            } finally {
+                hideLoader();
+            }
+        }
+
+        // --- توابع کمکی جدید برای مودال انتخاب پروژه ---
+        function renderMatchingProjectsModal(matchingProjects, activityId, recipientEmail) {
+            const modal = document.getElementById('selectionModal');
+            const titleEl = document.getElementById('selectionModalTitle');
+            const bodyEl = document.getElementById('selectionModalBody');
+            const closeBtn = document.getElementById('selectionModalCloseBtn');
+
+            titleEl.textContent = 'یک پروژه برای ارسال درخواست انتخاب کنید';
+            
+            let projectsHtml = '<div class="flex flex-col gap-y-2">';
+            matchingProjects.forEach(p => {
+                projectsHtml += `<a href="#" class="block p-3 bg-slate-50 hover:bg-slate-100 rounded-lg text-slate-700 font-semibold" data-project-id="${p.projectId}" data-activity-id="${activityId}" data-recipient-email="${recipientEmail}">${p.projectName}</a>`;
+            });
+            projectsHtml += '</div>';
+            bodyEl.innerHTML = projectsHtml;
+
+            bodyEl.onclick = function(e) {
+                e.preventDefault();
+                const link = e.target.closest('a');
+                if (link) {
+                    handleProjectSelectionForRequest(link.dataset.projectId, link.dataset.activityId, link.dataset.recipientEmail);
+                    modal.style.display = 'none';
+                }
+            };
+            
+            closeBtn.onclick = () => modal.style.display = 'none';
+            modal.style.display = 'flex';
+        }        
+        async function handleProjectSelectionForRequest(projectId, activityId, recipientEmail) {
+            showLoader();
+            try {
+                const payload = {
+                    action: 'createInteraction',
+                    ProjectID: projectId,
+                    ActivityID: activityId,
+                    InitiatorRole: 'Employer',
+                    InitiatorEmail: userData.email,
+                    RecipientEmail: recipientEmail
+                };
+                const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const result = await response.json();
+                showModal(result.message, result.status);
+                // می‌توانید در اینجا دکمه درخواست همکاری را در صفحه جستجوی مهندس غیرفعال کنید
+            } catch(error) {
+                 showModal('خطا در ارسال درخواست.', 'error');
+            } finally {
+                hideLoader();
+            }
+        }
+        
 function attachProjectRowListeners() {
             const allProjectRows = document.querySelectorAll('.project-row');
             allProjectRows.forEach(row => {
@@ -3526,54 +3632,76 @@ async function main() {
             };
 
 document.querySelector('.main-content-area').addEventListener('click', e => {
-                const button = e.target.closest('button, a'); // نزدیک‌ترین دکمه یا لینک کلیک شده را پیدا می‌کند
-                if (!button || !button.dataset.action) return; // اگر کلیک روی دکمه‌ای با اکشن مشخص نبود، خارج شو
+                const button = e.target.closest('button, a');
+                if (!button || !button.dataset.action) return;
 
                 e.preventDefault();
                 const action = button.dataset.action;
                 const contentBody = button.closest('.content-body');
                 if (!contentBody) return;
 
-                // مدیریت اکشن‌های صفحه "پروژه‌های من"
-                if (contentBody.id === 'projectsContent') {
-                    const projectRow = button.closest('.project-row');
-                    if (projectRow) {
-                        const projectId = projectRow.dataset.projectId;
-                        if (action === 'edit-project') handleEditProject(projectId);
-                        else if (action === 'close-project') handleChangeProjectStatus(projectId, 'بسته');
-                        else if (action === 'open-project') handleChangeProjectStatus(projectId, 'باز');
-                    }
-
-                    const applicantRow = button.closest('.applicant-row');
-                    if (applicantRow) {
-                        const projectId = applicantRow.closest('.project-row').dataset.projectId;
-                        const engineerEmail = applicantRow.dataset.email;
-
-                        if (action === 'toggle-options') {
-                            const options = button.nextElementSibling;
-                            document.querySelectorAll('.action-options').forEach(opt => {
-                                if (opt !== options) opt.classList.add('hidden');
-                            });
-                            options.classList.toggle('hidden');
-                        } else if (action === 'set-status') {
-                            const newStatus = button.dataset.status;
-                            const container = button.closest('.action-btn-container');
-                            updateAppStatus(projectId, engineerEmail, newStatus, container);
+                // مدیریت اکشن‌ها بر اساس ID صفحه‌ای که در آن هستیم
+                switch (contentBody.id) {
+                    
+                    // --- صفحه پروژه‌های من (کارفرما) ---
+                    case 'projectsContent':
+                        const projectRow = button.closest('.project-row');
+                        if (projectRow) {
+                            const projectId = projectRow.dataset.projectId;
+                            if (action === 'edit-project') handleEditProject(projectId);
+                            else if (action === 'close-project') handleChangeProjectStatus(projectId, 'بسته');
+                            else if (action === 'open-project') handleChangeProjectStatus(projectId, 'باز');
                         }
-                    }
-                }
+                        
+                        const applicantRow = button.closest('.applicant-row');
+                        if (applicantRow) {
+                            const projectId = applicantRow.closest('.project-row').dataset.projectId;
+                            const engineerEmail = applicantRow.dataset.email;
+                            if (action === 'toggle-options') {
+                                const options = button.nextElementSibling;
+                                document.querySelectorAll('.action-options').forEach(opt => {
+                                    if (opt !== options) opt.classList.add('hidden');
+                                });
+                                options.classList.toggle('hidden');
+                            } else if (action === 'set-status') {
+                                const newStatus = button.dataset.status;
+                                const container = button.closest('.action-btn-container');
+                                updateAppStatus(projectId, engineerEmail, newStatus, container);
+                            }
+                        }
+                        // منطق درخواست همکاری مهندس در همین صفحه نیز مدیریت می‌شود
+                        if (userData.role === 'engineer') {
+                            if (action === 'apply') checkApplicationPrerequisites(button.dataset.projectId, button);
+                            else if (action === 'cancel-application') handleCancelApplication(button.dataset.projectId, button);
+                        }
+                        break;
 
-                // مدیریت اکشن‌های صفحه "فعالیت‌های من"
-                if (contentBody.id === 'myActivitiesContent') {
-                    const activityCard = button.closest('.activity-card');
-                    if (activityCard) {
-                        const activityId = activityCard.querySelector('[data-activity-id]').dataset.activityId;
-                        if (action === 'edit-activity') handleEditActivity(activityId);
-                        else if (action === 'change-activity-status') handleChangeActivityStatus(activityId, button.dataset.newStatus);
-                    }
-                }
+                    // --- صفحه فعالیت‌های من (مهندس) ---
+                    case 'myActivitiesContent':
+                        const activityRow = button.closest('.project-row');
+                        if (activityRow) {
+                            const activityId = activityRow.dataset.activityId;
+                            if (action === 'edit-activity') handleEditActivity(activityId);
+                            else if (action === 'change-activity-status') handleChangeActivityStatus(activityId, button.dataset.newStatus);
+                        }
+                        // در اینجا می‌توانید منطق مربوط به پذیرش/رد درخواست‌های کارفرمایان را اضافه کنید
+                        break;
 
-                // می‌توانید مدیریت سایر صفحات را نیز به همین شکل اضافه کنید
+                    // --- صفحه جستجوی مهندس (کارفرما) ---
+                    case 'engineersContent':
+                        const card = button.closest('.activity-card');
+                        if (card) {
+                            const activityId = card.querySelector('[data-activity-id]').dataset.activityId;
+                            if (action === 'request-cooperation') {
+                                const activity = fetchedEngineersActivities.find(act => act.ActivityID === activityId);
+                                if(activity) checkCooperationPrerequisites(activity, button);
+                            } else if (action === 'cancel-cooperation') {
+                                // منطق لغو درخواست همکاری که قبلا نوشته شده
+                                handleCancelCooperation(activityId, button);
+                            }
+                        }
+                        break;
+                }
             });
             
             document.getElementById('refresh-nav-item').addEventListener('click', (e) => {
