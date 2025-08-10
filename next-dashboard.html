@@ -639,7 +639,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxIwl5dJr6LYR_Qk0P7YudBueuVcYZNYjYnEnalsUSv5wBprejWXCWeMOn82rgMxRo3/exec'; // Please replace with your actual script URL
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzRYJMtCHmxhiJEt7lsPtBF88DF5GxiY7MQJ6fNcBIF7uuOkleo9Rvo4lgxhHBlr_lK/exec'; // Please replace with your actual script URL
 
         const SLIDESHOW_CONTENT_R = [
             { 
@@ -2381,14 +2381,175 @@ function renderProjectForm(projectData = null) {
                 myActivitiesContent.innerHTML = `<p class="text-center text-red-500">خطا: ${error.message}</p>`;
             }
         }
+/**
+         * این تابع یک لیست از تعاملات (درخواست‌ها/پذیرش‌ها) را می‌گیرد و کد وب آن را می‌سازد.
+         * این تابع قلب تپنده نمایش لیست‌های تفکیک شده در هر دو پنل کارفرما و مهندس است.
+         */
+        function renderInteractionList(interactions, listType) {
+            // پیام‌های پیش‌فرض برای زمانی که لیستی خالی است
+            if (!interactions || interactions.length === 0) {
+                const messages = {
+                    incomingApps: 'هنوز درخواستی از مهندسان دریافت نشده است.',
+                    outgoingReqs: 'شما هنوز درخواستی برای همکاری ارسال نکرده‌اید.',
+                    incomingReqs: 'هنوز درخواستی از کارفرمایان دریافت نشده است.',
+                    outgoingApps: 'شما هنوز برای پروژه‌ای درخواست همکاری ارسال نکرده‌اید.'
+                };
+                return `<div class="p-4 text-center text-sm text-slate-500">${messages[listType] || ''}</div>`;
+            }
 
+            let html = '';
+            interactions.forEach((item, index) => {
+                let rowContent = '';
+                
+                // بر اساس نوع لیست، محتوای هر ردیف را به صورت اختصاصی می‌سازیم
+                switch (listType) {
+                    // کارفرما -> درخواست‌های دریافتی از مهندسان
+                    case 'incomingApps':
+                        rowContent = `
+                            <strong>${toPersianNum(index + 1)}</strong>
+                            <strong>${item.engineerName || 'ناشناس'}</strong>
+                            <div class="header-item">
+                                <strong>${item.activityInfo?.engineerActivity || ''} ${item.activityInfo?.engineerLevel || ''}</strong>
+                                <span class="text-xs text-slate-500">مهندس ${item.activityInfo?.engineerField || ''}</span>
+                            </div>
+                            <div class="header-item">
+                                <strong>${toPersianNum(item.activityInfo?.maxProjects - item.activityInfo?.currentProjects)} عدد</strong>
+                                <span>کار باقیمانده</span>
+                            </div>
+                            <div class="header-item">
+                                <strong>${toPersianNum(item.activityInfo?.maxArea - item.activityInfo?.occupiedArea)} مترمربع</strong>
+                                <span>متراژ باقیمانده</span>
+                            </div>
+                            <div class="header-item">
+                                <strong>${formatTimeAgo(item.Timestamp)}</strong>
+                                <span>زمان ارسال</span>
+                            </div>
+                            <div class="action-btn-container">
+                                 <button class="btn btn-secondary !py-1 !px-3" data-action="toggle-options"><i class="fas fa-ellipsis-v"></i></button>
+                                 <div class="action-options hidden">
+                                     <a href="#" data-action="set-status" data-status="Accepted"><i class="fas fa-check-circle text-green-500"></i> پذیرش</a>
+                                     <a href="#" data-action="set-status" data-status="Rejected"><i class="fas fa-times-circle text-red-500"></i> عدم پذیرش</a>
+                                     <a href="#" data-action="set-status" data-status="Reviewing"><i class="fas fa-clock text-yellow-500"></i> در حال بررسی</a>
+                                 </div>
+                            </div>`;
+                        break;
+
+                    // کارفرما -> درخواست‌های ارسالی به مهندسان
+                    case 'outgoingReqs':
+                         rowContent = `
+                            <strong>${toPersianNum(index + 1)}</strong>
+                            <strong>${item.engineerName || 'ناشناس'}</strong>
+                            <div class="header-item" colspan="4"><span>وضعیت</span><strong>${item.Status}</strong></div>
+                            <div class="flex gap-x-2">
+                                <button class="btn btn-danger !py-1 !px-3" data-action="cancel-interaction">لغو درخواست</button>
+                            </div>`;
+                        break;
+
+                    // مهندس -> درخواست‌های دریافتی از کارفرمایان
+                    case 'incomingReqs':
+                        const p = item.projectInfo || {};
+                        rowContent = `
+                            <div class="header-item">
+                                <strong>${p.province}</strong>
+                                <span class="text-xs text-slate-500">منطقه ${toPersianNum(p.district)} ${p.city}</span>
+                            </div>
+                            <div class="header-item">
+                                <strong>${p.engineerActivity} ${p.engineerRank}</strong>
+                                <span class="text-xs text-slate-500">مهندس ${p.engineerField}</span>
+                            </div>
+                            <div class="header-item">
+                                <strong>${toPersianNum(p.floors)} طبقه</strong>
+                                ${parseInt(p.basementFloors) > 0 ? `<strong>+ ${toPersianNum(p.basementFloors)} زیرزمین</strong>` : ''}
+                            </div>
+                            <div class="header-item">
+                                <strong>${toPersianNum(p.contractMonths)} ماه</strong>
+                                <span>مدت قرارداد</span>
+                            </div>
+                            <div class="header-item">
+                                <strong>${toPersianNum(parseFloat(p.unitPrice))} تومان</strong>
+                                <span>تعرفه پیشنهادی</span>
+                            </div>
+                            <div class="header-item">
+                                <strong>${formatTimeAgo(item.Timestamp)}</strong>
+                                <span>زمان پیشنهاد</span>
+                            </div>
+                            <div class="action-btn-container">
+                            </div>
+                        `;
+                        break;
+                    
+                    // مهندس -> درخواست‌های ارسالی برای پروژه‌ها
+                    case 'outgoingApps':
+                        rowContent = `
+                            <strong>${toPersianNum(index + 1)}</strong>
+                            <strong colspan="4">${item.projectInfo?.projectName || 'پروژه یافت نشد'}</strong>
+                            <div class="header-item"><span>وضعیت</span><strong>${item.Status}</strong></div>
+                            <div class="flex gap-x-2">
+                                <button class="btn btn-danger !py-1 !px-3" data-action="cancel-interaction">لغو درخواست</button>
+                            </div>
+                        `;
+                        break;
+                }
+                html += `<div class="interaction-row" data-interaction-id="${item.InteractionID}">${rowContent}</div>`;
+            });
+            return html;
+        }
+
+        /* منطق باز و بسته شدن آکاردئون و واکشی اطلاعات برای صفحه "پروژه‌های من" کارفرما.*/
+        function attachProjectRowListeners() {
+            const allProjectRows = document.querySelectorAll('#projectsContent .project-row');
+            allProjectRows.forEach(row => {
+                const header = row.querySelector('.project-header');
+                header.addEventListener('click', async (e) => {
+                    if (e.target.closest('button')) return;
+
+                    const status = row.dataset.status;
+                    if (status === 'بسته') {
+                        const message = `برای مشاهده درخواست‌ها، نخست باید وضعیت پروژه را با دکمه <i class="fas fa-lock-open text-green-500 mx-1"></i> به حالت باز تبدیل کنید.`;
+                        showModal(message, 'info');
+                        return;
+                    }
+                    
+                    const projectId = row.dataset.projectId;
+                    const body = row.querySelector('.project-body');
+                    const isOpen = row.classList.contains('open');
+
+                    allProjectRows.forEach(otherRow => {
+                        if (otherRow !== row) otherRow.classList.remove('open');
+                    });
+
+                    if (!isOpen && !body.dataset.loaded) {
+                        showLoader();
+                        try {
+                            const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getProjectDetails&projectId=${projectId}`);
+                            const result = await response.json();
+                            if (result.success) {
+                                const { incoming, outgoing } = result.data;
+                                document.getElementById(`incoming-apps-${projectId}`).innerHTML = renderInteractionList(incoming, 'incomingApps');
+                                document.getElementById(`outgoing-reqs-${projectId}`).innerHTML = renderInteractionList(outgoing, 'outgoingReqs');
+                                body.dataset.loaded = 'true';
+                            } else { throw new Error(result.message); }
+                        } catch (error) {
+                            body.querySelector('.interaction-list').innerHTML = `<div class="p-4 text-center text-red-500">خطا در بارگذاری جزئیات.</div>`;
+                        } finally {
+                            hideLoader();
+                        }
+                    }
+                    row.classList.toggle('open');
+                });
+            });
+        }
+        
+        /**
+         * منطق باز و بسته شدن آکاردئون و واکشی اطلاعات برای صفحه "فعالیت‌های من" مهندس.
+         */
         function attachActivityRowListeners() {
             document.querySelectorAll('#myActivitiesContent .project-row').forEach(row => {
                 const header = row.querySelector('.project-header');
                 header.addEventListener('click', async (e) => {
                     if (e.target.closest('button')) return;
                     
-                    if(row.dataset.status !== 'فعال') {
+                    if (row.dataset.status !== 'فعال') {
                         showModal('برای مشاهده درخواست‌ها، ابتدا باید وضعیت فعالیت را به "فعال" تغییر دهید.', 'info');
                         return;
                     }
@@ -2402,19 +2563,27 @@ function renderProjectForm(projectData = null) {
                     });
 
                     if (!isOpen && !body.dataset.loaded) {
-                        body.innerHTML = '<div class="p-4 text-center text-slate-500">در حال بارگذاری درخواست‌ها...</div>';
-                        const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getRequestersForActivity&activityId=${activityId}`);
-                        const result = await response.json();
-                        if (result.success) {
-                            renderRequesters(result.data, body);
-                            body.dataset.loaded = 'true';
+                        showLoader();
+                        try {
+                            const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getActivityDetails&activityId=${activityId}`);
+                            const result = await response.json();
+                            if (result.success) {
+                                const { incoming, outgoing } = result.data;
+                                document.getElementById(`incoming-reqs-${activityId}`).innerHTML = renderInteractionList(incoming, 'incomingReqs');
+                                document.getElementById(`outgoing-apps-${activityId}`).innerHTML = renderInteractionList(outgoing, 'outgoingApps');
+                                body.dataset.loaded = 'true';
+                            } else { throw new Error(result.message); }
+                        } catch (error) {
+                            body.querySelector('.interaction-list').innerHTML = `<div class="p-4 text-center text-red-500">خطا در بارگذاری جزئیات.</div>`;
+                        } finally {
+                            hideLoader();
                         }
                     }
                     row.classList.toggle('open');
                 });
             });
         }
-
+        
         function renderRequesters(requesters, bodyElement) {
             if (requesters.length === 0) {
                 bodyElement.innerHTML = '<div class="p-4 text-center text-slate-500">هنوز درخواستی برای این فعالیت ثبت نشده است.</div>';
@@ -2777,36 +2946,61 @@ async function renderProjectMarketplace() {
             return engineerValue >= projectValue; // اگر پایه مهندس بهتر یا مساوی بود، true برمی‌گرداند
         }
 
-function checkApplicationPrerequisites(projectId, button) {
-            const project = fetchedProjects.find(p => p.ProjectID === projectId);
-            if (!project) return;
+async function checkApplicationPrerequisites(projectId, button) {
+    const project = fetchedProjects.find(p => p.ProjectID === projectId);
+    if (!project) return;
 
-            const qualifiedActivity = engineerActivities.find(activity => {
-                // بررسی شرط‌های اصلی
-                const isActive = activity.Status === 'فعال';
-                const isActivityTypeMatch = activity.engineerActivity === project.engineerActivity;
-                const isGradeSufficient = compareGrades(activity.engineerLevel, project.engineerRank);
-
-                // بررسی شرط رشته با در نظر گرفتن استثنا
-                let isFieldMatch = activity.engineerField === project.engineerField;
-                if (
-                    project.engineerActivity === 'مجری' &&
-                    (project.engineerField === 'معماری' && activity.engineerField === 'عمران') ||
-                    (project.engineerField === 'عمران' && activity.engineerField === 'معماری')
-                ) {
-                    isFieldMatch = true;
-                }
-                
-                return isActive && isActivityTypeMatch && isGradeSufficient && isFieldMatch;
-            });
-
-            if (qualifiedActivity) {
-                handleApplyForProject(projectId, button);
-            } else {
-                const message = 'شما فعالیت ثبت‌شده و فعالی که با نیازمندی‌های این پروژه (رشته، نوع فعالیت و پایه) مطابقت داشته باشد، ندارید. لطفاً ابتدا از بخش "فعالیت‌های من" یک فعالیت مرتبط ثبت کرده یا فعالیت موجود خود را فعال نمایید.';
-                showModal(message, 'info');
-            }
+    // جستجو برای یافتن یک فعالیت واجد شرایط
+    const qualifiedActivity = engineerActivities.find(activity => {
+        const isActive = activity.Status === 'فعال';
+        const isActivityTypeMatch = activity.engineerActivity === project.engineerActivity;
+        const isGradeSufficient = compareGrades(activity.engineerLevel, project.engineerRank);
+        let isFieldMatch = activity.engineerField === project.engineerField;
+        if (project.engineerActivity === 'مجری' &&
+            ((project.engineerField === 'معماری' && activity.engineerField === 'عمران') ||
+             (project.engineerField === 'عمران' && activity.engineerField === 'معماری'))) {
+            isFieldMatch = true;
         }
+        return isActive && isActivityTypeMatch && isGradeSufficient && isFieldMatch;
+    });
+
+    if (qualifiedActivity) {
+        // اگر شرایط احراز شد، درخواست مستقیماً از اینجا ارسال می‌شود
+        showLoader();
+        try {
+            const payload = {
+                action: 'createInteraction', // استفاده از تابع جدید بک‌اند
+                ProjectID: project.ProjectID,
+                ActivityID: qualifiedActivity.ActivityID, // شناسه فعالیت واجد شرایط
+                InitiatorRole: 'Engineer',
+                InitiatorEmail: userData.email,
+                RecipientEmail: project.EmployerEmail // ایمیل کارفرمای صاحب پروژه
+            };
+            const response = await fetch(GOOGLE_SCRIPT_URL, { 
+                method: 'POST',
+                mode: 'cors',
+                cache: 'no-cache',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload) 
+            });
+            const result = await response.json();
+            showModal(result.message, result.status);
+
+            if (result.status === 'success') {
+                button.textContent = 'درخواست ارسال شد';
+                button.disabled = true;
+            }
+        } catch (error) {
+            showModal('خطا در ارسال درخواست همکاری.', 'error');
+        } finally {
+            hideLoader();
+        }
+    } else {
+        // اگر شرایط احراز نشد، پیام راهنما نمایش داده می‌شود
+        const message = 'شما فعالیت ثبت‌شده و فعالی که با نیازمندی‌های این پروژه مطابقت داشته باشد، ندارید. لطفاً ابتدا یک فعالیت مرتبط ثبت نمایید.';
+        showModal(message, 'info');
+    }
+}
         function toPersianNum(num) {
             if (num === null || num === undefined) return '-';
             return num.toLocaleString('fa-IR');
@@ -2966,53 +3160,6 @@ async function checkCooperationPrerequisites(activity) {
             }
         }
         
-function attachProjectRowListeners() {
-            const allProjectRows = document.querySelectorAll('.project-row');
-            allProjectRows.forEach(row => {
-                const header = row.querySelector('.project-header');
-                header.addEventListener('click', async (e) => {
-                    if (e.target.closest('button')) return;
-
-                    const status = row.dataset.status;
-
-                    // --- بخش جدید برای بررسی وضعیت پروژه ---
-                    if (status === 'بسته') {
-                        const message = `برای مشاهده درخواست همکاری مهندسان، نخست باید وضعیت پروژه را با دکمه <i class="fas fa-lock-open text-green-500 mx-1"></i> به حالت باز تبدیل کنید.`;
-                        showModal(message, 'info');
-                        return; // از ادامه اجرای کد جلوگیری می‌کند
-                    }
-                    // --- پایان بخش جدید ---
-
-                    const projectId = row.dataset.projectId;
-                    const body = row.querySelector('.project-body');
-                    const isOpen = row.classList.contains('open');
-
-                    allProjectRows.forEach(otherRow => {
-                        if (otherRow !== row) {
-                            otherRow.classList.remove('open');
-                        }
-                    });
-
-                    if (!isOpen && !body.dataset.loaded) {
-                        showLoader(); // << نمایش لودر
-                        try {
-                            const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getApplicantsForProject&projectId=${projectId}`);
-                            const result = await response.json();
-                            if (result.success) {
-                                renderApplicants(result.data, body);
-                                body.dataset.loaded = 'true';
-                            } else { throw new Error(result.message); }
-                        } catch (error) {
-                            body.innerHTML = `<div class="p-4 text-center text-red-500">خطا در بارگذاری.</div>`;
-                        } finally {
-                            hideLoader(); // << مخفی کردن لودر در هر صورت
-                        }
-                    }
-                    row.classList.toggle('open');
-                });
-            });
-        }
-        
         function renderApplicants(applicants, bodyElement) {
             if (applicants.length === 0) {
                 bodyElement.innerHTML = '<div class="p-4 text-center text-slate-500">هیچ درخواستی برای این پروژه ثبت نشده است.</div>';
@@ -3060,38 +3207,6 @@ function attachProjectRowListeners() {
                     </div>`;
             });
             bodyElement.innerHTML = applicantsHtml;
-        }
-
-        async function handleAccept(button) {
-            const row = button.closest('.applicant-row');
-            const projectRow = button.closest('.project-row');
-            const payload = {
-                action: 'acceptApplication',
-                projectId: projectRow.dataset.projectId,
-                engineerEmail: row.dataset.email
-            };
-            const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-            const result = await response.json();
-            showModal(result.message, result.status);
-            if (result.status === 'success') {
-                renderEmployerProjects(); // رفرش لیست پروژه‌ها
-            }
-        }
-
-        async function handleReject(button) {
-             const row = button.closest('.applicant-row');
-            const projectRow = button.closest('.project-row');
-            const payload = {
-                action: 'rejectApplication',
-                projectId: projectRow.dataset.projectId,
-                engineerEmail: row.dataset.email
-            };
-            const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-            const result = await response.json();
-            showModal(result.message, result.status);
-             if (result.status === 'success') {
-                row.remove(); // فقط سطر درخواست از لیست حذف می‌شود
-            }
         }
 
 function setupDashboardFeatures() {
@@ -3394,25 +3509,6 @@ async function renderEngineerDashboard() {
 
         // --- End Notification Logic ---
 
-        async function handleRequestCooperation(activityId, button) {
-            button.disabled = true;
-            button.innerHTML = '<div class="spinner !w-5 !h-5 !border-2"></div>';
-            try {
-                const payload = { action: 'requestCooperation', employerEmail: userData.email, activityId };
-                const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'cors', cache: 'no-cache', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
-                const result = await response.json();
-                if (result.status === 'success') {
-                    showModal(result.message, 'success');
-                    requestedCooperationIds.add(activityId);
-                    const card = button.closest('.activity-card');
-                    if(card) card.outerHTML = getActivityCardHTML(fetchedEngineersActivities.find(a => a.ActivityID === activityId), true);
-                } else { throw new Error(result.message); }
-            } catch (error) {
-                showModal(`خطا: ${error.message}`, 'error');
-                button.disabled = false;
-                button.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>درخواست همکاری';
-            }
-        }
         
         async function handleCancelCooperation(activityId, button) {
             showModal('آیا از لغو درخواست همکاری با این مهندس مطمئن هستید؟', 'confirm', async () => {
@@ -3436,44 +3532,33 @@ async function renderEngineerDashboard() {
             });
         }
 
-        async function handleApplyForProject(projectId, button) {
-            button.disabled = true;
-            button.innerHTML = '<div class="spinner !w-5 !h-5 !border-2"></div>';
-            try {
-                const payload = { action: 'applyForProject', engineerEmail: userData.email, projectId };
-                const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'cors', cache: 'no-cache', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
-                const result = await response.json();
-                if (result.status === 'success') {
-                    showModal(result.message, 'success');
-                    appliedProjectIds.add(projectId);
-                    const card = button.closest('.project-card');
-                    if(card) card.outerHTML = getProjectCardHTML(fetchedProjects.find(p => p.ProjectID === projectId), 'engineer', true);
-                } else { throw new Error(result.message); }
-            } catch (error) {
-                showModal(`خطا: ${error.message}`, 'error');
-                button.disabled = false;
-                button.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>درخواست همکاری';
-            }
-        }
-        
         async function handleCancelApplication(projectId, button) {
             showModal('آیا از لغو درخواست همکاری برای این پروژه مطمئن هستید؟', 'confirm', async () => {
-                button.disabled = true;
-                button.innerHTML = '<div class="spinner !w-5 !h-5 !border-2"></div>';
+                showLoader();
                 try {
-                    const payload = { action: 'cancelApplication', engineerEmail: userData.email, projectId };
-                    const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'cors', cache: 'no-cache', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+                    const payload = { 
+                        action: 'cancelInteraction', 
+                        projectId: projectId, 
+                        engineerEmail: userData.email 
+                    };
+                    const response = await fetch(GOOGLE_SCRIPT_URL, { 
+                        method: 'POST',
+                        mode: 'cors',
+                        cache: 'no-cache',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(payload) 
+                    });
                     const result = await response.json();
+                    showModal(result.message, result.status);
+
                     if (result.status === 'success') {
-                        showModal(result.message, 'success');
-                        appliedProjectIds.delete(projectId);
-                        const card = button.closest('.project-card');
-                        if(card) card.outerHTML = getProjectCardHTML(fetchedProjects.find(p => p.ProjectID === projectId), 'engineer', false);
-                    } else { throw new Error(result.message); }
+                        // رفرش کردن صفحه پروژه‌ها برای نمایش تغییرات
+                        document.querySelector('[data-view="projects"]').click();
+                    }
                 } catch (error) {
                     showModal(`خطا: ${error.message}`, 'error');
-                    button.disabled = false;
-                    button.innerHTML = '<i class="fas fa-times-circle mr-2"></i>لغو درخواست همکاری';
+                } finally {
+                    hideLoader();
                 }
             });
         }
