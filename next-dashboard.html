@@ -2648,32 +2648,33 @@ async function renderMyActivities() {
             let html = '';
             requesters.forEach((req, index) => {
                  html += `
-                    <div class="applicant-row p-4">
-                        <strong>${toPersianNum(index + 1)}</strong>
+                    <div class="applicant-row p-4" data-email="${req.email}">
                         <div class="header-item">
-                            <span>نام کارفرما</span>
+                            <strong>${toPersianNum(index + 1)}</strong>
+                        </div>
+                        <div class="header-item">
                             <strong>${req.name}</strong>
+                            <span>نام کارفرما</span>
                         </div>
                         <div class="header-item">
+                            <strong>${req.province || '-'}</strong>
                             <span>استان</span>
-                            <strong>-</strong>
                         </div>
                         <div class="header-item">
-                            <span>طبقات</span>
-                            <strong>-</strong>
+                            <strong>${req.city || '-'}</strong>
+                            <span>شهر</span>
                         </div>
                         <div class="header-item">
-                            <span>مدت قرارداد</span>
-                            <strong>-</strong>
-                        </div>
-                        <div class="header-item">
-                            <span>تعرفه</span>
-                            <strong>-</strong>
+                            <strong>${formatTimeAgo(req.requestDate)}</strong>
+                            <span>زمان درخواست</span>
                         </div>
                         <div class="action-btn-container">
-                            <button class="btn btn-secondary !py-1 !px-3" data-action="toggle-options">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
+                            <button class="btn btn-secondary !py-1 !px-3" data-action="toggle-options"><span>تعیین تکلیف</span></button>
+                            <div class="action-options hidden">
+                                <a href="#" data-action="set-coop-status" data-status="Accepted"><i class="fas fa-check-circle text-green-500"></i> پذیرش</a>
+                                <a href="#" data-action="set-coop-status" data-status="Rejected"><i class="fas fa-times-circle text-red-500"></i> عدم پذیرش</a>
+                                <a href="#" data-action="set-coop-status" data-status="Reviewing"><i class="fas fa-clock text-yellow-500"></i> در حال بررسی</a>
+                            </div>
                         </div>
                     </div>`;
             });
@@ -3696,6 +3697,27 @@ async function renderEngineerDashboard() {
                 });
             });
         }
+        async function updateCoopStatus(activityId, employerEmail, newStatus, container) {
+            showLoader();
+            try {
+                const payload = { action: 'updateCooperationRequestStatus', activityId, employerEmail, newStatus };
+                const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const result = await response.json();
+                showModal(result.message, result.status);
+
+                if (result.status === 'success') {
+                    const mainButton = container.querySelector('button');
+                    const options = container.querySelector('.action-options');
+                    options.classList.add('hidden');
+                    // تغییر متن و ظاهر دکمه اصلی بر اساس وضعیت جدید
+                    mainButton.innerHTML = `<i class="fas ${newStatus === 'Accepted' ? 'fa-check-circle text-green-500' : (newStatus === 'Rejected' ? 'fa-times-circle text-red-500' : 'fa-clock text-yellow-500')}"></i>`;
+                }
+            } catch (error) {
+                showModal('خطای اتصال به سرور.', 'error');
+            } finally {
+                hideLoader();
+            }
+        }
 async function updateAppStatus(interactionId, newStatus, container) {
             showLoader();
             try {
@@ -3817,12 +3839,30 @@ document.querySelector('.main-content-area').addEventListener('click', e => {
                     // --- صفحه فعالیت‌های من (مهندس) ---
                     case 'myActivitiesContent':
                         const activityRow = button.closest('.project-row');
-                        if (activityRow) {
+                        if (activityRow && (action === 'edit-activity' || action === 'change-activity-status')) {
                             const activityId = activityRow.dataset.activityId;
                             if (action === 'edit-activity') handleEditActivity(activityId);
                             else if (action === 'change-activity-status') handleChangeActivityStatus(activityId, button.dataset.newStatus);
                         }
-                        // در اینجا می‌توانید منطق مربوط به پذیرش/رد درخواست‌های کارفرمایان را اضافه کنید
+
+                        const requesterRow = button.closest('.applicant-row');
+                        if (requesterRow) {
+                            const activityId = requesterRow.closest('.project-row').dataset.activityId;
+                            const employerEmail = requesterRow.dataset.email;
+
+                            if (action === 'toggle-options') {
+                                const options = button.nextElementSibling;
+                                document.querySelectorAll('.action-options').forEach(opt => {
+                                    if (opt !== options) opt.classList.add('hidden');
+                                });
+                                options.classList.toggle('hidden');
+                            } else if (action === 'set-coop-status') {
+                                const newStatus = button.dataset.status;
+                                const container = button.closest('.action-btn-container');
+                                // تابع updateCoopStatus را برای آپدیت وضعیت فراخوانی می‌کنیم
+                                updateCoopStatus(activityId, employerEmail, newStatus, container);
+                            }
+                        }
                         break;
 
                     // --- صفحه جستجوی مهندس (کارفرما) ---
