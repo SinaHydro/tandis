@@ -2342,12 +2342,12 @@ async function renderMyActivities() {
                                         <span class="text-xs text-slate-500">مهندس ${act.engineerField}</span>
                                     </div>
                                     <div class="header-item">
-                                        <strong>${toPersianNum(act.maxProjects)} عدد</strong>
-                                        <span>${toPersianNum(act.maxProjects - act.currentProjects)} کار باقیمانده</span>
+                                        <strong>${toPersianNum(act.maxProjects - act.currentProjects)} عدد</strong>
+                                        <span>کار باقیمانده</span>
                                     </div>
                                     <div class="header-item">
-                                        <strong>${toPersianNum(act.maxArea)} مترمربع</strong>
-                                        <span>${toPersianNum(act.maxArea - act.occupiedArea)} متر باقیمانده</span>
+                                        <strong>${toPersianNum(act.maxArea - act.occupiedArea)} مترمربع</strong>
+                                        <span>متراژ باقیمانده</span>
                                     </div>
                                     <div class="header-item">
                                         <strong>${act.licenseType}</strong>
@@ -3697,10 +3697,10 @@ async function renderEngineerDashboard() {
                 });
             });
         }
-        async function updateCoopStatus(activityId, employerEmail, newStatus, container) {
+        async function updateCoopStatus(interactionId, newStatus, container) {
             showLoader();
             try {
-                const payload = { action: 'updateCooperationRequestStatus', activityId, employerEmail, newStatus };
+                const payload = { action: 'updateInteractionStatus', interactionId, newStatus };
                 const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
                 const result = await response.json();
                 showModal(result.message, result.status);
@@ -3709,8 +3709,9 @@ async function renderEngineerDashboard() {
                     const mainButton = container.querySelector('button');
                     const options = container.querySelector('.action-options');
                     options.classList.add('hidden');
-                    // تغییر متن و ظاهر دکمه اصلی بر اساس وضعیت جدید
+                    // تغییر آیکن دکمه اصلی بر اساس وضعیت جدید
                     mainButton.innerHTML = `<i class="fas ${newStatus === 'Accepted' ? 'fa-check-circle text-green-500' : (newStatus === 'Rejected' ? 'fa-times-circle text-red-500' : 'fa-clock text-yellow-500')}"></i>`;
+                    mainButton.querySelector('span').textContent = newStatus;
                 }
             } catch (error) {
                 showModal('خطای اتصال به سرور.', 'error');
@@ -3847,8 +3848,7 @@ document.querySelector('.main-content-area').addEventListener('click', e => {
 
                         const requesterRow = button.closest('.applicant-row');
                         if (requesterRow) {
-                            const activityId = requesterRow.closest('.project-row').dataset.activityId;
-                            const employerEmail = requesterRow.dataset.email;
+                            const interactionId = requesterRow.dataset.interactionId;
 
                             if (action === 'toggle-options') {
                                 const options = button.nextElementSibling;
@@ -3859,8 +3859,7 @@ document.querySelector('.main-content-area').addEventListener('click', e => {
                             } else if (action === 'set-coop-status') {
                                 const newStatus = button.dataset.status;
                                 const container = button.closest('.action-btn-container');
-                                // تابع updateCoopStatus را برای آپدیت وضعیت فراخوانی می‌کنیم
-                                updateCoopStatus(activityId, employerEmail, newStatus, container);
+                                updateCoopStatus(interactionId, newStatus, container);
                             }
                         }
                         break;
