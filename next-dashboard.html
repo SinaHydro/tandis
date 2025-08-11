@@ -2358,8 +2358,8 @@ async function renderMyActivities() {
                                         <span>درخواست‌ها</span>
                                     </div>
                                     <div class="header-actions">
-                                        <button class="btn ${isActive ? 'btn-danger' : 'btn-success'} !p-2" data-action="change-activity-status" data-new-status="${isActive ? 'بستن فعالیت' : 'بازکردن فعالیت'}">
-                                            <i class="fas ${isActive ? 'fa-lock' : 'fa-lock-open'}"></i>
+                                        <button class="btn ${isActive ? 'btn-danger' : 'btn-success'} !p-2" data-action="change-activity-status" data-new-status="${isActive ? 'غیرفعال' : 'فعال'}">
+                                            <i class="fas ${isActive ? 'fa-eye-slash' : 'fa-eye'}"></i>
                                         </button>
                                         <button class="btn btn-secondary !p-2" data-action="edit-activity">
                                             <i class="fas fa-edit"></i>
@@ -2732,16 +2732,31 @@ async function renderMyActivities() {
                 </div>
                 <div class="p-4 space-y-4">
                      <div class="flex items-center justify-between gap-2 p-2 bg-slate-100 rounded-md">
-                        <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-green-600"></i><span class="font-semibold text-slate-700">${data.province} - ${data.city}</span></div>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-map-marker-alt text-green-600"></i>
+                                <span class="font-semibold text-slate-700">${data.province} - ${data.city}</span>
+                        </div>
                         ${data.needsHelp ? '<span class="needs-help">نیازمند کمک مجری</span>' : ''}
                      </div>
                     <div> 
-                        <div class="flex gap-4 items-center justify-between text-sm"><label class="font-medium text-gray-700">متراژ باقی‌مانده</label><span class="text-gray-600">${remainingArea.toLocaleString('fa-IR')} متر</span></div>
-                        <div class="progress-bar mt-1"><div class="progress-fill bg-green-500" style="width: ${areaPercentage}%"></div></div>
+                        <div class="flex gap-4 items-center justify-between text-sm">
+                            <label class="font-medium text-gray-700">متراژ باقی‌مانده</label>
+                                <span class="text-gray-600">${remainingArea.toLocaleString('fa-IR')} متر</span>
+                        </div>
+                        <div class="progress-bar mt-1">
+                            <div class="progress-fill bg-green-500" style="width: ${areaPercentage}%">
+                            </div>
+                        </div>
                     </div>
                     <div> 
-                        <div class="flex gap-4 items-center justify-between text-sm"><label class="font-medium text-gray-700">کار باقی‌مانده</label><span class="text-gray-600">${remainingProjects} از ${data.maxProjects}</span></div>
-                        <div class="progress-bar mt-1"><div class="progress-fill bg-blue-500" style="width: ${projectPercentage}%"></div></div>
+                        <div class="flex gap-4 items-center justify-between text-sm">
+                            <label class="font-medium text-gray-700">کار باقی‌مانده</label>
+                                <span class="text-gray-600">${remainingProjects} از ${data.maxProjects}</span>
+                        </div>
+                        <div class="progress-bar mt-1">
+                            <div class="progress-fill bg-blue-500" style="width: ${projectPercentage}%">
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="flex justify-end gap-2 p-3 bg-gray-50 border-t">${footerHtml}</div>
