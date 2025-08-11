@@ -3844,7 +3844,7 @@ document.querySelector('.main-content-area').addEventListener('click', e => {
                 switch (contentBody.id) {
                     
                     // --- صفحه پروژه‌های من (کارفرما) ---
-                    case 'projectsContent':
+                    case 'projectsContent': {
                         const projectRow = button.closest('.project-row');
                     if (projectRow && (action === 'edit-project' || action === 'close-project' || action === 'open-project')) {
                         const projectId = projectRow.dataset.projectId;
@@ -3875,9 +3875,9 @@ document.querySelector('.main-content-area').addEventListener('click', e => {
                             else if (action === 'cancel-application') handleCancelApplication(button.dataset.projectId, button);
                         }
                         break;
-
+                }
                     // --- صفحه فعالیت‌های من (مهندس) ---
-                    case 'myActivitiesContent': // === شروع منطق جدید برای "فعالیت‌های من" ===
+                    case 'myActivitiesContent': {
                         const activityRow = button.closest('.project-row');
                         if (activityRow && (action === 'edit-activity' || action === 'change-activity-status')) {
                             const activityId = activityRow.dataset.activityId;
@@ -3902,9 +3902,9 @@ document.querySelector('.main-content-area').addEventListener('click', e => {
                             }
                         }
                         break;
-
+                    }
                     // --- صفحه جستجوی مهندس (کارفرما) ---
-                    case 'engineersContent':
+                    case 'engineersContent': {
                         const card = button.closest('.activity-card');
                         if (card) {
                             const activityId = card.querySelector('[data-activity-id]').dataset.activityId;
@@ -3917,6 +3917,7 @@ document.querySelector('.main-content-area').addEventListener('click', e => {
                             }
                         }
                         break;
+                    }
                 }
             });
             
