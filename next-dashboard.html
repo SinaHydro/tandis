@@ -2315,7 +2315,7 @@ function renderProjectForm(projectData = null) {
             }
         }
         
-        async function renderMyActivities() {
+async function renderMyActivities() {
             myActivitiesContent.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
             try {
                 const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getActivitiesWithRequestCounts&email=${encodeURIComponent(userData.email)}`);
@@ -2324,7 +2324,7 @@ function renderProjectForm(projectData = null) {
 
                 const activities = result.data.sort((a,b) => new Date(b.LastModifiedDate) - new Date(a.LastModifiedDate));
                 if (activities.length > 0) {
-                    let activitiesHtml = '<div class="project-accordion">'; // استفاده از همان استایل
+                    let activitiesHtml = '<div class="project-accordion">';
                     activities.forEach(act => {
                         const isActive = act.Status === 'فعال';
                         activitiesHtml += `
@@ -2334,20 +2334,20 @@ function renderProjectForm(projectData = null) {
                                         <i class="fas fa-chevron-down accordion-icon"></i>
                                     </div>
                                     <div class="header-item">
-                                        <strong>${act.province}، ${act.city}</strong>
-                                        <span>استان و شهر</span>
+                                        <strong>${act.province}</strong>
+                                        <span class="text-xs text-slate-500">${act.city}</span>
                                     </div>
                                     <div class="header-item">
                                         <strong>${act.engineerActivity} ${act.engineerLevel}</strong>
                                         <span class="text-xs text-slate-500">مهندس ${act.engineerField}</span>
                                     </div>
                                     <div class="header-item">
-                                        <strong>${(act.maxProjects - act.currentProjects)} / ${act.maxProjects} عدد</strong>
-                                        <span>کار باقیمانده</span>
+                                        <strong>${toPersianNum(act.maxProjects)} عدد</strong>
+                                        <span>${toPersianNum(act.maxProjects - act.currentProjects)} کار باقیمانده</span>
                                     </div>
                                     <div class="header-item">
-                                        <strong>${toPersianNum(act.maxArea - act.occupiedArea)} متر</strong>
-                                        <span>متراژ باقیمانده</span>
+                                        <strong>${toPersianNum(act.maxArea)} مترمربع</strong>
+                                        <span>${toPersianNum(act.maxArea - act.occupiedArea)} متر باقیمانده</span>
                                     </div>
                                     <div class="header-item">
                                         <strong>${act.licenseType}</strong>
@@ -2355,7 +2355,7 @@ function renderProjectForm(projectData = null) {
                                     </div>
                                     <div class="header-item">
                                         <strong>${toPersianNum(act.requestCount)} نفر</strong>
-                                        <span>تعداد درخواست</span>
+                                        <span>درخواست‌ها</span>
                                     </div>
                                     <div class="header-actions">
                                         <button class="btn ${isActive ? 'btn-danger' : 'btn-success'} !p-2" data-action="change-activity-status" data-new-status="${isActive ? 'غیرفعال' : 'فعال'}">
@@ -2367,7 +2367,12 @@ function renderProjectForm(projectData = null) {
                                     </div>
                                 </div>
                                 <div class="project-body">
-                                    <div class="p-4 text-center text-slate-500">برای مشاهده درخواست‌ها کلیک کنید</div>
+                                    <div class="interaction-list">
+                                        <h5><i class="fas fa-arrow-down text-blue-500"></i> پیشنهادهای دریافتی از کارفرمایان</h5>
+                                        <div id="incoming-reqs-${act.ActivityID}"></div>
+                                        <h5><i class="fas fa-arrow-up text-green-500"></i> درخواست‌های ارسالی توسط شما</h5>
+                                        <div id="outgoing-apps-${act.ActivityID}"></div>
+                                    </div>
                                 </div>
                             </div>`;
                     });
