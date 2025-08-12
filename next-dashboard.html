@@ -2425,7 +2425,7 @@ async function renderMyActivities() {
                 // بر اساس نوع لیست، محتوای هر ردیف را به صورت اختصاصی می‌سازیم
                 switch (listType) {
                     // کارفرما -> درخواست‌های دریافتی از مهندسان
-                    case 'incomingApps':
+                    case 'incomingApps': {
                         rowContent = `
                             <div class="header-item">
                                 <strong>${toPersianNum(index + 1)}</strong>
@@ -2461,9 +2461,10 @@ async function renderMyActivities() {
                                  </div>
                             </div>`;
                         break;
+                    }
 
                     // کارفرما -> درخواست‌های ارسالی به مهندسان
-                    case 'outgoingReqs':
+                    case 'outgoingReqs': {
                         const status_out = item.Status || 'Pending';
                         // تبدیل وضعیت انگلیسی به فارسی برای نمایش
                         const statusText = { 'Pending': 'در انتظار پاسخ', 'Accepted': 'پذیرفته شده', 'Rejected': 'رد شده', 'Reviewing': 'در حال بررسی' }[status_out] || status_out;
@@ -2497,9 +2498,9 @@ async function renderMyActivities() {
                                 <span class="status-badge ${statusClass}">${statusText}</span>
                             </div>`;
                         break;
-
+                    }
                     // مهندس -> درخواست‌های دریافتی از کارفرمایان
-                    case 'incomingReqs':
+                    case 'incomingReqs': {
                         const p = item.projectInfo || {};
                         rowContent = `
                             <div class="header-item">
@@ -2537,9 +2538,9 @@ async function renderMyActivities() {
                                  </div>
                             </div>`;
                         break;
-                    
+                    }
                     // مهندس -> درخواست‌های ارسالی برای پروژه‌ها
-                    case 'outgoingApps':
+                    case 'outgoingApps': {
                         const p_out = item.projectInfo || {};
                         const status_out = item.Status || 'Pending';
                         const statusClass = `status-${status_out.toLowerCase()}`;
@@ -2573,6 +2574,7 @@ async function renderMyActivities() {
                                 <span class="status-badge ${statusClass}">${status_out}</span>
                             </div>`;
                         break;
+                    }
                 }
                 html += `<div class="interaction-row" data-interaction-id="${item.InteractionID}">${rowContent}</div>`;
             });
