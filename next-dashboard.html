@@ -639,7 +639,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwTgr3wdFBki5zGJJu3U5Vn9GeegW8N13vl_HDf4U4uxehwlJZa2It9IbEZuHm3DCoZ/exec'; // Please replace with your actual script URL
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx-ZzYud6A65TWo9rZPRRlz8rM9VxOvYR1GOXNdlibvkglxPKYSozmonSmTwun_bzjo/exec'; // Please replace with your actual script URL
 
         const SLIDESHOW_CONTENT_R = [
             { 
@@ -3636,17 +3636,19 @@ async function renderEngineerDashboard() {
                     };
                     const response = await fetch(GOOGLE_SCRIPT_URL, { 
                         method: 'POST',
-                        mode: 'cors',
-                        cache: 'no-cache',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                         body: JSON.stringify(payload) 
                     });
                     const result = await response.json();
                     showModal(result.message, result.status);
 
                     if (result.status === 'success') {
-                        // رفرش کردن صفحه پروژه‌ها برای نمایش تغییرات
-                        document.querySelector('[data-view="projects"]').click();
+                        // آپدیت آنی کارت به جای رفرش کل صفحه
+                        appliedProjectIds.delete(projectId); // حذف پروژه از لیست درخواست‌های ارسال شده
+                        const projectData = fetchedProjects.find(p => p.ProjectID === projectId);
+                        const card = button.closest('.project-card');
+                        if (card && projectData) {
+                            card.outerHTML = getProjectCardHTML(projectData, 'engineer', false);
+                        }
                     }
                 } catch (error) {
                     showModal(`خطا: ${error.message}`, 'error');
