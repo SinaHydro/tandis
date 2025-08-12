@@ -3248,9 +3248,19 @@ async function checkCooperationPrerequisites(activity) {
                     InitiatorEmail: userData.email,
                     RecipientEmail: recipientEmail
                 };
-                const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const response = await fetch(GOOGLE_SCRIPT_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify(payload) 
+                });
                 const result = await response.json();
                 showModal(result.message, result.status);
+
+                // --- بخش زیر اصلاح شده است ---
+                if (result.status === 'success') {
+                    // به جای غیرفعال کردن دکمه، کل پنل جستجوی مهندس را رفرش می‌کنیم
+                    // تا وضعیت جدید دکمه‌ها از سرور خوانده شود.
+                    renderEngineersPanel();
+                }
                 // می‌توانید در اینجا دکمه درخواست همکاری را در صفحه جستجوی مهندس غیرفعال کنید
             } catch(error) {
                  showModal('خطا در ارسال درخواست.', 'error');
