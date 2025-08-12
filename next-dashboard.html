@@ -400,7 +400,15 @@
         
         .interaction-list { padding: 0.5rem; }
         .interaction-list h5 { font-weight: 600; color: #1e293b; background-color: #e2e8f0; padding: 0.5rem 1rem; border-radius: 0.5rem; margin-top: 1rem; }
-        .interaction-row { display: grid; grid-template-columns: repeat(6, 1fr) auto; gap: 1rem; align-items: center; padding: 1rem; border-bottom: 1px solid #e2e8f0; }
+        .interaction-row { 
+            display: grid; 
+            /* ستون اول: 40px، ستون آخر: 120px، بقیه مساوی */
+            grid-template-columns: 40px repeat(5, 1fr) 120px;
+            gap: 1rem; 
+            align-items: center; 
+            padding: 1rem; 
+            border-bottom: 1px solid #e2e8f0; 
+        }
         .interaction-row:last-child { border-bottom: none; }
         
         .status-badge {
@@ -416,8 +424,8 @@
         .status-reviewing { background-color: #fef9c3; color: #854d0e; }
 
         /* رنگ پس‌زمینه برای هدر لیست‌ها */
-        .list-header-incoming { background-color: #e0f2fe !important; } /* آبی کم‌رنگ */
-        .list-header-outgoing { background-color: #f0fdf4 !important; } /* سبز کم‌رنگ */
+        .list-header-incoming { background-color: #e0f2fe !important; border-bottom: 1px solid #93c5fd;} /* آبی کم‌رنگ */
+        .list-header-outgoing { background-color: #f0fdf4 !important; border-bottom: 1px solid #86efac;} /* سبز کم‌رنگ */
         
     </style>
 </head>
@@ -2402,10 +2410,9 @@ async function renderMyActivities() {
                 myActivitiesContent.innerHTML = `<p class="text-center text-red-500">خطا: ${error.message}</p>`;
             }
         }
-/**
-         * این تابع یک لیست از تعاملات (درخواست‌ها/پذیرش‌ها) را می‌گیرد و کد وب آن را می‌سازد.
-         * این تابع قلب تپنده نمایش لیست‌های تفکیک شده در هر دو پنل کارفرما و مهندس است.
-         */
+
+         // این تابع یک لیست از تعاملات (درخواست‌ها/پذیرش‌ها) را می‌گیرد و کد وب آن را می‌سازد.
+         // این تابع قلب تپنده نمایش لیست‌های تفکیک شده در هر دو پنل کارفرما و مهندس است.
         function renderInteractionList(interactions, listType) {
             // پیام‌های پیش‌فرض برای زمانی که لیستی خالی است
             if (!interactions || interactions.length === 0) {
@@ -2427,9 +2434,7 @@ async function renderMyActivities() {
                     // کارفرما -> درخواست‌های دریافتی از مهندسان
                     case 'incomingApps': {
                         rowContent = `
-                            <div class="header-item">
-                                <strong>${toPersianNum(index + 1)}</strong>
-                            </div>
+                            <strong>${toPersianNum(index + 1)}</strong>
                             <div class="header-item">
                                 <strong>${item.activityInfo?.province || '-'}</strong>
                                 <span>استان</span>
@@ -2452,7 +2457,7 @@ async function renderMyActivities() {
                             </div>
                             <div class="action-btn-container">
                                  <button class="btn btn-secondary !py-1 !px-3" data-action="toggle-options">
-                                     <span>تعیین تکلیف</span>
+                                     <span>پاسخ ...</span>
                                  </button>
                                  <div class="action-options hidden">
                                      <a href="#" data-action="set-status" data-status="Accepted"><i class="fas fa-check-circle text-green-500"></i> پذیرش</a>
@@ -2471,9 +2476,7 @@ async function renderMyActivities() {
                         const statusClass = `status-${status_out.toLowerCase()}`;
                         
                          rowContent = `
-                            <div class="header-item">
-                                <strong>${toPersianNum(index + 1)}</strong>
-                            </div>
+                            <strong>${toPersianNum(index + 1)}</strong>
                             <div class="header-item">
                                 <strong>${item.activityInfo?.province || '-'}</strong>
                                 <span>استان</span>
@@ -2503,6 +2506,7 @@ async function renderMyActivities() {
                     case 'incomingReqs': {
                         const p = item.projectInfo || {};
                         rowContent = `
+                            <strong>${toPersianNum(index + 1)}</strong>
                             <div class="header-item">
                                 <strong>${p.province}</strong>
                                 <span class="text-xs text-slate-500">منطقه ${toPersianNum(p.district)} ${p.city}</span>
@@ -3687,11 +3691,17 @@ async function renderEngineerDashboard() {
             });
         }
         
-        function handleEditProject(projectId) {
+function handleEditProject(projectId) {
             const projectToEdit = fetchedProjects.find(p => p.ProjectID === projectId);
             if (projectToEdit) {
-                document.querySelector('.nav-item[data-view="create-project"]').click();
-                setTimeout(() => renderProjectForm(projectToEdit), 50);
+                // آدرس دکمه به نوار ناوبری جدید آپدیت شد
+                const createProjectButton = document.getElementById('create-project-nav-item');
+                if (createProjectButton) {
+                    switchToView('create-project', createProjectButton);
+                    setTimeout(() => renderProjectForm(projectToEdit), 50);
+                } else {
+                    console.error("دکمه ثبت پروژه در نوار ناوبری یافت نشد.");
+                }
             }
         }
 
