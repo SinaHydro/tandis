@@ -319,7 +319,7 @@
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.4s ease-in-out;
-            background-color: #fcfcfc;
+            background-color: #ffffff;
         }
         .project-accordion .project-row.open .project-body {
             max-height: 500px; /* ارتفاع تقریبی برای نمایش محتوا */
@@ -426,7 +426,8 @@
         /* رنگ پس‌زمینه برای هدر لیست‌ها */
         .list-header-incoming { background-color: #e0f2fe !important; border-bottom: 1px solid #93c5fd;} /* آبی کم‌رنگ */
         .list-header-outgoing { background-color: #f0fdf4 !important; border-bottom: 1px solid #86efac;} /* سبز کم‌رنگ */
-        
+        .list-header-suggestions { background-color: #fefce8 !important; border-bottom: 1px solid #86efac; } /* زرد کم‌رنگ */
+
     </style>
 </head>
 <body class="hidden">
@@ -663,7 +664,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyP70iKup66DO_c7hnDZwC4iPJIoFDWZb6T2I1uNWbTlMJzHYKYUJDVe-D-J6OaGjNn/exec'; // Please replace with your actual script URL
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwHfVXg_zOxjYEWa1nzIRJdtjxlUzdVYiqlGGr6v9xG9ayv-JLDl-NZw6CUhRYbUu1G/exec'; // Please replace with your actual script URL
 
         const SLIDESHOW_CONTENT_R = [
             { 
@@ -2502,6 +2503,43 @@ async function renderMyActivities() {
                             </div>`;
                         break;
                     }
+                                        // کارفرما -> پیشنهادهای هوشمند
+                case 'suggestions': {
+                    if (!interactions || interactions.length === 0) {
+                        return '<div class="p-4 text-center text-sm text-slate-500">مهندس واجد شرایط دیگری یافت نشد.</div>';
+                    }
+                    let suggestionsHtml = '';
+                    interactions.forEach((act, index) => {
+                        suggestionsHtml += `
+                        <div class="interaction-row">
+                            <strong>${toPersianNum(index + 1)}</strong>
+                            <div class="header-item">
+                                <strong>${item.activityInfo?.province || '-'}</strong>
+                                <span>استان</span>
+                            </div>
+                            <div class="header-item">
+                                <strong>${item.activityInfo?.engineerActivity || ''} ${item.activityInfo?.engineerLevel || ''}</strong>
+                                <span class="text-xs text-slate-500">مهندس ${item.activityInfo?.engineerField || ''}</span>
+                            </div>
+                            <div class="header-item">
+                                <strong>${toPersianNum(item.activityInfo?.maxProjects - item.activityInfo?.currentProjects)} عدد</strong>
+                                <span>کار باقیمانده</span>
+                            </div>
+                            <div class="header-item">
+                                <strong>${toPersianNum(item.activityInfo?.maxArea - item.activityInfo?.occupiedArea)} مترمربع</strong>
+                                <span>متراژ باقیمانده</span>
+                            </div>
+                            <div class="header-item">
+                                <strong>${formatTimeAgo(item.Timestamp)}</strong>
+                                <span>زمان ارسال</span>
+                            </div>
+                            <div class="flex items-center justify-center">
+                                <button class="btn btn-success !py-1 !px-3" data-action="send-request" data-activity-id="${act.ActivityID}" data-recipient-email="${act.EngineerEmail}">ارسال درخواست</button>
+                                </div>
+                            </div>`;
+                    });
+                    return suggestionsHtml;
+                    }
                     // مهندس -> درخواست‌های دریافتی از کارفرمایان
                     case 'incomingReqs': {
                         const p = item.projectInfo || {};
@@ -2587,14 +2625,11 @@ async function renderMyActivities() {
 
         /* منطق باز و بسته شدن آکاردئون و واکشی اطلاعات برای صفحه "پروژه‌های من" کارفرما.*/
         function attachProjectRowListeners() {
-            const allProjectRows = document.querySelectorAll('#projectsContent .project-row');
-            allProjectRows.forEach(row => {
+            document.querySelectorAll('#projectsContent .project-row').forEach(row => {
                 const header = row.querySelector('.project-header');
                 header.addEventListener('click', async (e) => {
                     if (e.target.closest('button')) return;
-
-                    const status = row.dataset.status;
-                    if (status === 'بسته') {
+                    if (row.dataset.status === 'بسته') {
                         const message = `برای مشاهده درخواست‌ها، نخست باید وضعیت پروژه را با دکمه <i class="fas fa-lock-open text-green-500 mx-1"></i> به حالت باز تبدیل کنید.`;
                         showModal(message, 'info');
                         return;
@@ -2604,26 +2639,34 @@ async function renderMyActivities() {
                     const body = row.querySelector('.project-body');
                     const isOpen = row.classList.contains('open');
 
-                    allProjectRows.forEach(otherRow => {
+                    document.querySelectorAll('#projectsContent .project-row').forEach(otherRow => {
                         if (otherRow !== row) otherRow.classList.remove('open');
                     });
 
                     if (!isOpen && !body.dataset.loaded) {
                         showLoader();
                         try {
-                            const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getProjectDetails&projectId=${projectId}`);
-                            const result = await response.json();
-                            if (result.success) {
-                                const { incoming, outgoing } = result.data;
+                            // واکشی همزمان هر سه لیست
+                            const [detailsResponse, suggestionsResponse] = await Promise.all([
+                                fetch(`${GOOGLE_SCRIPT_URL}?func=getProjectDetails&projectId=${projectId}`),
+                                fetch(`${GOOGLE_SCRIPT_URL}?func=getSuggestedEngineers&projectId=${projectId}`)
+                            ]);
+                            const detailsResult = await detailsResponse.json();
+                            const suggestionsResult = await suggestionsResponse.json();
+
+                            if (detailsResult.success) {
+                                const { incoming, outgoing } = detailsResult.data;
                                 document.getElementById(`incoming-apps-${projectId}`).innerHTML = renderInteractionList(incoming, 'incomingApps');
                                 document.getElementById(`outgoing-reqs-${projectId}`).innerHTML = renderInteractionList(outgoing, 'outgoingReqs');
-                                body.dataset.loaded = 'true';
-                            } else { throw new Error(result.message); }
+                            }
+                            if (suggestionsResult.success) {
+                                document.getElementById(`suggestions-count-${projectId}`).textContent = toPersianNum(suggestionsResult.data.length);
+                                document.getElementById(`suggestions-${projectId}`).innerHTML = renderInteractionList(suggestionsResult.data, 'suggestions');
+                            }
+                            body.dataset.loaded = 'true';
                         } catch (error) {
                             body.querySelector('.interaction-list').innerHTML = `<div class="p-4 text-center text-red-500">خطا در بارگذاری جزئیات.</div>`;
-                        } finally {
-                            hideLoader();
-                        }
+                        } finally { hideLoader(); }
                     }
                     row.classList.toggle('open');
                 });
@@ -3173,8 +3216,8 @@ async function checkCooperationPrerequisites(activity) {
                                         <span>تعرفه شما</span>
                                     </div>
                                     <div class="header-item">
-                                        <strong>${toPersianNum(p.applicantCount)} نفر</strong>
-                                        <span>درخواست‌ها</span>
+                                        <strong>${toPersianNum(p.incomingRequestCount)} پیشنهاد <i class="fas fa-arrow-down text-blue-500"></i></strong>
+                                        <strong>${toPersianNum(p.outgoingRequestCount)} درخواست <i class="fas fa-arrow-up text-green-500"></i></strong>
                                     </div>
                                     <div class="header-actions">
                                         <button class="btn ${!isClosed ? 'btn-danger' : 'btn-success'} !p-2" title="${!isClosed ? 'بستن پروژه' : 'باز کردن پروژه'}" data-action="${!isClosed ? 'close-project' : 'open-project'}">
@@ -3186,12 +3229,26 @@ async function checkCooperationPrerequisites(activity) {
                                     </div>
                                 </div>
                                     <div class="project-body">
-                                        <div class="interaction-list">
-                                            <h5 class="list-header-incoming"><i class="fas fa-arrow-down text-blue-500"></i> پیشنهادهای دریافتی از مهندسان</h5>
-                                            <div id="incoming-apps-${p.ProjectID}"></div>
-                                            <h5 class="list-header-outgoing"><i class="fas fa-arrow-up text-green-500"></i> درخواست‌های ارسالی توسط شما</h5>
-                                            <div id="outgoing-reqs-${p.ProjectID}"></div>
+                                        <h5 class="list-header-incoming flex justify-between items-center">
+                                            <span><i class="fas fa-arrow-down text-blue-500 mr-2"></i> پیشنهادهای مهندسان</span>
+                                            <span class="font-bold text-slate-700">${toPersianNum(p.incomingRequestCount)}</span>
+                                        </h5>
+                                        <div id="incoming-apps-${p.ProjectID}"></div>
+                                        
+                                        <h5 class="list-header-outgoing flex justify-between items-center">
+                                            <span><i class="fas fa-arrow-up text-green-500 mr-2"></i> درخواست‌های شما</span>
+                                            <span class="font-bold text-slate-700">${toPersianNum(p.outgoingRequestCount)}</span>
+                                        </h5>
+                                        <div id="outgoing-reqs-${p.ProjectID}"></div>
                                         </div>
+
+                                        <h5 class="list-header-suggestions flex justify-between items-center">
+                                            <span><i class="fas fa-lightbulb text-yellow-500 mr-2"></i> پیشنهادهای هوشمند</span>
+                                            <span class="font-bold text-slate-700">${toPersianNum(p.ProjectID)}</span>
+                                            <span id="suggestions-count-${toPersianNum(p.ProjectID)}" class="font-bold text-slate-700"></span>
+                                        </h5>
+                                        <div id="suggestions-${p.ProjectID}"></div>
+                                    </div>
                                     </div>
                             </div>`;
                     });
@@ -3323,7 +3380,7 @@ async function checkCooperationPrerequisites(activity) {
                             <span>زمان پیشنهاد</span>
                         </div>
                         <div class="action-btn-container">
-                            <button class="btn btn-secondary !py-1 !px-3" data-action="toggle-options"><span>تعیین تکلیف</span></button>
+                            <button class="btn btn-secondary !py-1 !px-3" data-action="toggle-options"><span>پاسخ ...</span></button>
                             <div class="action-options hidden">
                                 <a href="#" data-action="set-status" data-status="Accepted"><i class="fas fa-check-circle text-green-500"></i> پذیرش</a>
                                 <a href="#" data-action="set-status" data-status="Rejected"><i class="fas fa-times-circle text-red-500"></i> عدم پذیرش</a>
