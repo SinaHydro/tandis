@@ -402,7 +402,23 @@
         .interaction-list h5 { font-weight: 600; color: #1e293b; background-color: #e2e8f0; padding: 0.5rem 1rem; border-radius: 0.5rem; margin-top: 1rem; }
         .interaction-row { display: grid; grid-template-columns: repeat(6, 1fr) auto; gap: 1rem; align-items: center; padding: 1rem; border-bottom: 1px solid #e2e8f0; }
         .interaction-row:last-child { border-bottom: none; }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: center;
+        }
+        .status-pending { background-color: #f1f5f9; color: #475569; }
+        .status-accepted { background-color: #dcfce7; color: #166534; }
+        .status-rejected { background-color: #fee2e2; color: #991b1b; }
+        .status-reviewing { background-color: #fef9c3; color: #854d0e; }
 
+        /* رنگ پس‌زمینه برای هدر لیست‌ها */
+        .list-header-incoming { background-color: #e0f2fe !important; } /* آبی کم‌رنگ */
+        .list-header-outgoing { background-color: #f0fdf4 !important; } /* سبز کم‌رنگ */
+        
     </style>
 </head>
 <body class="hidden">
@@ -2368,9 +2384,9 @@ async function renderMyActivities() {
                                 </div>
                                 <div class="project-body">
                                     <div class="interaction-list">
-                                        <h5><i class="fas fa-arrow-down text-blue-500"></i> پیشنهادهای دریافتی از کارفرمایان</h5>
+                                        <h5 class="list-header-incoming"><i class="fas fa-arrow-down text-blue-500"></i> پیشنهادهای دریافتی از کارفرمایان</h5>
                                         <div id="incoming-reqs-${act.ActivityID}"></div>
-                                        <h5><i class="fas fa-arrow-up text-green-500"></i> درخواست‌های ارسالی توسط شما</h5>
+                                        <h5 class="list-header-outgoing"><i class="fas fa-arrow-up text-green-500"></i> درخواست‌های ارسالی توسط شما</h5>
                                         <div id="outgoing-apps-${act.ActivityID}"></div>
                                     </div>
                                 </div>
@@ -2526,6 +2542,10 @@ async function renderMyActivities() {
                     
                     // مهندس -> درخواست‌های ارسالی برای پروژه‌ها
                     case 'outgoingApps':
+                        const p_out = item.projectInfo || {};
+                        const status_out = item.Status || 'Pending';
+                        const statusClass = `status-${status_out.toLowerCase()}`;
+                        
                         rowContent = `
                             <div class="header-item">
                                 <strong>${p.province}</strong>
@@ -2551,15 +2571,9 @@ async function renderMyActivities() {
                                 <strong>${formatTimeAgo(item.Timestamp)}</strong>
                                 <span>زمان پیشنهاد</span>
                             </div>
-                            <div class="action-btn-container">
-                                 <button class="btn btn-secondary !py-1 !px-3" data-action="toggle-options">
-                                     <span>تعیین تکلیف</span>
-                                 </button>
-                                 <div class="action-options hidden">
-                                     <a href="#" data-action="set-status" data-status="Accepted"><i class="fas fa-check-circle text-green-500"></i> پذیرش</a>
-                                     <a href="#" data-action="set-status" data-status="Rejected"><i class="fas fa-times-circle text-red-500"></i> عدم پذیرش</a>
-                                     <a href="#" data-action="set-status" data-status="Reviewing"><i class="fas fa-clock text-yellow-500"></i> در حال بررسی</a>
-                                 </div>
+                            <div class="flex items-center justify-center">
+                                <span class="status-badge ${statusClass}">${status_out}</span>
+                            </div>
                             </div>`;
                         break;
                 }
@@ -3170,9 +3184,9 @@ async function checkCooperationPrerequisites(activity) {
                                 </div>
                                     <div class="project-body">
                                         <div class="interaction-list">
-                                            <h5><i class="fas fa-arrow-down text-blue-500"></i> پیشنهادهای دریافتی از مهندسان</h5>
+                                            <h5 class="list-header-incoming"><i class="fas fa-arrow-down text-blue-500"></i> پیشنهادهای دریافتی از مهندسان</h5>
                                             <div id="incoming-apps-${p.ProjectID}"></div>
-                                            <h5><i class="fas fa-arrow-up text-green-500"></i> درخواست‌های ارسالی توسط شما</h5>
+                                            <h5 class="list-header-outgoing"><i class="fas fa-arrow-up text-green-500"></i> درخواست‌های ارسالی توسط شما</h5>
                                             <div id="outgoing-reqs-${p.ProjectID}"></div>
                                         </div>
                                     </div>
