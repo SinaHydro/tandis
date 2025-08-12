@@ -296,7 +296,7 @@
         .project-accordion .project-header {
             display: grid;
             /* ستون‌ها برای جای دادن "مدت قرارداد" آپدیت شد */
-            grid-template-columns: auto repeat(6, 1fr) auto;
+            grid-template-columns: auto repeat(6, 1fr) 120px;
             align-items: center;
             padding: 1rem 1.5rem;
             cursor: pointer;
@@ -319,7 +319,7 @@
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.4s ease-in-out;
-            background-color: #f8fafc;
+            background-color: #fcfcfc;
         }
         .project-accordion .project-row.open .project-body {
             max-height: 500px; /* ارتفاع تقریبی برای نمایش محتوا */
@@ -403,7 +403,7 @@
         .interaction-row { 
             display: grid; 
             /* ستون اول: 40px، ستون آخر: 120px، بقیه مساوی */
-            grid-template-columns: 40px repeat(5, 1fr) 120px;
+            grid-template-columns: auto repeat(5, 1fr) 120px;
             gap: 1rem; 
             align-items: center; 
             padding: 1rem; 
