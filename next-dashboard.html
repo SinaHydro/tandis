@@ -3075,10 +3075,16 @@ async function checkApplicationPrerequisites(projectId, button) {
             const result = await response.json();
             showModal(result.message, result.status);
 
-            if (result.status === 'success') {
-                button.textContent = 'درخواست ارسال شد';
-                button.disabled = true;
-            }
+                    if (result.status === 'success') {
+                        // ۱. شناسه پروژه را به لیست درخواست‌های ارسال شده اضافه می‌کنیم
+                        appliedProjectIds.add(projectId);
+                        
+                        // ۲. کارت پروژه را پیدا کرده و آن را با دکمه جدید بازрисов می‌کنیم
+                        const card = button.closest('.project-card');
+                        if (card) {
+                            card.outerHTML = getProjectCardHTML(project, 'engineer', true); // isApplied = true
+                        }
+                    }
         } catch (error) {
             showModal('خطا در ارسال درخواست همکاری.', 'error');
         } finally {
