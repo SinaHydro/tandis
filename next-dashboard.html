@@ -2464,6 +2464,11 @@ async function renderMyActivities() {
 
                     // کارفرما -> درخواست‌های ارسالی به مهندسان
                     case 'outgoingReqs':
+                        const status_out = item.Status || 'Pending';
+                        // تبدیل وضعیت انگلیسی به فارسی برای نمایش
+                        const statusText = { 'Pending': 'در انتظار پاسخ', 'Accepted': 'پذیرفته شده', 'Rejected': 'رد شده', 'Reviewing': 'در حال بررسی' }[status_out] || status_out;
+                        const statusClass = `status-${status_out.toLowerCase()}`;
+                        
                          rowContent = `
                             <div class="header-item">
                                 <strong>${toPersianNum(index + 1)}</strong>
@@ -2488,15 +2493,8 @@ async function renderMyActivities() {
                                 <strong>${formatTimeAgo(item.Timestamp)}</strong>
                                 <span>زمان ارسال</span>
                             </div>
-                            <div class="action-btn-container">
-                                 <button class="btn btn-secondary !py-1 !px-3" data-action="toggle-options">
-                                     <span>تعیین تکلیف</span>
-                                 </button>
-                                 <div class="action-options hidden">
-                                     <a href="#" data-action="set-status" data-status="Accepted"><i class="fas fa-check-circle text-green-500"></i> پذیرش</a>
-                                     <a href="#" data-action="set-status" data-status="Rejected"><i class="fas fa-times-circle text-red-500"></i> عدم پذیرش</a>
-                                     <a href="#" data-action="set-status" data-status="Reviewing"><i class="fas fa-clock text-yellow-500"></i> در حال بررسی</a>
-                                 </div>
+                            <div class="flex items-center justify-center">
+                                <span class="status-badge ${statusClass}">${statusText}</span>
                             </div>`;
                         break;
 
@@ -2573,7 +2571,6 @@ async function renderMyActivities() {
                             </div>
                             <div class="flex items-center justify-center">
                                 <span class="status-badge ${statusClass}">${status_out}</span>
-                            </div>
                             </div>`;
                         break;
                 }
