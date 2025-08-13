@@ -2547,7 +2547,6 @@ function renderProjectForm(projectData = null) {
                             </div>
                             <div class="action-btn-container">
                                 <button class="btn btn-success !py-1 !px-3" data-action="send-request" data-activity-id="${activity.ActivityID}" data-recipient-email="${activity.EngineerEmail}">
-                                    <i class="fas fa-paper-plane mr-2"></i>
                                     <span>ارسال درخواست</span>
                                 </button>
                             </div>`;
@@ -2682,7 +2681,7 @@ function renderProjectForm(projectData = null) {
                                 if (outgoing.length > 0) {
                                      finalHtml += `
                                         <h5 class="list-header-outgoing flex justify-between items-center">
-                                            <span><i class="fas fa-arrow-up text-green-500 mr-2"></i> درخواست‌های ارسالی</span>
+                                            <span><i class="fas fa-arrow-up text-green-500 mr-2"></i> درخواست‌های شما</span>
                                             <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button>
                                         </h5>
                                         <div class="interaction-list-content">${renderInteractionList(outgoing, 'outgoingReqs')}</div>`;
@@ -2691,7 +2690,7 @@ function renderProjectForm(projectData = null) {
                              if (suggestionsResult.success && suggestionsResult.data.length > 0) {
                                  finalHtml += `
                                     <h5 class="list-header-suggestions flex justify-between items-center">
-                                        <span><i class="fas fa-lightbulb text-yellow-500 mr-2"></i> پیشنهادها</span>
+                                        <span><i class="fas fa-lightbulb text-yellow-500 mr-2"></i> پیشنهادهای هوشمند</span>
                                         <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button>
                                     </h5>
                                     <div class="interaction-list-content">${renderInteractionList(suggestionsResult.data, 'suggestions')}</div>`;
@@ -3990,14 +3989,24 @@ document.querySelector('.main-content-area').addEventListener('click', e => {
                             button.classList.toggle('collapsed'); // حالت دکمه را عوض می‌کند (برای چرخش آیکن)
                             listContent.classList.toggle('collapsed'); // لیست را باز یا بسته می‌کند
                         }
-                        
+                        // --- بخش جدید برای دکمه ارسال درخواست در لیست پیشنهادها ---
+                        if (action === 'send-request') {
+                            const projectRow = button.closest('.project-row');
+                            if (projectRow) {
+                                const projectId = projectRow.dataset.projectId;
+                                const activityId = button.dataset.activityId;
+                                const recipientEmail = button.dataset.recipientEmail;
+                                // از تابع کمکی که قبلاً برای مودال نوشته بودیم، دوباره استفاده می‌کنیم
+                                handleProjectSelectionForRequest(projectId, activityId, recipientEmail);
+                            }
+                        }
                         // منطق درخواست همکاری مهندس در همین صفحه نیز مدیریت می‌شود
-                        if (userData.role === 'engineer') {
+                        if (userData.role === 'engineer' && (action === 'apply' || action === 'cancel-application')) {
                             if (action === 'apply') checkApplicationPrerequisites(button.dataset.projectId, button);
                             else if (action === 'cancel-application') handleCancelApplication(button.dataset.projectId, button);
                         }
                         break;
-                }
+                    }
                     // --- صفحه فعالیت‌های من (مهندس) ---
                     case 'myActivitiesContent': {
                         const activityRow = button.closest('.project-row');
