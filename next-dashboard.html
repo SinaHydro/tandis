@@ -2636,7 +2636,7 @@ function renderProjectForm(projectData = null) {
         }
 
         // منطق باز و بسته شدن آکاردئون و واکشی اطلاعات برای صفحه "پروژه‌های من" کارفرما.
-        function attachProjectRowListeners() {
+function attachProjectRowListeners() {
             document.querySelectorAll('#projectsContent .project-row').forEach(row => {
                 const header = row.querySelector('.project-header');
                 header.addEventListener('click', async (e) => {
@@ -2670,18 +2670,18 @@ function renderProjectForm(projectData = null) {
                             let finalHtml = '';
                             if (detailsResult.success) {
                                 const { incoming, outgoing } = detailsResult.data;
-                                if (incoming.length > 0) {
+                                if (incoming && incoming.length > 0) {
                                     finalHtml += `
                                         <h5 class="list-header-incoming flex justify-between items-center">
-                                            <span><i class="fas fa-arrow-down text-blue-500 mr-2"></i> درخواست‌های دریافتی</span>
+                                            <span><i class="fas fa-arrow-down text-blue-500 m-2"></i> درخواست‌های دریافتی (${toPersianNum(incoming.length)})</span>
                                             <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button>
                                         </h5>
                                         <div class="interaction-list-content">${renderInteractionList(incoming, 'incomingApps')}</div>`;
                                 }
-                                if (outgoing.length > 0) {
+                                if (outgoing && outgoing.length > 0) {
                                      finalHtml += `
                                         <h5 class="list-header-outgoing flex justify-between items-center">
-                                            <span><i class="fas fa-arrow-up text-green-500 mr-2"></i> درخواست‌های شما</span>
+                                            <span><i class="fas fa-arrow-up text-green-500 m-2"></i> درخواست‌های ارسالی (${toPersianNum(outgoing.length)})</span>
                                             <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button>
                                         </h5>
                                         <div class="interaction-list-content">${renderInteractionList(outgoing, 'outgoingReqs')}</div>`;
@@ -2690,7 +2690,7 @@ function renderProjectForm(projectData = null) {
                              if (suggestionsResult.success && suggestionsResult.data.length > 0) {
                                  finalHtml += `
                                     <h5 class="list-header-suggestions flex justify-between items-center">
-                                        <span><i class="fas fa-lightbulb text-yellow-500 mr-2"></i> پیشنهادهای هوشمند</span>
+                                        <span><i class="fas fa-lightbulb text-yellow-500 m-2"></i> پیشنهادهای هوشمند (${toPersianNum(suggestionsResult.data.length)})</span>
                                         <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button>
                                     </h5>
                                     <div class="interaction-list-content">${renderInteractionList(suggestionsResult.data, 'suggestions')}</div>`;
@@ -2698,7 +2698,6 @@ function renderProjectForm(projectData = null) {
                             wrapper.innerHTML = finalHtml || '<p class="text-center text-sm p-4">موردی برای نمایش وجود ندارد.</p>';
                             body.dataset.loaded = 'true';
                         } catch (error) {
-                            // بخش کامل شده برای مدیریت خطا
                             console.error('خطا در واکشی جزئیات پروژه:', error);
                             wrapper.innerHTML = '<p class="text-center text-red-500 p-4">خطا در بارگذاری اطلاعات. لطفاً دوباره تلاش کنید.</p>';
                         } finally { 
