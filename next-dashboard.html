@@ -371,6 +371,7 @@
         }
         .action-btn-container {
             position: relative;
+            display: flex;
             justify-content: center;
         }
         .action-options {
@@ -2688,7 +2689,7 @@ function attachProjectRowListeners() {
                                 if (incoming && incoming.length > 0) {
                                     finalHtml += `
                                         <h5 class="list-header-incoming flex justify-between items-center">
-                                            <span class="text-blue-700"><i class="fas arrow-down-left text-blue-500"></i>  پیشنهادهای دریافتی (${toPersianNum(incoming.length)})</span>
+                                            <span class="text-blue-700"><i class="fas fa-envelope-open text-blue-500"></i>  پیشنهادهای دریافتی (${toPersianNum(incoming.length)})</span>
                                             <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up text-blue-500"></i></button>
                                         </h5>
                                         <div class="interaction-list-content">${renderInteractionList(incoming, 'incomingApps')}</div>`;
@@ -2696,7 +2697,7 @@ function attachProjectRowListeners() {
                                 if (outgoing && outgoing.length > 0) {
                                      finalHtml += `
                                         <h5 class="list-header-outgoing flex justify-between items-center">
-                                            <span class="text-green-700"><i class="fas arrow-up-right text-green-500"></i>  درخواست‌های ارسالی (${toPersianNum(outgoing.length)})</span>
+                                            <span class="text-green-700"><i class="fas fa-paper-plane text-green-500"></i>  درخواست‌های ارسالی (${toPersianNum(outgoing.length)})</span>
                                             <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up text-green-500"></i></button>
                                         </h5>
                                         <div class="interaction-list-content">${renderInteractionList(outgoing, 'outgoingReqs')}</div>`;
