@@ -2672,7 +2672,7 @@ function attachProjectRowListeners() {
                                 const { incoming, outgoing } = detailsResult.data;
                                 if (incoming && incoming.length > 0) {
                                     finalHtml += `
-                                        <h5 class="list-header-incoming flex justify-between items-center">
+                                        <h5 class="list-header-incoming flex justify-between items-center m-2">
                                             <span><i class="fas fa-arrow-down text-blue-500 m-2"></i> درخواست‌های دریافتی (${toPersianNum(incoming.length)})</span>
                                             <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button>
                                         </h5>
@@ -2680,7 +2680,7 @@ function attachProjectRowListeners() {
                                 }
                                 if (outgoing && outgoing.length > 0) {
                                      finalHtml += `
-                                        <h5 class="list-header-outgoing flex justify-between items-center">
+                                        <h5 class="list-header-outgoing flex justify-between items-center m-2">
                                             <span><i class="fas fa-arrow-up text-green-500 m-2"></i> درخواست‌های ارسالی (${toPersianNum(outgoing.length)})</span>
                                             <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button>
                                         </h5>
@@ -2689,7 +2689,7 @@ function attachProjectRowListeners() {
                             }
                              if (suggestionsResult.success && suggestionsResult.data.length > 0) {
                                  finalHtml += `
-                                    <h5 class="list-header-suggestions flex justify-between items-center">
+                                    <h5 class="list-header-suggestions flex justify-between items-center m-2">
                                         <span><i class="fas fa-lightbulb text-yellow-500 m-2"></i> پیشنهادهای هوشمند (${toPersianNum(suggestionsResult.data.length)})</span>
                                         <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button>
                                     </h5>
