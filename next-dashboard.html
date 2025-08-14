@@ -296,7 +296,7 @@
         .project-accordion .project-header {
             display: grid;
             /* ستون‌ها برای جای دادن "مدت قرارداد" آپدیت شد */
-            grid-template-columns: auto repeat(6, 1fr) 120px;
+            grid-template-columns: 30px repeat(6, 1fr) 120px;
             align-items: center;
             padding: 1rem 1.5rem;
             cursor: pointer;
@@ -334,7 +334,7 @@
         .applicant-row {
             display: grid;
             /* چیدمان جدید برای مشخصات مهندس */
-            grid-template-columns: 40px repeat(6, 1fr) auto;
+            grid-template-columns: 30px repeat(6, 1fr) 120px;
             gap: 1rem;
             align-items: center;
         }
@@ -405,7 +405,7 @@
         .interaction-row { 
             display: grid; 
             /* ستون اول: 40px، ستون آخر: 120px، بقیه مساوی */
-            grid-template-columns: auto repeat(6, 1fr) 120px;
+            grid-template-columns: 30px repeat(6, 1fr) 120px;
             gap: 1rem; 
             align-items: center; 
             padding: 1rem; 
@@ -2473,12 +2473,16 @@ function renderProjectForm(projectData = null) {
                                 <span>متراژ باقیمانده</span>
                             </div>
                             <div class="header-item">
+                                <strong>${toPersianNum(parseFloat(item.unitPrice))} تومان</strong>
+                                <span>تعرفه پیشنهادی</span>
+                            </div>
+                            <div class="header-item">
                                 <strong>${formatTimeAgo(item.Timestamp)}</strong>
                                 <span>زمان ارسال</span>
                             </div>
                             <div class="action-btn-container">
                                  <button class="btn btn-secondary !py-1 !px-3" data-action="toggle-options">
-                                     <span>پاسخ ...</span>
+                                     <span>پاسخ</span>
                                  </button>
                                  <div class="action-options hidden">
                                      <a href="#" data-action="set-status" data-status="Accepted"><i class="fas fa-check-circle text-green-500"></i> پذیرش</a>
@@ -2493,7 +2497,7 @@ function renderProjectForm(projectData = null) {
                     case 'outgoingReqs': {
                         const status_out = item.Status || 'Pending';
                         // تبدیل وضعیت انگلیسی به فارسی برای نمایش
-                        const statusText = { 'Pending': 'در انتظار پاسخ', 'Accepted': 'پذیرفته شده', 'Rejected': 'رد شده', 'Reviewing': 'در حال بررسی' }[status_out] || status_out;
+                        const statusText = { 'Pending': 'در انتظار', 'Accepted': 'پذیرفت', 'Rejected': 'رد شد', 'Reviewing': 'بررسی' }[status_out] || status_out;
                         const statusClass = `status-${status_out.toLowerCase()}`;
                         
                          rowContent = `
@@ -2513,6 +2517,10 @@ function renderProjectForm(projectData = null) {
                             <div class="header-item">
                                 <strong>${toPersianNum(item.activityInfo?.maxArea - item.activityInfo?.occupiedArea)} مترمربع</strong>
                                 <span>متراژ باقیمانده</span>
+                            </div>
+                            <div class="header-item">
+                                <strong>${toPersianNum(parseFloat(item.activityInfo?.unitPrice))} تومان</strong>
+                                <span>تعرفه پیشنهادی</span>
                             </div>
                             <div class="header-item">
                                 <strong>${formatTimeAgo(item.Timestamp)}</strong>
@@ -2543,6 +2551,10 @@ function renderProjectForm(projectData = null) {
                             <div class="header-item">
                                 <strong>${toPersianNum((activity.maxArea || 0) - (activity.occupiedArea || 0))} مترمربع</strong>
                                 <span>متراژ باقیمانده</span>
+                            </div>
+                            <div class="header-item">
+                                <strong>${toPersianNum(parseFloat(activity.unitPrice))} تومان</strong>
+                                <span>تعرفه پیشنهادی</span>
                             </div>
                              <div class="header-item">
                                 <strong>-</strong>
@@ -2676,7 +2688,7 @@ function attachProjectRowListeners() {
                                 if (incoming && incoming.length > 0) {
                                     finalHtml += `
                                         <h5 class="list-header-incoming flex justify-between items-center">
-                                            <span><i class="fas fa-arrow-down text-blue-500"></i> درخواست‌های دریافتی (${toPersianNum(incoming.length)})</span>
+                                            <span class="text-blue-700"><i class="fas fa-inbox text-blue-500"></i>  درخواست‌های دریافتی (${toPersianNum(incoming.length)})</span>
                                             <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button>
                                         </h5>
                                         <div class="interaction-list-content">${renderInteractionList(incoming, 'incomingApps')}</div>`;
@@ -2684,7 +2696,7 @@ function attachProjectRowListeners() {
                                 if (outgoing && outgoing.length > 0) {
                                      finalHtml += `
                                         <h5 class="list-header-outgoing flex justify-between items-center">
-                                            <span><i class="fas fa-arrow-up text-green-500"></i> درخواست‌های ارسالی (${toPersianNum(outgoing.length)})</span>
+                                            <span class="text-green-700"><i class="fas fa-angle-up text-green-500"></i>  درخواست‌های ارسالی (${toPersianNum(outgoing.length)})</span>
                                             <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button>
                                         </h5>
                                         <div class="interaction-list-content">${renderInteractionList(outgoing, 'outgoingReqs')}</div>`;
@@ -2693,7 +2705,7 @@ function attachProjectRowListeners() {
                              if (suggestionsResult.success && suggestionsResult.data.length > 0) {
                                  finalHtml += `
                                     <h5 class="list-header-suggestions flex justify-between items-center">
-                                        <span><i class="fas fa-lightbulb text-yellow-500"></i> پیشنهادهای هوشمند (${toPersianNum(suggestionsResult.data.length)})</span>
+                                        <span class="text-yellow-700"><i class="fas fa-lightbulb text-yellow-500"></i>  پیشنهادهای هوشمند (${toPersianNum(suggestionsResult.data.length)})</span>
                                         <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button>
                                     </h5>
                                     <div class="interaction-list-content">${renderInteractionList(suggestionsResult.data, 'suggestions')}</div>`;
@@ -3398,7 +3410,7 @@ async function checkCooperationPrerequisites(activity) {
                             <span>زمان پیشنهاد</span>
                         </div>
                         <div class="action-btn-container">
-                            <button class="btn btn-secondary !py-1 !px-3" data-action="toggle-options"><span>پاسخ ...</span></button>
+                            <button class="btn btn-secondary !py-1 !px-3" data-action="toggle-options"><span>پاسخ</span></button>
                             <div class="action-options hidden">
                                 <a href="#" data-action="set-status" data-status="Accepted"><i class="fas fa-check-circle text-green-500"></i> پذیرش</a>
                                 <a href="#" data-action="set-status" data-status="Rejected"><i class="fas fa-times-circle text-red-500"></i> عدم پذیرش</a>
