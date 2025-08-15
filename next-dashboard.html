@@ -3381,19 +3381,20 @@ async function checkCooperationPrerequisites(activity) {
                 if (result.status === 'success') {
                     // رفرش کردن اطلاعات پروژه فعلی برای نمایش تغییرات
                     const projectRow = document.querySelector(`.project-row[data-project-id="${projectId}"]`);
-                    const suggestionRow = projectRow.querySelector(`button[data-activity-id="${activityId}"]`).closest('.interaction-row');
-
-                    // <-- NEW: If we found the suggestion, let's move it.
-                    if (suggestionRow) {
-                        // 1. Get the list where sent requests are supposed to go.
-                        const outgoingList = projectRow.querySelector('.interaction-list-content:not(:first-child)'); // Assuming outgoing is the second list
-                        
-                        // 2. We'll need info about the activity to build the new row.
-                        // This part is a bit tricky, we'll have to "rebuild" the row visually.
-                        // Let's reload the project details for simplicity and accuracy.
+                    
+                    // مرحله ۲: اگر پروژه پیدا شد، آن را می‌بندیم و طوری علامت‌گذاری می‌کنیم
+                    // که انگار اطلاعاتش قدیمی شده است.
+                    if (projectRow) {
                         projectRow.classList.remove('open');
-                        projectRow.querySelector('.project-body').dataset.loaded = 'false'; // Mark as not loaded
-                        projectRow.querySelector('.project-header').click(); // Simulate a click to reload it
+                        const body = projectRow.querySelector('.project-body');
+                        if (body) {
+                           body.dataset.loaded = 'false'; // این خط به سایت می‌گوید اطلاعات این بخش باید دوباره از سرور خوانده شود
+                           body.querySelector('.interaction-list-wrapper').innerHTML = ''; // محتوای قبلی را پاک می‌کنیم
+                        }
+                        
+                        // مرحله ۳: به صورت خودکار دوباره روی هدر پروژه کلیک می‌کنیم تا باز شود
+                        // و اطلاعات جدید و به‌روز شده را از سرور بگیرد.
+                        projectRow.querySelector('.project-header').click();
                     }
                 }
             } catch(error) {
@@ -3540,12 +3541,12 @@ function setupDashboardFeatures() {
                         <div class="flex gap-x-3 text-center">
                             
                             <div>
-                                <span class="text-2xl font-bold text-blue-600">${p.applicantCount}</span>
+                                <span class="text-2xl font-bold text-blue-600">${toPersianNum(p.applicantCount)}</span>
                                 <p class="text-xs text-gray-600 flex items-center gap-1"><i class="fas fa-envelope-open text-blue-500"></i>دریافتی</p>
                             </div>
                             
                             <div>
-                                <span class="text-2xl font-bold text-green-600">${p.outgoingCount}</span>
+                                <span class="text-2xl font-bold text-green-600">${toPersianNum(p.outgoingCount)}</span>
                                 <p class="text-xs text-gray-600 flex items-center gap-1"><i class="fas fa-paper-plane text-green-500"></i>ارسالی</p>
                             </div>
 
@@ -3566,8 +3567,8 @@ function setupDashboardFeatures() {
                             <a href="#" data-view="create-project" class="main-card group border-yellow-500 rounded-2xl p-1 shadow-lg flex-grow block">
                                 <div class="bg-gradient-to-b from-white to-yellow-50 rounded-xl p-4 w-full flex flex-col h-full">
                                     <div class="bg-white rounded-xl border border-gray-300 overflow-hidden">
-                                        <div class="p-4 flex justify-between h-24 bg-gradient-to-t from-green-100 to-white"><span class="text-xl font-bold text-green-700 self-end">پروژه‌های باز</span><span class="text-3xl font-bold text-green-600 self-start">${stats.open}</span></div><hr class="border-gray-300"/>
-                                        <div class="p-4 flex justify-between h-24 bg-gradient-to-t from-red-100 to-white"><span class="text-xl font-bold text-red-800 self-end">پروژه‌های بسته</span><span class="text-3xl font-bold text-red-900 self-start">${stats.closed}</span></div>
+                                        <div class="p-4 flex justify-between h-24 bg-gradient-to-t from-green-100 to-white"><span class="text-xl font-bold text-green-700 self-end">پروژه‌های باز</span><span class="text-3xl font-bold text-green-600 self-start">${toPersianNum(stats.open)}</span></div><hr class="border-gray-300"/>
+                                        <div class="p-4 flex justify-between h-24 bg-gradient-to-t from-red-100 to-white"><span class="text-xl font-bold text-red-800 self-end">پروژه‌های بسته</span><span class="text-3xl font-bold text-red-900 self-start">${toPersianNum(stats.closed)}</span></div>
                                     </div>
                                     <div class="description-text text-center text-gray-600 text-sm" data-text="یک پروژه جدید ثبت کنید تا بهترین مهندسان برای آن درخواست همکاری ارسال کنند."></div>
                                     <div class="mt-auto pt-4 flex items-center justify-start"><div class="icon-link flex items-center gap-x-2 font-bold text-orange-900 p-2 rounded-lg"><i class="far fa-square-plus text-3xl text-orange-800"></i><span class="text-xl">ثبت پروژه جدید</span></div></div>
