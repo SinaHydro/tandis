@@ -687,7 +687,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwHfVXg_zOxjYEWa1nzIRJdtjxlUzdVYiqlGGr6v9xG9ayv-JLDl-NZw6CUhRYbUu1G/exec'; // Please replace with your actual script URL
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyz9WCD3r8N2bCMddgInfdrZQSAlyrcNbSfYzubY4wjW6I9xcVNATllxFtOzse2kv8/exec'; // Please replace with your actual script URL
 
         const SLIDESHOW_CONTENT_R = [
             { 
@@ -3374,20 +3374,20 @@ async function checkCooperationPrerequisites(activity) {
                     InitiatorEmail: userData.email,
                     RecipientEmail: recipientEmail
                 };
-                const response = await fetch(GOOGLE_SCRIPT_URL, { 
-                    method: 'POST', 
-                    body: JSON.stringify(payload) 
-                });
+                const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
                 const result = await response.json();
                 showModal(result.message, result.status);
 
-                // --- بخش زیر اصلاح شده است ---
                 if (result.status === 'success') {
-                    // به جای غیرفعال کردن دکمه، کل پنل جستجوی مهندس را رفرش می‌کنیم
-                    // تا وضعیت جدید دکمه‌ها از سرور خوانده شود.
-                    renderEngineersPanel();
+                    // رفرش کردن اطلاعات پروژه فعلی برای نمایش تغییرات
+                    const openProjectRow = document.querySelector('.project-row.open');
+                    if (openProjectRow) {
+                        const openProjectId = openProjectRow.dataset.projectId;
+                        // با بستن و باز کردن مجدد، اطلاعات آپدیت می‌شود
+                        openProjectRow.classList.remove('open');
+                        openProjectRow.querySelector('.project-header').click();
+                    }
                 }
-                // می‌توانید در اینجا دکمه درخواست همکاری را در صفحه جستجوی مهندس غیرفعال کنید
             } catch(error) {
                  showModal('خطا در ارسال درخواست.', 'error');
             } finally {
@@ -3523,12 +3523,22 @@ function setupDashboardFeatures() {
                 if (!result.success) throw new Error(result.message);
                 
                 const { stats, projects } = result.data;
-                let projectsListHtml = projects.slice(0, 2).map(p => `
-                    <div class="p-2 flex justify-between items-center">
-                        <div><p class="font-bold text-sm text-gray-700">${p.projectName}</p><p class="text-xs text-gray-500">وضعیت: ${p.Status}</p></div>
-                        <div class="text-center"><span class="text-2xl font-bold text-blue-600">${p.applicantCount}</span><p class="text-xs text-gray-600">درخواست</p></div>
-                    </div><hr class="border-gray-300"/>`).join('');
+                let projectsListHtml = projects.sort((a,b) => new Date(b.lastModifiedDate) - new Date(a.lastModifiedDate))
+                    .slice(0, 2) // فقط دو پروژه آخر
+                    .map(p => `
+                        <div class="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm">
+                            <div>
+                                <p class="font-semibold text-slate-800">${p.projectName}</p>
+                                <p class="text-xs text-slate-500">${p.Status === 'باز' ? 'وضعیت: باز' : 'وضعیت: بسته'}</p>
+                            </div>
+                            <div class="text-left text-xs space-y-1">
+                                <p class="font-semibold text-blue-600"><i class="fas fa-arrow-down fa-fw"></i> ${toPersianNum(p.incomingRequestCount)} پیشنهاد دریافتی</p>
+                                <p class="font-semibold text-green-600"><i class="fas fa-arrow-up fa-fw"></i> ${toPersianNum(p.outgoingRequestCount)} درخواست ارسالی</p>
+                                </div>
+                        </div>`).join('');
 
+                if (projects.length === 0) projectsListHtml = '<p class="text-center text-slate-500 col-span-2">هنوز پروژه‌ای ثبت نکرده‌اید.</p>';
+                
                 dashboardContent.innerHTML = `
                     <div class="flex flex-col md:flex-row items-stretch gap-8">
                         <div class="w-full md:w-1/2 flex flex-col gap-8">
@@ -3914,22 +3924,29 @@ async function updateCoopStatus(interactionId, newStatus, container) {
 async function updateAppStatus(interactionId, newStatus, container) {
             showLoader();
             try {
-                // payload حالا از interactionId استفاده می‌کند
-                const payload = { action: 'updateInteractionStatus', interactionId: interactionId, newStatus: newStatus };
-                const response = await fetch(GOOGLE_SCRIPT_URL, { 
-                    method: 'POST', 
-                    body: JSON.stringify(payload) 
-                });
+                const payload = { action: 'updateInteractionStatus', interactionId, newStatus };
+                const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
                 const result = await response.json();
                 showModal(result.message, result.status);
 
                 if (result.status === 'success') {
-                    const mainButtonIcon = container.querySelector('button i');
+                    const mainButton = container.querySelector('button');
                     const options = container.querySelector('.action-options');
-                    options.classList.add('hidden');
-                    if (newStatus === 'Accepted') mainButtonIcon.className = 'fas fa-check-circle text-green-500';
-                    else if (newStatus === 'Rejected') mainButtonIcon.className = 'fas fa-times-circle text-red-500';
-                    else if (newStatus === 'Reviewing') mainButtonIcon.className = 'fas fa-clock text-yellow-500';
+                    options.classList.add('hidden'); // بستن منو
+                    
+                    // دیکشنری برای متن و آیکن جدید
+                    const statusInfo = {
+                        Accepted: { text: 'پذیرفته شد', icon: 'fa-check-circle', color: 'btn-success' },
+                        Rejected: { text: 'رد شد', icon: 'fa-times-circle', color: 'btn-danger' },
+                        Reviewing: { text: 'در حال بررسی', icon: 'fa-clock', color: 'btn-secondary' }
+                    };
+                    
+                    const info = statusInfo[newStatus];
+                    if (info) {
+                        mainButton.innerHTML = `<i class="fas ${info.icon} mr-2"></i><span>${info.text}</span>`;
+                        mainButton.className = `btn !py-1 !px-3 w-full ${info.color}`;
+                        mainButton.disabled = true; // غیرفعال کردن دکمه پس از تعیین تکلیف
+                    }
                 }
             } catch (error) {
                  showModal('خطای اتصال به سرور.', 'error');
