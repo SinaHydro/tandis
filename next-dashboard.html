@@ -687,7 +687,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyu-StnJuMIvoZE49Fl3_4G1KPdFHNrtKVk69x9mFru9dd1CGMa6KusD60YscOwPBkz/exec'; // Please replace with your actual script URL
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxnw9DAzBW-Z3u2r1qdiVt2u0_PUl4x-jCX9mEtdPkiMZUS4KTz46yZgK0TRF2SctDm/exec'; // Please replace with your actual script URL
 
         const SLIDESHOW_CONTENT_R = [
             { 
@@ -3380,12 +3380,20 @@ async function checkCooperationPrerequisites(activity) {
 
                 if (result.status === 'success') {
                     // رفرش کردن اطلاعات پروژه فعلی برای نمایش تغییرات
-                    const openProjectRow = document.querySelector('.project-row.open');
-                    if (openProjectRow) {
-                        const openProjectId = openProjectRow.dataset.projectId;
-                        // با بستن و باز کردن مجدد، اطلاعات آپدیت می‌شود
-                        openProjectRow.classList.remove('open');
-                        openProjectRow.querySelector('.project-header').click();
+                    const projectRow = document.querySelector(`.project-row[data-project-id="${projectId}"]`);
+                    const suggestionRow = projectRow.querySelector(`button[data-activity-id="${activityId}"]`).closest('.interaction-row');
+
+                    // <-- NEW: If we found the suggestion, let's move it.
+                    if (suggestionRow) {
+                        // 1. Get the list where sent requests are supposed to go.
+                        const outgoingList = projectRow.querySelector('.interaction-list-content:not(:first-child)'); // Assuming outgoing is the second list
+                        
+                        // 2. We'll need info about the activity to build the new row.
+                        // This part is a bit tricky, we'll have to "rebuild" the row visually.
+                        // Let's reload the project details for simplicity and accuracy.
+                        projectRow.classList.remove('open');
+                        projectRow.querySelector('.project-body').dataset.loaded = 'false'; // Mark as not loaded
+                        projectRow.querySelector('.project-header').click(); // Simulate a click to reload it
                     }
                 }
             } catch(error) {
@@ -3523,19 +3531,26 @@ function setupDashboardFeatures() {
                 if (!result.success) throw new Error(result.message);
                 
                 const { stats, projects } = result.data;
-                let projectsListHtml = projects.sort((a,b) => new Date(b.lastModifiedDate) - new Date(a.lastModifiedDate))
-                    .slice(0, 2) // فقط دو پروژه آخر
-                    .map(p => `
-                        <div class="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm">
+                let projectsListHtml = projects.slice(0, 2).map(p => `
+                    <div class="p-2 flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-sm text-gray-700">${p.projectName}</p>
+                            <p class="text-xs text-gray-500">وضعیت: ${p.Status}</p>
+                        </div>
+                        <div class="flex gap-x-3 text-center">
+                            
                             <div>
-                                <p class="font-semibold text-slate-800">${p.projectName}</p>
-                                <p class="text-xs text-slate-500">${p.Status === 'باز' ? 'وضعیت: باز' : 'وضعیت: بسته'}</p>
+                                <span class="text-2xl font-bold text-blue-600">${p.applicantCount}</span>
+                                <p class="text-xs text-gray-600 flex items-center gap-1"><i class="fas fa-envelope-open text-blue-500"></i>دریافتی</p>
                             </div>
-                            <div class="text-left text-xs space-y-1">
-                                <p class="font-semibold text-blue-600"><i class="fas fa-arrow-down fa-fw"></i> ${toPersianNum(p.incomingRequestCount)} پیشنهاد دریافتی</p>
-                                <p class="font-semibold text-green-600"><i class="fas fa-arrow-up fa-fw"></i> ${toPersianNum(p.outgoingRequestCount)} درخواست ارسالی</p>
-                                </div>
-                        </div>`).join('');
+                            
+                            <div>
+                                <span class="text-2xl font-bold text-green-600">${p.outgoingCount}</span>
+                                <p class="text-xs text-gray-600 flex items-center gap-1"><i class="fas fa-paper-plane text-green-500"></i>ارسالی</p>
+                            </div>
+
+                        </div>
+                    </div><hr class="border-gray-300"/>`).join('');
 
                 if (projects.length === 0) projectsListHtml = '<p class="text-center text-slate-500 col-span-2">هنوز پروژه‌ای ثبت نکرده‌اید.</p>';
                 
@@ -3933,19 +3948,21 @@ async function updateAppStatus(interactionId, newStatus, container) {
                     const mainButton = container.querySelector('button');
                     const options = container.querySelector('.action-options');
                     options.classList.add('hidden'); // بستن منو
+                    const mainButton = container.querySelector('button[data-action="toggle-options"]');
                     
                     // دیکشنری برای متن و آیکن جدید
-                    const statusInfo = {
-                        Accepted: { text: 'پذیرفته شد', icon: 'fa-check-circle', color: 'btn-success' },
-                        Rejected: { text: 'رد شد', icon: 'fa-times-circle', color: 'btn-danger' },
-                        Reviewing: { text: 'در حال بررسی', icon: 'fa-clock', color: 'btn-secondary' }
+                    const statusStyles = {
+                        Accepted: { text: 'پذیرفته شد', icon: 'fa-check-circle', class: 'btn-success' },
+                        Rejected: { text: 'رد شد', icon: 'fa-times-circle', class: 'btn-danger' },
+                        Reviewing: { text: 'در حال بررسی', icon: 'fa-clock', class: 'btn-secondary' }
                     };
                     
-                    const info = statusInfo[newStatus];
-                    if (info) {
-                        mainButton.innerHTML = `<i class="fas ${info.icon} mr-2"></i><span>${info.text}</span>`;
-                        mainButton.className = `btn !py-1 !px-3 w-full ${info.color}`;
-                        mainButton.disabled = true; // غیرفعال کردن دکمه پس از تعیین تکلیف
+                    const style = statusStyles[newStatus];
+                    
+                    if (style) {
+                        mainButton.disabled = true; // Make the button unclickable
+                        mainButton.className = `btn !py-1 !px-3 w-full ${style.class}`; // Change its color
+                        mainButton.innerHTML = `<i class="fas ${style.icon}"></i><span>${style.text}</span>`; // Change its icon and text
                     }
                 }
             } catch (error) {
