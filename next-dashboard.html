@@ -2416,9 +2416,9 @@ function renderProjectForm(projectData = null) {
                                 </div>
                                 <div class="project-body">
                                     <div class="interaction-list">
-                                        <h5 class="list-header-incoming"><i class="fas fa-arrow-down text-blue-500"></i> پیشنهادهای دریافتی از کارفرمایان</h5>
+                                        <h5 class="list-header-incoming"><i class="fas fa-envelope-open text-blue-500"></i> پیشنهادهای دریافتی</h5>
                                         <div id="incoming-reqs-${act.ActivityID}"></div>
-                                        <h5 class="list-header-outgoing"><i class="fas fa-arrow-up text-green-500"></i> درخواست‌های ارسالی توسط شما</h5>
+                                        <h5 class="list-header-outgoing"><i class="fas fa-paper-plane text-green-500"></i> درخواست‌های شما</h5>
                                         <div id="outgoing-apps-${act.ActivityID}"></div>
                                     </div>
                                 </div>
@@ -2462,7 +2462,6 @@ function renderProjectForm(projectData = null) {
                             <strong>${toPersianNum(index + 1)}</strong>
                             <div class="header-item">
                                 <strong>${item.activityInfo?.province || '-'}</strong>
-                                <span>استان</span>
                             </div>
                             <div class="header-item">
                                 <strong>${item.activityInfo?.engineerActivity || ''} ${item.activityInfo?.engineerLevel || ''}</strong>
@@ -2538,8 +2537,7 @@ function renderProjectForm(projectData = null) {
                                 <span>زمان ارسال</span>
                             </div>
                             <div class="flex items-center justify-center">
-                                
-                                <span class="status-badge <i class="${statusIcon}"></i> ${statusClass}">${statusText}</span>
+                                <span class="status-badge ${statusClass}"><i class="${statusIcon}"></i> ${statusText}</span>
                             </div>`;
                         break;
                     }
@@ -2573,6 +2571,7 @@ function renderProjectForm(projectData = null) {
                             </div>
                             <div class="action-btn-container">
                                 <button class="btn btn-success !py-1 !px-3" data-action="send-request" data-activity-id="${activity.ActivityID}" data-recipient-email="${activity.EngineerEmail}">
+                                    <i class="fas fa-paper-plane text-green-500"></i>
                                     <span>درخواست</span>
                                 </button>
                             </div>`;
@@ -2659,7 +2658,7 @@ function renderProjectForm(projectData = null) {
                                 <span>زمان پیشنهاد</span>
                             </div>
                             <div class="flex items-center justify-center">
-                                <span class="status-badge <i class="${statusIcon}"></i> ${statusClass}">${status_out}</span>
+                                <span class="status-badge ${statusClass}"><i class="${statusIcon}"></i> ${status_out}</span>
                             </div>`;
                         break;
                     }
@@ -3288,8 +3287,8 @@ async function checkCooperationPrerequisites(activity) {
                                         <span>تعرفه شما</span>
                                     </div>
                                     <div class="header-item">
-                                        <strong><i class="fas fa-arrow-down text-blue-500"></i> ${toPersianNum(p.incomingRequestCount)} پیشنهاد </strong>
-                                        <strong><i class="fas fa-arrow-up text-green-500"></i> ${toPersianNum(p.outgoingRequestCount)} درخواست </strong>
+                                        <strong><i class="fas fa-envelope-open text-blue-500"></i> ${toPersianNum(p.incomingRequestCount)} پیشنهاد </strong>
+                                        <strong><i class="fas fa-paper-plane text-green-500"></i> ${toPersianNum(p.outgoingRequestCount)} درخواست </strong>
                                     </div>
                                     <div class="header-actions">
                                         <button class="btn ${!isClosed ? 'btn-danger' : 'btn-success'} !p-2" title="${!isClosed ? 'بستن پروژه' : 'باز کردن پروژه'}" data-action="${!isClosed ? 'close-project' : 'open-project'}">
