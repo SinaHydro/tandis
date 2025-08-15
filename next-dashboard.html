@@ -3945,7 +3945,7 @@ async function updateAppStatus(interactionId, newStatus, container) {
                 showModal(result.message, result.status);
 
                 if (result.status === 'success') {
-                    const mainButton = container.querySelector('button');
+                    
                     const options = container.querySelector('.action-options');
                     options.classList.add('hidden'); // بستن منو
                     const mainButton = container.querySelector('button[data-action="toggle-options"]');
