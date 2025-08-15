@@ -3287,8 +3287,8 @@ async function checkCooperationPrerequisites(activity) {
                                         <span>تعرفه شما</span>
                                     </div>
                                     <div class="header-item">
-                                        <strong><i class="fas fa-envelope-open text-blue-500"></i> ${toPersianNum(p.incomingRequestCount)} پیشنهاد </strong>
-                                        <strong><i class="fas fa-paper-plane text-green-500"></i> ${toPersianNum(p.outgoingRequestCount)} درخواست </strong>
+                                        ${parseInt(p.incomingRequestCount) > 0 ? `<strong><i class="fas fa-envelope-open text-blue-500"></i> ${toPersianNum(p.incomingRequestCount)} پیشنهاد </strong>` : ''}
+                                        ${parseInt(p.outgoingRequestCount) > 0 ? `<strong><i class="fas fa-paper-plane text-green-500"></i> ${toPersianNum(p.outgoingRequestCount)} درخواست </strong>` : ''}
                                     </div>
                                     <div class="header-actions">
                                         <button class="btn ${!isClosed ? 'btn-danger' : 'btn-success'} !p-2" title="${!isClosed ? 'بستن پروژه' : 'باز کردن پروژه'}" data-action="${!isClosed ? 'close-project' : 'open-project'}">
