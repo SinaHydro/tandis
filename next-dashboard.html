@@ -416,7 +416,10 @@
         .interaction-row:last-child { border-bottom: none; }
         
         .status-badge {
-            padding: 0.25rem 0.75rem;
+            display: flex;  
+            justify-content: center;
+            width: 100%;
+            padding: 0.5rem 0.75rem;
             border-radius: 9999px;
             font-size: 0.8rem;
             font-weight: 600;
@@ -2482,13 +2485,14 @@ function renderProjectForm(projectData = null) {
                                 <span>زمان ارسال</span>
                             </div>
                             <div class="action-btn-container">
-                                 <button class="btn btn-secondary !py-1 !px-3" data-action="toggle-options">
-                                     <span>پاسخ</span>
+                                 <button class="btn btn-secondary !py-1 !px-3 w-full" data-action="toggle-options">
+                                     <i class="fas fa-reply"></i>
+                                     <span>پاسخ </span>
                                  </button>
                                  <div class="action-options hidden">
                                      <a href="#" data-action="set-status" data-status="Accepted"><i class="fas fa-check-circle text-green-500"></i> پذیرش</a>
                                      <a href="#" data-action="set-status" data-status="Rejected"><i class="fas fa-times-circle text-red-500"></i> عدم پذیرش</a>
-                                     <a href="#" data-action="set-status" data-status="Reviewing"><i class="fas fa-clock text-yellow-500"></i> در حال بررسی</a>
+                                     <a href="#" data-action="set-status" data-status="Reviewing"><i class="fas fa-clock text-yellow-500"></i> بررسی</a>
                                  </div>
                             </div>`;
                         break;
@@ -2500,12 +2504,19 @@ function renderProjectForm(projectData = null) {
                         // تبدیل وضعیت انگلیسی به فارسی برای نمایش
                         const statusText = { 'Pending': 'در انتظار', 'Accepted': 'پذیرفت', 'Rejected': 'رد شد', 'Reviewing': 'بررسی' }[status_out] || status_out;
                         const statusClass = `status-${status_out.toLowerCase()}`;
+                        const statusIcons = {
+                            'Pending': 'fas fa-clock',
+                            'Reviewing': 'fas fa-clock',
+                            'Accepted': 'fas fa-check-circle',
+                            'Rejected': 'fas fa-times-circle'
+                        };
+                        const statusIcon = statusIcons[status_out] || 'fas fa-question-circle';
+
                         
                          rowContent = `
                             <strong>${toPersianNum(index + 1)}</strong>
                             <div class="header-item">
                                 <strong>${item.activityInfo?.province || '-'}</strong>
-                                <span>استان</span>
                             </div>
                             <div class="header-item">
                                 <strong>${item.activityInfo?.engineerActivity || ''} ${item.activityInfo?.engineerLevel || ''}</strong>
@@ -2528,6 +2539,7 @@ function renderProjectForm(projectData = null) {
                                 <span>زمان ارسال</span>
                             </div>
                             <div class="flex items-center justify-center">
+                                <i class="${statusIcon}"></i>
                                 <span class="status-badge ${statusClass}">${statusText}</span>
                             </div>`;
                         break;
@@ -2539,7 +2551,6 @@ function renderProjectForm(projectData = null) {
                             <strong>${toPersianNum(index + 1)}</strong>
                             <div class="header-item">
                                 <strong>${activity.province || '-'}</strong>
-                                <span>استان</span>
                             </div>
                             <div class="header-item">
                                 <strong>${activity.engineerActivity || ''} ${activity.engineerLevel || ''}</strong>
@@ -2598,8 +2609,9 @@ function renderProjectForm(projectData = null) {
                                 <span>زمان پیشنهاد</span>
                             </div>
                             <div class="action-btn-container">
-                                 <button class="btn btn-secondary !py-1 !px-3" data-action="toggle-options">
-                                     <span>تعیین تکلیف</span>
+                                 <button class="btn btn-secondary !py-1 !px-3 w-full" data-action="toggle-options">
+                                     <i class="fas fa-reply"></i>
+                                     <span>پاسخ </span>
                                  </button>
                                  <div class="action-options hidden">
                                      <a href="#" data-action="set-status" data-status="Accepted"><i class="fas fa-check-circle text-green-500"></i> پذیرش</a>
@@ -2796,7 +2808,10 @@ function attachProjectRowListeners() {
                             <span>زمان درخواست</span>
                         </div>
                         <div class="action-btn-container">
-                            <button class="btn btn-secondary !py-1 !px-3" data-action="toggle-options"><span>تعیین تکلیف</span></button>
+                            <button class="btn btn-secondary !py-1 !px-3 w-full" data-action="toggle-options">
+                                <i class="fas fa-reply"></i>
+                                <span>پاسخ </span>
+                            </button>
                             <div class="action-options hidden">
                                 <a href="#" data-action="set-coop-status" data-status="Accepted"><i class="fas fa-check-circle text-green-500"></i> پذیرش</a>
                                 <a href="#" data-action="set-coop-status" data-status="Rejected"><i class="fas fa-times-circle text-red-500"></i> عدم پذیرش</a>
@@ -2821,7 +2836,8 @@ function attachProjectRowListeners() {
             let footerHtml = '';
             if (forEmployer) {
                 const isRequested = requestedCooperationIds.has(data.ActivityID);
-                footerHtml = `<button data-action="${isRequested ? 'cancel-cooperation' : 'request-cooperation'}" data-activity-id="${data.ActivityID}" class="btn ${isRequested ? 'btn-danger' : 'btn-success'} w-full"><i class="fas ${isRequested ? 'fa-times-circle' : 'fa-paper-plane'} mr-2"></i>${isRequested ? 'لغو درخواست همکاری' : 'درخواست همکاری'}</button>`;
+                footerHtml = `<button data-action="${isRequested ? 'cancel-cooperation' : 'request-cooperation'}" data-activity-id="${data.ActivityID}" class="btn ${isRequested ? 'btn-danger' : 'btn-success'} w-full">
+                    <i class="fas ${isRequested ? 'fa-times-circle' : 'fa-paper-plane'} mr-2"></i>${isRequested ? 'لغو درخواست همکاری' : 'درخواست همکاری'}</button>`;
             } else {
                 footerHtml = `
                     <button data-action="change-activity-status" data-activity-id="${data.ActivityID}" data-new-status="${isActive ? 'غیرفعال' : 'فعال'}" class="btn ${isActive ? 'btn-danger' : 'btn-success'} !py-1 !px-3 text-sm"><i class="fas ${isActive ? 'fa-eye-slash' : 'fa-eye'}"></i><span>${isActive ? 'غیرفعال کن' : 'فعال کن'}</span></button>
@@ -3411,11 +3427,14 @@ async function checkCooperationPrerequisites(activity) {
                             <span>زمان پیشنهاد</span>
                         </div>
                         <div class="action-btn-container">
-                            <button class="btn btn-secondary !py-1 !px-3" data-action="toggle-options"><span>پاسخ</span></button>
+                            <button class="btn btn-secondary !py-1 !px-3 w-full" data-action="toggle-options">
+                                <i class="fas fa-reply"></i>
+                                <span>پاسخ </span>
+                            </button>
                             <div class="action-options hidden">
                                 <a href="#" data-action="set-status" data-status="Accepted"><i class="fas fa-check-circle text-green-500"></i> پذیرش</a>
                                 <a href="#" data-action="set-status" data-status="Rejected"><i class="fas fa-times-circle text-red-500"></i> عدم پذیرش</a>
-                                <a href="#" data-action="set-status" data-status="Reviewing"><i class="fas fa-clock text-yellow-500"></i> در حال بررسی</a>
+                                <a href="#" data-action="set-status" data-status="Reviewing"><i class="fas fa-clock text-yellow-500"></i> بررسی</a>
                             </div>
                         </div>
                     </div>`;
