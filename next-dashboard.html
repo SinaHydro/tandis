@@ -2501,7 +2501,7 @@ function renderProjectForm(projectData = null) {
                     case 'outgoingReqs': {
                         const status_out = item.Status || 'Pending';
                         // تبدیل وضعیت انگلیسی به فارسی برای نمایش
-                        const statusText = { 'Pending': 'در انتظار', 'Accepted': 'پذیرفت', 'Rejected': 'رد شد', 'Reviewing': 'بررسی' }[status_out] || status_out;
+                        const statusText = { 'Pending': 'در انتظار ', 'Accepted': 'پذیرفت ', 'Rejected': 'رد شد ', 'Reviewing': 'بررسی ' }[status_out] || status_out;
                         const statusClass = `status-${status_out.toLowerCase()}`;
                         const statusIcons = {
                             'Pending': 'fas fa-clock',
@@ -2571,7 +2571,7 @@ function renderProjectForm(projectData = null) {
                             </div>
                             <div class="action-btn-container">
                                 <button class="btn btn-success !py-1 !px-3" data-action="send-request" data-activity-id="${activity.ActivityID}" data-recipient-email="${activity.EngineerEmail}">
-                                    <i class="fas fa-paper-plane text-green-500"></i>
+                                    <i class="fas fa-paper-plane text-green-50"></i>
                                     <span>درخواست</span>
                                 </button>
                             </div>`;
