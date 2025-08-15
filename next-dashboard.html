@@ -2511,7 +2511,6 @@ function renderProjectForm(projectData = null) {
                             'Rejected': 'fas fa-times-circle'
                         };
                         const statusIcon = statusIcons[status_out] || 'fas fa-question-circle';
-
                         
                          rowContent = `
                             <strong>${toPersianNum(index + 1)}</strong>
@@ -2539,8 +2538,8 @@ function renderProjectForm(projectData = null) {
                                 <span>زمان ارسال</span>
                             </div>
                             <div class="flex items-center justify-center">
-                                <i class="${statusIcon}"></i>
-                                <span class="status-badge ${statusClass}">${statusText}</span>
+                                
+                                <span class="status-badge <i class="${statusIcon}"></i> ${statusClass}">${statusText}</span>
                             </div>`;
                         break;
                     }
@@ -2574,7 +2573,7 @@ function renderProjectForm(projectData = null) {
                             </div>
                             <div class="action-btn-container">
                                 <button class="btn btn-success !py-1 !px-3" data-action="send-request" data-activity-id="${activity.ActivityID}" data-recipient-email="${activity.EngineerEmail}">
-                                    <span>ارسال درخواست</span>
+                                    <span>درخواست</span>
                                 </button>
                             </div>`;
                         break;
@@ -2626,6 +2625,13 @@ function renderProjectForm(projectData = null) {
                         const p_out = item.projectInfo || {};
                         const status_out = item.Status || 'Pending';
                         const statusClass = `status-${status_out.toLowerCase()}`;
+                        const statusIcons = {
+                            'Pending': 'fas fa-clock',
+                            'Reviewing': 'fas fa-clock',
+                            'Accepted': 'fas fa-check-circle',
+                            'Rejected': 'fas fa-times-circle'
+                        };
+                        const statusIcon = statusIcons[status_out] || 'fas fa-question-circle';
                         
                         rowContent = `
                             <div class="header-item">
@@ -2653,7 +2659,7 @@ function renderProjectForm(projectData = null) {
                                 <span>زمان پیشنهاد</span>
                             </div>
                             <div class="flex items-center justify-center">
-                                <span class="status-badge ${statusClass}">${status_out}</span>
+                                <span class="status-badge <i class="${statusIcon}"></i> ${statusClass}">${status_out}</span>
                             </div>`;
                         break;
                     }
