@@ -449,7 +449,24 @@
         .interaction-list-content.collapsed {
             display: none;
         }
-        
+        .engineer-field-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 0.375rem;
+        background-color: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .engineer-field-btn:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+    .engineer-field-btn.active {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+        font-weight: 600;
+    }
 
     </style>
 </head>
@@ -1866,51 +1883,36 @@ function renderProjectForm(projectData = null) {
                         </div>
                     </div>
 
-                    <div class="space-y-4">
-                        <h3 id="tariff-title" class="text-lg font-semibold text-gray-800 border-b pb-2">تعرفه پیشنهادی</h3>
-                        <input type="hidden" id="unitPrice" name="unitPrice" value="${projectData?.unitPrice || '107000'}">
-                        <div id="price-buttons-container" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div class="price-btn flex flex-col p-3 text-center" data-index="1">
-                                <label class="text-slate-700 text-sm mb-2">ساختمان ۱ تا ۲ طبقه</label>
-                                <input type="number" class="custom-price-input" value="107000">
-                            </div>
-                            <div class="price-btn flex flex-col p-3 text-center" data-index="2">
-                                <label class="text-slate-700 text-sm mb-2">ساختمان ۳ تا ۵ طبقه</label>
-                                <input type="number" class="custom-price-input" value="125000">
-                            </div>
-                            <div class="price-btn flex flex-col p-3 text-center" data-index="3">
-                                <label class="text-slate-700 text-sm mb-2">ساختمان ۶ تا ۷ طبقه</label>
-                                <input type="number" class="custom-price-input" value="127800">
-                            </div>
-                            <div class="price-btn flex flex-col p-3 text-center" data-index="4">
-                                <label class="text-slate-700 text-sm mb-2">ساختمان ۸ تا ۱۰ طبقه</label>
-                                <input type="number" class="custom-price-input" value="139500">
-                            </div>
-                            <div class="price-btn flex flex-col p-3 text-center" data-index="5">
-                                <label class="text-slate-700 text-sm mb-2">ساختمان ۱۱ تا ۱۲ طبقه</label>
-                                <input type="number" class="custom-price-input" value="142800">
-                            </div>
-                            <div class="price-btn flex flex-col p-3 text-center" data-index="6">
-                                <label class="text-slate-700 text-sm mb-2">ساختمان ۱۳ تا ۱۵ طبقه</label>
-                                <input type="number" class="custom-price-input" value="148800">
-                            </div>
-                            <div class="price-btn flex flex-col p-3 text-center" data-index="7">
-                                <label class="text-slate-700 text-sm mb-2">ساختمان بالای ۱۶ طبقه</label>
-                                <input type="number" class="custom-price-input" value="159200">
-                            </div>
-                            </div>
+                    <div class="space-y-2">
+                        <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">مشخصات مهندس مورد نیاز پروژه</h3>
+                        <p class="text-sm text-slate-500">رشته‌های مهندسی مورد نیاز خود را انتخاب کرده و قیمت پیشنهادی برای هر کدام را وارد نمایید.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-5">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-1 required-field">رشته مهندس</label>
+                            <div id="engineer-fields-selector" class="flex flex-wrap gap-2 p-2 bg-slate-100 rounded-md">
+                                <button type="button" class="engineer-field-btn" data-field="معماری">معماری</button>
+                                <button type="button" class="engineer-field-btn" data-field="عمران">عمران</button>
+                                <button type="button" class="engineer-field-btn" data-field="مکانیک">مکانیک</button>
+                                <button type="button" class="engineer-field-btn" data-field="برق">برق</button>
+                                <button type="button" class="engineer-field-btn" data-field="تفشه برداری">نقشه برداری</button>
+                                <button type="button" class="engineer-field-btn" data-field="شهرسازی">شهرسازی</button>
+                                <button type="button" class="engineer-field-btn" data-field="ترافیک">ترافیک</button>
+                                </div>
+                        </div>
+                        <div class="md:col-span-3">
+                             <label class="block text-gray-700 font-medium mb-1">تعرفه پیشنهادی (تومان به ازای هر متر مربع)</label>
+                             <div id="price-fields-container" class="space-y-3">
+                                <p class="text-slate-400 text-center p-4">لطفاً ابتدا یک رشته مهندس انتخاب کنید.</p>
+                             </div>
+                        </div>
+                    </div>
                         
-                        <div class="price-highlight p-4 rounded-lg mt-4 space-y-3">
-                            <div class="flex items-center"><i class="fas fa-tag text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت واحد انتخابی:</span><span id="unitPricePreview" class="mr-2 font-semibold"></span>
+                        <div class="price-highlight p-3 rounded-lg mt-4">
+                            <div class="flex items-center"><i class="fas fa-tag text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت واحد:</span><span id="unitPricePreview" class="mr-2 font-semibold"></span>
                             </div>
-                            <div class="flex items-center"><i class="fas fa-calculator text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت کل پروژه:</span><span id="totalPricePreview" class="mr-2 font-bold text-green-600"></span>
-                            </div>
-
-                            <hr class="border-green-200 my-2">
-
-                            <div class="text-xs text-green-800/90 space-y-1">
-                                <p><i class="fas fa-info-circle ml-1"></i>**انتخاب ردیف صحیح** بر اساس گروه ساختمانی، در محاسبه قیمت کل موثر است.</p>
-                                <p><i class="fas fa-ruler-combined ml-1"></i>تعداد طبقات از روی شالوده محاسبه می شود.</p>
+                            <div class="flex items-center mt-2"><i class="fas fa-calculator text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت کل:</span><span id="totalPricePreview" class="mr-2 font-bold text-green-600"></span>
                             </div>
                         </div>
                     </div>
@@ -2010,59 +2012,45 @@ function renderProjectForm(projectData = null) {
         // <h4 class="font-bold text-lg text-slate-800">${project.projectName || 'بدون نام'}</h4>
         
 function attachProjectFormListeners() {
-    document.getElementById('projectForm').addEventListener('submit', submitProjectData);
+            document.getElementById('projectForm').addEventListener('submit', submitProjectData);
+            
+            document.getElementById('cancelProjectFormBtn')?.addEventListener('click', () => {
+                document.getElementById('home-nav-item').click(); 
+            });
 
-    const cancelBtn = document.getElementById('cancelProjectFormBtn');
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', () => {
-            document.getElementById('home-nav-item').click(); 
-        });
-    }
+            initializeProjectMap();
 
-    initializeProjectMap();
+            const priceContainer = document.getElementById('price-fields-container');
+            const engineerButtons = document.querySelectorAll('.engineer-field-btn');
 
-    const priceButtons = document.querySelectorAll('.price-btn');
-    const unitPriceInput = document.getElementById('unitPrice');
-    const unitPriceIndexInput = document.getElementById('unitPriceIndex');
+            engineerButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    button.classList.toggle('active');
+                    const fieldName = button.dataset.field;
+                    const fieldIdentifier = fieldName.replace(/\s/g, '_'); // برای ساخت نام یکتا
 
-    priceButtons.forEach(button => {
-        const inputField = button.querySelector('input');
-
-        // رویداد کلیک روی کل کارت
-        button.addEventListener('click', () => {
-            priceButtons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-
-            unitPriceInput.value = inputField.value || '0';
-            unitPriceIndexInput.value = button.dataset.index;
-            updatePriceCalculations();
-        });
-
-        // رویداد تغییر مقدار در فیلد ورودی
-        if(inputField){
-            inputField.addEventListener('input', () => {
-                if (button.classList.contains('active')) {
-                    unitPriceInput.value = inputField.value || '0';
-                    updatePriceCalculations();
-                }
+                    if (button.classList.contains('active')) {
+                        // اگر دکمه فعال شد، فیلد قیمت را اضافه کن
+                        if (priceContainer.querySelector('p')) {
+                            priceContainer.innerHTML = ''; // حذف پیام اولیه
+                        }
+                        const newField = `
+                            <div id="price-field-${fieldIdentifier}" class="flex items-center gap-2">
+                                <label class="w-24 flex-shrink-0" for="price_input_${fieldIdentifier}">قیمت برای ${fieldName}:</label>
+                                <input type="number" id="price_input_${fieldIdentifier}" name="price_${fieldIdentifier}" class="w-full" placeholder="مبلغ به تومان" required>
+                            </div>
+                        `;
+                        priceContainer.insertAdjacentHTML('beforeend', newField);
+                    } else {
+                        // اگر دکمه غیرفعال شد، فیلد قیمت را حذف کن
+                        document.getElementById(`price-field-${fieldIdentifier}`)?.remove();
+                        if (priceContainer.children.length === 0) {
+                            priceContainer.innerHTML = '<p class="text-slate-400 text-center p-4">لطفاً ابتدا یک رشته مهندس انتخاب کنید.</p>';
+                        }
+                    }
+                });
             });
         }
-    });
-
-    const areaInput = document.getElementById('area');
-    const floorsInput = document.getElementById('floors');
-    const basementFloorsInput = document.getElementById('basementFloors');
-    const contractMonthsInput = document.getElementById('contractMonths');
-
-    if (areaInput) areaInput.addEventListener('input', updatePriceTierSelection);
-    if (floorsInput) floorsInput.addEventListener('input', updatePriceTierSelection);
-    if (basementFloorsInput) basementFloorsInput.addEventListener('input', updatePriceTierSelection);
-    if (contractMonthsInput) {contractMonthsInput.addEventListener('input', updatePriceCalculations);}
-
-    updatePriceTierSelection();
-
-}
-
         async function getAddressFromLatLng(lat, lng) {
             try {
                 const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&accept-language=fa`);
@@ -2141,7 +2129,7 @@ function attachProjectFormListeners() {
             // document.getElementById('commissionPreview').textContent = `${toPersianNum(commission)} تومان`;
         }
         
-        async function submitProjectData(e) {
+async function submitProjectData(e) {
             e.preventDefault();
             const form = document.getElementById('projectForm');
             if (!form.checkValidity()) {
@@ -2149,32 +2137,79 @@ function attachProjectFormListeners() {
                 form.reportValidity();
                 return;
             }
-            const projectData = Object.fromEntries(new FormData(form).entries());
-            
-            projectData.unitPrice = `${projectData.unitPrice}|${projectData.unitPriceIndex}`;
-            delete projectData.unitPriceIndex;
 
-            const isUpdate = !!projectData.ProjectID;
-            const action = isUpdate ? 'updateProject' : 'createProject';
-            const payload = { action, employerEmail: userData.email, projectData };
-
-            welcomeLoader.style.opacity = '1';
-            welcomeLoader.style.display = 'flex';
-            try {
-                const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'cors', cache: 'no-cache', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
-                if (!response.ok) throw new Error(`خطای سرور: ${response.status}`);
-                const result = await response.json();
-                if (result.status === 'success') {
-                    showModal(result.message, 'success');
-                    document.getElementById('home-nav-item').click(); 
-                } else {
-                    throw new Error(result.message || 'خطای ناشناخته.');
+            // ۱. جمع‌آوری اطلاعات پایه پروژه
+            const formData = new FormData(form);
+            const baseProjectData = {};
+            formData.forEach((value, key) => {
+                if (!key.startsWith('price_')) { // فیلدهای قیمت را جدا می‌کنیم
+                    baseProjectData[key] = value;
                 }
+            });
+
+            // ۲. پیدا کردن مهندسان انتخاب شده
+            const selectedEngineers = [];
+            document.querySelectorAll('.engineer-field-btn.active').forEach(btn => {
+                const fieldName = btn.dataset.field;
+                const fieldIdentifier = fieldName.replace(/\s/g, '_');
+                const priceValue = formData.get(`price_${fieldIdentifier}`);
+                selectedEngineers.push({ field: fieldName, price: priceValue });
+            });
+
+            if (selectedEngineers.length === 0) {
+                showModal('حداقل یک رشته مهندس باید انتخاب شود.', 'error');
+                return;
+            }
+
+            showLoader();
+
+            // ۳. ایجاد یک شناسه گروه مشترک برای همه ردیف‌ها
+            const projectGroupID = `G${Date.now()}`;
+            
+            // ۴. محاسبه ردیف تعرفه
+            const area = parseFloat(baseProjectData.area) || 0;
+            const totalFloors = (parseInt(baseProjectData.floors) || 0) + (parseInt(baseProjectData.basementFloors) || 0);
+            const tierIndex = calculatePriceTierIndex(area, totalFloors);
+
+            // ۵. ایجاد لیستی از درخواست‌ها برای ارسال به سرور
+            const promises = selectedEngineers.map(engineer => {
+                const projectDataForEngineer = { ...baseProjectData };
+                projectDataForEngineer.engineerField = engineer.field;
+                // ترکیب قیمت و ردیف تعرفه محاسبه شده
+                projectDataForEngineer.unitPrice = `${engineer.price}|${tierIndex}`;
+
+                const payload = {
+                    action: 'createProject',
+                    employerEmail: userData.email,
+                    projectData: projectDataForEngineer,
+                    projectGroupID: projectGroupID // ارسال شناسه گروه
+                };
+
+                return fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                }).then(res => res.json());
+            });
+
+            // ۶. ارسال همزمان همه درخواست‌ها و مدیریت نتیجه
+            try {
+                const results = await Promise.all(promises);
+                const hasError = results.some(res => res.status !== 'success');
+
+                if (hasError) {
+                    throw new Error('حداقل یکی از درخواست‌ها برای ثبت رشته‌های مهندسی با خطا مواجه شد.');
+                }
+
+                showModal(`پروژه شما با ${selectedEngineers.length} ردیف مهندس با موفقیت ثبت شد.`, 'success');
+                document.getElementById('home-nav-item').click();
+
             } catch (error) {
-                showModal(`خطا در ثبت/ویرایش پروژه: ${error.message}`, 'error');
+                showModal(`خطا در ثبت پروژه: ${error.message}`, 'error');
             } finally {
-                welcomeLoader.style.opacity = '0';
-                setTimeout(() => { welcomeLoader.style.display = 'none'; }, 500);
+                hideLoader();
             }
         }
 
@@ -2286,6 +2321,17 @@ function attachProjectFormListeners() {
             if(isEditMode) currentActivityData.ActivityID = document.getElementById('activityId').value;
             
             renderActivityPreview(currentActivityData);
+        }
+
+        function calculatePriceTierIndex(area, totalFloors) {
+            if (totalFloors >= 1 && totalFloors <= 2 && area > 0 && area < 600) return 1;
+            if (totalFloors >= 3 && totalFloors <= 5 && area >= 600 && area < 2000) return 2;
+            if (totalFloors >= 6 && totalFloors <= 7 && area >= 2000 && area < 5000) return 3;
+            if (totalFloors >= 8 && totalFloors <= 10 && area >= 2000 && area < 5000) return 4;
+            if (totalFloors >= 11 && totalFloors <= 12 && area >= 5000) return 5;
+            if (totalFloors >= 13 && totalFloors <= 15 && area >= 5000) return 6;
+            if (totalFloors >= 16 && area >= 5000) return 7;
+            return 0; // اگر در هیچ دسته‌ای نبود
         }
 
         function renderActivityPreview(data) {
@@ -2676,63 +2722,6 @@ function attachProjectFormListeners() {
                 html += `<div class="interaction-row" data-interaction-id="${item.InteractionID}">${rowContent}</div>`;
             });
             return html;
-        }
-
-
-        // این تابع جدید را به فایل خود اضافه کنید
-function updatePriceTierSelection() {
-            const area = parseFloat(document.getElementById('area').value) || 0;
-            const floors = parseInt(document.getElementById('floors').value) || 0;
-            const basementFloors = parseInt(document.getElementById('basementFloors').value) || 0;
-            const totalFloors = floors + basementFloors;
-
-            let selectedIndex = 0;
-
-            if (totalFloors >= 1 && totalFloors <= 2 && area > 0 && area < 600) {
-                selectedIndex = 1;
-            } else if (totalFloors >= 3 && totalFloors <= 5 && area >= 600 && area < 2000) {
-                selectedIndex = 2;
-            } else if (totalFloors >= 6 && totalFloors <= 7 && area >= 2000 && area < 5000) {
-                selectedIndex = 3;
-            } else if (totalFloors >= 8 && totalFloors <= 10 && area >= 2000 && area < 5000) {
-                selectedIndex = 4;
-            } else if (totalFloors >= 11 && totalFloors <= 12 && area >= 5000) {
-                selectedIndex = 5;
-            } else if (totalFloors >= 13 && totalFloors <= 15 && area >= 5000) {
-                selectedIndex = 6;
-            } else if (totalFloors >= 16 && area >= 5000) {
-                selectedIndex = 7;
-            }
-
-            const priceButtons = document.querySelectorAll('.price-btn');
-            
-            // اگر ردیفی مطابق با شرایط پیدا شد
-            if (selectedIndex > 0) {
-                priceButtons.forEach(btn => {
-                    // بررسی می‌کنیم که آیا این دکمه، همان دکمه‌ی منتخب است یا نه
-                    if (btn.dataset.index == selectedIndex) {
-                        // --- اگر گزینه صحیح بود ---
-                        btn.classList.remove('hidden'); // آن را نمایش می‌دهیم
-                        btn.classList.add('active');   // و فعالش می‌کنیم
-                        
-                        const inputField = btn.querySelector('input');
-                        document.getElementById('unitPrice').value = inputField.value || '0';
-                        document.getElementById('unitPriceIndex').value = btn.dataset.index;
-                    } else {
-                        // --- اگر گزینه‌های دیگر بودند ---
-                        btn.classList.add('hidden');     // آن‌ها را مخفی می‌کنیم
-                        btn.classList.remove('active');
-                    }
-                });
-            } else {
-                // اگر هیچ ردیفی با شرایط مطابقت نداشت، همه را مخفی کن
-                priceButtons.forEach(btn => {
-                    btn.classList.add('hidden');
-                    btn.classList.remove('active');
-                });
-            }
-
-            updatePriceCalculations();
         }
         
         // منطق باز و بسته شدن آکاردئون و واکشی اطلاعات برای صفحه "پروژه‌های من" کارفرما.
