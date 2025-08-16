@@ -1876,45 +1876,56 @@ function renderProjectForm(projectData = null) {
                     <div class="space-y-2">
                         <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">مشخصات مهندس مورد نیاز پروژه</h3>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-5 pt-2">
-                            <div><label for="engineerRank" class="block text-gray-700 font-medium mb-1 required-field">پایه مهندس</label><select id="engineerRank" name="engineerRank" required><option value="پایه 3">پایه 3</option><option value="پایه 2">پایه 2</option><option value="پایه 1">پایه 1</option><option value="پایه ارشد">پایه ارشد</option></select></div>
-                            <div><label for="engineerField" class="block text-gray-700 font-medium mb-1 required-field">رشته مهندس</label><select id="engineerField" name="engineerField" required><option value="معماری">معماری</option><option value="عمران">عمران</option><option value="مکانیک">مکانیک</option><option value="برق">برق</option><option value="شهرسازی">شهرسازی</option><option value="ترافیک">ترافیک</option><option value="نقشه برداری">نقشه برداری</option></select></div>
                             <div><label for="engineerActivity" class="block text-gray-700 font-medium mb-1 required-field">نوع فعالیت مهندس</label><select id="engineerActivity" name="engineerActivity" required><option value="طراح">طراح</option><option value="ناظر">ناظر</option><option value="مجری">مجری</option></select></div>
                             <div><label for="permitType" class="block text-gray-700 font-medium mb-1 required-field">نوع پروانه مهندس</label><select id="permitType" name="permitType" required><option value="طراح حقوقی">طراح حقوقی</option><option value="ناظر حقوقی">ناظر حقوقی</option><option value="انبوه ساز">انبوه ساز</option><option value="مجری حقوقی">مجری حقوقی</option><option value="مهندس حقیقی">مهندس حقیقی</option><option value="کاردان">کاردان</option><option value="معمارتجربی">معمارتجربی</option></select></div>
+                            <div><label for="engineerRank" class="block text-gray-700 font-medium mb-1 required-field">پایه مهندس</label><select id="engineerRank" name="engineerRank" required><option value="پایه 3">پایه 3</option><option value="پایه 2">پایه 2</option><option value="پایه 1">پایه 1</option><option value="پایه ارشد">پایه ارشد</option></select></div>
                         </div>
-                    </div>
 
-                    <div class="space-y-2">
-                        <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">مشخصات مهندس مورد نیاز پروژه</h3>
                         <p class="text-sm text-slate-500">رشته‌های مهندسی مورد نیاز خود را انتخاب کرده و قیمت پیشنهادی برای هر کدام را وارد نمایید.</p>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-5">
-                        <div>
-                            <label class="block text-gray-700 font-medium mb-1 required-field">رشته مهندس</label>
-                            <div id="engineer-fields-selector" class="flex flex-wrap gap-2 p-2 bg-slate-100 rounded-md">
-                                <button type="button" class="engineer-field-btn" data-field="معماری">معماری</button>
-                                <button type="button" class="engineer-field-btn" data-field="عمران">عمران</button>
-                                <button type="button" class="engineer-field-btn" data-field="مکانیک">مکانیک</button>
-                                <button type="button" class="engineer-field-btn" data-field="برق">برق</button>
-                                <button type="button" class="engineer-field-btn" data-field="تفشه برداری">نقشه برداری</button>
-                                <button type="button" class="engineer-field-btn" data-field="شهرسازی">شهرسازی</button>
-                                <button type="button" class="engineer-field-btn" data-field="ترافیک">ترافیک</button>
-                                </div>
+                    <div id="engineer-pricing-container" class="space-y-3 border p-4 rounded-lg bg-slate-50">
+                        <div class="grid grid-cols-[150px_1fr_1fr] gap-4 items-center px-2 pb-2 border-b">
+                            <span class="font-bold text-sm text-slate-600">رشته مهندس</span>
+                            <span class="font-bold text-sm text-slate-600 text-center">قیمت واحد (تومان)</span>
+                            <span class="font-bold text-sm text-slate-600 text-center">قیمت کل رشته</span>
                         </div>
-                        <div class="md:col-span-3">
-                             <label class="block text-gray-700 font-medium mb-1">تعرفه پیشنهادی (تومان به ازای هر متر مربع)</label>
-                             <div id="price-fields-container" class="space-y-3">
-                                <p class="text-slate-400 text-center p-4">لطفاً ابتدا یک رشته مهندس انتخاب کنید.</p>
-                             </div>
+
+                        <div class="engineer-pricing-row grid grid-cols-[150px_1fr_1fr] gap-4 items-center" data-field="معماری">
+                            <button type="button" class="engineer-field-btn w-full" data-field="معماری">معماری</button>
+                            <div class="flex items-center">
+                                <input type="number" name="price_معماری" class="price-input w-full text-center" value="160000" disabled>
+                            </div>
+                            <div class="total-price-display text-center text-slate-600 font-semibold">-</div>
+                        </div>
+                        <div class="engineer-pricing-row grid grid-cols-[150px_1fr_1fr] gap-4 items-center" data-field="عمران">
+                            <button type="button" class="engineer-field-btn w-full" data-field="عمران">عمران</button>
+                            <div class="flex items-center">
+                                <input type="number" name="price_عمران" class="price-input w-full text-center" value="175000" disabled>
+                            </div>
+                            <div class="total-price-display text-center text-slate-600 font-semibold">-</div>
+                        </div>
+                        <div class="engineer-pricing-row grid grid-cols-[150px_1fr_1fr] gap-4 items-center" data-field="مکانیک">
+                            <button type="button" class="engineer-field-btn w-full" data-field="مکانیک">مکانیک</button>
+                            <div class="flex items-center">
+                                <input type="number" name="price_مکانیک" class="price-input w-full text-center" value="95000" disabled>
+                            </div>
+                            <div class="total-price-display text-center text-slate-600 font-semibold">-</div>
+                        </div>
+                        <div class="engineer-pricing-row grid grid-cols-[150px_1fr_1fr] gap-4 items-center" data-field="برق">
+                            <button type="button" class="engineer-field-btn w-full" data-field="برق">برق</button>
+                            <div class="flex items-center">
+                                <input type="number" name="price_برق" class="price-input w-full text-center" value="90000" disabled>
+                            </div>
+                            <div class="total-price-display text-center text-slate-600 font-semibold">-</div>
                         </div>
                     </div>
-                        
-                        <div class="price-highlight p-3 rounded-lg mt-4">
-                            <div class="flex items-center"><i class="fas fa-tag text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت واحد:</span><span id="unitPricePreview" class="mr-2 font-semibold"></span>
-                            </div>
-                            <div class="flex items-center mt-2"><i class="fas fa-calculator text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت کل:</span><span id="totalPricePreview" class="mr-2 font-bold text-green-600"></span>
-                            </div>
-                        </div>
+
+                    <div id="grand-total-container" class="text-left mt-4 p-4 bg-green-100 rounded-lg">
+                        <span class="font-bold text-lg">مجموع کل هزینه‌ها:</span>
+                        <span id="grand-total-value" class="font-bold text-lg text-green-700">۰ تومان</span>
+                    </div>
+                    
                     </div>
                     <div><label for="description" class="block text-gray-700 font-medium mb-1">توضیحات</label><textarea id="description" name="description" rows="2" class="w-full">${projectData?.description || ''}</textarea>
                     </div>
@@ -2012,44 +2023,42 @@ function renderProjectForm(projectData = null) {
         // <h4 class="font-bold text-lg text-slate-800">${project.projectName || 'بدون نام'}</h4>
         
 function attachProjectFormListeners() {
+            // اتصال رویداد ارسال نهایی فرم
             document.getElementById('projectForm').addEventListener('submit', submitProjectData);
             
+            // اتصال رویداد دکمه انصراف
             document.getElementById('cancelProjectFormBtn')?.addEventListener('click', () => {
                 document.getElementById('home-nav-item').click(); 
             });
 
+            // بارگذاری نقشه
             initializeProjectMap();
 
-            const priceContainer = document.getElementById('price-fields-container');
+            // اتصال رویدادها به فیلدها و دکمه‌های بخش قیمت
+            const areaInput = document.getElementById('area');
             const engineerButtons = document.querySelectorAll('.engineer-field-btn');
+            const priceInputs = document.querySelectorAll('.price-input');
 
+            // هر زمان متراژ تغییر کرد، همه قیمت‌ها را دوباره محاسبه کن
+            if(areaInput) {
+                areaInput.addEventListener('input', updateAllPrices);
+            }
+
+            // هر زمان روی یک دکمه رشته کلیک شد
             engineerButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     button.classList.toggle('active');
-                    const fieldName = button.dataset.field;
-                    const fieldIdentifier = fieldName.replace(/\s/g, '_'); // برای ساخت نام یکتا
-
-                    if (button.classList.contains('active')) {
-                        // اگر دکمه فعال شد، فیلد قیمت را اضافه کن
-                        if (priceContainer.querySelector('p')) {
-                            priceContainer.innerHTML = ''; // حذف پیام اولیه
-                        }
-                        const newField = `
-                            <div id="price-field-${fieldIdentifier}" class="flex items-center gap-2">
-                                <label class="w-24 flex-shrink-0" for="price_input_${fieldIdentifier}">قیمت برای ${fieldName}:</label>
-                                <input type="number" id="price_input_${fieldIdentifier}" name="price_${fieldIdentifier}" class="w-full" placeholder="مبلغ به تومان" required>
-                            </div>
-                        `;
-                        priceContainer.insertAdjacentHTML('beforeend', newField);
-                    } else {
-                        // اگر دکمه غیرفعال شد، فیلد قیمت را حذف کن
-                        document.getElementById(`price-field-${fieldIdentifier}`)?.remove();
-                        if (priceContainer.children.length === 0) {
-                            priceContainer.innerHTML = '<p class="text-slate-400 text-center p-4">لطفاً ابتدا یک رشته مهندس انتخاب کنید.</p>';
-                        }
-                    }
+                    updateAllPrices(); // همه قیمت‌ها را دوباره محاسبه کن
                 });
             });
+
+            // هر زمان قیمت واحد یک رشته تغییر کرد
+            priceInputs.forEach(input => {
+                input.addEventListener('input', updateAllPrices);
+            });
+
+            // اجرای اولیه محاسبات در لحظه بارگذاری فرم
+            updateAllPrices();
         }
         async function getAddressFromLatLng(lat, lng) {
             try {
@@ -2100,6 +2109,36 @@ function attachProjectFormListeners() {
         }, 1);
         }
 
+        function updateAllPrices() {
+            const area = parseFloat(document.getElementById('area').value) || 0;
+            let grandTotal = 0;
+
+            document.querySelectorAll('.engineer-pricing-row').forEach(row => {
+                const button = row.querySelector('.engineer-field-btn');
+                const priceInput = row.querySelector('.price-input');
+                const totalDisplay = row.querySelector('.total-price-display');
+
+                // بررسی می‌کنیم آیا این رشته انتخاب شده است یا نه
+                if (button.classList.contains('active')) {
+                    priceInput.disabled = false; // فیلد قیمت را قابل ویرایش کن
+                    const unitPrice = parseFloat(priceInput.value) || 0;
+                    const rowTotal = area * unitPrice;
+                    
+                    // نمایش قیمت کل برای این ردیف
+                    totalDisplay.textContent = `${rowTotal.toLocaleString('fa-IR')} تومان`;
+                    
+                    // اضافه کردن به مجموع کل
+                    grandTotal += rowTotal;
+                } else {
+                    priceInput.disabled = true; // فیلد قیمت را غیرفعال کن
+                    totalDisplay.textContent = '-'; // پاک کردن قیمت کل ردیف
+                }
+            });
+
+            // به‌روزرسانی نمایش مجموع کل
+            document.getElementById('grand-total-value').textContent = `${grandTotal.toLocaleString('fa-IR')} تومان`;
+        }
+        
         function updatePriceCalculations() {
             const unitPriceInput = document.getElementById('unitPrice');
             const customPriceInput = document.getElementById('customPriceInput');
