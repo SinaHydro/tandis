@@ -2169,20 +2169,26 @@ function updateAllPrices() {
                 const priceInput = row.querySelector('.price-input');
                 const totalDisplay = row.querySelector('.total-price-display');
 
+                // بررسی می‌کنیم آیا این رشته انتخاب شده است یا نه
                 if (button.classList.contains('active')) {
-                    priceInput.disabled = false; 
+                    priceInput.disabled = false; // فیلد قیمت را قابل ویرایش کن
                     const unitPrice = parseFloat(priceInput.value) || 0;
-                    // --- تغییر کلیدی در این خط است ---
+                    
+                    // قیمت کل رشته با متراژ صحیح محاسبه می‌شود
                     const rowTotal = areaForCalc * unitPrice;
                     
+                    // نمایش قیمت کل برای این ردیف
                     totalDisplay.textContent = `${rowTotal.toLocaleString('fa-IR')} تومان`;
+                    
+                    // اضافه کردن به مجموع کل
                     grandTotal += rowTotal;
                 } else {
-                    priceInput.disabled = true; 
-                    totalDisplay.textContent = '-';
+                    priceInput.disabled = true; // فیلد قیمت را غیرفعال کن
+                    totalDisplay.textContent = '-'; // پاک کردن قیمت کل ردیف
                 }
             });
 
+            // به‌روزرسانی نمایش مجموع کل
             document.getElementById('grand-total-value').textContent = `${grandTotal.toLocaleString('fa-IR')} تومان`;
         }
         
