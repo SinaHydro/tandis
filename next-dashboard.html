@@ -672,6 +672,7 @@
             <div class="spinner"></div>
         </div>
     </div>
+    
 
     <div id="selectionModal" class="modal">
         <div class="modal-content">
@@ -1868,24 +1869,48 @@ function renderProjectForm(projectData = null) {
                     <div class="space-y-4">
                         <h3 id="tariff-title" class="text-lg font-semibold text-gray-800 border-b pb-2">تعرفه پیشنهادی</h3>
                         <input type="hidden" id="unitPrice" name="unitPrice" value="${projectData?.unitPrice || '107000'}">
-                        <div id="price-buttons-container" class="grid grid-cols-4 gap-3">
-                            <button type="button" class="price-btn" data-price="107000">ساختمان ۱ تا ۲ طبقه<br><span class="font-bold">۱۰۷,۰۰۰ تومان</span></button>
-                            <button type="button" class="price-btn" data-price="125000">ساختمان ۳ تا ۵ طبقه<br><span class="font-bold">۱۲۵,۰۰۰ تومان</span></button>
-                            <button type="button" class="price-btn" data-price="127800">ساختمان ۶ تا ۷ طبقه<br><span class="font-bold">۱۲۷,۸۰۰ تومان</span></button>
-                            <button type="button" class="price-btn" data-price="139500">ساختمان ۸ تا ۱۰ طبقه<br><span class="font-bold">۱۳۹,۵۰۰ تومان</span></button>
-                            <button type="button" class="price-btn" data-price="142800">ساختمان ۱۱ تا ۱۲ طبقه<br><span class="font-bold">۱۴۲,۸۰۰ تومان</span></button>
-                            <button type="button" class="price-btn" data-price="148800">ساختمان ۱۳ تا ۱۵ طبقه<br><span class="font-bold">۱۴۸,۸۰۰ تومان</span></button>
-                            <button type="button" class="price-btn" data-price="159200">ساختمان بالای ۱۶ طبقه<br><span class="font-bold">۱۵۹,۲۰۰ تومان</span></button>
-                            <div class="price-btn custom-price-container" data-price="custom">
-                                <span>قیمت دلخواه (تومان)</span>
-                                <input type="number" id="customPriceInput" class="custom-price-input" placeholder="مبلغ را وارد کنید">
+                        <div id="price-buttons-container" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="price-btn flex flex-col p-3 text-center" data-index="1">
+                                <label class="text-slate-700 text-sm mb-2">ساختمان ۱ تا ۲ طبقه</label>
+                                <input type="number" class="custom-price-input" value="107000">
                             </div>
-                        </div>
+                            <div class="price-btn flex flex-col p-3 text-center" data-index="2">
+                                <label class="text-slate-700 text-sm mb-2">ساختمان ۳ تا ۵ طبقه</label>
+                                <input type="number" class="custom-price-input" value="125000">
+                            </div>
+                            <div class="price-btn flex flex-col p-3 text-center" data-index="3">
+                                <label class="text-slate-700 text-sm mb-2">ساختمان ۶ تا ۷ طبقه</label>
+                                <input type="number" class="custom-price-input" value="127800">
+                            </div>
+                            <div class="price-btn flex flex-col p-3 text-center" data-index="4">
+                                <label class="text-slate-700 text-sm mb-2">ساختمان ۸ تا ۱۰ طبقه</label>
+                                <input type="number" class="custom-price-input" value="139500">
+                            </div>
+                            <div class="price-btn flex flex-col p-3 text-center" data-index="5">
+                                <label class="text-slate-700 text-sm mb-2">ساختمان ۱۱ تا ۱۲ طبقه</label>
+                                <input type="number" class="custom-price-input" value="142800">
+                            </div>
+                            <div class="price-btn flex flex-col p-3 text-center" data-index="6">
+                                <label class="text-slate-700 text-sm mb-2">ساختمان ۱۳ تا ۱۵ طبقه</label>
+                                <input type="number" class="custom-price-input" value="148800">
+                            </div>
+                            <div class="price-btn flex flex-col p-3 text-center" data-index="7">
+                                <label class="text-slate-700 text-sm mb-2">ساختمان بالای ۱۶ طبقه</label>
+                                <input type="number" class="custom-price-input" value="159200">
+                            </div>
+                            </div>
                         
-                        <div class="price-highlight p-3 rounded-lg mt-4">
-                            <div class="flex items-center"><i class="fas fa-tag text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت واحد:</span><span id="unitPricePreview" class="mr-2 font-semibold"></span>
+                        <div class="price-highlight p-4 rounded-lg mt-4 space-y-3">
+                            <div class="flex items-center"><i class="fas fa-tag text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت واحد انتخابی:</span><span id="unitPricePreview" class="mr-2 font-semibold"></span>
                             </div>
-                            <div class="flex items-center mt-2"><i class="fas fa-calculator text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت کل:</span><span id="totalPricePreview" class="mr-2 font-bold text-green-600"></span>
+                            <div class="flex items-center"><i class="fas fa-calculator text-green-500 ml-2"></i><span class="text-gray-700 font-medium">قیمت کل پروژه:</span><span id="totalPricePreview" class="mr-2 font-bold text-green-600"></span>
+                            </div>
+
+                            <hr class="border-green-200 my-2">
+
+                            <div class="text-xs text-green-800/90 space-y-1">
+                                <p><i class="fas fa-info-circle ml-1"></i>**انتخاب ردیف صحیح** بر اساس گروه ساختمانی، در محاسبه قیمت کل موثر است.</p>
+                                <p><i class="fas fa-ruler-combined ml-1"></i>تعداد طبقات از روی شالوده محاسبه می شود.</p>
                             </div>
                         </div>
                     </div>
@@ -1984,75 +2009,72 @@ function renderProjectForm(projectData = null) {
         }
         // <h4 class="font-bold text-lg text-slate-800">${project.projectName || 'بدون نام'}</h4>
         
-        function attachProjectFormListeners() {
-            document.getElementById('projectForm').addEventListener('submit', submitProjectData);
-            
-            const cancelBtn = document.getElementById('cancelProjectFormBtn');
-            if (cancelBtn) {
-                cancelBtn.addEventListener('click', () => {
-                    document.getElementById('home-nav-item').click(); 
-                });
-            }
+function attachProjectFormListeners() {
+    document.getElementById('projectForm').addEventListener('submit', submitProjectData);
 
-            initializeProjectMap();
+    const cancelBtn = document.getElementById('cancelProjectFormBtn');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+            document.getElementById('home-nav-item').click(); 
+        });
+    }
 
-            const priceButtons = document.querySelectorAll('.price-btn');
-            const unitPriceInput = document.getElementById('unitPrice');
-            const customPriceInput = document.getElementById('customPriceInput');
+    initializeProjectMap();
 
-            priceButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    priceButtons.forEach(btn => btn.classList.remove('active'));
-                    button.classList.add('active');
-                    
-                    const priceType = button.dataset.price;
-                    if (priceType === 'custom') {
-                        unitPriceInput.value = customPriceInput.value || '0';
-                        customPriceInput.focus();
-                    } else {
-                        unitPriceInput.value = priceType;
-                    }
-                    updatePriceCalculations();
-                });
-            });
+    const priceButtons = document.querySelectorAll('.price-btn');
+    const unitPriceInput = document.getElementById('unitPrice');
+    const unitPriceIndexInput = document.getElementById('unitPriceIndex');
 
-            customPriceInput.addEventListener('input', () => {
-                if (document.querySelector('.custom-price-container.active')) {
-                    unitPriceInput.value = customPriceInput.value || '0';
+    priceButtons.forEach(button => {
+        const inputField = button.querySelector('input');
+
+        // رویداد کلیک روی کل کارت
+        button.addEventListener('click', () => {
+            priceButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            unitPriceInput.value = inputField.value || '0';
+            unitPriceIndexInput.value = button.dataset.index;
+            updatePriceCalculations();
+        });
+
+        // رویداد تغییر مقدار در فیلد ورودی
+        if(inputField){
+            inputField.addEventListener('input', () => {
+                if (button.classList.contains('active')) {
+                    unitPriceInput.value = inputField.value || '0';
                     updatePriceCalculations();
                 }
             });
-            
-            const areaInput = document.getElementById('area');
-            const contractMonthsInput = document.getElementById('contractMonths');
-
-            // هر بار که کاربر عددی در این فیلد تایپ می‌کند، قیمت‌ها دوباره محاسبه می‌شوند
-            if (areaInput) {
-                areaInput.addEventListener('input', updatePriceCalculations);
-            }
-
-            // افزودن شنونده به فیلد مدت قرارداد
-            if (contractMonthsInput) {
-                contractMonthsInput.addEventListener('input', updatePriceCalculations);
-            }
-
-            // فعال کردن دکمه پیش‌فرض در هنگام بارگذاری فرم
-            const initialPrice = unitPriceInput.value;
-            let activeButton = document.querySelector(`.price-btn[data-price="${initialPrice}"]`);
-            if (activeButton) {
-                activeButton.classList.add('active');
-            } else if (initialPrice && initialPrice !== '0') {
-                activeButton = document.querySelector('.custom-price-container');
-                if (activeButton) {
-                    activeButton.classList.add('active');
-                    customPriceInput.value = initialPrice;
-                }
-            } else {
-                const firstButton = document.querySelector('.price-btn');
-                if(firstButton) firstButton.classList.add('active');
-            }
-            updatePriceCalculations(); // محاسبه قیمت اولیه
         }
+    });
+
+    const areaInput = document.getElementById('area');
+    const floorsInput = document.getElementById('floors');
+    const basementFloorsInput = document.getElementById('basementFloors');
+    const contractMonthsInput = document.getElementById('contractMonths');
+
+    if (areaInput) areaInput.addEventListener('input', updatePriceTierSelection);
+    if (floorsInput) floorsInput.addEventListener('input', updatePriceTierSelection);
+    if (basementFloorsInput) basementFloorsInput.addEventListener('input', updatePriceTierSelection);
+    if (contractMonthsInput) {contractMonthsInput.addEventListener('input', updatePriceCalculations);}
+
+    // فعال کردن دکمه پیش‌فرض در هنگام بارگذاری فرم
+    const initialIndex = unitPriceIndexInput.value || '1';
+    let activeButton = document.querySelector(`.price-btn[data-index="${initialIndex}"]`);
+    if (activeButton) {
+        activeButton.classList.add('active');
+        // اگر در حالت ویرایش هستیم، مقدار ذخیره شده را در فیلد ورودی قرار بده
+        const initialPrice = unitPriceInput.value;
+        if(initialPrice){
+             activeButton.querySelector('input').value = initialPrice;
+        }
+    } else {
+        document.querySelector('.price-btn')?.classList.add('active');
+    }
+    updatePriceCalculations();
+
+}
 
         async function getAddressFromLatLng(lat, lng) {
             try {
@@ -2141,8 +2163,9 @@ function renderProjectForm(projectData = null) {
                 return;
             }
             const projectData = Object.fromEntries(new FormData(form).entries());
-            const priceRadio = form.querySelector('input[name="priceOption"]:checked');
-            projectData.unitPrice = priceRadio.id === 'priceOptionCustom' ? projectData.customPrice : priceRadio.value;
+            
+            projectData.unitPrice = `${projectData.unitPrice}|${projectData.unitPriceIndex}`;
+            delete projectData.unitPriceIndex;
 
             const isUpdate = !!projectData.ProjectID;
             const action = isUpdate ? 'updateProject' : 'createProject';
@@ -2668,6 +2691,54 @@ function renderProjectForm(projectData = null) {
             return html;
         }
 
+
+        // این تابع جدید را به فایل خود اضافه کنید
+        function updatePriceTierSelection() {
+            // مرحله ۱: خواندن مقادیر از فیلدهای ورودی
+            const area = parseFloat(document.getElementById('area').value) || 0;
+            const floors = parseInt(document.getElementById('floors').value) || 0;
+            const basementFloors = parseInt(document.getElementById('basementFloors').value) || 0;
+            const totalFloors = floors + basementFloors;
+
+            let selectedIndex = 0; // به صورت پیش‌فرض هیچ ردیفی انتخاب نشده
+
+            // مرحله ۲: بررسی قوانین شما برای پیدا کردن ردیف صحیح
+            if (totalFloors >= 1 && totalFloors <= 2 && area > 0 && area < 600) {
+                selectedIndex = 1;
+            } else if (totalFloors >= 3 && totalFloors <= 5 && area >= 600 && area < 2000) {
+                selectedIndex = 2;
+            } else if (totalFloors >= 6 && totalFloors <= 7 && area >= 2000 && area < 5000) {
+                selectedIndex = 3;
+            } else if (totalFloors >= 8 && totalFloors <= 10 && area >= 2000 && area < 5000) {
+                selectedIndex = 4;
+            } else if (totalFloors >= 11 && totalFloors <= 12 && area >= 5000) {
+                selectedIndex = 5;
+            } else if (totalFloors >= 13 && totalFloors <= 15 && area >= 5000) {
+                selectedIndex = 6;
+            } else if (totalFloors >= 16 && area >= 5000) {
+                selectedIndex = 7;
+            }
+
+            // مرحله ۳: به‌روزرسانی ظاهر فرم
+            const priceButtons = document.querySelectorAll('.price-btn');
+            priceButtons.forEach(btn => btn.classList.remove('active')); // کلاس فعال را از همه گزینه‌ها حذف می‌کنیم
+
+            if (selectedIndex > 0) {
+                const targetButton = document.querySelector(`.price-btn[data-index="${selectedIndex}"]`);
+                if (targetButton) {
+                    targetButton.classList.add('active'); // فقط گزینه صحیح را فعال می‌کنیم
+                    
+                    // مقادیر فیلدهای مخفی را نیز به‌روز می‌کنیم
+                    const inputField = targetButton.querySelector('input');
+                    document.getElementById('unitPrice').value = inputField.value || '0';
+                    document.getElementById('unitPriceIndex').value = targetButton.dataset.index;
+                }
+            }
+
+            // مرحله ۴: محاسبه مجدد قیمت کل بر اساس ردیف جدید
+            updatePriceCalculations();
+        }
+        
         // منطق باز و بسته شدن آکاردئون و واکشی اطلاعات برای صفحه "پروژه‌های من" کارفرما.
 function attachProjectRowListeners() {
             document.querySelectorAll('#projectsContent .project-row').forEach(row => {
