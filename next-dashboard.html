@@ -705,7 +705,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby3Y6_P1d26ZT7YJZc-xtwLybpXpUCEf89IVLyrGF4z752n1X9wPVDSPskS7-Qbm6Wx/exec'; // GSA v.78 Please replace with your actual script URL
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwjjOjaNVgrgkRgKpOiyeR4Q8uPqXt82IGEDU-XQx2lcyk9q3dgkhmDMot_Cv4X_F7p/exec'; // GSA v.79 Please replace with your actual script URL
 
         const SLIDESHOW_CONTENT_R = [
             { 
@@ -2332,19 +2332,22 @@ async function submitProjectData(e) {
             }
 
             const priceOptions = [
-                { label: 'ساختمان 1 تا 2 طبقه', default: '107,000' }, { label: 'ساختمان 3 تا 5 طبقه', default: '125,000' },
-                { label: 'ساختمان 6 تا 7 طبقه', default: '127,800' }, { label: 'ساختمان 8 تا 10 طبقه', default: '139,500' },
-                { label: 'ساختمان 11 تا 12 طبقه', default: '142,800' }, { label: 'ساختمان 13 تا 15 طبقه', default: '148,800' },
-                { label: 'ساختمان بالای 16 طبقه', default: '159,200' },
+                { label: 'ساختمان 1 تا 2 طبقه', default: '107,000', index: 1 }, 
+                { label: 'ساختمان 3 تا 5 طبقه', default: '125,000', index: 2 },
+                { label: 'ساختمان 6 تا 7 طبقه', default: '127,800', index: 3 }, 
+                { label: 'ساختمان 8 تا 10 طبقه', default: '139,500', index: 4 },
+                { label: 'ساختمان 11 تا 12 طبقه', default: '142,800', index: 5 }, 
+                { label: 'ساختمان 13 تا 15 طبقه', default: '148,800', index: 6 },
+                { label: 'ساختمان بالای 16 طبقه', default: '159,200', index: 7 },
             ];
             
             const priceRowsHtml = priceOptions.map(opt => `
-                <div class="price-row grid grid-cols-2 gap-4 items-center">
+                <div class="price-row grid grid-cols-2 gap-4 items-center" data-index="${opt.index}">
                     <label class="flex items-center text-base">
-                        <input type="checkbox" class="ml-4" ${isEditMode ? (prices[opt.label] ? 'checked' : '') : 'checked'}> 
+                        <input type="checkbox" class="ml-4" ${isEditMode && prices[opt.index] ? 'checked' : ''}> 
                         <span>${opt.label}</span>
                     </label>
-                    <input type="text" class="p-2 border border-gray-300 rounded-md text-base" value="${prices[opt.label] || opt.default}">
+                    <input type="text" class="p-2 border border-gray-300 rounded-md text-base" value="${prices[opt.index] || opt.default}">
                 </div>
             `).join('');
 
@@ -2408,13 +2411,13 @@ async function submitProjectData(e) {
             for (let row of priceRows) {
                 const checkbox = row.querySelector('input[type="checkbox"]');
                 if (checkbox.checked) {
-                    prices.push({ label: row.querySelector('span').textContent.trim(), price: row.querySelector('input[type="text"]').value });
+                    prices.push({index: row.dataset.index, price: row.querySelector('input[type="text"]').value});
                 }
             }
             currentActivityData.prices = JSON.stringify(prices);
-            
+        
             if(isEditMode) currentActivityData.ActivityID = document.getElementById('activityId').value;
-            
+        
             renderActivityPreview(currentActivityData);
         }
 
@@ -2627,7 +2630,7 @@ async function submitProjectData(e) {
                                 <span>متراژ باقیمانده</span>
                             </div>
                             <div class="header-item">
-                                <strong>${toPersianNum(parseFloat(item.unitPrice))} تومان</strong>
+                                <strong>${toPersianNum(parseFloat(item.activityInfo?.matchedUnitPrice))} تومان</strong>
                                 <span>تعرفه پیشنهادی</span>
                             </div>
                             <div class="header-item">
@@ -2680,7 +2683,7 @@ async function submitProjectData(e) {
                                 <span>متراژ باقیمانده</span>
                             </div>
                             <div class="header-item">
-                                <strong>${toPersianNum(parseFloat(item.activityInfo?.unitPrice))} تومان</strong>
+                                <strong>${toPersianNum(parseFloat(item.activityInfo?.matchedUnitPrice))} تومان</strong>
                                 <span>تعرفه پیشنهادی</span>
                             </div>
                             <div class="header-item">
@@ -2713,12 +2716,12 @@ async function submitProjectData(e) {
                                 <span>متراژ باقیمانده</span>
                             </div>
                             <div class="header-item">
-                                <strong>${toPersianNum(parseFloat(activity.unitPrice))} تومان</strong>
+                                <strong>${toPersianNum(parseFloat(activity.matchedUnitPrice))} تومان</strong>
                                 <span>تعرفه پیشنهادی</span>
                             </div>
                              <div class="header-item">
                                 <strong>-</strong>
-                                <span>زمان ارسال</span>
+                                <span>-</span>
                             </div>
                             <div class="action-btn-container">
                                 <button class="btn btn-success !py-1 !px-3" data-action="send-request" data-activity-id="${activity.ActivityID}" data-recipient-email="${activity.EngineerEmail}">
@@ -2750,7 +2753,7 @@ async function submitProjectData(e) {
                                 <span>مدت قرارداد</span>
                             </div>
                             <div class="header-item">
-                                <strong>${toPersianNum(parseFloat(p.unitPrice))} تومان</strong>
+                                <strong>${toPersianNum(parseFloat(p.matchedUnitPrice))} تومان</strong>
                                 <span>تعرفه پیشنهادی</span>
                             </div>
                             <div class="header-item">
@@ -2801,7 +2804,7 @@ async function submitProjectData(e) {
                                 <span>مدت قرارداد</span>
                             </div>
                             <div class="header-item">
-                                <strong>${toPersianNum(parseFloat(p.unitPrice))} تومان</strong>
+                                <strong>${toPersianNum(parseFloat(p.matchedUnitPrice))} تومان</strong>
                                 <span>تعرفه پیشنهادی</span>
                             </div>
                             <div class="header-item">
@@ -2820,7 +2823,7 @@ async function submitProjectData(e) {
         }
         
         // منطق باز و بسته شدن آکاردئون و واکشی اطلاعات برای صفحه "پروژه‌های من" کارفرما.
-function attachProjectRowListeners() {
+        function attachProjectRowListeners() {
             document.querySelectorAll('#projectsContent .project-row').forEach(row => {
                 const header = row.querySelector('.project-header');
                 header.addEventListener('click', async (e) => {
