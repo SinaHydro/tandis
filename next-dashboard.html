@@ -705,7 +705,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxnw9DAzBW-Z3u2r1qdiVt2u0_PUl4x-jCX9mEtdPkiMZUS4KTz46yZgK0TRF2SctDm/exec'; // Please replace with your actual script URL
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzxQPS4YIKn3lOphcqIqpIe8rRdSmLiYlxYB7ZrOMRA0r6tVhjLnxHTniaVuDhonbo3/exec'; // Please replace with your actual script URL
 
         const SLIDESHOW_CONTENT_R = [
             { 
@@ -1848,10 +1848,18 @@ function renderProjectForm(projectData = null) {
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-5">
+                        <div><label for="fileType" class="block text-gray-700 font-medium mb-1 required-field">نوع پرونده</label><select id="fileType" name="fileType" required><option value="عادی">عادی</option><option value="فرسوده">فرسوده</option></select></div>
+                        <div><label for="permitNumber" class="block text-gray-700 font-medium mb-1 required-field">شماره پروانه</label><input type="text" id="permitNumber" name="permitNumber" required value="${projectData?.permitNumber || ''}"></div>
+                        <div><label for="permitValidity" class="block text-gray-700 font-medium mb-1 required-field">اعتبار پروانه (ماه)</label><input type="number" id="permitValidity" name="permitValidity" min="1" required value="${projectData?.permitValidity || ''}"></div>
+                        <div><label for="contractMonths" class="block text-gray-700 font-medium mb-1 required-field">مدت قرارداد (ماه)</label><input type="number" id="contractMonths" name="contractMonths" min="1" required value="${projectData?.contractMonths || ''}"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-5">
                         <div><label for="area" class="block text-gray-700 font-medium mb-1 required-field">متراژ (مترمربع)</label><input type="number" id="area" name="area" min="1" required value="${projectData?.area || ''}"></div>
+                        <div><label for="area_d" class="block text-gray-700 font-medium mb-1">متراژ با اعمال بخش فرسوده</label><input type="number" id="area_d" name="area_d" min="1" value="${projectData?.area_d || ''}" disabled></div>
                         <div><label for="floors" class="block text-gray-700 font-medium mb-1 required-field">تعداد طبقات</label><input type="number" id="floors" name="floors" min="1" required value="${projectData?.floors || ''}"></div>
                         <div><label for="basementFloors" class="block text-gray-700 font-medium mb-1 required-field">طبقات زیرزمین</label><input type="number" id="basementFloors" name="basementFloors" min="0" required value="${projectData?.basementFloors || '0'}"></div>
-                        <div><label for="structureType" class="block text-gray-700 font-medium mb-1 required-field">نوع سازه</label><select id="structureType" name="structureType" required><option value="فلزی">فلزی</option><option value="بتنی">بتنی</option></select></div>
+                        
                     </div>
 
                     <div>
@@ -1866,19 +1874,13 @@ function renderProjectForm(projectData = null) {
                         <input type="hidden" id="longitude" name="longitude" value="${projectData?.longitude || ''}">
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-5">
-                        <div><label for="fileType" class="block text-gray-700 font-medium mb-1 required-field">نوع پرونده</label><select id="fileType" name="fileType" required><option value="عادی">عادی</option><option value="فرسوده">فرسوده</option></select></div>
-                        <div><label for="permitNumber" class="block text-gray-700 font-medium mb-1 required-field">شماره پروانه</label><input type="text" id="permitNumber" name="permitNumber" required value="${projectData?.permitNumber || ''}"></div>
-                        <div><label for="permitValidity" class="block text-gray-700 font-medium mb-1 required-field">اعتبار پروانه (ماه)</label><input type="number" id="permitValidity" name="permitValidity" min="1" required value="${projectData?.permitValidity || ''}"></div>
-                        <div><label for="contractMonths" class="block text-gray-700 font-medium mb-1 required-field">مدت قرارداد (ماه)</label><input type="number" id="contractMonths" name="contractMonths" min="1" required value="${projectData?.contractMonths || ''}"></div>
-                    </div>
-
                     <div class="space-y-2">
                         <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">مشخصات مهندس مورد نیاز پروژه</h3>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-5 pt-2">
                             <div><label for="engineerActivity" class="block text-gray-700 font-medium mb-1 required-field">نوع فعالیت مهندس</label><select id="engineerActivity" name="engineerActivity" required><option value="طراح">طراح</option><option value="ناظر">ناظر</option><option value="مجری">مجری</option></select></div>
                             <div><label for="permitType" class="block text-gray-700 font-medium mb-1 required-field">نوع پروانه مهندس</label><select id="permitType" name="permitType" required><option value="طراح حقوقی">طراح حقوقی</option><option value="ناظر حقوقی">ناظر حقوقی</option><option value="انبوه ساز">انبوه ساز</option><option value="مجری حقوقی">مجری حقوقی</option><option value="مهندس حقیقی">مهندس حقیقی</option><option value="کاردان">کاردان</option><option value="معمارتجربی">معمارتجربی</option></select></div>
                             <div><label for="engineerRank" class="block text-gray-700 font-medium mb-1 required-field">پایه مهندس</label><select id="engineerRank" name="engineerRank" required><option value="پایه 3">پایه 3</option><option value="پایه 2">پایه 2</option><option value="پایه 1">پایه 1</option><option value="پایه ارشد">پایه ارشد</option></select></div>
+                            <div><label for="structureType" class="block text-gray-700 font-medium mb-1 required-field">نوع سازه</label><select id="structureType" name="structureType" required><option value="فلزی">فلزی</option><option value="بتنی">بتنی</option></select></div>
                         </div>
 
                         <p class="text-sm text-slate-500">رشته‌های مهندسی مورد نیاز خود را انتخاب کرده و قیمت پیشنهادی برای هر کدام را وارد نمایید.</p>
@@ -2080,6 +2082,27 @@ function attachProjectFormListeners() {
 
             // اجرای اولیه محاسبات در لحظه بارگذاری فرم
             updateAllPrices();
+
+            const fileTypeSelect = document.getElementById('fileType');
+            const dilapidatedAreaInput = document.getElementById('area_d');
+            const dilapidatedAreaLabel = document.querySelector('label[for="area_d"]');
+    
+            if(fileTypeSelect) {
+                fileTypeSelect.addEventListener('change', () => {
+                    if (fileTypeSelect.value === 'فرسوده') {
+                        dilapidatedAreaInput.disabled = false;
+                        dilapidatedAreaLabel.classList.add('required-field');
+                        // هر بار که فعال می‌شود، محاسبات را دوباره انجام بده
+                        updateAllPrices(); 
+                    } else {
+                        dilapidatedAreaInput.disabled = true;
+                        dilapidatedAreaInput.value = ''; // مقدارش را خالی کن
+                        dilapidatedAreaLabel.classList.remove('required-field');
+                        // هر بار که غیرفعال می‌شود، محاسبات را دوباره انجام بده
+                        updateAllPrices(); 
+                    }
+                });
+            }
         }
         async function getAddressFromLatLng(lat, lng) {
             try {
@@ -2130,8 +2153,15 @@ function attachProjectFormListeners() {
         }, 1);
         }
 
-        function updateAllPrices() {
-            const area = parseFloat(document.getElementById('area').value) || 0;
+function updateAllPrices() {
+            // مقادیر هر دو فیلد متراژ را می‌خوانیم
+            const regularArea = parseFloat(document.getElementById('area').value) || 0;
+            const dilapidatedAreaInput = document.getElementById('area_d');
+            const dilapidatedArea = parseFloat(dilapidatedAreaInput.value) || 0;
+
+            // تصمیم‌گیری برای استفاده از متراژ عادی یا متراژ فرسوده در محاسبات
+            const areaForCalc = !dilapidatedAreaInput.disabled && dilapidatedArea > 0 ? dilapidatedArea : regularArea;
+
             let grandTotal = 0;
 
             document.querySelectorAll('.engineer-pricing-row').forEach(row => {
@@ -2139,24 +2169,20 @@ function attachProjectFormListeners() {
                 const priceInput = row.querySelector('.price-input');
                 const totalDisplay = row.querySelector('.total-price-display');
 
-                // بررسی می‌کنیم آیا این رشته انتخاب شده است یا نه
                 if (button.classList.contains('active')) {
-                    priceInput.disabled = false; // فیلد قیمت را قابل ویرایش کن
+                    priceInput.disabled = false; 
                     const unitPrice = parseFloat(priceInput.value) || 0;
-                    const rowTotal = area * unitPrice;
+                    // --- تغییر کلیدی در این خط است ---
+                    const rowTotal = areaForCalc * unitPrice;
                     
-                    // نمایش قیمت کل برای این ردیف
                     totalDisplay.textContent = `${rowTotal.toLocaleString('fa-IR')} تومان`;
-                    
-                    // اضافه کردن به مجموع کل
                     grandTotal += rowTotal;
                 } else {
-                    priceInput.disabled = true; // فیلد قیمت را غیرفعال کن
-                    totalDisplay.textContent = '-'; // پاک کردن قیمت کل ردیف
+                    priceInput.disabled = true; 
+                    totalDisplay.textContent = '-';
                 }
             });
 
-            // به‌روزرسانی نمایش مجموع کل
             document.getElementById('grand-total-value').textContent = `${grandTotal.toLocaleString('fa-IR')} تومان`;
         }
         
