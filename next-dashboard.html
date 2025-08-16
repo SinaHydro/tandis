@@ -1894,28 +1894,49 @@ function renderProjectForm(projectData = null) {
                         <div class="engineer-pricing-row grid grid-cols-[150px_1fr_1fr] gap-4 items-center" data-field="معماری">
                             <button type="button" class="engineer-field-btn w-full" data-field="معماری">معماری</button>
                             <div class="flex items-center">
-                                <input type="number" name="price_معماری" class="price-input w-full text-center" value="160000" disabled>
+                                <input type="number" name="price_معماری" class="price-input w-full text-center" value="814000" disabled>
                             </div>
                             <div class="total-price-display text-center text-slate-600 font-semibold">-</div>
                         </div>
                         <div class="engineer-pricing-row grid grid-cols-[150px_1fr_1fr] gap-4 items-center" data-field="عمران">
                             <button type="button" class="engineer-field-btn w-full" data-field="عمران">عمران</button>
                             <div class="flex items-center">
-                                <input type="number" name="price_عمران" class="price-input w-full text-center" value="175000" disabled>
+                                <input type="number" name="price_عمران" class="price-input w-full text-center" value="945000" disabled>
                             </div>
                             <div class="total-price-display text-center text-slate-600 font-semibold">-</div>
                         </div>
                         <div class="engineer-pricing-row grid grid-cols-[150px_1fr_1fr] gap-4 items-center" data-field="مکانیک">
                             <button type="button" class="engineer-field-btn w-full" data-field="مکانیک">مکانیک</button>
                             <div class="flex items-center">
-                                <input type="number" name="price_مکانیک" class="price-input w-full text-center" value="95000" disabled>
+                                <input type="number" name="price_مکانیک" class="price-input w-full text-center" value="446000" disabled>
                             </div>
                             <div class="total-price-display text-center text-slate-600 font-semibold">-</div>
                         </div>
                         <div class="engineer-pricing-row grid grid-cols-[150px_1fr_1fr] gap-4 items-center" data-field="برق">
                             <button type="button" class="engineer-field-btn w-full" data-field="برق">برق</button>
                             <div class="flex items-center">
-                                <input type="number" name="price_برق" class="price-input w-full text-center" value="90000" disabled>
+                                <input type="number" name="price_برق" class="price-input w-full text-center" value="420000" disabled>
+                            </div>
+                            <div class="total-price-display text-center text-slate-600 font-semibold">-</div>
+                        </div>
+                        <div class="engineer-pricing-row grid grid-cols-[150px_1fr_1fr] gap-4 items-center" data-field="نقشه برداری">
+                            <button type="button" class="engineer-field-btn w-full" data-field="نقشه برداری">تقشه برداری</button>
+                            <div class="flex items-center">
+                                <input type="number" name="price_نقشه" class="price-input w-full text-center" value="217500" disabled>
+                            </div>
+                            <div class="total-price-display text-center text-slate-600 font-semibold">-</div>
+                        </div>
+                        <div class="engineer-pricing-row grid grid-cols-[150px_1fr_1fr] gap-4 items-center" data-field="شهرسازی">
+                            <button type="button" class="engineer-field-btn w-full" data-field="شهرسازی">شهرسازی</button>
+                            <div class="flex items-center">
+                                <input type="number" name="price_شهرسازی" class="price-input w-full text-center" value="90000" disabled>
+                            </div>
+                            <div class="total-price-display text-center text-slate-600 font-semibold">-</div>
+                        </div>
+                        <div class="engineer-pricing-row grid grid-cols-[150px_1fr_1fr] gap-4 items-center" data-field="ترافیک">
+                            <button type="button" class="engineer-field-btn w-full" data-field="ترافیک">ترافیک</button>
+                            <div class="flex items-center">
+                                <input type="number" name="price_ترافیک" class="price-input w-full text-center" value="20000" disabled>
                             </div>
                             <div class="total-price-display text-center text-slate-600 font-semibold">-</div>
                         </div>
@@ -1926,8 +1947,8 @@ function renderProjectForm(projectData = null) {
                         <span id="grand-total-value" class="font-bold text-lg text-green-700">۰ تومان</span>
                     </div>
                     
-                    </div>
-                    <div><label for="description" class="block text-gray-700 font-medium mb-1">توضیحات</label><textarea id="description" name="description" rows="2" class="w-full">${projectData?.description || ''}</textarea>
+                    <div>
+                        <label for="description" class="block text-gray-700 font-medium mb-1">توضیحات</label><textarea id="description" name="description" rows="2" class="w-full">${projectData?.description || ''}</textarea>
                     </div>
                 </div>
                 <div class="border-t border-gray-200 mt-6 p-4 flex justify-end gap-4">
