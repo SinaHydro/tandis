@@ -2085,6 +2085,9 @@ function attachProjectFormListeners() {
 
             const fileTypeSelect = document.getElementById('fileType');
             const dilapidatedAreaInput = document.getElementById('area_d');
+            if (dilapidatedAreaInput) {
+                dilapidatedAreaInput.addEventListener('input', updateAllPrices);
+            }
             const dilapidatedAreaLabel = document.querySelector('label[for="area_d"]');
     
             if(fileTypeSelect) {
