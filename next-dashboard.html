@@ -2332,13 +2332,13 @@ async function submitProjectData(e) {
             }
 
             const priceOptions = [
-                { label: 'ساختمان 1 تا 2 طبقه', default: '107,000', index: 1 }, 
-                { label: 'ساختمان 3 تا 5 طبقه', default: '125,000', index: 2 },
-                { label: 'ساختمان 6 تا 7 طبقه', default: '127,800', index: 3 }, 
-                { label: 'ساختمان 8 تا 10 طبقه', default: '139,500', index: 4 },
-                { label: 'ساختمان 11 تا 12 طبقه', default: '142,800', index: 5 }, 
-                { label: 'ساختمان 13 تا 15 طبقه', default: '148,800', index: 6 },
-                { label: 'ساختمان بالای 16 طبقه', default: '159,200', index: 7 },
+                { label: 'ساختمان 1 تا 2 طبقه', default: '10,700', index: 1 }, 
+                { label: 'ساختمان 3 تا 5 طبقه', default: '12,500', index: 2 },
+                { label: 'ساختمان 6 تا 7 طبقه', default: '12,780', index: 3 }, 
+                { label: 'ساختمان 8 تا 10 طبقه', default: '13,950', index: 4 },
+                { label: 'ساختمان 11 تا 12 طبقه', default: '14,280', index: 5 }, 
+                { label: 'ساختمان 13 تا 15 طبقه', default: '14,880', index: 6 },
+                { label: 'ساختمان بالای 16 طبقه', default: '15,920', index: 7 },
             ];
             
             const priceRowsHtml = priceOptions.map(opt => `
@@ -2517,7 +2517,7 @@ async function submitProjectData(e) {
             }
         }
         
-        async function renderMyActivities() {
+async function renderMyActivities() {
             myActivitiesContent.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
             try {
                 const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getActivitiesWithRequestCounts&email=${encodeURIComponent(userData.email)}`);
@@ -2527,7 +2527,9 @@ async function submitProjectData(e) {
                 fetchedActivities = result.data.sort((a,b) => new Date(b.LastModifiedDate) - new Date(a.LastModifiedDate));
                 if (fetchedActivities.length > 0) {
                     let activitiesHtml = '<div class="project-accordion">';
-                    activities.forEach(act => {
+                    
+                    // خطا اینجا بود: متغیر activities به fetchedActivities تغییر کرد
+                    fetchedActivities.forEach(act => {
                         const isActive = act.Status === 'فعال';
                         activitiesHtml += `
                             <div class="project-row ${!isActive ? 'closed-project' : ''}" data-activity-id="${act.ActivityID}" data-status="${act.Status}">
@@ -2544,11 +2546,11 @@ async function submitProjectData(e) {
                                         <span class="text-xs text-slate-500">مهندس ${act.engineerField}</span>
                                     </div>
                                     <div class="header-item">
-                                        <strong>${toPersianNum(act.maxProjects - act.currentProjects)} عدد</strong>
+                                        <strong>${toPersianNum((act.maxProjects || 0) - (act.currentProjects || 0))} عدد</strong>
                                         <span>کار باقیمانده</span>
                                     </div>
                                     <div class="header-item">
-                                        <strong>${toPersianNum(act.maxArea - act.occupiedArea)} مترمربع</strong>
+                                        <strong>${toPersianNum((act.maxArea || 0) - (act.occupiedArea || 0))} مترمربع</strong>
                                         <span>متراژ باقیمانده</span>
                                     </div>
                                     <div class="header-item">
@@ -2569,11 +2571,18 @@ async function submitProjectData(e) {
                                     </div>
                                 </div>
                                 <div class="project-body">
-                                    <div class="interaction-list">
-                                        <h5 class="list-header-incoming"><i class="fas fa-envelope-open text-blue-500"></i> پیشنهادهای دریافتی</h5>
-                                        <div id="incoming-reqs-${act.ActivityID}"></div>
-                                        <h5 class="list-header-outgoing"><i class="fas fa-paper-plane text-green-500"></i> درخواست‌های شما</h5>
-                                        <div id="outgoing-apps-${act.ActivityID}"></div>
+                                    <div class="interaction-list p-2">
+                                        <h5 class="list-header-incoming flex justify-between items-center">
+                                            <span class="text-blue-700"><i class="fas fa-envelope-open text-blue-500"></i>  پیشنهادهای دریافتی</span>
+                                            <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up text-blue-500"></i></button>
+                                        </h5>
+                                        <div id="incoming-reqs-${act.ActivityID}" class="interaction-list-content"></div>
+
+                                        <h5 class="list-header-outgoing flex justify-between items-center mt-2">
+                                            <span class="text-green-700"><i class="fas fa-paper-plane text-green-500"></i>  درخواست‌های شما</span>
+                                            <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up text-green-500"></i></button>
+                                        </h5>
+                                        <div id="outgoing-apps-${act.ActivityID}" class="interaction-list-content"></div>
                                     </div>
                                 </div>
                             </div>`;
