@@ -738,7 +738,15 @@
         ]; 
         
         const PROVINCES = ["آذربایجان شرقی", "آذربایجان غربی", "اردبیل", "اصفهان", "البرز", "ایلام", "بوشهر", "تهران", "چهارمحال و بختیاری", "خراسان جنوبی", "خراسان رضوی", "خراسان شمالی", "خوزستان", "زنجان", "سمنان", "سیستان و بلوچستان", "فارس", "قزوین", "قم", "کردستان", "کرمان", "کرمانشاه", "کهگیلویه و بویراحمد", "گلستان", "گیلان", "لرستان", "مازندران", "مرکزی", "هرمزگان", "همدان", "یزد"];
-
+            const priceOptions = [
+                { label: 'ساختمان 1 تا 2 طبقه', default: '10,700', index: 1 }, 
+                { label: 'ساختمان 3 تا 5 طبقه', default: '12,500', index: 2 },
+                { label: 'ساختمان 6 تا 7 طبقه', default: '12,780', index: 3 }, 
+                { label: 'ساختمان 8 تا 10 طبقه', default: '13,950', index: 4 },
+                { label: 'ساختمان 11 تا 12 طبقه', default: '14,280', index: 5 }, 
+                { label: 'ساختمان 13 تا 15 طبقه', default: '14,880', index: 6 },
+                { label: 'ساختمان بالای 16 طبقه', default: '15,920', index: 7 },
+            ];
         // --- STATE ---
         let userData = null;
         let cropper = null;
@@ -2324,22 +2332,13 @@ async function submitProjectData(e) {
             let prices = {};
             if (data.prices) {
                 try {
+                    // این بخش اصلاح شده تا بر اساس ایندکس کار کند
                     const parsedPrices = JSON.parse(data.prices);
                     if (Array.isArray(parsedPrices)) {
-                        parsedPrices.forEach(p => { prices[p.label] = p.price; });
+                        parsedPrices.forEach(p => { prices[p.index] = p.price; });
                     }
                 } catch(e) { console.error("Could not parse prices:", data.prices); }
             }
-
-            const priceOptions = [
-                { label: 'ساختمان 1 تا 2 طبقه', default: '10,700', index: 1 }, 
-                { label: 'ساختمان 3 تا 5 طبقه', default: '12,500', index: 2 },
-                { label: 'ساختمان 6 تا 7 طبقه', default: '12,780', index: 3 }, 
-                { label: 'ساختمان 8 تا 10 طبقه', default: '13,950', index: 4 },
-                { label: 'ساختمان 11 تا 12 طبقه', default: '14,280', index: 5 }, 
-                { label: 'ساختمان 13 تا 15 طبقه', default: '14,880', index: 6 },
-                { label: 'ساختمان بالای 16 طبقه', default: '15,920', index: 7 },
-            ];
             
             const priceRowsHtml = priceOptions.map(opt => `
                 <div class="price-row grid grid-cols-2 gap-4 items-center" data-index="${opt.index}">
@@ -2443,8 +2442,12 @@ async function submitProjectData(e) {
             const remainingProjects = (data.maxProjects || 0) - (data.currentProjects || 0);
             const projectPercentage = data.maxProjects > 0 ? (remainingProjects / data.maxProjects) * 100 : 0;
 
-            let priceHtml = pricesArray.map(p => `<div class="price-row grid grid-cols-2 gap-4 items-center"><span>${p.label}</span><span class="text-left">${p.price} تومان</span></div>`).join('');
-
+            let priceHtml = pricesArray.map(p => {
+                const option = priceOptions.find(opt => opt.index == p.index);
+                const label = option ? option.label : 'ردیف نامشخص';
+                return `<div class="price-row grid grid-cols-2 gap-4 items-center"><span>${label}</span><span class="text-left">${p.price} تومان</span></div>`;
+            }).join('');
+            
             const levelMap = { 'پایه 3': 1, 'پایه 2': 2, 'پایه 1': 3, 'پایه ارشد': 4 };
             const starsCount = levelMap[data.engineerLevel] || 1;
             const starsHtml = '<i class="fas fa-star text-yellow-400"></i>'.repeat(starsCount);
@@ -3060,15 +3063,13 @@ async function renderMyActivities() {
         function handleEditActivity(activityId) {
             const activityToEdit = fetchedActivities.find(act => act.ActivityID === activityId);
             if (activityToEdit) {
-                document.querySelectorAll('.nav-item[data-view]').forEach(item => item.classList.remove('active'));
-                document.querySelectorAll('.content-body').forEach(el => el.style.display = 'none');
+                // دکمه مربوط به ثبت/ویرایش فعالیت در نوار ناوبری پایین را پیدا می‌کنیم
+                const createActivityButton = document.getElementById('create-activity-nav-item');
                 
-                const navItem = document.querySelector('.nav-item[data-view="create-activity"]');
-                navItem.classList.add('active');
+                // از تابع اصلی برای جابجایی بین صفحات استفاده می‌کنیم
+                switchToView('create-activity', createActivityButton);
                 
-                createActivityContent.style.display = 'block';
-                mainHeaderTitle.textContent = 'ثبت / ویرایش فعالیت';
-                
+                // حالا که صفحه ویرایش باز شده، فرم را با اطلاعات فعالیت مورد نظر پر می‌کنیم
                 renderActivityForm(activityToEdit);
             }
         }
