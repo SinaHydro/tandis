@@ -2594,12 +2594,14 @@ async function renderMyActivities() {
             }
         }
 
-        function attachActivityRowListeners() {
+function attachActivityRowListeners() {
             document.querySelectorAll('#myActivitiesContent .project-row').forEach(row => {
                 const header = row.querySelector('.project-header');
                 header.addEventListener('click', async (e) => {
+                    // اگر روی دکمه کلیک شد، آکاردئون باز نشود
                     if (e.target.closest('button')) return;
                     
+                    // اگر فعالیت غیرفعال بود، هشدار بده و خارج شو
                     if (row.dataset.status !== 'فعال') {
                         showModal('برای مشاهده پروژه‌ها، ابتدا باید وضعیت فعالیت را به "فعال" تغییر دهید.', 'info');
                         return;
@@ -2607,20 +2609,21 @@ async function renderMyActivities() {
                     
                     const activityId = row.dataset.activityId;
                     const body = row.querySelector('.project-body');
-                    const wrapper = body.querySelector('.interaction-list-wrapper'); // این ظرف اصلی ماست
+                    const wrapper = body.querySelector('.interaction-list-wrapper'); // این ظرف اصلی و صحیح است
                     const isOpen = row.classList.contains('open');
 
+                    // بستن بقیه ردیف‌های باز در صفحه
                     document.querySelectorAll('#myActivitiesContent .project-row.open').forEach(otherRow => {
                         if (otherRow !== row) otherRow.classList.remove('open');
                     });
                     
                     row.classList.toggle('open');
 
+                    // اگر ردیف در حال باز شدن است و قبلاً داده‌های آن بارگذاری نشده
                     if (!isOpen && !body.dataset.loaded) {
                         wrapper.innerHTML = '<div class="spinner mx-auto my-4"></div>';
                         showLoader();
                         try {
-                            // درخواست همزمان برای جزئیات و پیشنهادهای هوشمند
                             const [detailsResponse, suggestionsResponse] = await Promise.all([
                                 fetch(`${GOOGLE_SCRIPT_URL}?func=getActivityDetails&activityId=${activityId}`),
                                 fetch(`${GOOGLE_SCRIPT_URL}?func=getSuggestedProjects&activityId=${activityId}`)
@@ -2636,7 +2639,6 @@ async function renderMyActivities() {
                             const { incoming, outgoing } = detailsResult.data;
                             const suggestions = suggestionsResult.data;
 
-                            // ساخت HTML برای هر لیست با استفاده از تابع اصلی renderInteractionList
                             finalHtml += `<h5 class="list-header-incoming flex justify-between items-center"><span><i class="fas fa-envelope-open text-blue-500"></i> درخواست‌های دریافتی</span><button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button></h5>`;
                             finalHtml += `<div class="interaction-list-content">${renderInteractionList(incoming, 'incomingReqs')}</div>`;
                             
@@ -2644,13 +2646,12 @@ async function renderMyActivities() {
                             finalHtml += `<div class="interaction-list-content">${renderInteractionList(outgoing, 'outgoingApps')}</div>`;
                             
                             finalHtml += `<h5 class="list-header-suggestions flex justify-between items-center mt-4"><span><i class="fas fa-lightbulb text-yellow-500"></i> پروژه‌های پیشنهادی</span><button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button></h5>`;
-                            // اینجا از کیس جدید 'projectSuggestions' استفاده می‌کنیم
                             finalHtml += `<div class="interaction-list-content">${renderInteractionList(suggestions, 'projectSuggestions', activityId)}</div>`;
 
                             wrapper.innerHTML = finalHtml;
                             body.dataset.loaded = 'true';
                         } catch (error) {
-                            // --- این بخش اصلاح شده است ---
+                            // --- بخش اصلاح شده ---
                             // پیام خطا نیز باید در همان ظرف اصلی (wrapper) نمایش داده شود
                             wrapper.innerHTML = `<p class="text-center text-red-500 p-4">خطا در بارگذاری جزئیات: ${error.message}</p>`;
                         } finally { 
@@ -3666,8 +3667,8 @@ async function checkCooperationPrerequisites(activity) {
                                         <span>تعرفه شما</span>
                                     </div>
                                     <div class="header-item">
-                                        ${parseInt(p.incomingRequestCount) > 0 ? `<strong><i class="fas fa-envelope-open text-blue-500"></i> ${toPersianNum(p.incomingRequestCount)} پیشنهاد </strong>` : ''}
-                                        ${parseInt(p.outgoingRequestCount) > 0 ? `<strong><i class="fas fa-paper-plane text-green-500"></i> ${toPersianNum(p.outgoingRequestCount)} درخواست </strong>` : ''}
+                                        ${parseInt(p.incomingRequestCount) > 0 ? `<strong><i class="fas fa-envelope-open text-blue-500"> </i> ${toPersianNum(p.incomingRequestCount)}</strong>` : ''}
+                                        ${parseInt(p.outgoingRequestCount) > 0 ? `<strong><i class="fas fa-paper-plane text-green-500"> </i> ${toPersianNum(p.outgoingRequestCount)}</strong>` : ''}
                                     </div>
                                     <div class="header-actions">
                                         <button class="btn ${!isClosed ? 'btn-danger' : 'btn-success'} !p-2" title="${!isClosed ? 'بستن پروژه' : 'باز کردن پروژه'}" data-action="${!isClosed ? 'close-project' : 'open-project'}">
