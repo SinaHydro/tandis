@@ -705,7 +705,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxEAmWjkA9wkF13dzBTmJ-IwhgzjDSG4-o2pAOuc2_6Jh_o-1zD7jN9k8RIlXls0yt-/exec'; // GSA v.81
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyDlx-V4t7lKWweh0aCp1LFP71vHyT0mO6WZzkSdsPJWp3W1KHRm7PgJKeNs5iFKDNT/exec'; // GSA v.82
 
         const SLIDESHOW_CONTENT_R = [
             { 
@@ -2641,28 +2641,15 @@ async function renderMyActivities() {
                             const { incoming, outgoing } = detailsResult.data;
                             const suggestions = suggestionsResult.data;
 
-                            // ساخت HTML برای هر لیست
-                            finalHtml += `
-                                <h5 class="list-header-incoming flex justify-between items-center">
-                                    <span><i class="fas fa-envelope-open text-blue-500"></i> درخواست‌های دریافتی</span>
-                                    <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button>
-                                </h5>`;
+                            finalHtml += `<h5 class="list-header-incoming flex justify-between items-center"><span><i class="fas fa-envelope-open text-blue-500"></i> درخواست‌های دریافتی</span><button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button></h5>`;
                             finalHtml += `<div class="interaction-list-content">${renderProjectInteractionList(incoming, 'incomingReqs')}</div>`;
                             
-                            finalHtml += `
-                                <h5 class="list-header-outgoing flex justify-between items-center mt-4">
-                                    <span><i class="fas fa-paper-plane text-green-500"></i> درخواست‌های ارسالی شما</span>
-                                    <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button>
-                                </h5>`;
+                            finalHtml += `<h5 class="list-header-outgoing flex justify-between items-center mt-4"><span><i class="fas fa-paper-plane text-green-500"></i> درخواست‌های ارسالی شما</span><button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button></h5>`;
                             finalHtml += `<div class="interaction-list-content">${renderProjectInteractionList(outgoing, 'outgoingApps')}</div>`;
                             
-                            finalHtml += `
-                                <h5 class="list-header-suggestions flex justify-between items-center mt-4">
-                                    <span><i class="fas fa-lightbulb text-yellow-500"></i> پروژه‌های پیشنهادی</span>
-                                    <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button>
-                                </h5>`;
+                            finalHtml += `<h5 class="list-header-suggestions flex justify-between items-center mt-4"><span><i class="fas fa-lightbulb text-yellow-500"></i> پروژه‌های پیشنهادی</span><button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button></h5>`;
                             finalHtml += `<div class="interaction-list-content">${renderProjectInteractionList(suggestions, 'suggestions', activityId)}</div>`;
-                            
+
                             wrapper.innerHTML = finalHtml;
                             body.dataset.loaded = 'true'; // علامت‌گذاری به عنوان بارگذاری شده
                         } catch (error) {
