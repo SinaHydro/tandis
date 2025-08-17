@@ -2528,7 +2528,8 @@ async function submitActivityData() {
 async function renderMyActivities() {
             myActivitiesContent.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
             try {
-                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getActivitiesWithRequestCounts&email=${encodeURIComponent(userData.email)}`);
+                // فراخوانی تابع صحیح در بک‌اند
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getActivitiesByEngineer&email=${encodeURIComponent(userData.email)}`);
                 const result = await response.json();
                 if (!result.success) throw new Error(result.message);
 
@@ -2538,7 +2539,6 @@ async function renderMyActivities() {
                     fetchedActivities.forEach(act => {
                         const isActive = act.Status === 'فعال';
                         
-                        // این خط مهم‌ترین بخش است که شناسه را به ردیف اضافه می‌کند
                         activitiesHtml += `
                             <div class="project-row ${!isActive ? 'closed-project' : ''}" data-activity-id="${act.ActivityID}" data-status="${act.Status}">
                                 <div class="project-header">
@@ -2564,7 +2564,7 @@ async function renderMyActivities() {
                                         <span>نوع پروانه</span>
                                     </div>
                                     <div class="header-item">
-                                        <strong>${toPersianNum(act.requestCount)} نفر</strong>
+                                        <strong>${toPersianNum(act.requestCount || 0)} نفر</strong>
                                         <span>درخواست دریافتی</span>
                                     </div>
                                     <div class="header-actions">
