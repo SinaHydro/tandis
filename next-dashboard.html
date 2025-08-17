@@ -2620,6 +2620,7 @@ async function renderMyActivities() {
                         wrapper.innerHTML = '<div class="spinner mx-auto my-4"></div>';
                         showLoader();
                         try {
+                            // درخواست همزمان برای جزئیات و پیشنهادهای هوشمند
                             const [detailsResponse, suggestionsResponse] = await Promise.all([
                                 fetch(`${GOOGLE_SCRIPT_URL}?func=getActivityDetails&activityId=${activityId}`),
                                 fetch(`${GOOGLE_SCRIPT_URL}?func=getSuggestedProjects&activityId=${activityId}`)
@@ -2635,14 +2636,16 @@ async function renderMyActivities() {
                             const { incoming, outgoing } = detailsResult.data;
                             const suggestions = suggestionsResult.data;
 
+                            // ساخت HTML برای هر لیست با استفاده از تابع اصلی renderInteractionList
                             finalHtml += `<h5 class="list-header-incoming flex justify-between items-center"><span><i class="fas fa-envelope-open text-blue-500"></i> درخواست‌های دریافتی</span><button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button></h5>`;
-                            finalHtml += `<div class="interaction-list-content">${renderProjectInteractionList(incoming, 'incomingReqs')}</div>`;
+                            finalHtml += `<div class="interaction-list-content">${renderInteractionList(incoming, 'incomingReqs')}</div>`;
                             
                             finalHtml += `<h5 class="list-header-outgoing flex justify-between items-center mt-4"><span><i class="fas fa-paper-plane text-green-500"></i> درخواست‌های ارسالی شما</span><button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button></h5>`;
-                            finalHtml += `<div class="interaction-list-content">${renderProjectInteractionList(outgoing, 'outgoingApps')}</div>`;
+                            finalHtml += `<div class="interaction-list-content">${renderInteractionList(outgoing, 'outgoingApps')}</div>`;
                             
                             finalHtml += `<h5 class="list-header-suggestions flex justify-between items-center mt-4"><span><i class="fas fa-lightbulb text-yellow-500"></i> پروژه‌های پیشنهادی</span><button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button></h5>`;
-                            finalHtml += `<div class="interaction-list-content">${renderProjectInteractionList(suggestions, 'suggestions', activityId)}</div>`;
+                            // اینجا از کیس جدید 'projectSuggestions' استفاده می‌کنیم
+                            finalHtml += `<div class="interaction-list-content">${renderInteractionList(suggestions, 'projectSuggestions', activityId)}</div>`;
 
                             wrapper.innerHTML = finalHtml;
                             body.dataset.loaded = 'true';
@@ -2793,7 +2796,8 @@ async function renderMyActivities() {
                     outgoingReqs: 'شما هنوز درخواستی برای همکاری ارسال نکرده‌اید.',
                     incomingReqs: 'هنوز درخواستی از کارفرمایان دریافت نشده است.',
                     outgoingApps: 'شما هنوز برای پروژه‌ای درخواست همکاری ارسال نکرده‌اید.',
-                    suggestions: 'مهندس واجد شرایط دیگری یافت نشد.'
+                    suggestions: 'مهندس واجد شرایط دیگری یافت نشد.',
+                    projectSuggestions: 'پروژه واجد شرایط دیگری یافت نشد.'
                 };
                 return `<div class="p-4 text-center text-sm text-slate-500">${messages[listType] || ''}</div>`;
             }
@@ -3008,6 +3012,35 @@ async function renderMyActivities() {
                             <div class="flex items-center justify-center">
                                 <span class="status-badge ${statusClass}"><i class="${statusIcon} pl-2"></i> ${status_out}</span>
                             </div>`;
+                        break;
+                    }
+                        // پیشنهادهای هوشمند پروژه برای مهندس
+                    case 'projectSuggestions': {
+                        const p = item; // در این حالت، خود آیتم داده‌های پروژه است
+                        rowContent = `
+                            <strong>${toPersianNum(index + 1)}</strong>
+                            <div class="header-item">
+                                <strong>${p.province}</strong>
+                                <span class="text-xs text-slate-500">منطقه ${toPersianNum(p.district)} ${p.city}</span>
+                            </div>
+                            <div class="header-item">
+                                <strong>${p.engineerActivity} ${p.engineerRank}</strong>
+                                <span class="text-xs text-slate-500">${p.engineerField}</span>
+                            </div>
+                            <div class="header-item">
+                                <strong>${toPersianNum(p.area)} مترمربع</strong>
+                                <span>${toPersianNum(p.floors)} طبقه</span>
+                            </div>
+                            <div class="header-item">
+                                <strong>${toPersianNum(p.contractMonths)} ماه</strong>
+                                <span>مدت قرارداد</span>
+                            </div>
+                             <div class="header-item"><strong>-</strong><span>-</span></div>
+                             <div class="action-btn-container">
+                                <button class="btn btn-success !py-1 !px-3" data-action="apply" data-project-id="${p.ProjectID}" data-activity-id="${activityId}" data-employer-email="${p.EmployerEmail}">
+                                    <i class="fas fa-paper-plane"></i><span>درخواست همکاری</span>
+                                </button>
+                             </div>`;
                         break;
                     }
                 }
