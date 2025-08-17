@@ -3896,14 +3896,17 @@ function setupDashboardFeatures() {
                 let projectsListHtml = projects.slice(0, 2).map(p => `
                 
                     <div class="p-2 flex justify-between items-center">
-                        <div><p class="font-bold text-sm text-gray-700">${p.projectName}</p><p class="text-xs text-gray-500">وضعـیت: ${p.Status}</p></div>
+                        <div>
+                            <p class="font-bold text-sm text-gray-700 flex items-center">
+                                ${p.Status === 'باز' ? '<i class="fas fa-lock-open text-green-500 ml-2" title="پروژه باز"></i>' : '<i class="fas fa-lock text-red-500 ml-2" title="پروژه بسته"></i>'}
+                                ${p.projectName}
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1">${p.engineerActivity} ${p.engineerRank} ${p.engineerField}</p>
+                        </div>
                         
                         <div class="flex items-center gap-x-3 text-slate-600">
-                            <i class="fas fa-envelope-open text-blue-500" title="دریافتی"></i>
-                            <span class="font-bold text-lg">${toPersianNum(p.applicantCount)}</span>
-                            <div class="border-l h-5 border-slate-300"></div>
-                            <i class="fas fa-paper-plane text-green-500" title="ارسالی"></i>
-                            <span class="font-bold text-lg">${toPersianNum(p.outgoingCount)}</span>
+                            ${parseInt(p.applicantCount) > 0 ? `<i class="fas fa-envelope-open text-blue-500" title="درخواست‌های دریافتی"></i><span class="font-bold text-lg">${toPersianNum(p.applicantCount)}</span>` : ''}
+                            ${parseInt(p.outgoingCount) > 0 ? `<div class="border-l h-5 border-slate-300"></div><i class="fas fa-paper-plane text-green-500" title="درخواست‌های ارسالی"></i><span class="font-bold text-lg">${toPersianNum(p.outgoingCount)}</span>` : ''}
                         </div>
                     </div><hr class="border-gray-300"/>`).join('');
 
@@ -3921,18 +3924,18 @@ function setupDashboardFeatures() {
                             <a href="#" data-view="create-project" class="main-card group border-yellow-500 rounded-2xl p-1 shadow-lg flex-grow block">
                                 <div class="bg-gradient-to-b from-white to-yellow-50 rounded-xl p-4 w-full flex flex-col h-full">
                                     <div class="bg-white rounded-xl border border-gray-300 overflow-hidden">
-                                        <div class="p-4 flex justify-between h-24 bg-gradient-to-t from-green-100 to-white"><span class="text-xl font-bold text-green-700 self-end">پـروژه‌های باز</span><span class="text-3xl font-bold text-green-600 self-start">${toPersianNum(stats.open)}</span></div><hr class="border-gray-300"/>
-                                        <div class="p-4 flex justify-between h-24 bg-gradient-to-t from-red-100 to-white"><span class="text-xl font-bold text-red-800 self-end">پـروژه‌های بسته</span><span class="text-3xl font-bold text-red-900 self-start">${toPersianNum(stats.closed)}</span></div>
+                                        <div class="p-4 flex justify-between h-24 bg-gradient-to-t from-green-100 to-white"><i class="fas fa-lock-open text-green-500 ml-2"></i><span class="text-xl font-bold text-green-700 self-end">پـروژه‌هـای بـاز </span><span class="text-3xl font-bold text-green-600 self-start">${toPersianNum(stats.open)}</span></div><hr class="border-gray-300"/>
+                                        <div class="p-4 flex justify-between h-24 bg-gradient-to-t from-red-100 to-white"><i class="fas fa-lock text-red-500 ml-2"></i><span class="text-xl font-bold text-red-800 self-end">پـروژه‌هـای بسته </span><span class="text-3xl font-bold text-red-900 self-start">${toPersianNum(stats.closed)}</span></div>
                                     </div>
                                     <div class="description-text text-center text-gray-600 text-sm" data-text="یک پروژه جدید ثبت کنید تا بهترین مهندسان برای آن درخواست همکاری ارسال کنند."></div>
-                                    <div class="mt-auto pt-4 flex items-center justify-start"><div class="icon-link flex items-center gap-x-2 font-bold text-orange-900 p-2 rounded-lg"><i class="far fa-square-plus text-3xl text-orange-800"></i><span class="text-xl">ثبـت پـروژه جـدید</span></div></div>
+                                    <div class="mt-auto pt-4 flex items-center justify-start"><div class="icon-link flex items-center gap-x-2 font-bold text-orange-900 p-2 rounded-lg"><i class="far fa-square-plus text-3xl text-orange-800"></i><span class="text-xl">ثـبت پـروژه جـدید</span></div></div>
                                 </div>
                             </a>
                         </div>
                         <div class="w-full md:w-1/2 flex flex-col gap-8">
                             <a href="#" data-view="projects" class="main-card group rounded-2xl border-slate-400 p-1 shadow-lg flex-grow block">
                                 <div class="card-content bg-gradient-to-b from-white to-slate-100 rounded-xl p-4 w-full flex flex-col h-full">
-                                    <div class="bg-white rounded-xl border border-gray-300 overflow-hidden"><h2 class="text-center text-lg font-bold p-2 text-gray-800">آخـرین پـروژه‌های من</h2><hr class="border-gray-300"/>${projectsListHtml}</div>
+                                    <div class="bg-white rounded-xl border border-gray-300 overflow-hidden"><h2 class="text-center text-lg font-bold p-2 text-gray-800">آخـرین پـروژه‌هـای من</h2><hr class="border-gray-300"/>${projectsListHtml}</div>
                                     <div class="description-text text-center text-gray-600 text-sm opacity-0" data-text="پروژه‌های ثبت شده خود را مدیریت کنید."></div>
                                     <div class="mt-auto pt-4 flex items-center justify-start"><div class="icon-link flex items-center gap-x-2 font-bold text-slate-700 p-2 rounded-lg"><i class="fas fa-briefcase text-2xl text-slate-500"></i><span class="text-lg">پـروژه‌هـای من</span></div></div>
                                 </div>
@@ -3967,18 +3970,19 @@ function setupDashboardFeatures() {
                 
                     <div class="p-2 flex justify-between items-center">
                         <div>
-                            <p class="font-bold text-sm text-gray-700">${act.engineerActivity} ${act.engineerLevel} ${act.engineerField}</p>
-                            <p class="text-xs text-gray-500">وضعیت: ${act.Status}</p>
+                            <p class="font-bold text-sm text-gray-700 flex items-center">
+                                ${act.Status === 'فعال' ? '<i class="fas fa-lock-open text-green-500 ml-2" title="فعالیت باز"></i>' : '<i class="fas fa-lock text-red-500 ml-2" title="فعالیت بسته"></i>'}
+                                ${act.engineerActivity} ${act.engineerLevel}
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1">مهـندسی ${act.engineerField}</p>
                         </div>
                         
                         <div class="flex items-center gap-x-3 text-slate-600">
-                            <i class="fas fa-envelope-open text-blue-500" title="دریافتی"></i>
-                            <span class="font-bold text-lg">${toPersianNum(act.incomingRequestCount)}</span>
-                            <div class="border-l h-5 border-slate-300"></div>
-                            <i class="fas fa-paper-plane text-green-500" title="ارسالی"></i>
-                            <span class="font-bold text-lg">${toPersianNum(act.outgoingApplicationCount)}</span>
+                            ${parseInt(act.incomingRequestCount) > 0 ? `<i class="fas fa-envelope-open text-blue-500" title="درخواست‌های دریافتی"></i><span class="font-bold text-lg">${toPersianNum(act.incomingRequestCount)}</span>` : ''}
+                            ${parseInt(act.outgoingApplicationCount) > 0 ? `<div class="border-l h-5 border-slate-300"></div><i class="fas fa-paper-plane text-green-500" title="درخواست‌های ارسالی"></i><span class="font-bold text-lg">${toPersianNum(act.outgoingApplicationCount)}</span>` : ''}
                         </div>
-                    </div><hr class="border-gray-300"/>`).join('');
+                    </div>
+                    <hr class="border-gray-300"/>`).join('');                   
                 
                 if (activities.length === 0) {
                     activitiesListHtml = '<p class="text-center text-sm text-gray-500 p-4">فعالیتی ثبت نشده است.</p>';
@@ -3997,11 +4001,11 @@ function setupDashboardFeatures() {
                             <a href="#" data-view="create-activity" class="main-card group border-yellow-500 rounded-2xl p-1 shadow-lg flex-grow block">
                                 <div class="bg-gradient-to-b from-white to-yellow-50 rounded-xl p-4 w-full flex flex-col h-full">
                                     <div class="bg-white rounded-xl border border-gray-300 overflow-hidden">
-                                        <div class="p-4 flex justify-between h-24 bg-gradient-to-t from-green-100 to-white"><span class="text-xl font-bold text-green-700 self-end">فعـالـیت‌هـای باز</span><span class="text-3xl font-bold text-green-600 self-start">${toPersianNum(stats.active)}</span></div><hr class="border-gray-300"/>
+                                        <div class="p-4 flex justify-between h-24 bg-gradient-to-t from-green-100 to-white"><span class="text-xl font-bold text-green-700 self-end">فعـالـیت‌هـای بـاز</span><span class="text-3xl font-bold text-green-600 self-start">${toPersianNum(stats.active)}</span></div><hr class="border-gray-300"/>
                                         <div class="p-4 flex justify-between h-24 bg-gradient-to-t from-red-100 to-white"><span class="text-xl font-bold text-red-800 self-end">فعـالـیت‌هـای بسته</span><span class="text-3xl font-bold text-red-900 self-start">${toPersianNum(stats.inactive)}</span></div>
                                     </div>
                                     <div class="description-text text-center text-gray-600 text-sm" data-text="با ثبت یک فعالیت جدید، آمادگی خود را برای دریافت پروژه‌های جدید به کارفرمایان اعلام کنید."></div>
-                                    <div class="mt-auto pt-4 flex items-center justify-start"><div class="icon-link flex items-center gap-x-2 font-bold text-orange-900 p-2 rounded-lg"><i class="far fa-square-plus text-3xl text-orange-800"></i><span class="text-xl">ثبـت فعـالـیت جـدید</span></div></div>
+                                    <div class="mt-auto pt-4 flex items-center justify-start"><div class="icon-link flex items-center gap-x-2 font-bold text-orange-900 p-2 rounded-lg"><i class="far fa-square-plus text-3xl text-orange-800"></i><span class="text-xl">ثـبت فعـالـیت جـدید</span></div></div>
                                 </div>
                             </a>
                         </div>
@@ -4016,7 +4020,7 @@ function setupDashboardFeatures() {
                             <a href="#" data-view="projects" class="main-card group rounded-2xl p-1 shadow-lg flex-grow block">
                                 <div class="card-content bg-gradient-to-b from-white to-slate-100 rounded-xl p-4 w-full flex flex-col h-full">
                                     <div class="description-text text-center text-gray-600 text-sm opacity-0" data-text="لیست پروژه‌های باز کارفرمایان در اینجا نمایش داده می‌شود. می‌توانید برای همکاری درخواست ارسال کنید."></div>
-                                    <div class="mt-auto pt-4 flex items-center justify-start"><div class="icon-link flex items-center gap-x-3 font-bold text-slate-700 p-2 rounded-lg"><i class="fas fa-search text-2xl text-slate-500"></i><span class="text-lg">جـستجـوی پـروژه</span></div></div>
+                                    <div class="mt-auto pt-4 flex items-center justify-start"><div class="icon-link flex items-center gap-x-3 font-bold text-slate-700 p-2 rounded-lg"><i class="fas fa-search text-2xl text-slate-500"></i><span class="text-lg">جـستـجوی پـروژه</span></div></div>
                                 </div>
                             </a>
                         </div>
