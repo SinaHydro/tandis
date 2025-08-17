@@ -705,7 +705,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzKMYUVWCKwtk3IpaWLK3Ep7IF1HDNQTcWT7md80ORHHrC97TCwTmL7N_ihIaogdTMp/exec'; // GSA v.80
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxEAmWjkA9wkF13dzBTmJ-IwhgzjDSG4-o2pAOuc2_6Jh_o-1zD7jN9k8RIlXls0yt-/exec'; // GSA v.81
 
         const SLIDESHOW_CONTENT_R = [
             { 
@@ -3951,7 +3951,7 @@ function setupDashboardFeatures() {
             }
         }
 
-async function renderEngineerDashboard() {
+        async function renderEngineerDashboard() {
             dashboardContent.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
             try {
                 // ۱. دریافت اطلاعات مخصوص داشبورد مهندس
@@ -3962,11 +3962,24 @@ async function renderEngineerDashboard() {
                 const { stats, activities } = result.data;
 
                 // ۲. آماده‌سازی لیست دو فعالیت اخیر برای نمایش در کارت
+                activities.sort((a, b) => new Date(b.LastModifiedDate) - new Date(a.LastModifiedDate));
                 let activitiesListHtml = activities.slice(0, 2).map(act => `
+                
                     <div class="p-2 flex justify-between items-center">
-                        <div><p class="font-bold text-sm text-gray-700">${act.engineerActivity} ${act.engineerLevel} ${act.engineerField}</p><p class="text-xs text-gray-500">وضعیت: ${act.Status}</p></div>
-                        <div class="text-center"><span class="text-2xl font-bold text-blue-600">${act.requestCount || 0}</span><p class="text-xs text-gray-600">درخواست</p></div>
+                        <div>
+                            <p class="font-bold text-sm text-gray-700">${act.engineerActivity} ${act.engineerLevel}</p>
+                            <p class="text-xs text-gray-500">وضعیت: ${act.Status}</p>
+                        </div>
+                        
+                        <div class="flex items-center gap-x-3 text-slate-600">
+                            <i class="fas fa-envelope-open text-blue-500" title="دریافتی"></i>
+                            <span class="font-bold text-lg">${toPersianNum(act.incomingRequestCount)}</span>
+                            <div class="border-l h-5 border-slate-300"></div>
+                            <i class="fas fa-paper-plane text-green-500" title="ارسالی"></i>
+                            <span class="font-bold text-lg">${toPersianNum(act.outgoingApplicationCount)}</span>
+                        </div>
                     </div><hr class="border-gray-300"/>`).join('');
+                
                 if (activities.length === 0) {
                     activitiesListHtml = '<p class="text-center text-sm text-gray-500 p-4">فعالیتی ثبت نشده است.</p>';
                 }
@@ -3984,8 +3997,8 @@ async function renderEngineerDashboard() {
                             <a href="#" data-view="create-activity" class="main-card group border-yellow-500 rounded-2xl p-1 shadow-lg flex-grow block">
                                 <div class="bg-gradient-to-b from-white to-yellow-50 rounded-xl p-4 w-full flex flex-col h-full">
                                     <div class="bg-white rounded-xl border border-gray-300 overflow-hidden">
-                                        <div class="p-4 flex justify-between h-24 bg-gradient-to-t from-green-100 to-white"><span class="text-xl font-bold text-green-700 self-end">فعالیت‌های باز</span><span class="text-3xl font-bold text-green-600 self-start">${stats.active}</span></div><hr class="border-gray-300"/>
-                                        <div class="p-4 flex justify-between h-24 bg-gradient-to-t from-red-100 to-white"><span class="text-xl font-bold text-red-800 self-end">فعالیت‌های بسته</span><span class="text-3xl font-bold text-red-900 self-start">${stats.inactive}</span></div>
+                                        <div class="p-4 flex justify-between h-24 bg-gradient-to-t from-green-100 to-white"><span class="text-xl font-bold text-green-700 self-end">فعالیت‌های باز</span><span class="text-3xl font-bold text-green-600 self-start">${toPersianNum(stats.active)}</span></div><hr class="border-gray-300"/>
+                                        <div class="p-4 flex justify-between h-24 bg-gradient-to-t from-red-100 to-white"><span class="text-xl font-bold text-red-800 self-end">فعالیت‌های بسته</span><span class="text-3xl font-bold text-red-900 self-start">${toPersianNum(stats.inactive)}</span></div>
                                     </div>
                                     <div class="description-text text-center text-gray-600 text-sm" data-text="با ثبت یک فعالیت جدید، آمادگی خود را برای دریافت پروژه‌های جدید به کارفرمایان اعلام کنید."></div>
                                     <div class="mt-auto pt-4 flex items-center justify-start"><div class="icon-link flex items-center gap-x-2 font-bold text-orange-900 p-2 rounded-lg"><i class="far fa-square-plus text-3xl text-orange-800"></i><span class="text-xl">ثبت فعالیت جدید</span></div></div>
