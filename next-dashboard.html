@@ -1765,21 +1765,24 @@ function handleEditClick(e) {
         }
         
         async function refreshCurrentView() {
-            const activeNavItem = document.querySelector('.nav-item.active');
-            if (activeNavItem) {
-                const view = activeNavItem.dataset.view;
-                // Add a spinner or loading indicator to the content area
-                const contentEl = document.getElementById(`${view.replace(/-/g, '')}Content`);
-                if (contentEl) contentEl.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
-                
-                // Re-fetch data if necessary and re-render
-                if (view === 'dashboard' || view === 'profile') {
-                     const updatedData = await fetchUserProfile(userData.email);
-                     if (updatedData) userData = { ...updatedData, email: userData.email };
-                }
-                
-                activeNavItem.click();
+            // اگر صفحه فعلی مشخص نبود، کاری انجام نده
+            if (!currentView) return;
+
+            // پیدا کردن دکمه مربوط به صفحه فعلی برای فعال نگه داشتن آن
+            const currentButton = document.querySelector(`.nav-icon-btn[data-view="${currentView}"]`);
+            
+            // پیدا کردن محتوای صفحه فعلی و نمایش یک اسپینر لودینگ
+            const viewId = currentView.replace(/-./g, s => s[1].toUpperCase()) + 'Content';
+            const contentEl = document.getElementById(viewId);
+            if (contentEl) {
+                contentEl.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
             }
+
+            // با یک تاخیر کوتاه، تابع اصلی جابجایی صفحه را دوباره صدا می‌زنیم
+            // این تابع به طور خودکار تمام داده‌های جدید را از سرور دریافت و صفحه را بازسازی می‌کند
+            setTimeout(() => {
+                switchToView(currentView, currentButton);
+            }, 100); 
         }
         
         async function handleChangePassword(e) {
@@ -3723,6 +3726,7 @@ async function checkCooperationPrerequisites(activity) {
             closeBtn.onclick = () => modal.style.display = 'none';
             modal.style.display = 'flex';
         }        
+        
         async function handleProjectSelectionForRequest(projectId, activityId, recipientEmail) {
             showLoader();
             try {
@@ -3734,27 +3738,27 @@ async function checkCooperationPrerequisites(activity) {
                     InitiatorEmail: userData.email,
                     RecipientEmail: recipientEmail
                 };
-                const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const response = await fetch(GOOGLE_SCRIPT_URL, { 
+                    method: 'POST', 
+                    mode: 'cors', 
+                    cache: 'no-cache', 
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+                    body: JSON.stringify(payload) 
+                });
                 const result = await response.json();
                 showModal(result.message, result.status);
 
                 if (result.status === 'success') {
-                    // رفرش کردن اطلاعات پروژه فعلی برای نمایش تغییرات
-                    const projectRow = document.querySelector(`.project-row[data-project-id="${projectId}"]`);
-                    
-                    // مرحله ۲: اگر پروژه پیدا شد، آن را می‌بندیم و طوری علامت‌گذاری می‌کنیم
-                    // که انگار اطلاعاتش قدیمی شده است.
-                    if (projectRow) {
-                        projectRow.classList.remove('open');
-                        const body = projectRow.querySelector('.project-body');
-                        if (body) {
-                           body.dataset.loaded = 'false'; // این خط به سایت می‌گوید اطلاعات این بخش باید دوباره از سرور خوانده شود
-                           body.querySelector('.interaction-list-wrapper').innerHTML = ''; // محتوای قبلی را پاک می‌کنیم
-                        }
-                        
-                        // مرحله ۳: به صورت خودکار دوباره روی هدر پروژه کلیک می‌کنیم تا باز شود
-                        // و اطلاعات جدید و به‌روز شده را از سرور بگیرد.
-                        projectRow.querySelector('.project-header').click();
+                    // ۱. شناسه فعالیت را به لیست درخواست‌های ارسال شده اضافه می‌کنیم تا وضعیت آن تغییر کند
+                    requestedCooperationIds.add(activityId);
+
+                    // ۲. کارت مربوط به همان مهندس را در صفحه پیدا می‌کنیم
+                    const card = document.querySelector(`.activity-card [data-activity-id="${activityId}"]`).closest('.activity-card');
+                    const activityData = fetchedEngineersActivities.find(a => a.ActivityID === activityId);
+
+                    // ۳. فقط همان کارت را با دکمه جدید (لغو درخواست) باز می‌کنیم
+                    if (card && activityData) {
+                        card.outerHTML = getActivityCardHTML(activityData, true);
                     }
                 }
             } catch(error) {
