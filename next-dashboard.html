@@ -2596,28 +2596,31 @@ function attachActivityRowListeners() {
             document.querySelectorAll('#myActivitiesContent .project-row').forEach(row => {
                 const header = row.querySelector('.project-header');
                 header.addEventListener('click', async (e) => {
-                    // اگر روی دکمه کلیک شد، آکاردئون باز نشود
                     if (e.target.closest('button')) return;
-                    
-                    // اگر فعالیت غیرفعال بود، هشدار بده و خارج شو
+
                     if (row.dataset.status !== 'فعال') {
                         showModal('برای مشاهده پروژه‌ها، ابتدا باید وضعیت فعالیت را به "فعال" تغییر دهید.', 'info');
                         return;
                     }
-                    
+
                     const activityId = row.dataset.activityId;
+                    
+                    // --- بخش جدید برای بررسی شناسه قبل از ارسال ---
+                    if (!activityId) {
+                        console.error("خطا: شناسه فعالیت در این ردیف HTML یافت نشد.", row);
+                        showModal("خطای داخلی: شناسه فعالیت در این ردیف یافت نشد. لطفاً داده‌های خود را در گوگل شیت بررسی کنید.", "error");
+                        return; // از ادامه اجرای تابع جلوگیری می‌کند
+                    }
+                    // --- پایان بخش جدید ---
+
                     const body = row.querySelector('.project-body');
-                    const wrapper = body.querySelector('.interaction-list-wrapper'); // این ظرف اصلی و صحیح است
+                    const wrapper = body.querySelector('.interaction-list-wrapper');
                     const isOpen = row.classList.contains('open');
 
-                    // بستن بقیه ردیف‌های باز در صفحه
                     document.querySelectorAll('#myActivitiesContent .project-row.open').forEach(otherRow => {
                         if (otherRow !== row) otherRow.classList.remove('open');
                     });
-                    
-                    row.classList.toggle('open');
 
-                    // اگر ردیف در حال باز شدن است و قبلاً داده‌های آن بارگذاری نشده
                     if (!isOpen && !body.dataset.loaded) {
                         wrapper.innerHTML = '<div class="spinner mx-auto my-4"></div>';
                         showLoader();
@@ -2632,7 +2635,7 @@ function attachActivityRowListeners() {
                             if (!detailsResult.success || !suggestionsResult.success) {
                                 throw new Error(detailsResult.message || suggestionsResult.message);
                             }
-                            
+
                             let finalHtml = '';
                             const { incoming, outgoing } = detailsResult.data;
                             const suggestions = suggestionsResult.data;
@@ -2649,13 +2652,13 @@ function attachActivityRowListeners() {
                             wrapper.innerHTML = finalHtml;
                             body.dataset.loaded = 'true';
                         } catch (error) {
-                            // --- بخش اصلاح شده ---
-                            // پیام خطا نیز باید در همان ظرف اصلی (wrapper) نمایش داده شود
                             wrapper.innerHTML = `<p class="text-center text-red-500 p-4">خطا در بارگذاری جزئیات: ${error.message}</p>`;
-                        } finally { 
-                            hideLoader(); 
+                        } finally {
+                            hideLoader();
                         }
                     }
+
+                    row.classList.toggle('open');
                 });
             });
         }
