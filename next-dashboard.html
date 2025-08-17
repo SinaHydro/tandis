@@ -705,7 +705,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwjjOjaNVgrgkRgKpOiyeR4Q8uPqXt82IGEDU-XQx2lcyk9q3dgkhmDMot_Cv4X_F7p/exec'; // GSA v.79 Please replace with your actual script URL
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzKMYUVWCKwtk3IpaWLK3Ep7IF1HDNQTcWT7md80ORHHrC97TCwTmL7N_ihIaogdTMp/exec'; // GSA v.80
 
         const SLIDESHOW_CONTENT_R = [
             { 
@@ -2523,6 +2523,7 @@ async function submitProjectData(e) {
 async function renderMyActivities() {
             myActivitiesContent.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
             try {
+                // دریافت لیست اولیه فعالیت‌ها به همراه تعداد درخواست‌های دریافتی
                 const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getActivitiesWithRequestCounts&email=${encodeURIComponent(userData.email)}`);
                 const result = await response.json();
                 if (!result.success) throw new Error(result.message);
@@ -2530,8 +2531,6 @@ async function renderMyActivities() {
                 fetchedActivities = result.data.sort((a,b) => new Date(b.LastModifiedDate) - new Date(a.LastModifiedDate));
                 if (fetchedActivities.length > 0) {
                     let activitiesHtml = '<div class="project-accordion">';
-                    
-                    // خطا اینجا بود: متغیر activities به fetchedActivities تغییر کرد
                     fetchedActivities.forEach(act => {
                         const isActive = act.Status === 'فعال';
                         activitiesHtml += `
@@ -2562,7 +2561,7 @@ async function renderMyActivities() {
                                     </div>
                                     <div class="header-item">
                                         <strong>${toPersianNum(act.requestCount)} نفر</strong>
-                                        <span>درخواست‌ها</span>
+                                        <span>درخواست دریافتی</span>
                                     </div>
                                     <div class="header-actions">
                                         <button class="btn ${isActive ? 'btn-danger' : 'btn-success'} !p-2" data-action="change-activity-status" data-new-status="${isActive ? 'غیرفعال' : 'فعال'}">
@@ -2574,31 +2573,226 @@ async function renderMyActivities() {
                                     </div>
                                 </div>
                                 <div class="project-body">
-                                    <div class="interaction-list p-2">
-                                        <h5 class="list-header-incoming flex justify-between items-center">
-                                            <span class="text-blue-700"><i class="fas fa-envelope-open text-blue-500"></i>  پیشنهادهای دریافتی</span>
-                                            <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up text-blue-500"></i></button>
-                                        </h5>
-                                        <div id="incoming-reqs-${act.ActivityID}" class="interaction-list-content"></div>
-
-                                        <h5 class="list-header-outgoing flex justify-between items-center mt-2">
-                                            <span class="text-green-700"><i class="fas fa-paper-plane text-green-500"></i>  درخواست‌های شما</span>
-                                            <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up text-green-500"></i></button>
-                                        </h5>
-                                        <div id="outgoing-apps-${act.ActivityID}" class="interaction-list-content"></div>
-                                    </div>
+                                    <div class="interaction-list-wrapper p-2"></div>
                                 </div>
                             </div>`;
                     });
                     activitiesHtml += '</div>';
                     myActivitiesContent.innerHTML = activitiesHtml;
+                    // اتصال رویدادهای کلیک به ردیف‌های ساخته شده
                     attachActivityRowListeners();
                 } else {
                     myActivitiesContent.innerHTML = '<p class="text-center text-slate-500">شما هنوز فعالیتی ثبت نکرده‌اید.</p>';
                 }
             } catch (error) {
-                myActivitiesContent.innerHTML = `<p class="text-center text-red-500">خطا: ${error.message}</p>`;
+                myActivitiesContent.innerHTML = `<p class="text-center text-red-500">خطا در بارگذاری فعالیت‌ها: ${error.message}</p>`;
             }
+        }
+
+        function attachActivityRowListeners() {
+            document.querySelectorAll('#myActivitiesContent .project-row').forEach(row => {
+                const header = row.querySelector('.project-header');
+                header.addEventListener('click', async (e) => {
+                    // اگر روی دکمه کلیک شد، آکاردئون باز نشود
+                    if (e.target.closest('button')) return;
+                    
+                    // اگر فعالیت غیرفعال بود، هشدار بده
+                    if (row.dataset.status !== 'فعال') {
+                        showModal('برای مشاهده پروژه‌ها، ابتدا باید وضعیت فعالیت را به "فعال" تغییر دهید.', 'info');
+                        return;
+                    }
+                    
+                    const activityId = row.dataset.activityId;
+                    const body = row.querySelector('.project-body');
+                    const wrapper = body.querySelector('.interaction-list-wrapper');
+                    const isOpen = row.classList.contains('open');
+
+                    // بستن بقیه ردیف‌های باز
+                    document.querySelectorAll('#myActivitiesContent .project-row.open').forEach(otherRow => {
+                        if (otherRow !== row) otherRow.classList.remove('open');
+                    });
+                    
+                    // باز/بسته کردن ردیف فعلی
+                    row.classList.toggle('open');
+
+                    // اگر برای اولین بار باز می‌شود، داده‌ها را از سرور بگیر
+                    if (!isOpen && !body.dataset.loaded) {
+                        wrapper.innerHTML = '<div class="spinner mx-auto my-4"></div>';
+                        showLoader();
+                        try {
+                            // درخواست همزمان برای جزئیات و پیشنهادهای هوشمند
+                            const [detailsResponse, suggestionsResponse] = await Promise.all([
+                                fetch(`${GOOGLE_SCRIPT_URL}?func=getActivityDetails&activityId=${activityId}`),
+                                fetch(`${GOOGLE_SCRIPT_URL}?func=getSuggestedProjects&activityId=${activityId}`)
+                            ]);
+                            const detailsResult = await detailsResponse.json();
+                            const suggestionsResult = await suggestionsResponse.json();
+
+                            if (!detailsResult.success || !suggestionsResult.success) {
+                                throw new Error(detailsResult.message || suggestionsResult.message);
+                            }
+                            
+                            let finalHtml = '';
+                            const { incoming, outgoing } = detailsResult.data;
+                            const suggestions = suggestionsResult.data;
+
+                            // ساخت HTML برای هر لیست
+                            finalHtml += `
+                                <h5 class="list-header-incoming flex justify-between items-center">
+                                    <span><i class="fas fa-envelope-open text-blue-500"></i> درخواست‌های دریافتی</span>
+                                    <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button>
+                                </h5>`;
+                            finalHtml += `<div class="interaction-list-content">${renderProjectInteractionList(incoming, 'incomingReqs')}</div>`;
+                            
+                            finalHtml += `
+                                <h5 class="list-header-outgoing flex justify-between items-center mt-4">
+                                    <span><i class="fas fa-paper-plane text-green-500"></i> درخواست‌های ارسالی شما</span>
+                                    <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button>
+                                </h5>`;
+                            finalHtml += `<div class="interaction-list-content">${renderProjectInteractionList(outgoing, 'outgoingApps')}</div>`;
+                            
+                            finalHtml += `
+                                <h5 class="list-header-suggestions flex justify-between items-center mt-4">
+                                    <span><i class="fas fa-lightbulb text-yellow-500"></i> پروژه‌های پیشنهادی</span>
+                                    <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button>
+                                </h5>`;
+                            finalHtml += `<div class="interaction-list-content">${renderProjectInteractionList(suggestions, 'suggestions', activityId)}</div>`;
+                            
+                            wrapper.innerHTML = finalHtml;
+                            body.dataset.loaded = 'true'; // علامت‌گذاری به عنوان بارگذاری شده
+                        } catch (error) {
+                            wrapper.innerHTML = `<p class="text-center text-red-500 p-4">خطا در بارگذاری جزئیات: ${error.message}</p>`;
+                        } finally { 
+                            hideLoader(); 
+                        }
+                    }
+                });
+            });
+        }
+
+        function renderProjectInteractionList(projects, listType, activityId = null) {
+            if (!projects || projects.length === 0) {
+                const messages = {
+                    incomingReqs: 'هنوز درخواستی از کارفرمایان دریافت نشده است.',
+                    outgoingApps: 'شما هنوز برای پروژه‌ای درخواست همکاری ارسال نکرده‌اید.',
+                    suggestions: 'پروژه واجد شرایط دیگری برای شما یافت نشد.'
+                };
+                return `<div class="p-4 text-center text-sm text-slate-500">${messages[listType]}</div>`;
+            }
+
+            let html = '<div class="interaction-list">';
+            projects.forEach((item, index) => {
+                const p = listType === 'suggestions' ? item : item.projectInfo || {};
+                let rowContent = `
+                    <div class="interaction-row" data-interaction-id="${item.InteractionID || ''}" data-project-id="${p.ProjectID}">
+                        <div class="header-item">
+                            <strong>${toPersianNum(index + 1)}</strong>
+                        </div>
+                        <div class="header-item">
+                            <strong>${p.province}</strong>
+                            <span class="text-xs text-slate-500">منطقه ${toPersianNum(p.district)} ${p.city}</span>
+                        </div>
+                        <div class="header-item">
+                            <strong>${p.engineerActivity} ${p.engineerRank}</strong>
+                            <span class="text-xs text-slate-500">${p.engineerField}</span>
+                        </div>
+                        <div class="header-item">
+                            <strong>${toPersianNum(p.area)} مترمربع</strong>
+                            <span>${toPersianNum(p.floors)} طبقه</span>
+                        </div>
+                        <div class="header-item">
+                            <strong>${toPersianNum(p.contractMonths)} ماه</strong>
+                            <span>مدت قرارداد</span>
+                        </div>
+                `;
+
+                switch (listType) {
+                    case 'incomingReqs':
+                        rowContent += `
+                            <div class="header-item"><strong>${item.employerName || 'کارفرما'}</strong><span>کارفرما</span></div>
+                            <div class="action-btn-container">
+                                <button class="btn btn-secondary !py-1 !px-3 w-full" data-action="toggle-options">
+                                    <i class="fas fa-reply"></i><span>پاسخ</span>
+                                </button>
+                                <div class="action-options hidden">
+                                    <a href="#" data-action="set-coop-status" data-status="Accepted"><i class="fas fa-check-circle text-green-500"></i>پذیرش</a>
+                                    <a href="#" data-action="set-coop-status" data-status="Rejected"><i class="fas fa-times-circle text-red-500"></i>عدم پذیرش</a>
+                                </div>
+                            </div>`;
+                        break;
+                    case 'outgoingApps':
+                        const status = item.Status || 'Pending';
+                        const statusText = { 'Pending': 'در انتظار', 'Accepted': 'پذیرفته شد', 'Rejected': 'رد شد', 'Reviewing': 'در حال بررسی' }[status] || status;
+                        rowContent += `
+                            <div class="header-item">
+                                <strong>${formatTimeAgo(item.Timestamp)}</strong>
+                                <span>زمان ارسال</span>
+                            </div>
+                            <div class="flex items-center justify-center">
+                                <span class="status-badge status-${status.toLowerCase()}">${statusText}</span>
+                            </div>`;
+                        break;
+                        rowContent += `
+                            <div class="action-btn-container">
+                                <button class="btn btn-danger !py-1 !px-3" data-action="cancel-application" data-project-id="${p.ProjectID}">
+                                    <i class="fas fa-times-circle"></i>
+                                    <span>لغو</span>
+                                </button>
+                            </div>`;
+                        break;
+                    case 'suggestions':
+                         rowContent += `
+                             <div class="header-item">
+                                 <strong>-</strong>
+                                 <span>-</span>
+                             </div>
+                             <div class="action-btn-container">
+                                <button class="btn btn-success !py-1 !px-3" data-action="apply" data-project-id="${p.ProjectID}" data-activity-id="${activityId}" data-employer-email="${p.EmployerEmail}">
+                                    <i class="fas fa-paper-plane"></i>
+                                    <span>درخواست همکاری</span>
+                                </button>
+                             </div>`;
+                        break;
+                }
+                rowContent += `</div>`; // Closing interaction-row
+                html += rowContent;
+            });
+            html += '</div>'; // Closing interaction-list
+            return html;
+        }
+
+        async function handleApplyFromActivity(button) {
+            const { projectId, activityId, employerEmail } = button.dataset;
+            showModal('آیا می‌خواهید برای این پروژه درخواست همکاری ارسال کنید؟', 'confirm', async () => {
+                showLoader();
+                try {
+                    const payload = {
+                        action: 'createInteraction',
+                        ProjectID: projectId,
+                        ActivityID: activityId,
+                        InitiatorRole: 'Engineer',
+                        InitiatorEmail: userData.email,
+                        RecipientEmail: employerEmail // این فیلد در بک‌اند استفاده نمی‌شود اما ارسال آن خوب است
+                    };
+                    const response = await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+                    showModal(result.message, result.status);
+                    if (result.status === 'success') {
+                        // برای نمایش نتیجه، آکاردئون را رفرش می‌کنیم
+                        const activityRow = button.closest('.project-row');
+                        activityRow.classList.remove('open');
+                        activityRow.querySelector('.project-body').dataset.loaded = 'false';
+                        activityRow.querySelector('.project-header').click();
+                    }
+                } catch (error) {
+                     showModal('خطا در ارسال درخواست.', 'error');
+                } finally {
+                    hideLoader();
+                }
+            });
         }
 
          // این تابع یک لیست از تعاملات (درخواست‌ها/پذیرش‌ها) را می‌گیرد و کد وب آن را می‌سازد.
@@ -4247,28 +4441,38 @@ document.querySelector('.main-content-area').addEventListener('click', e => {
                     }
                     // --- صفحه فعالیت‌های من (مهندس) ---
                     case 'myActivitiesContent': {
+                        // مدیریت دکمه‌های ویرایش و فعال/غیرفعال کردن در سربرگ
                         const activityRow = button.closest('.project-row');
                         if (activityRow && (action === 'edit-activity' || action === 'change-activity-status')) {
                             const activityId = activityRow.dataset.activityId;
                             if (action === 'edit-activity') handleEditActivity(activityId);
                             else if (action === 'change-activity-status') handleChangeActivityStatus(activityId, button.dataset.newStatus);
+                            return; // پایان عملیات
                         }
 
+                        // مدیریت دکمه‌های داخل لیست‌های پروژه
                         const interactionRow = button.closest('.interaction-row');
                         if (interactionRow) {
                             const interactionId = interactionRow.dataset.interactionId;
 
                             if (action === 'toggle-options') {
-                                const options = button.nextElementSibling;
-                                document.querySelectorAll('.action-options').forEach(opt => {
-                                    if (opt !== options) opt.classList.add('hidden');
-                                });
-                                options.classList.toggle('hidden');
-                            } else if (action === 'set-coop-status') { // نام اکشن جدید
+                                button.nextElementSibling.classList.toggle('hidden');
+                            } else if (action === 'set-coop-status') {
                                 const newStatus = button.dataset.status;
-                                const container = button.closest('.action-btn-container');
-                                updateCoopStatus(interactionId, newStatus, container);
+                                updateCoopStatus(interactionId, newStatus, button.closest('.action-btn-container'));
+                            } else if (action === 'apply') {
+                                handleApplyFromActivity(button);
+                            } else if (action === 'cancel-application') { // <-- این بخش جدید است
+                                const projectId = button.dataset.projectId;
+                                handleCancelApplication(projectId, button);
                             }
+                        }
+                        
+                        // مدیریت دکمه جمع‌کردن لیست‌ها (توصیه سوم)
+                        if (action === 'toggle-list') {
+                            const listContent = button.parentElement.nextElementSibling;
+                            button.classList.toggle('collapsed');
+                            listContent.classList.toggle('collapsed');
                         }
                         break;
                     }
