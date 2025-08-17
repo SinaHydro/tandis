@@ -3125,42 +3125,66 @@ function attachActivityRowListeners() {
         }
         
          // منطق باز و بسته شدن آکاردئون و واکشی اطلاعات برای صفحه "فعالیت‌های من" مهندس.
-        function attachActivityRowListeners() {
+function attachActivityRowListeners() {
             document.querySelectorAll('#myActivitiesContent .project-row').forEach(row => {
                 const header = row.querySelector('.project-header');
                 header.addEventListener('click', async (e) => {
                     if (e.target.closest('button')) return;
-                    
+
                     if (row.dataset.status !== 'فعال') {
-                        showModal('برای مشاهده درخواست‌ها، ابتدا باید وضعیت فعالیت را به "فعال" تغییر دهید.', 'info');
+                        showModal('برای مشاهده پروژه‌ها، ابتدا باید وضعیت فعالیت را به "فعال" تغییر دهید.', 'info');
                         return;
                     }
-                    
+
                     const activityId = row.dataset.activityId;
                     const body = row.querySelector('.project-body');
+                    const wrapper = body.querySelector('.interaction-list-wrapper');
                     const isOpen = row.classList.contains('open');
 
-                    document.querySelectorAll('#myActivitiesContent .project-row').forEach(otherRow => {
+                    // بستن سایر ردیف‌های باز
+                    document.querySelectorAll('#myActivitiesContent .project-row.open').forEach(otherRow => {
                         if (otherRow !== row) otherRow.classList.remove('open');
                     });
 
+                    // اگر برای اولین بار است که باز می‌شود، اطلاعات را از سرور واکشی کن
                     if (!isOpen && !body.dataset.loaded) {
+                        wrapper.innerHTML = '<div class="spinner mx-auto my-4"></div>';
                         showLoader();
                         try {
-                            const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getActivityDetails&activityId=${activityId}`);
-                            const result = await response.json();
-                            if (result.success) {
-                                const { incoming, outgoing } = result.data;
-                                document.getElementById(`incoming-reqs-${activityId}`).innerHTML = renderInteractionList(incoming, 'incomingReqs');
-                                document.getElementById(`outgoing-apps-${activityId}`).innerHTML = renderInteractionList(outgoing, 'outgoingApps');
-                                body.dataset.loaded = 'true';
-                            } else { throw new Error(result.message); }
+                            const [detailsResponse, suggestionsResponse] = await Promise.all([
+                                fetch(`${GOOGLE_SCRIPT_URL}?func=getActivityDetails&activityId=${activityId}`),
+                                fetch(`${GOOGLE_SCRIPT_URL}?func=getSuggestedProjects&activityId=${activityId}`)
+                            ]);
+                            const detailsResult = await detailsResponse.json();
+                            const suggestionsResult = await suggestionsResponse.json();
+
+                            if (!detailsResult.success || !suggestionsResult.success) {
+                                throw new Error(detailsResult.message || suggestionsResult.message);
+                            }
+
+                            let finalHtml = '';
+                            const { incoming, outgoing } = detailsResult.data;
+                            const suggestions = suggestionsResult.data;
+
+                            finalHtml += `<h5 class="list-header-incoming flex justify-between items-center"><span><i class="fas fa-envelope-open text-blue-500"></i> درخواست‌های دریافتی</span><button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button></h5>`;
+                            finalHtml += `<div class="interaction-list-content">${renderInteractionList(incoming, 'incomingReqs')}</div>`;
+                            
+                            finalHtml += `<h5 class="list-header-outgoing flex justify-between items-center mt-4"><span><i class="fas fa-paper-plane text-green-500"></i> درخواست‌های ارسالی شما</span><button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button></h5>`;
+                            finalHtml += `<div class="interaction-list-content">${renderInteractionList(outgoing, 'outgoingApps')}</div>`;
+                            
+                            finalHtml += `<h5 class="list-header-suggestions flex justify-between items-center mt-4"><span><i class="fas fa-lightbulb text-yellow-500"></i> پروژه‌های پیشنهادی</span><button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button></h5>`;
+                            finalHtml += `<div class="interaction-list-content">${renderInteractionList(suggestions, 'projectSuggestions', activityId)}</div>`;
+
+                            wrapper.innerHTML = finalHtml;
+                            body.dataset.loaded = 'true';
                         } catch (error) {
-                            body.querySelector('.interaction-list').innerHTML = `<div class="p-4 text-center text-red-500">خطا در بارگذاری جزئیات.</div>`;
+                            wrapper.innerHTML = `<p class="text-center text-red-500 p-4">خطا در بارگذاری جزئیات: ${error.message}</p>`;
                         } finally {
                             hideLoader();
                         }
                     }
+
+                    // این دستور در انتها اجرا می‌شود تا از بروز خطا جلوگیری شود
                     row.classList.toggle('open');
                 });
             });
