@@ -2053,13 +2053,13 @@ function renderProjectForm(projectData = null) {
         }
         // <h4 class="font-bold text-lg text-slate-800">${project.projectName || 'بدون نام'}</h4>
         
-function attachProjectFormListeners() {
+        function attachProjectFormListeners() {
             // اتصال رویداد ارسال نهایی فرم
             document.getElementById('projectForm').addEventListener('submit', submitProjectData);
             
             // اتصال رویداد دکمه انصراف
             document.getElementById('cancelProjectFormBtn')?.addEventListener('click', () => {
-                document.getElementById('home-nav-item').click(); 
+                document.getElementById('my-items-nav-item').click(); 
             });
 
             // بارگذاری نقشه
@@ -2300,6 +2300,7 @@ async function submitProjectData(e) {
             // ۶. ارسال همزمان همه درخواست‌ها و مدیریت نتیجه
             try {
                 const results = await Promise.all(promises);
+                
                 const hasError = results.some(res => res.status !== 'success');
 
                 if (hasError) {
@@ -2307,7 +2308,7 @@ async function submitProjectData(e) {
                 }
 
                 showModal(`پروژه شما با ${selectedEngineers.length} ردیف مهندس با موفقیت ثبت شد.`, 'success');
-                document.getElementById('home-nav-item').click();
+                document.getElementById('my-items-nav-item').click();
 
             } catch (error) {
                 showModal(`خطا در ثبت پروژه: ${error.message}`, 'error');
@@ -3891,24 +3892,18 @@ function setupDashboardFeatures() {
                 if (!result.success) throw new Error(result.message);
                 
                 const { stats, projects } = result.data;
+                projects.sort((a, b) => new Date(b.SubmissionDate) - new Date(a.SubmissionDate));
                 let projectsListHtml = projects.slice(0, 2).map(p => `
+                
                     <div class="p-2 flex justify-between items-center">
-                        <div>
-                            <p class="font-bold text-sm text-gray-700">${p.projectName}</p>
-                            <p class="text-xs text-gray-500">وضعیت: ${p.Status}</p>
-                        </div>
-                        <div class="flex gap-x-3 text-center">
-                            
-                            <div>
-                                <span class="text-2xl font-bold text-blue-600">${toPersianNum(p.applicantCount)}</span>
-                                <p class="text-xs text-gray-600 flex items-center gap-1"><i class="fas fa-envelope-open text-blue-500"></i>دریافتی</p>
-                            </div>
-                            
-                            <div>
-                                <span class="text-2xl font-bold text-green-600">${toPersianNum(p.outgoingCount)}</span>
-                                <p class="text-xs text-gray-600 flex items-center gap-1"><i class="fas fa-paper-plane text-green-500"></i>ارسالی</p>
-                            </div>
-
+                        <div><p class="font-bold text-sm text-gray-700">${p.projectName}</p><p class="text-xs text-gray-500">وضعیت: ${p.Status}</p></div>
+                        
+                        <div class="flex items-center gap-x-3 text-slate-600">
+                            <i class="fas fa-envelope-open text-blue-500" title="دریافتی"></i>
+                            <span class="font-bold text-lg">${toPersianNum(p.applicantCount)}</span>
+                            <div class="border-l h-5 border-slate-300"></div>
+                            <i class="fas fa-paper-plane text-green-500" title="ارسالی"></i>
+                            <span class="font-bold text-lg">${toPersianNum(p.outgoingCount)}</span>
                         </div>
                     </div><hr class="border-gray-300"/>`).join('');
 
@@ -4333,7 +4328,7 @@ async function updateAppStatus(interactionId, newStatus, container) {
         }
 
         // --- INITIALIZATION ---
-async function main() {
+        async function main() {
             document.body.classList.remove('hidden');
             const params = new URLSearchParams(window.location.search);
             const email = params.get('email');
