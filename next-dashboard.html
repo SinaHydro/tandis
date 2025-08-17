@@ -2528,7 +2528,6 @@ async function submitActivityData() {
 async function renderMyActivities() {
             myActivitiesContent.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
             try {
-                // دریافت لیست اولیه فعالیت‌ها به همراه تعداد درخواست‌های دریافتی
                 const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getActivitiesWithRequestCounts&email=${encodeURIComponent(userData.email)}`);
                 const result = await response.json();
                 if (!result.success) throw new Error(result.message);
@@ -2538,12 +2537,12 @@ async function renderMyActivities() {
                     let activitiesHtml = '<div class="project-accordion">';
                     fetchedActivities.forEach(act => {
                         const isActive = act.Status === 'فعال';
+                        
+                        // این خط مهم‌ترین بخش است که شناسه را به ردیف اضافه می‌کند
                         activitiesHtml += `
                             <div class="project-row ${!isActive ? 'closed-project' : ''}" data-activity-id="${act.ActivityID}" data-status="${act.Status}">
                                 <div class="project-header">
-                                    <div class="header-item">
-                                        <i class="fas fa-chevron-down accordion-icon"></i>
-                                    </div>
+                                    <div class="header-item"><i class="fas fa-chevron-down accordion-icon"></i></div>
                                     <div class="header-item">
                                         <strong>${act.province}</strong>
                                         <span class="text-xs text-slate-500">${act.city}</span>
@@ -2584,7 +2583,6 @@ async function renderMyActivities() {
                     });
                     activitiesHtml += '</div>';
                     myActivitiesContent.innerHTML = activitiesHtml;
-                    // اتصال رویدادهای کلیک به ردیف‌های ساخته شده
                     attachActivityRowListeners();
                 } else {
                     myActivitiesContent.innerHTML = '<p class="text-center text-slate-500">شما هنوز فعالیتی ثبت نکرده‌اید.</p>';
