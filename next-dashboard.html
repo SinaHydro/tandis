@@ -2598,10 +2598,8 @@ async function renderMyActivities() {
             document.querySelectorAll('#myActivitiesContent .project-row').forEach(row => {
                 const header = row.querySelector('.project-header');
                 header.addEventListener('click', async (e) => {
-                    // اگر روی دکمه کلیک شد، آکاردئون باز نشود
                     if (e.target.closest('button')) return;
                     
-                    // اگر فعالیت غیرفعال بود، هشدار بده
                     if (row.dataset.status !== 'فعال') {
                         showModal('برای مشاهده پروژه‌ها، ابتدا باید وضعیت فعالیت را به "فعال" تغییر دهید.', 'info');
                         return;
@@ -2609,23 +2607,19 @@ async function renderMyActivities() {
                     
                     const activityId = row.dataset.activityId;
                     const body = row.querySelector('.project-body');
-                    const wrapper = body.querySelector('.interaction-list-wrapper');
+                    const wrapper = body.querySelector('.interaction-list-wrapper'); // این ظرف اصلی ماست
                     const isOpen = row.classList.contains('open');
 
-                    // بستن بقیه ردیف‌های باز
                     document.querySelectorAll('#myActivitiesContent .project-row.open').forEach(otherRow => {
                         if (otherRow !== row) otherRow.classList.remove('open');
                     });
                     
-                    // باز/بسته کردن ردیف فعلی
                     row.classList.toggle('open');
 
-                    // اگر برای اولین بار باز می‌شود، داده‌ها را از سرور بگیر
                     if (!isOpen && !body.dataset.loaded) {
                         wrapper.innerHTML = '<div class="spinner mx-auto my-4"></div>';
                         showLoader();
                         try {
-                            // درخواست همزمان برای جزئیات و پیشنهادهای هوشمند
                             const [detailsResponse, suggestionsResponse] = await Promise.all([
                                 fetch(`${GOOGLE_SCRIPT_URL}?func=getActivityDetails&activityId=${activityId}`),
                                 fetch(`${GOOGLE_SCRIPT_URL}?func=getSuggestedProjects&activityId=${activityId}`)
@@ -2651,8 +2645,10 @@ async function renderMyActivities() {
                             finalHtml += `<div class="interaction-list-content">${renderProjectInteractionList(suggestions, 'suggestions', activityId)}</div>`;
 
                             wrapper.innerHTML = finalHtml;
-                            body.dataset.loaded = 'true'; // علامت‌گذاری به عنوان بارگذاری شده
+                            body.dataset.loaded = 'true';
                         } catch (error) {
+                            // --- این بخش اصلاح شده است ---
+                            // پیام خطا نیز باید در همان ظرف اصلی (wrapper) نمایش داده شود
                             wrapper.innerHTML = `<p class="text-center text-red-500 p-4">خطا در بارگذاری جزئیات: ${error.message}</p>`;
                         } finally { 
                             hideLoader(); 
