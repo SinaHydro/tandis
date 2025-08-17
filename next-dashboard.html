@@ -2592,77 +2592,6 @@ async function renderMyActivities() {
             }
         }
 
-function attachActivityRowListeners() {
-            document.querySelectorAll('#myActivitiesContent .project-row').forEach(row => {
-                const header = row.querySelector('.project-header');
-                header.addEventListener('click', async (e) => {
-                    if (e.target.closest('button')) return;
-
-                    if (row.dataset.status !== 'فعال') {
-                        showModal('برای مشاهده پروژه‌ها، ابتدا باید وضعیت فعالیت را به "فعال" تغییر دهید.', 'info');
-                        return;
-                    }
-
-                    const activityId = row.dataset.activityId;
-                    
-                    // --- بخش جدید برای بررسی شناسه قبل از ارسال ---
-                    if (!activityId) {
-                        console.error("خطا: شناسه فعالیت در این ردیف HTML یافت نشد.", row);
-                        showModal("خطای داخلی: شناسه فعالیت در این ردیف یافت نشد. لطفاً داده‌های خود را در گوگل شیت بررسی کنید.", "error");
-                        return; // از ادامه اجرای تابع جلوگیری می‌کند
-                    }
-                    // --- پایان بخش جدید ---
-
-                    const body = row.querySelector('.project-body');
-                    const wrapper = body.querySelector('.interaction-list-wrapper');
-                    const isOpen = row.classList.contains('open');
-
-                    document.querySelectorAll('#myActivitiesContent .project-row.open').forEach(otherRow => {
-                        if (otherRow !== row) otherRow.classList.remove('open');
-                    });
-
-                    if (!isOpen && !body.dataset.loaded) {
-                        wrapper.innerHTML = '<div class="spinner mx-auto my-4"></div>';
-                        showLoader();
-                        try {
-                            const [detailsResponse, suggestionsResponse] = await Promise.all([
-                                fetch(`${GOOGLE_SCRIPT_URL}?func=getActivityDetails&activityId=${activityId}`),
-                                fetch(`${GOOGLE_SCRIPT_URL}?func=getSuggestedProjects&activityId=${activityId}`)
-                            ]);
-                            const detailsResult = await detailsResponse.json();
-                            const suggestionsResult = await suggestionsResponse.json();
-
-                            if (!detailsResult.success || !suggestionsResult.success) {
-                                throw new Error(detailsResult.message || suggestionsResult.message);
-                            }
-
-                            let finalHtml = '';
-                            const { incoming, outgoing } = detailsResult.data;
-                            const suggestions = suggestionsResult.data;
-
-                            finalHtml += `<h5 class="list-header-incoming flex justify-between items-center"><span><i class="fas fa-envelope-open text-blue-500"></i> درخواست‌های دریافتی</span><button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button></h5>`;
-                            finalHtml += `<div class="interaction-list-content">${renderInteractionList(incoming, 'incomingReqs')}</div>`;
-                            
-                            finalHtml += `<h5 class="list-header-outgoing flex justify-between items-center mt-4"><span><i class="fas fa-paper-plane text-green-500"></i> درخواست‌های ارسالی شما</span><button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button></h5>`;
-                            finalHtml += `<div class="interaction-list-content">${renderInteractionList(outgoing, 'outgoingApps')}</div>`;
-                            
-                            finalHtml += `<h5 class="list-header-suggestions flex justify-between items-center mt-4"><span><i class="fas fa-lightbulb text-yellow-500"></i> پروژه‌های پیشنهادی</span><button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button></h5>`;
-                            finalHtml += `<div class="interaction-list-content">${renderInteractionList(suggestions, 'projectSuggestions', activityId)}</div>`;
-
-                            wrapper.innerHTML = finalHtml;
-                            body.dataset.loaded = 'true';
-                        } catch (error) {
-                            wrapper.innerHTML = `<p class="text-center text-red-500 p-4">خطا در بارگذاری جزئیات: ${error.message}</p>`;
-                        } finally {
-                            hideLoader();
-                        }
-                    }
-
-                    row.classList.toggle('open');
-                });
-            });
-        }
-
         function renderProjectInteractionList(projects, listType, activityId = null) {
             if (!projects || projects.length === 0) {
                 const messages = {
@@ -3126,18 +3055,28 @@ function attachActivityRowListeners() {
         }
         
          // منطق باز و بسته شدن آکاردئون و واکشی اطلاعات برای صفحه "فعالیت‌های من" مهندس.
-function attachActivityRowListeners() {
+        function attachActivityRowListeners() {
             document.querySelectorAll('#myActivitiesContent .project-row').forEach(row => {
                 const header = row.querySelector('.project-header');
                 header.addEventListener('click', async (e) => {
+                    // اگر روی دکمه کلیک شد، آکاردئون باز نشود
                     if (e.target.closest('button')) return;
 
+                    // اگر فعالیت غیرفعال بود، هشدار بده و خارج شو
                     if (row.dataset.status !== 'فعال') {
                         showModal('برای مشاهده پروژه‌ها، ابتدا باید وضعیت فعالیت را به "فعال" تغییر دهید.', 'info');
                         return;
                     }
 
                     const activityId = row.dataset.activityId;
+                    
+                    // بررسی شناسه قبل از ارسال درخواست به سرور
+                    if (!activityId) {
+                        console.error("خطا: شناسه فعالیت در این ردیف HTML یافت نشد.", row);
+                        showModal("خطای داخلی: شناسه فعالیت در این ردیف یافت نشد. لطفاً داده‌های خود را در گوگل شیت بررسی کنید.", "error");
+                        return;
+                    }
+
                     const body = row.querySelector('.project-body');
                     const wrapper = body.querySelector('.interaction-list-wrapper');
                     const isOpen = row.classList.contains('open');
@@ -3185,7 +3124,7 @@ function attachActivityRowListeners() {
                         }
                     }
 
-                    // این دستور در انتها اجرا می‌شود تا از بروز خطا جلوگیری شود
+                    // دستور باز و بسته کردن آکاردئون در انتها اجرا می‌شود
                     row.classList.toggle('open');
                 });
             });
