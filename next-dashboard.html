@@ -705,7 +705,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxisdvmnPaQXJNpmFyfmDMZhlkcySsoO7m-1yFbX8EwtPgMSZ_1G7RyYxamnxlqiOeX/exec'; // GSA v.89
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVSyGbIGSg4Aao6-dT5QrbU9nEqbLvFdFrTn1F4CZA5uWedpqAakBS8itzbn6bQosT/exec'; // GSA v.90
 
         const SLIDESHOW_CONTENT_R = [
             { 
@@ -2885,11 +2885,15 @@ async function renderMyActivities() {
                                 ${parseInt(p.basementFloors) > 0 ? `<strong>+ ${toPersianNum(p.basementFloors)} زیرزمین</strong>` : ''}
                             </div>
                             <div class="header-item">
+                                <strong>${toPersianNum(p.area)} مترمربع</strong>
+                                <span>متراژ پروژه</span>
+                            </div>
+                            <div class="header-item">
                                 <strong>${toPersianNum(p.contractMonths)} ماه</strong>
                                 <span>مدت قرارداد</span>
                             </div>
                             <div class="header-item">
-                                <strong>${toPersianNum(parseFloat(p.matchedUnitPrice))} تومان</strong>
+                                <strong>${toPersianNum(parseFloat((p.unitPrice || '|').split('|')[0]))} تومان</strong>
                                 <span>تعرفه پیشنهادی</span>
                             </div>
                             <div class="header-item">
@@ -2938,6 +2942,10 @@ async function renderMyActivities() {
                                 ${parseInt(p_out.basementFloors) > 0 ? `<strong>+ ${toPersianNum(p_out.basementFloors)} زیرزمین</strong>` : ''}
                             </div>
                             <div class="header-item">
+                                <strong>${toPersianNum(p_out.area)} مترمربع</strong>
+                                <span>متراژ پروژه</span>
+                            </div>
+                            <div class="header-item">
                                 <strong>${toPersianNum(p_out.contractMonths)} ماه</strong>
                                 <span>مدت قرارداد</span>
                             </div>
@@ -2946,7 +2954,7 @@ async function renderMyActivities() {
                                 <span>تعرفه پیشنهادی</span>
                             </div>
                             <div class="header-item">
-                                <strong>${formatTimeAgo(p_out.Timestamp)}</strong>
+                                <strong>${formatTimeAgo(item.Timestamp)}</strong>
                                 <span>زمان پیشنهاد</span>
                             </div>
                             <div class="flex items-center justify-center">
@@ -2966,17 +2974,28 @@ async function renderMyActivities() {
                             </div>
                             <div class="header-item">
                                 <strong>${p.engineerActivity} ${p.engineerRank}</strong>
-                                <span class="text-xs text-slate-500">${p.engineerField}</span>
+                                <span class="text-xs text-slate-500">مهندس ${p.engineerField}</span>
+                            </div>
+                            <div class="header-item">
+                                <strong>${toPersianNum(p.floors)} طبقه</strong>
+                                ${parseInt(p.basementFloors) > 0 ? `<strong>+ ${toPersianNum(p.basementFloors)} زیرزمین</strong>` : ''}
                             </div>
                             <div class="header-item">
                                 <strong>${toPersianNum(p.area)} مترمربع</strong>
-                                <span>${toPersianNum(p.floors)} طبقه</span>
+                                <span>متراژ پروژه</span>
                             </div>
                             <div class="header-item">
                                 <strong>${toPersianNum(p.contractMonths)} ماه</strong>
                                 <span>مدت قرارداد</span>
                             </div>
-                             <div class="header-item"><strong>-</strong><span>-</span></div>
+                            <div class="header-item">
+                                <strong>${toPersianNum(parseFloat((p.unitPrice || '|').split('|')[0]))} تومان</strong>
+                                <span>تعرفه پیشنهادی</span>
+                            </div>
+                            <div class="header-item">
+                                <strong>${formatTimeAgo(item.Timestamp)}</strong>
+                                <span>زمان پیشنهاد</span>
+                            </div>
                              <div class="action-btn-container">
                                 <button class="btn btn-success !py-1 !px-3" data-action="apply" data-project-id="${p.ProjectID}">
                                     <i class="fas fa-paper-plane text-green-50"></i>
@@ -3070,10 +3089,8 @@ function attachActivityRowListeners() {
             document.querySelectorAll('#myActivitiesContent .project-row').forEach(row => {
                 const header = row.querySelector('.project-header');
                 header.addEventListener('click', async (e) => {
-                    // اگر روی دکمه کلیک شد، آکاردئون باز نشود
                     if (e.target.closest('button')) return;
 
-                    // اگر فعالیت غیرفعال بود، هشدار بده و خارج شو
                     if (row.dataset.status !== 'فعال') {
                         showModal('برای مشاهده پروژه‌ها، ابتدا باید وضعیت فعالیت را به "فعال" تغییر دهید.', 'info');
                         return;
@@ -3081,10 +3098,8 @@ function attachActivityRowListeners() {
 
                     const activityId = row.dataset.activityId;
                     
-                    // بررسی شناسه قبل از ارسال درخواست به سرور
                     if (!activityId) {
-                        console.error("خطا: شناسه فعالیت در این ردیف HTML یافت نشد.", row);
-                        showModal("خطای داخلی: شناسه فعالیت در این ردیف یافت نشد. لطفاً داده‌های خود را در گوگل شیت بررسی کنید.", "error");
+                        showModal("خطای داخلی: شناسه فعالیت در این ردیف یافت نشد.", "error");
                         return;
                     }
 
@@ -3092,12 +3107,10 @@ function attachActivityRowListeners() {
                     const wrapper = body.querySelector('.interaction-list-wrapper');
                     const isOpen = row.classList.contains('open');
 
-                    // بستن سایر ردیف‌های باز
                     document.querySelectorAll('#myActivitiesContent .project-row.open').forEach(otherRow => {
                         if (otherRow !== row) otherRow.classList.remove('open');
                     });
 
-                    // اگر برای اولین بار است که باز می‌شود، اطلاعات را از سرور واکشی کن
                     if (!isOpen && !body.dataset.loaded) {
                         wrapper.innerHTML = '<div class="spinner mx-auto my-4"></div>';
                         showLoader();
@@ -3106,6 +3119,7 @@ function attachActivityRowListeners() {
                                 fetch(`${GOOGLE_SCRIPT_URL}?func=getActivityDetails&activityId=${activityId}`),
                                 fetch(`${GOOGLE_SCRIPT_URL}?func=getSuggestedProjects&activityId=${activityId}`)
                             ]);
+                            
                             const detailsResult = await detailsResponse.json();
                             const suggestionsResult = await suggestionsResponse.json();
 
@@ -3114,17 +3128,52 @@ function attachActivityRowListeners() {
                             }
 
                             let finalHtml = '';
-                            const { incoming, outgoing } = detailsResult.data;
-                            const suggestions = suggestionsResult.data;
+                            const detailsData = detailsResult.data || { incoming: [], outgoing: [] };
+                            const suggestions = suggestionsResult.data || [];
+                            const { incoming, outgoing } = detailsData;
 
-                            finalHtml += `<h5 class="list-header-incoming flex justify-between items-center"><span><i class="fas fa-envelope-open text-blue-500"></i> درخواست‌های دریافتی</span><button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button></h5>`;
-                            finalHtml += `<div class="interaction-list-content">${renderInteractionList(incoming, 'incomingReqs')}</div>`;
+                            // --- بخش جدید: ساختار شرطی برای نمایش لیست‌ها ---
+
+                            // ۱. بررسی لیست درخواست‌های دریافتی
+                            if (incoming && incoming.length > 0) {
+                                finalHtml += `
+                                    <div class="list-container mt-2">
+                                        <h5 class="list-header-incoming flex justify-between items-center">
+                                            <span><i class="fas fa-envelope-open text-blue-500"></i> درخواست‌های دریافتی</span>
+                                            <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button>
+                                        </h5>
+                                        <div class="interaction-list-content">${renderInteractionList(incoming, 'incomingReqs')}</div>
+                                    </div>`;
+                            }
                             
-                            finalHtml += `<h5 class="list-header-outgoing flex justify-between items-center mt-4"><span><i class="fas fa-paper-plane text-green-500"></i> درخواست‌های ارسالی شما</span><button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button></h5>`;
-                            finalHtml += `<div class="interaction-list-content">${renderInteractionList(outgoing, 'outgoingApps')}</div>`;
+                            // ۲. بررسی لیست درخواست‌های ارسالی
+                            if (outgoing && outgoing.length > 0) {
+                                finalHtml += `
+                                    <div class="list-container mt-4">
+                                        <h5 class="list-header-outgoing flex justify-between items-center">
+                                            <span><i class="fas fa-paper-plane text-green-500"></i> درخواست‌های ارسالی شما</span>
+                                            <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button>
+                                        </h5>
+                                        <div class="interaction-list-content">${renderInteractionList(outgoing, 'outgoingApps')}</div>
+                                    </div>`;
+                            }
                             
-                            finalHtml += `<h5 class="list-header-suggestions flex justify-between items-center mt-4"><span><i class="fas fa-lightbulb text-yellow-500"></i> پروژه‌های پیشنهادی</span><button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button></h5>`;
-                            finalHtml += `<div class="interaction-list-content">${renderInteractionList(suggestions, 'projectSuggestions', activityId)}</div>`;
+                            // ۳. بررسی لیست پیشنهادهای هوشمند
+                            if (suggestions && suggestions.length > 0) {
+                                finalHtml += `
+                                    <div class="list-container mt-4">
+                                        <h5 class="list-header-suggestions flex justify-between items-center">
+                                            <span><i class="fas fa-lightbulb text-yellow-500"></i> پروژه‌های پیشنهادی هوشمند</span>
+                                            <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button>
+                                        </h5>
+                                        <div class="interaction-list-content">${renderInteractionList(suggestions, 'projectSuggestions', activityId)}</div>
+                                    </div>`;
+                            }
+
+                            // اگر هیچ لیستی آیتم نداشت، یک پیام نمایش بده
+                            if (finalHtml === '') {
+                                finalHtml = '<p class="text-center text-sm p-4 text-slate-500">موردی برای نمایش در این بخش وجود ندارد.</p>';
+                            }
 
                             wrapper.innerHTML = finalHtml;
                             body.dataset.loaded = 'true';
@@ -3134,8 +3183,6 @@ function attachActivityRowListeners() {
                             hideLoader();
                         }
                     }
-
-                    // دستور باز و بسته کردن آکاردئون در انتها اجرا می‌شود
                     row.classList.toggle('open');
                 });
             });
