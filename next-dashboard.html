@@ -3066,10 +3066,8 @@ async function renderMyActivities() {
             document.querySelectorAll('#myActivitiesContent .project-row').forEach(row => {
                 const header = row.querySelector('.project-header');
                 header.addEventListener('click', async (e) => {
-                    // اگر روی دکمه کلیک شد، آکاردئون باز نشود
                     if (e.target.closest('button')) return;
 
-                    // اگر فعالیت غیرفعال بود، هشدار بده و خارج شو
                     if (row.dataset.status !== 'فعال') {
                         showModal('برای مشاهده پروژه‌ها، ابتدا باید وضعیت فعالیت را به "فعال" تغییر دهید.', 'info');
                         return;
@@ -3077,10 +3075,8 @@ async function renderMyActivities() {
 
                     const activityId = row.dataset.activityId;
                     
-                    // بررسی شناسه قبل از ارسال درخواست به سرور
                     if (!activityId) {
-                        console.error("خطا: شناسه فعالیت در این ردیف HTML یافت نشد.", row);
-                        showModal("خطای داخلی: شناسه فعالیت در این ردیف یافت نشد. لطفاً داده‌های خود را در گوگل شیت بررسی کنید.", "error");
+                        showModal("خطای داخلی: شناسه فعالیت در این ردیف یافت نشد.", "error");
                         return;
                     }
 
@@ -3088,12 +3084,10 @@ async function renderMyActivities() {
                     const wrapper = body.querySelector('.interaction-list-wrapper');
                     const isOpen = row.classList.contains('open');
 
-                    // بستن سایر ردیف‌های باز
                     document.querySelectorAll('#myActivitiesContent .project-row.open').forEach(otherRow => {
                         if (otherRow !== row) otherRow.classList.remove('open');
                     });
 
-                    // اگر برای اولین بار است که باز می‌شود، اطلاعات را از سرور واکشی کن
                     if (!isOpen && !body.dataset.loaded) {
                         wrapper.innerHTML = '<div class="spinner mx-auto my-4"></div>';
                         showLoader();
@@ -3102,12 +3096,22 @@ async function renderMyActivities() {
                                 fetch(`${GOOGLE_SCRIPT_URL}?func=getActivityDetails&activityId=${activityId}`),
                                 fetch(`${GOOGLE_SCRIPT_URL}?func=getSuggestedProjects&activityId=${activityId}`)
                             ]);
+                            
+                            // --- ردیاب ۱ ---
+                            alert("مرحله ۱: درخواست‌ها از سرور با موفقیت دریافت شد.");
+
                             const detailsResult = await detailsResponse.json();
                             const suggestionsResult = await suggestionsResponse.json();
+
+                            // --- ردیاب ۲ ---
+                            alert("مرحله ۲: پاسخ‌ها به JSON تبدیل شد.\n\nجزئیات: " + JSON.stringify(detailsResult) + "\n\nپیشنهادها: " + JSON.stringify(suggestionsResult));
 
                             if (!detailsResult.success || !suggestionsResult.success) {
                                 throw new Error(detailsResult.message || suggestionsResult.message);
                             }
+
+                            // --- ردیاب ۳ ---
+                            alert("مرحله ۳: بررسی موفقیت‌آمیز بودن هر دو پاسخ انجام شد. در حال ساخت HTML...");
 
                             let finalHtml = '';
                             const { incoming, outgoing } = detailsResult.data;
@@ -3130,8 +3134,6 @@ async function renderMyActivities() {
                             hideLoader();
                         }
                     }
-
-                    // دستور باز و بسته کردن آکاردئون در انتها اجرا می‌شود
                     row.classList.toggle('open');
                 });
             });
