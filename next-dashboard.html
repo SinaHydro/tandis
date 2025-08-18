@@ -705,7 +705,7 @@
     <script>
     (async function() {
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwYQzNL3RSXpdOIZzEmLugu3EdhsD_jWIj-iHKJAtHETT7EfDWLL75aYXnMtvac4soh/exec'; // GSA v.88
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxisdvmnPaQXJNpmFyfmDMZhlkcySsoO7m-1yFbX8EwtPgMSZ_1G7RyYxamnxlqiOeX/exec'; // GSA v.89
 
         const SLIDESHOW_CONTENT_R = [
             { 
@@ -2860,7 +2860,7 @@ async function renderMyActivities() {
                                 <span>-</span>
                             </div>
                             <div class="action-btn-container">
-                                <button class="btn btn-success !py-1 !px-3" data-action="send-request" data-activity-id="${activity.ActivityID}" data-recipient-email="${activity.EngineerEmail}">
+                                <button class="btn btn-success !py-1 !px-3" data-action="send-request" data-activity-id="${activity.ActivityID}">
                                     <i class="fas fa-paper-plane text-green-50"></i>
                                     <span>درخواست</span>
                                 </button>
@@ -2913,6 +2913,7 @@ async function renderMyActivities() {
                     case 'outgoingApps': {
                         const p_out = item.projectInfo || {};
                         const status_out = item.Status || 'Pending';
+                        const statusText = { 'Pending': 'در انتظار ', 'Accepted': 'پذیرفت ', 'Rejected': 'رد شد ', 'Reviewing': 'بررسی ' }[status_out] || status_out;
                         const statusClass = `status-${status_out.toLowerCase()}`;
                         const statusIcons = {
                             'Pending': 'fas fa-clock',
@@ -2977,7 +2978,7 @@ async function renderMyActivities() {
                             </div>
                              <div class="header-item"><strong>-</strong><span>-</span></div>
                              <div class="action-btn-container">
-                                <button class="btn btn-success !py-1 !px-3" data-action="send-request" data-project-id="${p.ProjectID}" data-employer-email="${p.EmployerEmail}">
+                                <button class="btn btn-success !py-1 !px-3" data-action="apply" data-project-id="${p.ProjectID}">
                                     <i class="fas fa-paper-plane text-green-50"></i>
                                     <span>درخواست</span>
                                 </button>
@@ -3718,7 +3719,7 @@ async function checkCooperationPrerequisites(activity) {
             modal.style.display = 'flex';
         }        
         
-        async function handleProjectSelectionForRequest(projectId, activityId, recipientEmail) {
+async function handleProjectSelectionForRequest(projectId, activityId) {
             showLoader();
             try {
                 const payload = {
@@ -3726,8 +3727,7 @@ async function checkCooperationPrerequisites(activity) {
                     ProjectID: projectId,
                     ActivityID: activityId,
                     InitiatorRole: 'Employer',
-                    InitiatorEmail: userData.email,
-                    RecipientEmail: recipientEmail
+                    InitiatorEmail: userData.email
                 };
                 const response = await fetch(GOOGLE_SCRIPT_URL, { 
                     method: 'POST', 
@@ -3740,14 +3740,10 @@ async function checkCooperationPrerequisites(activity) {
                 showModal(result.message, result.status);
 
                 if (result.status === 'success') {
-                    // ۱. شناسه فعالیت را به لیست درخواست‌های ارسال شده اضافه می‌کنیم تا وضعیت آن تغییر کند
+                    // به‌روزرسانی آنی دکمه در صفحه جستجوی مهندس
                     requestedCooperationIds.add(activityId);
-
-                    // ۲. کارت مربوط به همان مهندس را در صفحه پیدا می‌کنیم
                     const card = document.querySelector(`.activity-card [data-activity-id="${activityId}"]`).closest('.activity-card');
                     const activityData = fetchedEngineersActivities.find(a => a.ActivityID === activityId);
-
-                    // ۳. فقط همان کارت را با دکمه جدید (لغو درخواست) باز می‌کنیم
                     if (card && activityData) {
                         card.outerHTML = getActivityCardHTML(activityData, true);
                     }
@@ -4339,6 +4335,38 @@ async function updateAppStatus(interactionId, newStatus, container) {
             }
         }
 
+        async function handleSendRequestToEngineer(projectId, activityId, button) {
+            showModal('آیا می‌خواهید برای این مهندس درخواست همکاری ارسال کنید؟', 'confirm', async () => {
+                showLoader();
+                try {
+                    const payload = {
+                        action: 'createInteraction',
+                        ProjectID: projectId,
+                        ActivityID: activityId,
+                        InitiatorRole: 'Employer',
+                        InitiatorEmail: userData.email
+                    };
+                    const response = await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+                    showModal(result.message, result.status);
+                    if (result.status === 'success') {
+                        // برای نمایش نتیجه، آکاردئون را رفرش می‌کنیم
+                        const projectRow = button.closest('.project-row');
+                        projectRow.classList.remove('open');
+                        projectRow.querySelector('.project-body').dataset.loaded = 'false';
+                        projectRow.querySelector('.project-header').click();
+                    }
+                } catch (error) {
+                     showModal('خطا در ارسال درخواست.', 'error');
+                } finally {
+                    hideLoader();
+                }
+            });
+        }
+
         // --- INITIALIZATION ---
         async function main() {
             document.body.classList.remove('hidden');
@@ -4435,9 +4463,8 @@ document.querySelector('.main-content-area').addEventListener('click', e => {
                             if (projectRow) {
                                 const projectId = projectRow.dataset.projectId;
                                 const activityId = button.dataset.activityId;
-                                const recipientEmail = button.dataset.recipientEmail;
-                                // از تابع کمکی که قبلاً برای مودال نوشته بودیم، دوباره استفاده می‌کنیم
-                                handleProjectSelectionForRequest(projectId, activityId, recipientEmail);
+                                // فراخوانی تابع جدید و اختصاصی
+                                handleSendRequestToEngineer(projectId, activityId, button);
                             }
                         }
                         // منطق درخواست همکاری مهندس در همین صفحه نیز مدیریت می‌شود
@@ -4469,8 +4496,8 @@ document.querySelector('.main-content-area').addEventListener('click', e => {
                                 const newStatus = button.dataset.status;
                                 updateCoopStatus(interactionId, newStatus, button.closest('.action-btn-container'));
                             } else if (action === 'apply') {
-                                handleApplyFromActivity(button);
-                            } else if (action === 'cancel-application') { // <-- این بخش جدید است
+                                checkApplicationPrerequisites(button.dataset.projectId, button);
+                            } else if (action === 'cancel-application') { 
                                 const projectId = button.dataset.projectId;
                                 handleCancelApplication(projectId, button);
                             }
