@@ -3097,25 +3097,20 @@ async function renderMyActivities() {
                                 fetch(`${GOOGLE_SCRIPT_URL}?func=getSuggestedProjects&activityId=${activityId}`)
                             ]);
                             
-                            // --- ردیاب ۱ ---
-                            alert("مرحله ۱: درخواست‌ها از سرور با موفقیت دریافت شد.");
-
                             const detailsResult = await detailsResponse.json();
                             const suggestionsResult = await suggestionsResponse.json();
-
-                            // --- ردیاب ۲ ---
-                            alert("مرحله ۲: پاسخ‌ها به JSON تبدیل شد.\n\nجزئیات: " + JSON.stringify(detailsResult) + "\n\nپیشنهادها: " + JSON.stringify(suggestionsResult));
 
                             if (!detailsResult.success || !suggestionsResult.success) {
                                 throw new Error(detailsResult.message || suggestionsResult.message);
                             }
 
-                            // --- ردیاب ۳ ---
-                            alert("مرحله ۳: بررسی موفقیت‌آمیز بودن هر دو پاسخ انجام شد. در حال ساخت HTML...");
-
+                            // --- بخش اصلاح شده و مقاوم‌سازی شده ---
                             let finalHtml = '';
-                            const { incoming, outgoing } = detailsResult.data;
-                            const suggestions = suggestionsResult.data;
+                            // اگر data وجود نداشت، یک مقدار پیش‌فرض خالی برای آن در نظر می‌گیریم
+                            const detailsData = detailsResult.data || { incoming: [], outgoing: [] };
+                            const suggestions = suggestionsResult.data || [];
+                            const { incoming, outgoing } = detailsData;
+                            // --- پایان بخش اصلاح شده ---
 
                             finalHtml += `<h5 class="list-header-incoming flex justify-between items-center"><span><i class="fas fa-envelope-open text-blue-500"></i> درخواست‌های دریافتی</span><button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button></h5>`;
                             finalHtml += `<div class="interaction-list-content">${renderInteractionList(incoming, 'incomingReqs')}</div>`;
@@ -3134,6 +3129,7 @@ async function renderMyActivities() {
                             hideLoader();
                         }
                     }
+
                     row.classList.toggle('open');
                 });
             });
