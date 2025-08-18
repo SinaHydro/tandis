@@ -2537,12 +2537,6 @@ async function renderMyActivities() {
                 if (fetchedActivities.length > 0) {
                     let activitiesHtml = '<div class="project-accordion">';
                     fetchedActivities.forEach(act => {
-                        // --- کد دیباگ: این بخش را موقتاً اضافه کنید ---
-                        if (!act.ActivityID) {
-                            alert(`خطای داده: فعالیتی با اطلاعات زیر شناسه ندارد:\n\nاستان: ${act.province}\nشهر: ${act.city}\nنوع: ${act.engineerActivity} ${act.engineerLevel}`);
-                            // این alert اجرای کد را متوقف می‌کند تا شما بتوانید مشکل را ببینید.
-                        }
-                        // --- پایان کد دیبا-گ ---
                         
                         const isActive = act.Status === 'فعال';
                         
@@ -2571,8 +2565,8 @@ async function renderMyActivities() {
                                         <span>نوع پروانه</span>
                                     </div>
                                     <div class="header-item">
-                                        <strong>${toPersianNum(act.requestCount || 0)} نفر</strong>
-                                        <span>درخواست دریافتی</span>
+                                        ${parseInt(act.incomingRequestCount) > 0 ? `<strong><i class="fas fa-envelope-open text-blue-500"> </i> ${toPersianNum(act.incomingRequestCount)}</strong>` : ''}
+                                        ${parseInt(act.outgoingApplicationCount) > 0 ? `<strong><i class="fas fa-paper-plane text-green-500"> </i> ${toPersianNum(act.outgoingApplicationCount)}</strong>` : ''}
                                     </div>
                                     <div class="header-actions">
                                         <button class="btn ${isActive ? 'btn-danger' : 'btn-success'} !p-2" data-action="change-activity-status" data-new-status="${isActive ? 'غیرفعال' : 'فعال'}">
@@ -2856,8 +2850,8 @@ async function renderMyActivities() {
                                 <span>تعرفه پیشنهادی</span>
                             </div>
                              <div class="header-item">
-                                <strong>-</strong>
-                                <span>-</span>
+                                <strong></strong>
+                                <span></span>
                             </div>
                             <div class="action-btn-container">
                                 <button class="btn btn-success !py-1 !px-3" data-action="send-request" data-activity-id="${activity.ActivityID}">
@@ -2886,7 +2880,7 @@ async function renderMyActivities() {
                             </div>
                             <div class="header-item">
                                 <strong>${toPersianNum(p.area)} متـرمربع</strong>
-                                <strong>${toPersianNum(p.floors)} طـ ${parseInt(p.basementFloors) > 0 ? `+ ${toPersianNum(p.basementFloors)} زیرزمین` : ''}</strong>
+                                <span>${toPersianNum(p.floors)} طـ ${parseInt(p.basementFloors) > 0 ? `+ ${toPersianNum(p.basementFloors)} زیرزمین` : ''}</span>
                             </div>
                             <div class="header-item">
                                 <strong>${toPersianNum(parseFloat((p.unitPrice || '|').split('|')[0]))} تومان</strong>
@@ -2939,7 +2933,7 @@ async function renderMyActivities() {
                             </div>
                             <div class="header-item">
                                 <strong>${toPersianNum(p_out.area)} متـرمربع</strong>
-                                <strong>${toPersianNum(p_out.floors)} طـ ${parseInt(p_out.basementFloors) > 0 ? `+ ${toPersianNum(p_out.basementFloors)} زیرزمین` : ''}</strong>
+                                <span>${toPersianNum(p_out.floors)} طـ ${parseInt(p_out.basementFloors) > 0 ? `+ ${toPersianNum(p_out.basementFloors)} زیرزمین` : ''}</span>
                             </div>
                             <div class="header-item">
                                 <strong>${toPersianNum(parseFloat((p_out.unitPrice || '|').split('|')[0]))} تومان</strong>
@@ -2974,15 +2968,15 @@ async function renderMyActivities() {
                             </div>
                             <div class="header-item">
                                 <strong>${toPersianNum(p.area)} متـرمربع</strong>
-                                <strong>${toPersianNum(p.floors)} طـ ${parseInt(p.basementFloors) > 0 ? `+ ${toPersianNum(p.basementFloors)} زیرزمین` : ''}</strong>
+                                <span>${toPersianNum(p.floors)} طـ ${parseInt(p.basementFloors) > 0 ? `+ ${toPersianNum(p.basementFloors)} زیرزمین` : ''}</span>
                             </div>
                             <div class="header-item">
                                 <strong>${toPersianNum(parseFloat((p.unitPrice || '|').split('|')[0]))} تومان</strong>
                                 <span>تعرفه پیشنهادی</span>
                             </div>
                             <div class="header-item">
-                                <strong>${formatTimeAgo(item.Timestamp)}</strong>
-                                <span>زمان پیشنهاد</span>
+                                <strong></strong>
+                                <span></span>
                             </div>
                              <div class="action-btn-container">
                                 <button class="btn btn-success !py-1 !px-3" data-action="apply" data-project-id="${p.ProjectID}">
@@ -3754,7 +3748,7 @@ async function checkCooperationPrerequisites(activity) {
             modal.style.display = 'flex';
         }        
         
-async function handleProjectSelectionForRequest(projectId, activityId) {
+        async function handleProjectSelectionForRequest(projectId, activityId) {
             showLoader();
             try {
                 const payload = {
@@ -3790,59 +3784,7 @@ async function handleProjectSelectionForRequest(projectId, activityId) {
             }
         }
         
-        function renderApplicants(applicants, bodyElement) {
-            if (applicants.length === 0) {
-                bodyElement.innerHTML = '<div class="p-4 text-center text-slate-500">هیچ درخواستی برای این پروژه ثبت نشده است.</div>';
-                return;
-            }
-            let applicantsHtml = '';
-            applicants.forEach((app, index) => {
-                applicantsHtml += `
-                    <div class="applicant-row p-4" data-email="${app.email}">
-                        <div class="header-item">
-                            <strong>${toPersianNum(index + 1)}</strong>
-                        </div>
-                        <div class="header-item">
-                            <strong>${app.province || '-'}</strong>
-                            <span>استان فعالیت</span>
-                        </div>
-                        <div class="header-item">
-                            <strong>${app.activity || ''} ${app.level || ''}</strong>
-                            <span class="text-xs text-slate-500">مهندس ${app.field || ''}</span>
-                        </div>
-                        <div class="header-item">
-                            <strong>${toPersianNum(app.remainingWork)} عدد</strong>
-                            <span>کار باقیمانده</span>
-                        </div>
-                        <div class="header-item">
-                            <strong>${toPersianNum(app.remainingArea)} مترمربع</strong>
-                            <span>متراژ باقیمانده</span>
-                        </div>
-                        <div class="header-item">
-                            <strong>- تومان</strong>
-                            <span>پیشنهاد مهندس</span>
-                        </div>
-                        <div class="header-item">
-                            <strong>2 روز پیش</strong>
-                            <span>زمان پیشنهاد</span>
-                        </div>
-                        <div class="action-btn-container">
-                            <button class="btn btn-secondary !py-1 !px-3 w-full" data-action="toggle-options">
-                                <i class="fas fa-reply"></i>
-                                <span>پاسخ </span>
-                            </button>
-                            <div class="action-options hidden">
-                                <a href="#" data-action="set-status" data-status="Accepted"><i class="fas fa-check-circle text-green-500"></i> پذیرش</a>
-                                <a href="#" data-action="set-status" data-status="Rejected"><i class="fas fa-times-circle text-red-500"></i> عدم پذیرش</a>
-                                <a href="#" data-action="set-status" data-status="Reviewing"><i class="fas fa-clock text-yellow-500"></i> بررسی</a>
-                            </div>
-                        </div>
-                    </div>`;
-            });
-            bodyElement.innerHTML = applicantsHtml;
-        }
-
-function setupDashboardFeatures() {
+        function setupDashboardFeatures() {
             // فعال‌سازی کلیک روی کارت‌ها
             document.querySelectorAll('#dashboardContent .main-card').forEach(card => {
                 card.addEventListener('click', e => {
