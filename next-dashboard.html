@@ -2537,6 +2537,13 @@ async function renderMyActivities() {
                 if (fetchedActivities.length > 0) {
                     let activitiesHtml = '<div class="project-accordion">';
                     fetchedActivities.forEach(act => {
+                        // --- کد دیباگ: این بخش را موقتاً اضافه کنید ---
+                        if (!act.ActivityID) {
+                            alert(`خطای داده: فعالیتی با اطلاعات زیر شناسه ندارد:\n\nاستان: ${act.province}\nشهر: ${act.city}\nنوع: ${act.engineerActivity} ${act.engineerLevel}`);
+                            // این alert اجرای کد را متوقف می‌کند تا شما بتوانید مشکل را ببینید.
+                        }
+                        // --- پایان کد دیبا-گ ---
+                        
                         const isActive = act.Status === 'فعال';
                         
                         activitiesHtml += `
