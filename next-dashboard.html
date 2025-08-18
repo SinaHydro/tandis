@@ -467,18 +467,52 @@
             border-color: var(--primary-color);
             font-weight: 600;
         }
-        /* --- استایل‌های جدید برای کادربندی لیست‌ها --- */
+
+/* --- استایل‌های جدید و اصلاح‌شده برای کادربندی لیست‌ها --- */
         .list-group {
-            border: 1px solid #e2e8f0; /* یک حاشیه خاکستری دور کل گروه */
+            border-width: 1px;
             border-radius: 0.75rem;     /* گوشه‌های گرد برای کل گروه */
             overflow: hidden;         /* اطمینان از اینکه محتوای داخلی از گوشه‌های گرد بیرون نمی‌زند */
             margin-top: 1rem;         /* ایجاد فاصله بین گروه‌های لیست */
         }
-        .list-group .interaction-list-content {
-            background-color: #ffffff; /* پس‌زمینه سفید برای محتوای لیست */
+
+        /* رنگ‌بندی گروه درخواست‌های دریافتی (آبی) */
+        .list-group-incoming {
+            background-color: #f0f9ff; /* آبی بسیار کم‌رنگ */
+            border-color: #bae6fd;
         }
+        .list-group-incoming h5 {
+            color: #0c4a6e; /* متن آبی تیره */
+            border-bottom: 1px solid #bae6fd;
+        }
+
+        /* رنگ‌بندی گروه درخواست‌های ارسالی (سبز) */
+        .list-group-outgoing {
+            background-color: #f0fdf4; /* سبز بسیار کم‌رنگ */
+            border-color: #bbf7d0;
+        }
+        .list-group-outgoing h5 {
+            color: #166534; /* متن سبز تیره */
+            border-bottom: 1px solid #bbf7d0;
+        }
+
+        /* رنگ‌بندی گروه پیشنهادهای هوشمند (زرد) */
+        .list-group-suggestions {
+            background-color: #fefce8; /* زرد بسیار کم‌رنگ */
+            border-color: #fde047;
+        }
+        .list-group-suggestions h5 {
+            color: #854d0e; /* متن زرد تیره */
+            border-bottom: 1px solid #fde047;
+        }
+
+        /* استایل مشترک برای همه هدرها و محتوا */
         .list-group h5 {
-            border-bottom: 1px solid rgba(0,0,0,0.1); /* یک خط جداکننده بین هدر و محتوا */
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+        }
+        .list-group .interaction-list-content {
+            background-color: transparent; /* پس‌زمینه محتوا شفاف می‌شود تا رنگ والد را نشان دهد */
         }
 
     </style>
@@ -2248,7 +2282,7 @@ function updateAllPrices() {
             // document.getElementById('commissionPreview').textContent = `${toPersianNum(commission)} تومان`;
         }
         
-async function submitProjectData(e) {
+        async function submitProjectData(e) {
             e.preventDefault();
             const form = document.getElementById('projectForm');
             if (!form.checkValidity()) {
@@ -2261,7 +2295,7 @@ async function submitProjectData(e) {
             const formData = new FormData(form);
             const baseProjectData = {};
             formData.forEach((value, key) => {
-                if (!key.startsWith('price_')) { // فیلدهای قیمت را جدا می‌کنیم
+                if (!key.startsWith('price_')) {
                     baseProjectData[key] = value;
                 }
             });
@@ -2285,30 +2319,35 @@ async function submitProjectData(e) {
             // ۳. ایجاد یک شناسه گروه مشترک برای همه ردیف‌ها
             const projectGroupID = `G${Date.now()}`;
             
-            // ۴. محاسبه ردیف تعرفه
-            const area = parseFloat(baseProjectData.area) || 0;
+            // --- بخش جدید: تشخیص متراژ صحیح برای محاسبه ---
+            let areaForCalc = parseFloat(baseProjectData.area) || 0;
+            const fileType = baseProjectData.fileType;
+            const dilapidatedArea = parseFloat(baseProjectData.area_d) || 0;
+
+            if (fileType === 'فرسوده' && dilapidatedArea > 0) {
+                areaForCalc = dilapidatedArea;
+            }
+            // --- پایان بخش جدید ---
+
+            // ۴. محاسبه ردیف تعرفه با استفاده از متراژ صحیح
             const totalFloors = (parseInt(baseProjectData.floors) || 0) + (parseInt(baseProjectData.basementFloors) || 0);
-            const tierIndex = calculatePriceTierIndex(area, totalFloors);
+            const tierIndex = calculatePriceTierIndex(areaForCalc, totalFloors);
 
             // ۵. ایجاد لیستی از درخواست‌ها برای ارسال به سرور
             const promises = selectedEngineers.map(engineer => {
                 const projectDataForEngineer = { ...baseProjectData };
                 projectDataForEngineer.engineerField = engineer.field;
-                // ترکیب قیمت و ردیف تعرفه محاسبه شده
                 projectDataForEngineer.unitPrice = `${engineer.price}|${tierIndex}`;
 
                 const payload = {
                     action: 'createProject',
                     employerEmail: userData.email,
                     projectData: projectDataForEngineer,
-                    projectGroupID: projectGroupID // ارسال شناسه گروه
+                    projectGroupID: projectGroupID
                 };
 
                 return fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'cors',
-                    cache: 'no-cache',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(payload)
                 }).then(res => res.json());
             });
@@ -2316,7 +2355,6 @@ async function submitProjectData(e) {
             // ۶. ارسال همزمان همه درخواست‌ها و مدیریت نتیجه
             try {
                 const results = await Promise.all(promises);
-                
                 const hasError = results.some(res => res.status !== 'success');
 
                 if (hasError) {
@@ -2438,14 +2476,39 @@ async function submitProjectData(e) {
         }
 
         function calculatePriceTierIndex(area, totalFloors) {
-            if (totalFloors >= 1 && totalFloors <= 2 && area > 0 && area < 600) return 1;
-            if (totalFloors >= 3 && totalFloors <= 5 && area >= 600 && area < 2000) return 2;
-            if (totalFloors >= 6 && totalFloors <= 7 && area >= 2000 && area < 5000) return 3;
-            if (totalFloors >= 8 && totalFloors <= 10 && area >= 2000 && area < 5000) return 4;
-            if (totalFloors >= 11 && totalFloors <= 12 && area >= 5000) return 5;
-            if (totalFloors >= 13 && totalFloors <= 15 && area >= 5000) return 6;
-            if (totalFloors >= 16 && area >= 5000) return 7;
-            return 0; // اگر در هیچ دسته‌ای نبود
+            let areaIndex = 0;
+            let floorsIndex = 0;
+
+            // ۱. محاسبه ایندکس بر اساس مساحت
+            if (area > 0 && area <= 600) {
+                areaIndex = 1;
+            } else if (area > 600 && area <= 2000) {
+                areaIndex = 2;
+            } else if (area > 2000 && area <= 5000) {
+                areaIndex = 3;
+            } else if (area > 5000) {
+                areaIndex = 5;
+            }
+
+            // ۲. محاسبه ایندکس بر اساس مجموع طبقات
+            if (totalFloors >= 1 && totalFloors <= 2) {
+                floorsIndex = 1;
+            } else if (totalFloors >= 3 && totalFloors <= 5) {
+                floorsIndex = 2;
+            } else if (totalFloors >= 6 && totalFloors <= 7) {
+                floorsIndex = 3;
+            } else if (totalFloors >= 8 && totalFloors <= 10) {
+                floorsIndex = 4;
+            } else if (totalFloors >= 11 && totalFloors <= 12) {
+                floorsIndex = 5;
+            } else if (totalFloors >= 13 && totalFloors <= 15) {
+                floorsIndex = 6;
+            } else if (totalFloors >= 16) {
+                floorsIndex = 7;
+            }
+
+            // ۳. بازگرداندن بزرگترین ایندکس از بین دو محاسبه
+            return Math.max(areaIndex, floorsIndex);
         }
 
         function renderActivityPreview(data) {
@@ -2989,7 +3052,7 @@ async function submitActivityData() {
         }
         
          // منطق باز و بسته شدن آکاردئون و واکشی اطلاعات برای صفحه "فعالیت‌های من" مهندس.
-function attachActivityRowListeners() {
+        function attachActivityRowListeners() {
             document.querySelectorAll('#myActivitiesContent .project-row').forEach(row => {
                 const header = row.querySelector('.project-header');
                 header.addEventListener('click', async (e) => {
@@ -3018,7 +3081,7 @@ function attachActivityRowListeners() {
                     if (!isOpen && !body.dataset.loaded) {
                         wrapper.innerHTML = '<div class="spinner mx-auto my-4"></div>';
                         showLoader();
-                        try {
+try {
                             const [detailsResponse, suggestionsResponse] = await Promise.all([
                                 fetch(`${GOOGLE_SCRIPT_URL}?func=getActivityDetails&activityId=${activityId}`),
                                 fetch(`${GOOGLE_SCRIPT_URL}?func=getSuggestedProjects&activityId=${activityId}`)
@@ -3036,11 +3099,11 @@ function attachActivityRowListeners() {
                             const suggestions = suggestionsResult.data || [];
                             const { incoming, outgoing } = detailsData;
 
-                            // ۱. بررسی و ساخت لیست درخواست‌های دریافتی
+                            // ۱. بررسی و ساخت لیست درخواست‌های دریافتی در کادر جدید
                             if (incoming && incoming.length > 0) {
                                 finalHtml += `
-                                    <div class="list-group">
-                                        <h5 class="list-header-incoming flex justify-between items-center">
+                                    <div class="list-group list-group-incoming">
+                                        <h5 class="flex justify-between items-center">
                                             <span><i class="fas fa-envelope-open text-blue-500"></i> درخواست‌های دریافتی</span>
                                             <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button>
                                         </h5>
@@ -3048,11 +3111,11 @@ function attachActivityRowListeners() {
                                     </div>`;
                             }
                             
-                            // ۲. بررسی و ساخت لیست درخواست‌های ارسالی
+                            // ۲. بررسی و ساخت لیست درخواست‌های ارسالی در کادر جدید
                             if (outgoing && outgoing.length > 0) {
                                 finalHtml += `
-                                    <div class="list-group">
-                                        <h5 class="list-header-outgoing flex justify-between items-center">
+                                    <div class="list-group list-group-outgoing">
+                                        <h5 class="flex justify-between items-center">
                                             <span><i class="fas fa-paper-plane text-green-500"></i> درخواست‌های ارسالی شما</span>
                                             <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button>
                                         </h5>
@@ -3060,11 +3123,11 @@ function attachActivityRowListeners() {
                                     </div>`;
                             }
                             
-                            // ۳. بررسی و ساخت لیست پیشنهادهای هوشمند
+                            // ۳. بررسی و ساخت لیست پیشنهادهای هوشمند در کادر جدید
                             if (suggestions && suggestions.length > 0) {
                                 finalHtml += `
-                                    <div class="list-group">
-                                        <h5 class="list-header-suggestions flex justify-between items-center">
+                                    <div class="list-group list-group-suggestions">
+                                        <h5 class="flex justify-between items-center">
                                             <span><i class="fas fa-lightbulb text-yellow-500"></i> پروژه‌های پیشنهادی</span>
                                             <button class="list-toggle-btn" data-action="toggle-list"><i class="fas fa-chevron-up"></i></button>
                                         </h5>
