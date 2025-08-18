@@ -2541,18 +2541,18 @@ async function submitActivityData() {
         async function renderMyActivities() {
             myActivitiesContent.innerHTML = '<div class="spinner mx-auto mt-10"></div>';
             try {
-                // فراخوانی تابع صحیح در بک‌اند
-                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getActivitiesByEngineer&email=${encodeURIComponent(userData.email)}`);
+                // ۱. فراخوانی تابع صحیح در بک‌اند که تعداد درخواست‌ها را محاسبه می‌کند
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?func=getEngineerDashboardData&email=${encodeURIComponent(userData.email)}`);
                 const result = await response.json();
                 if (!result.success) throw new Error(result.message);
 
-                fetchedActivities = result.data.sort((a,b) => new Date(b.LastModifiedDate) - new Date(a.LastModifiedDate));
+                // ۲. دسترسی به لیست فعالیت‌ها از طریق result.data.activities
+                fetchedActivities = result.data.activities.sort((a,b) => new Date(b.LastModifiedDate) - new Date(a.LastModifiedDate));
+                
                 if (fetchedActivities.length > 0) {
                     let activitiesHtml = '<div class="project-accordion">';
                     fetchedActivities.forEach(act => {
-                        
                         const isActive = act.Status === 'فعال';
-                        
                         activitiesHtml += `
                             <div class="project-row ${!isActive ? 'closed-project' : ''}" data-activity-id="${act.ActivityID}" data-status="${act.Status}">
                                 <div class="project-header">
