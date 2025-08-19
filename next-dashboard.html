@@ -470,7 +470,7 @@
 
 /* --- استایل‌های جدید و اصلاح‌شده برای کادربندی لیست‌ها --- */
         .list-group {
-            border-width: 2px;
+            border-width: 1px;
             border-radius: 0.75rem;     /* گوشه‌های گرد برای کل گروه */
             overflow: hidden;         /* اطمینان از اینکه محتوای داخلی از گوشه‌های گرد بیرون نمی‌زند */
             margin-bottom: 1rem;         /* ایجاد فاصله بین گروه‌های لیست */
@@ -483,17 +483,16 @@
         }
         .list-group-incoming h5 {
             color: #0c4a6e; /* متن آبی تیره */
-            border-bottom: 1px solid #bae6fd;
+            border-bottom: 1px solid #3b82f6;
         }
-
         /* رنگ‌بندی گروه درخواست‌های ارسالی (سبز) */
         .list-group-outgoing {
             background-color: #f0fdf4; /* سبز بسیار کم‌رنگ */
-            border-color: green-500;
+            border-color: #86efac;
         }
         .list-group-outgoing h5 {
             color: #166534; /* متن سبز تیره */
-            border-bottom: 1px solid #bbf7d0;
+            border-bottom: 1px solid #86efac;
         }
 
         /* رنگ‌بندی گروه پیشنهادهای هوشمند (زرد) */
@@ -2641,8 +2640,8 @@ async function submitActivityData() {
                                         <span>نوع پروانه</span>
                                     </div>
                                     <div class="header-item">
-                                        ${parseInt(act.incomingRequestCount) > 0 ? `<strong><i class="fas fa-envelope-open text-blue-500"> </i> ${toPersianNum(act.incomingRequestCount)}</strong>` : ''}
-                                        ${parseInt(act.outgoingApplicationCount) > 0 ? `<strong><i class="fas fa-paper-plane text-green-500"> </i> ${toPersianNum(act.outgoingApplicationCount)}</strong>` : ''}
+                                        <strong>${parseInt(act.incomingRequestCount) > 0 ? `<i class="fas fa-envelope-open text-blue-500"> </i> ${toPersianNum(act.incomingRequestCount)}` : ''}
+                                        ${parseInt(act.outgoingApplicationCount) > 0 ? `<i class="fas fa-paper-plane text-green-500"> </i> ${toPersianNum(act.outgoingApplicationCount)}` : ''}</strong>
                                     </div>
                                     <div class="header-actions">
                                         <button class="btn ${isActive ? 'btn-danger' : 'btn-success'} !p-2" data-action="change-activity-status" data-new-status="${isActive ? 'غیرفعال' : 'فعال'}">
